@@ -1,0 +1,1 @@
+# wp-core-blueprint-automations
