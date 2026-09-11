@@ -86,4 +86,9 @@ $reference_result = ( new WorkflowValidator( $source ) )->validate( $reference_d
 assert_true( $reference_result->is_valid(), 'Reference binding into a sensitive input should remain structurally valid.' );
 assert_true( PersistencePolicy::allows( $reference_result ), 'Reference binding must remain persistable because no secret value is stored.' );
 
+$at_limit = str_repeat( 'a', PersistencePolicy::MAX_DEFINITION_BYTES );
+$over_limit = $at_limit . 'b';
+assert_true( PersistencePolicy::allows_encoded_definition( $at_limit ), 'Definition exactly at the persistence size limit must be allowed.' );
+assert_true( ! PersistencePolicy::allows_encoded_definition( $over_limit ), 'Definition above the persistence size limit must be rejected.' );
+
 fwrite( STDOUT, "privacy-policy: PASS\n" );
