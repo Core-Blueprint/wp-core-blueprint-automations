@@ -12,6 +12,7 @@ defined( 'ABSPATH' ) || exit;
 final class DesignerAssets {
 	private const BOOTSTRAP_HANDLE = 'cb-automations-admin-builder-bootstrap';
 	private const INSPECTOR_HANDLE = 'cb-automations-admin-builder-inspector';
+	private const HISTORY_MODULE   = 'cb-automations-admin-builder-history';
 
 	private static bool $initialized = false;
 
@@ -31,9 +32,11 @@ final class DesignerAssets {
 
 		$css           = CB_AUTOMATIONS_DIR . 'assets/css/admin-designer-shell.css';
 		$inspector_css = CB_AUTOMATIONS_DIR . 'assets/css/admin-builder-inspector.css';
+		$authoring_css = CB_AUTOMATIONS_DIR . 'assets/css/admin-builder-authoring.css';
 		$js            = CB_AUTOMATIONS_DIR . 'assets/js/admin-designer-shell.js';
 		$bootstrap     = CB_AUTOMATIONS_DIR . 'assets/js/admin-builder-bootstrap.js';
 		$inspector     = CB_AUTOMATIONS_DIR . 'assets/js/admin-builder-inspector.js';
+		$history       = CB_AUTOMATIONS_DIR . 'assets/js/admin-builder-history.js';
 
 		wp_enqueue_script(
 			self::BOOTSTRAP_HANDLE,
@@ -49,6 +52,9 @@ final class DesignerAssets {
 				'automationBuilder' => __( 'Automation Builder', 'core-blueprint-automations' ),
 				'openBuilder'       => __( 'Open builder', 'core-blueprint-automations' ),
 				'libraryUrl'        => AutomationsPage::url(),
+				'history'           => __( 'History', 'core-blueprint-automations' ),
+				'undo'              => __( 'Undo', 'core-blueprint-automations' ),
+				'redo'              => __( 'Redo', 'core-blueprint-automations' ),
 			]
 		);
 
@@ -94,12 +100,24 @@ final class DesignerAssets {
 			[ 'cb-automations-admin-designer-shell' ],
 			is_file( $inspector_css ) ? (string) filemtime( $inspector_css ) : CB_AUTOMATIONS_VERSION
 		);
+		wp_enqueue_style(
+			'cb-automations-admin-builder-authoring',
+			CB_AUTOMATIONS_URL . 'assets/css/admin-builder-authoring.css',
+			[ 'cb-automations-admin-builder-inspector' ],
+			is_file( $authoring_css ) ? (string) filemtime( $authoring_css ) : CB_AUTOMATIONS_VERSION
+		);
 
 		wp_enqueue_script_module(
 			'cb-automations-admin-designer-shell',
 			CB_AUTOMATIONS_URL . 'assets/js/admin-designer-shell.js',
 			[ '@cb-core/design-editor' ],
 			is_file( $js ) ? (string) filemtime( $js ) : CB_AUTOMATIONS_VERSION
+		);
+		wp_enqueue_script_module(
+			self::HISTORY_MODULE,
+			CB_AUTOMATIONS_URL . 'assets/js/admin-builder-history.js',
+			[ '@cb-core/design-editor', 'cb-automations-admin-designer-shell' ],
+			is_file( $history ) ? (string) filemtime( $history ) : CB_AUTOMATIONS_VERSION
 		);
 	}
 

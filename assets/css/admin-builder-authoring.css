@@ -1,0 +1,29 @@
+.cb-automations-step-head__actions,
+.cb-automations-step-reorder {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--cb-space-2);
+	flex-wrap: wrap;
+	justify-content: flex-end;
+}
+
+.cb-automations-step-reorder .button {
+	min-height: 28px;
+	padding: 0 var(--cb-space-2);
+	font-size: var(--cb-fs-2xs);
+}
+
+.cb-automations-builder-history-controls .button[disabled] {
+	opacity: .45;
+}
+
+@media (max-width: 782px) {
+	.cb-automations-step-head {
+		align-items: flex-start;
+	}
+
+	.cb-automations-step-head__actions {
+		width: 100%;
+		justify-content: flex-start;
+	}
+}

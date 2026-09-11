@@ -7,6 +7,9 @@
 		automationBuilder: 'Automation Builder',
 		openBuilder: 'Open builder',
 		libraryUrl: '',
+		history: 'History',
+		undo: 'Undo',
+		redo: 'Redo',
 		...(window.cbAutomationsBuilderStrings || {}),
 	};
 
@@ -99,6 +102,34 @@
 		}
 	};
 
+	const ensureHistoryControls = (shell) => {
+		const toolbar = shell.querySelector('.cb-core-design-shell__toolbar');
+		if (!toolbar || toolbar.querySelector('[data-cb-design-shell-undo]')) return;
+		const group = document.createElement('div');
+		group.className = 'cb-core-design-shell__toolbar-group cb-automations-builder-history-controls';
+		const label = document.createElement('span');
+		label.setAttribute('data-cb-design-shell-group-label', '');
+		label.textContent = config.history;
+		const undo = document.createElement('button');
+		undo.type = 'button';
+		undo.className = 'button cb-core-button';
+		undo.setAttribute('data-cb-design-shell-undo', '');
+		undo.title = `${config.undo} (Ctrl/Cmd+Z)`;
+		undo.textContent = config.undo;
+		undo.disabled = true;
+		const redo = document.createElement('button');
+		redo.type = 'button';
+		redo.className = 'button cb-core-button';
+		redo.setAttribute('data-cb-design-shell-redo', '');
+		redo.title = `${config.redo} (Ctrl/Cmd+Shift+Z)`;
+		redo.textContent = config.redo;
+		redo.disabled = true;
+		group.append(label, undo, redo);
+		const identity = toolbar.querySelector('.cb-automations-design-shell__identity');
+		identity?.insertAdjacentElement('afterend', group);
+		if (!identity) toolbar.prepend(group);
+	};
+
 	const decorateSidebar = (shell) => {
 		const sidebar = shell.querySelector('.cb-automations-design-shell__sidebar');
 		if (!sidebar) return;
@@ -122,6 +153,7 @@
 		page.setAttribute('data-cb-design-launch-root', '');
 		heading.setAttribute('data-cb-design-launch-context', '');
 		ensureInspectorPanel(shell);
+		ensureHistoryControls(shell);
 		decorateSidebar(shell);
 
 		const identity = shell.querySelector('.cb-automations-design-shell__identity strong');
