@@ -13,6 +13,7 @@ $notice = isset( $_GET['notice'] ) && is_string( $_GET['notice'] )
 
 $notices = [
 	'created' => [ 'success', __( 'Automation draft created.', 'core-blueprint-automations' ) ],
+	'failed'  => [ 'error', __( 'The automation could not be created. Check the name and try again.', 'core-blueprint-automations' ) ],
 ];
 ?>
 <div class="wrap cb-core-wrap cb-automations-admin">
