@@ -37,9 +37,11 @@ final class WorkflowService {
 	}
 
 	/**
-	 * Persist one editor revision. Draft/disabled definitions may be invalid;
-	 * enabling is fail-closed against the current capability source. Sensitive
-	 * literals are never persisted, regardless of activation state.
+	 * Persist one editor revision. Draft definitions may be invalid, but an
+	 * invalid definition can never remain enabled. When an operator requests
+	 * Enabled for an invalid definition we preserve the edits as Disabled and
+	 * return an explicit result so the UI can explain what happened.
+	 * Sensitive literals remain a hard persistence block in every state.
 	 */
 	public function save(
 		int $id,
@@ -53,21 +55,26 @@ final class WorkflowService {
 		if ( ! PersistencePolicy::allows( $validation ) ) {
 			return WorkflowSaveResult::persistence_blocked( $validation );
 		}
-		if ( ! ActivationPolicy::allows( $activation_state, $validation ) ) {
-			return WorkflowSaveResult::validation_failed( $validation );
-		}
+
+		$target_state = ActivationPolicy::allows( $activation_state, $validation )
+			? $activation_state
+			: ActivationState::Disabled;
 
 		$saved = WorkflowRepository::update(
 			$id,
 			$expected_revision,
 			$name,
-			$activation_state,
+			$target_state,
 			$definition,
 			$user_id
 		);
 
-		return $saved
-			? WorkflowSaveResult::saved( $validation )
-			: WorkflowSaveResult::conflict( $validation );
+		if ( ! $saved ) {
+			return WorkflowSaveResult::conflict( $validation );
+		}
+
+		return $target_state !== $activation_state
+			? WorkflowSaveResult::saved_disabled( $validation )
+			: WorkflowSaveResult::saved( $validation );
 	}
 }
