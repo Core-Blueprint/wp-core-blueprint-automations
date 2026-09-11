@@ -8,6 +8,11 @@
 	max-width: none;
 }
 
+body.cb-automations-builder-launch-pending .cb-automations-editor-page > p,
+body.cb-automations-builder-launch-pending .cb-automations-editor-page > .cb-automations-editor-heading,
+body.cb-automations-builder-launch-pending .cb-automations-editor-page > .notice,
+body.cb-automations-builder-launch-pending .cb-automations-editor-page > form,
+body.cb-automations-builder-launch-pending .cb-automations-editor-page > noscript,
 .cb-automations-editor-page.is-builder-launch-pending > p,
 .cb-automations-editor-page.is-builder-launch-pending > .cb-automations-editor-heading,
 .cb-automations-editor-page.is-builder-launch-pending > .notice,
@@ -16,8 +21,22 @@
 	visibility: hidden;
 }
 
+body.cb-automations-builder-launch-pending .cb-automations-editor-page > p,
+body.cb-automations-builder-launch-pending .cb-automations-editor-page > .cb-automations-editor-heading,
+body.cb-automations-builder-launch-pending .cb-automations-editor-page > .notice,
+body.cb-automations-builder-launch-pending .cb-automations-editor-page > form,
+body.cb-automations-builder-launch-pending .cb-automations-editor-page > noscript {
+	animation: cb-automations-builder-launch-fallback 0s linear 2s forwards;
+}
+
 .cb-automations-editor-page.is-builder-launch-pending {
 	min-height: 70vh;
+}
+
+@keyframes cb-automations-builder-launch-fallback {
+	to {
+		visibility: visible;
+	}
 }
 
 .cb-automations-design-shell .cb-core-design-shell__workspace {
