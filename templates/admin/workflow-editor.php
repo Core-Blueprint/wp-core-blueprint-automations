@@ -104,16 +104,7 @@ if ( ! is_string( $definition_json ) ) {
 					<span><?php esc_html_e( 'Linear workflow', 'core-blueprint-automations' ); ?></span>
 				</div>
 				<div class="cb-core-design-shell__toolbar-group">
-					<button
-						type="button"
-						class="button cb-core-button cb-core-button--secondary"
-						data-cb-design-shell-fullscreen
-						data-cb-design-shell-fullscreen-enter-label="<?php esc_attr_e( 'Open focus mode', 'core-blueprint-automations' ); ?>"
-						data-cb-design-shell-fullscreen-exit-label="<?php esc_attr_e( 'Exit focus mode', 'core-blueprint-automations' ); ?>"
-						aria-pressed="false"
-					>
-						<span data-cb-design-shell-fullscreen-label><?php esc_html_e( 'Open focus mode', 'core-blueprint-automations' ); ?></span>
-					</button>
+					<button type="button" class="button cb-core-button cb-core-button--secondary" data-cb-design-shell-fullscreen data-cb-design-shell-fullscreen-enter-label="<?php esc_attr_e( 'Open focus mode', 'core-blueprint-automations' ); ?>" data-cb-design-shell-fullscreen-exit-label="<?php esc_attr_e( 'Exit focus mode', 'core-blueprint-automations' ); ?>" aria-pressed="false"><span data-cb-design-shell-fullscreen-label><?php esc_html_e( 'Open focus mode', 'core-blueprint-automations' ); ?></span></button>
 					<button type="submit" class="button button-primary cb-core-button cb-core-button--primary"><?php esc_html_e( 'Save automation', 'core-blueprint-automations' ); ?></button>
 				</div>
 			</div>
@@ -132,39 +123,27 @@ if ( ! is_string( $definition_json ) ) {
 				<main class="cb-core-design-shell__canvas cb-automations-design-shell__canvas">
 					<div class="cb-automations-linear-editor" data-cb-automations-editor>
 						<section id="cb-automations-stage-trigger" class="cb-core-panel cb-automations-stage" data-stage="trigger" tabindex="-1">
-							<div class="cb-automations-stage-heading">
-								<div class="cb-automations-stage-heading__main"><span class="cb-automations-stage-kicker"><?php esc_html_e( 'WHEN', 'core-blueprint-automations' ); ?></span><h2><?php esc_html_e( 'Trigger', 'core-blueprint-automations' ); ?></h2></div>
-								<span class="cb-automations-stage-requirement is-required"><?php esc_html_e( 'Required', 'core-blueprint-automations' ); ?></span>
-							</div>
+							<div class="cb-automations-stage-heading"><div class="cb-automations-stage-heading__main"><span class="cb-automations-stage-kicker"><?php esc_html_e( 'WHEN', 'core-blueprint-automations' ); ?></span><h2><?php esc_html_e( 'Trigger', 'core-blueprint-automations' ); ?></h2></div><span class="cb-automations-stage-requirement is-required"><?php esc_html_e( 'Required', 'core-blueprint-automations' ); ?></span></div>
 							<p class="cb-automations-stage-description"><?php esc_html_e( 'Choose the event that starts this automation.', 'core-blueprint-automations' ); ?></p>
 							<div data-cb-automations-trigger></div>
 						</section>
 
 						<section id="cb-automations-stage-states" class="cb-core-panel cb-automations-stage" data-stage="states" tabindex="-1">
-							<div class="cb-automations-stage-heading">
-								<div class="cb-automations-stage-heading__main"><span class="cb-automations-stage-kicker"><?php esc_html_e( 'GET DATA', 'core-blueprint-automations' ); ?></span><h2><?php esc_html_e( 'Live state', 'core-blueprint-automations' ); ?></h2></div>
-								<span class="cb-automations-stage-requirement"><?php esc_html_e( 'Optional', 'core-blueprint-automations' ); ?></span>
-							</div>
+							<div class="cb-automations-stage-heading"><div class="cb-automations-stage-heading__main"><span class="cb-automations-stage-kicker"><?php esc_html_e( 'GET DATA', 'core-blueprint-automations' ); ?></span><h2><?php esc_html_e( 'Live state', 'core-blueprint-automations' ); ?></h2></div><span class="cb-automations-stage-requirement"><?php esc_html_e( 'Optional', 'core-blueprint-automations' ); ?></span></div>
 							<p class="cb-automations-stage-description"><?php esc_html_e( 'Look up additional live data and make typed values available to later steps.', 'core-blueprint-automations' ); ?></p>
 							<div data-cb-automations-states></div>
 							<div class="cb-core-actions cb-automations-stage-actions"><button type="button" class="button cb-core-button cb-core-button--secondary" data-cb-add-state><?php esc_html_e( 'Add data lookup', 'core-blueprint-automations' ); ?></button></div>
 						</section>
 
 						<section id="cb-automations-stage-conditions" class="cb-core-panel cb-automations-stage" data-stage="conditions" tabindex="-1">
-							<div class="cb-automations-stage-heading">
-								<div class="cb-automations-stage-heading__main"><span class="cb-automations-stage-kicker"><?php esc_html_e( 'ONLY IF', 'core-blueprint-automations' ); ?></span><h2><?php esc_html_e( 'Conditions', 'core-blueprint-automations' ); ?></h2></div>
-								<span class="cb-automations-stage-requirement"><?php esc_html_e( 'Optional', 'core-blueprint-automations' ); ?></span>
-							</div>
+							<div class="cb-automations-stage-heading"><div class="cb-automations-stage-heading__main"><span class="cb-automations-stage-kicker"><?php esc_html_e( 'ONLY IF', 'core-blueprint-automations' ); ?></span><h2><?php esc_html_e( 'Conditions', 'core-blueprint-automations' ); ?></h2></div><span class="cb-automations-stage-requirement"><?php esc_html_e( 'Optional', 'core-blueprint-automations' ); ?></span></div>
 							<p class="cb-automations-stage-description"><?php esc_html_e( 'Add rules that must match before any actions are allowed to continue.', 'core-blueprint-automations' ); ?></p>
 							<div data-cb-automations-conditions></div>
 							<div class="cb-core-actions cb-automations-stage-actions"><button type="button" class="button cb-core-button cb-core-button--secondary" data-cb-add-condition><?php esc_html_e( 'Add condition', 'core-blueprint-automations' ); ?></button></div>
 						</section>
 
 						<section id="cb-automations-stage-actions" class="cb-core-panel cb-automations-stage" data-stage="actions" tabindex="-1">
-							<div class="cb-automations-stage-heading">
-								<div class="cb-automations-stage-heading__main"><span class="cb-automations-stage-kicker"><?php esc_html_e( 'THEN', 'core-blueprint-automations' ); ?></span><h2><?php esc_html_e( 'Actions', 'core-blueprint-automations' ); ?></h2></div>
-								<span class="cb-automations-stage-requirement is-required"><?php esc_html_e( 'Required', 'core-blueprint-automations' ); ?></span>
-							</div>
+							<div class="cb-automations-stage-heading"><div class="cb-automations-stage-heading__main"><span class="cb-automations-stage-kicker"><?php esc_html_e( 'THEN', 'core-blueprint-automations' ); ?></span><h2><?php esc_html_e( 'Actions', 'core-blueprint-automations' ); ?></h2></div><span class="cb-automations-stage-requirement is-required"><?php esc_html_e( 'Required', 'core-blueprint-automations' ); ?></span></div>
 							<p class="cb-automations-stage-description"><?php esc_html_e( 'Choose what Core Blueprint should do after the workflow passes its conditions.', 'core-blueprint-automations' ); ?></p>
 							<div data-cb-automations-actions></div>
 							<div class="cb-core-actions cb-automations-stage-actions"><button type="button" class="button cb-core-button cb-core-button--secondary" data-cb-add-action><?php esc_html_e( 'Add action', 'core-blueprint-automations' ); ?></button></div>
@@ -179,45 +158,22 @@ if ( ! is_string( $definition_json ) ) {
 					</div>
 
 					<section class="cb-core-design-shell__panel" role="tabpanel" data-cb-design-shell-panel="settings" data-cb-design-shell-group="sidebar">
-						<div class="cb-automations-panel-heading">
-							<div>
-								<span class="cb-automations-panel-eyebrow"><?php esc_html_e( 'Automation', 'core-blueprint-automations' ); ?></span>
-								<h2><?php esc_html_e( 'Workflow settings', 'core-blueprint-automations' ); ?></h2>
-							</div>
-						</div>
+						<div class="cb-automations-panel-heading"><div><span class="cb-automations-panel-eyebrow"><?php esc_html_e( 'Automation', 'core-blueprint-automations' ); ?></span><h2><?php esc_html_e( 'Workflow settings', 'core-blueprint-automations' ); ?></h2></div></div>
 						<div class="cb-automations-settings-grid">
-							<div>
-								<label for="cb-automation-name"><strong><?php esc_html_e( 'Name', 'core-blueprint-automations' ); ?></strong></label>
-								<input id="cb-automation-name" name="name" type="text" class="regular-text" maxlength="191" required value="<?php echo esc_attr( $record->name() ); ?>" />
-							</div>
-							<div>
-								<label for="cb-automation-activation"><strong><?php esc_html_e( 'Activation', 'core-blueprint-automations' ); ?></strong></label>
-								<select id="cb-automation-activation" name="activation_state">
-									<option value="disabled" <?php selected( 'disabled', $record->activation_state()->value ); ?>><?php esc_html_e( 'Disabled', 'core-blueprint-automations' ); ?></option>
-									<option value="enabled" <?php selected( 'enabled', $record->activation_state()->value ); ?>><?php esc_html_e( 'Enabled', 'core-blueprint-automations' ); ?></option>
-								</select>
-								<p class="description"><?php esc_html_e( 'Enabled workflows must be fully valid against the current capability catalog.', 'core-blueprint-automations' ); ?></p>
-							</div>
+							<div><label for="cb-automation-name"><strong><?php esc_html_e( 'Name', 'core-blueprint-automations' ); ?></strong></label><input id="cb-automation-name" name="name" type="text" class="regular-text" maxlength="191" required value="<?php echo esc_attr( $record->name() ); ?>" /></div>
+							<div><label for="cb-automation-activation"><strong><?php esc_html_e( 'Activation', 'core-blueprint-automations' ); ?></strong></label><select id="cb-automation-activation" name="activation_state"><option value="disabled" <?php selected( 'disabled', $record->activation_state()->value ); ?>><?php esc_html_e( 'Disabled', 'core-blueprint-automations' ); ?></option><option value="enabled" <?php selected( 'enabled', $record->activation_state()->value ); ?>><?php esc_html_e( 'Enabled', 'core-blueprint-automations' ); ?></option></select><p class="description"><?php esc_html_e( 'Enabled workflows must be fully valid against the current capability catalog.', 'core-blueprint-automations' ); ?></p></div>
 						</div>
 					</section>
 
-					<section class="cb-core-design-shell__panel" role="tabpanel" data-cb-design-shell-panel="health" data-cb-design-shell-group="sidebar" hidden>
-						<div class="cb-automations-panel-heading">
-							<div>
-								<span class="cb-automations-panel-eyebrow"><?php esc_html_e( 'Workflow health', 'core-blueprint-automations' ); ?></span>
-								<h2><?php echo esc_html( $validation->is_valid() ? __( 'Ready', 'core-blueprint-automations' ) : __( 'Needs attention', 'core-blueprint-automations' ) ); ?></h2>
-							</div>
-						</div>
+					<section class="cb-core-design-shell__panel cb-automations-validation-panel" role="tabpanel" data-cb-design-shell-panel="health" data-cb-design-shell-group="sidebar" hidden>
+						<div class="cb-automations-panel-heading"><div><span class="cb-automations-panel-eyebrow"><?php esc_html_e( 'Workflow health', 'core-blueprint-automations' ); ?></span><h2><?php echo esc_html( $validation->is_valid() ? __( 'Ready', 'core-blueprint-automations' ) : __( 'Needs attention', 'core-blueprint-automations' ) ); ?></h2></div></div>
 						<?php if ( $validation->is_valid() ) : ?>
 							<p class="description"><?php esc_html_e( 'The current definition is valid against the live capability catalog.', 'core-blueprint-automations' ); ?></p>
 						<?php else : ?>
 							<p class="description"><?php esc_html_e( 'Resolve these items before the automation can be enabled.', 'core-blueprint-automations' ); ?></p>
 							<ul class="cb-automations-validation-list">
 								<?php foreach ( $validation->issues() as $issue ) : ?>
-									<li>
-										<strong><?php echo esc_html( \CB\Automations\Admin\ValidationPresenter::message( $issue ) ); ?></strong>
-										<code><?php echo esc_html( $issue->path() ); ?></code>
-									</li>
+									<li><strong><?php echo esc_html( \CB\Automations\Admin\ValidationPresenter::message( $issue ) ); ?></strong><code><?php echo esc_html( $issue->path() ); ?></code></li>
 								<?php endforeach; ?>
 							</ul>
 						<?php endif; ?>
@@ -226,9 +182,7 @@ if ( ! is_string( $definition_json ) ) {
 			</div>
 		</div>
 
-		<p class="submit cb-core-actions cb-automations-save-actions">
-			<button type="submit" class="button button-primary cb-core-button cb-core-button--primary"><?php esc_html_e( 'Save automation', 'core-blueprint-automations' ); ?></button>
-		</p>
+		<p class="submit cb-core-actions cb-automations-save-actions"><button type="submit" class="button button-primary cb-core-button cb-core-button--primary"><?php esc_html_e( 'Save automation', 'core-blueprint-automations' ); ?></button></p>
 	</form>
 
 	<noscript><div class="notice notice-warning"><p><?php esc_html_e( 'The visual workflow editor requires JavaScript. Name and activation can still be submitted using the currently stored definition.', 'core-blueprint-automations' ); ?></p></div></noscript>

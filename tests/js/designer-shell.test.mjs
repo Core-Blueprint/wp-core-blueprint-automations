@@ -29,6 +29,7 @@ test('Automations adopts the public Base Designer Shell without changing workflo
 	assert.match(template, /data-cb-design-shell-tab="health"/);
 	assert.match(template, /data-cb-design-shell-panel="settings"/);
 	assert.match(template, /data-cb-design-shell-panel="health"/);
+	assert.match(template, /cb-automations-validation-panel/);
 
 	for (const hook of [
 		'data-cb-automations-editor',
