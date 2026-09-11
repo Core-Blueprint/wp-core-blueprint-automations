@@ -48,9 +48,13 @@ final class FakeCapabilitySource implements CapabilitySource {
 	}
 }
 
-/** @param array<string,mixed> $schema */
-function field( string $type, bool $required = false, bool $sensitive = false, ?string $items = null ): array {
-	return [ 'type' => $type, 'required' => $required, 'sensitive' => $sensitive, 'items' => $items ];
+/** @return array<string,mixed> */
+function field( string $type, bool $required = false, bool $sensitive = false, ?string $items = null, ?string $semantic_type = null ): array {
+	$field = [ 'type' => $type, 'required' => $required, 'sensitive' => $sensitive, 'items' => $items ];
+	if ( null !== $semantic_type ) {
+		$field['semantic_type'] = $semantic_type;
+	}
+	return $field;
 }
 
 function capability( string $kind, string $provider, string $id, array $input, array $output, string $version = '1' ): CapabilityDefinition {
@@ -128,7 +132,7 @@ function source( bool $work_active = true, bool $include_create = true, string $
 		'contract.signed',
 		[],
 		[
-			'contract_id' => field( 'integer', true ),
+			'contract_id' => field( 'integer', true, false, null, 'core-blueprint-contracts.contract_id' ),
 			'status'      => field( 'string', true ),
 			'secret'      => field( 'string', false, true ),
 		]
@@ -137,10 +141,11 @@ function source( bool $work_active = true, bool $include_create = true, string $
 		CapabilityKind::STATE,
 		$work,
 		'project.lookup',
-		[ 'contract_id' => field( 'integer', true ) ],
+		[ 'contract_id' => field( 'integer', true, false, null, 'core-blueprint-contracts.contract_id' ) ],
 		[
-			'project_id' => field( 'integer', true ),
-			'tags'       => field( 'array', false, false, 'string' ),
+			'project_id'        => field( 'integer', true, false, null, 'core-blueprint-work.project_id' ),
+			'legacy_project_id' => field( 'integer' ),
+			'tags'              => field( 'array', false, false, 'string' ),
 		]
 	);
 	$create = capability(
@@ -148,10 +153,11 @@ function source( bool $work_active = true, bool $include_create = true, string $
 		$work,
 		'project.create',
 		[
-			'project_id'  => field( 'integer', true ),
-			'secret_copy' => field( 'string', false ),
+			'project_id'        => field( 'integer', true, false, null, 'core-blueprint-work.project_id' ),
+			'legacy_project_id' => field( 'integer' ),
+			'secret_copy'       => field( 'string', false ),
 		],
-		[ 'created_id' => field( 'integer', true ) ],
+		[ 'created_id' => field( 'integer', true, false, null, 'core-blueprint-work.project_id' ) ],
 		$create_version
 	);
 	$followup = capability(
@@ -159,7 +165,7 @@ function source( bool $work_active = true, bool $include_create = true, string $
 		$work,
 		'project.followup',
 		[],
-		[ 'project_id' => field( 'integer', true ) ]
+		[ 'project_id' => field( 'integer', true, false, null, 'core-blueprint-work.project_id' ) ]
 	);
 
 	$definitions = [
@@ -258,6 +264,33 @@ $wrong_type['actions'][0]['bindings']['project_id'] = [ 'source' => 'literal', '
 $type_result = $validator->validate( DefinitionCodec::decode( $wrong_type ) );
 assert_code( $type_result, 'binding.type_mismatch', 'Expected literal type mismatch.' );
 
+$semantic_mismatch = $encoded;
+$semantic_mismatch['actions'][0]['bindings']['project_id'] = [
+	'source'  => 'step_output',
+	'step_id' => 'trigger_1',
+	'field'   => 'contract_id',
+];
+$semantic_mismatch_result = $validator->validate( DefinitionCodec::decode( $semantic_mismatch ) );
+assert_code( $semantic_mismatch_result, 'binding.type_mismatch', 'Explicitly different semantic IDs must not bind despite matching primitive types.' );
+
+$untyped_source_to_semantic_target = $encoded;
+$untyped_source_to_semantic_target['actions'][0]['bindings']['project_id'] = [
+	'source'  => 'step_output',
+	'step_id' => 'state_1',
+	'field'   => 'legacy_project_id',
+];
+$untyped_source_result = $validator->validate( DefinitionCodec::decode( $untyped_source_to_semantic_target ) );
+assert_code( $untyped_source_result, 'binding.type_mismatch', 'Semantic targets must reject untyped workflow outputs despite matching primitive types.' );
+
+$legacy_semantic_fallback = $encoded;
+$legacy_semantic_fallback['actions'][0]['bindings']['legacy_project_id'] = [
+	'source'  => 'step_output',
+	'step_id' => 'state_1',
+	'field'   => 'project_id',
+];
+$legacy_semantic_result = $validator->validate( DefinitionCodec::decode( $legacy_semantic_fallback ) );
+assert_true( ! $legacy_semantic_result->has_code( 'binding.type_mismatch' ), 'Legacy untyped targets must retain primitive compatibility with semantically typed sources.' );
+
 $missing_source = $encoded;
 $missing_source['actions'][0]['bindings']['project_id'] = [ 'source' => 'step_output', 'step_id' => 'missing_1', 'field' => 'project_id' ];
 $missing_source_result = $validator->validate( DefinitionCodec::decode( $missing_source ) );
@@ -287,6 +320,36 @@ $action_condition['conditions'][0] = [
 ];
 $action_condition_result = $validator->validate( DefinitionCodec::decode( $action_condition ) );
 assert_code( $action_condition_result, 'binding.source_not_available_yet', 'Conditions must not consume action output.' );
+
+$semantic_condition = $encoded;
+$semantic_condition['conditions'][0] = [
+	'condition_id' => 'condition_1',
+	'left'         => [ 'source' => 'step_output', 'step_id' => 'state_1', 'field' => 'project_id' ],
+	'operator'     => 'equals',
+	'right'        => [ 'source' => 'step_output', 'step_id' => 'trigger_1', 'field' => 'contract_id' ],
+];
+$semantic_condition_result = $validator->validate( DefinitionCodec::decode( $semantic_condition ) );
+assert_code( $semantic_condition_result, 'condition.type_mismatch', 'Conditions must reject explicitly different semantic IDs despite matching primitive types.' );
+
+$untyped_semantic_condition = $encoded;
+$untyped_semantic_condition['conditions'][0] = [
+	'condition_id' => 'condition_1',
+	'left'         => [ 'source' => 'step_output', 'step_id' => 'state_1', 'field' => 'project_id' ],
+	'operator'     => 'equals',
+	'right'        => [ 'source' => 'step_output', 'step_id' => 'state_1', 'field' => 'legacy_project_id' ],
+];
+$untyped_semantic_condition_result = $validator->validate( DefinitionCodec::decode( $untyped_semantic_condition ) );
+assert_code( $untyped_semantic_condition_result, 'condition.type_mismatch', 'Typed condition subjects must reject untyped workflow-output comparisons.' );
+
+$literal_semantic_condition = $encoded;
+$literal_semantic_condition['conditions'][0] = [
+	'condition_id' => 'condition_1',
+	'left'         => [ 'source' => 'step_output', 'step_id' => 'state_1', 'field' => 'project_id' ],
+	'operator'     => 'equals',
+	'right'        => [ 'source' => 'literal', 'value' => 1 ],
+];
+$literal_semantic_condition_result = $validator->validate( DefinitionCodec::decode( $literal_semantic_condition ) );
+assert_true( ! $literal_semantic_condition_result->has_code( 'condition.type_mismatch' ), 'Typed condition subjects must continue to allow primitive literals.' );
 
 $unsupported = $encoded;
 $unsupported['conditions'][0]['operator'] = 'matches_magic';

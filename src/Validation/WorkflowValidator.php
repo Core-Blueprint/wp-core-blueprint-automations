@@ -276,7 +276,16 @@ final class WorkflowValidator {
 			$issues[] = new ValidationIssue( 'condition.type_mismatch', $path . '.left', [ 'operator' => $condition->operator() ] );
 			return;
 		}
-		if ( 2 === $operator['arity'] && null !== $right_type && ! $this->condition_types_compatible( $condition->operator(), $left_type, $right_type ) ) {
+		if (
+			2 === $operator['arity']
+			&& null !== $right_type
+			&& ! $this->condition_types_compatible(
+				$condition->operator(),
+				$left_type,
+				$right_type,
+				null !== $right && Binding::SOURCE_LITERAL === $right->source()
+			)
+		) {
 			$issues[] = new ValidationIssue( 'condition.type_mismatch', $path, [ 'operator' => $condition->operator() ] );
 		}
 	}
@@ -286,7 +295,7 @@ final class WorkflowValidator {
 	 * @param array<string,int>                  $order_by_id
 	 * @param array<string,CapabilityDefinition> $resolved
 	 * @param ValidationIssue[]                  $issues
-	 * @return array{type:string,items:?string,sensitive:bool}|null
+	 * @return array{type:string,items:?string,sensitive:bool,semantic_type:?string}|null
 	 */
 	private function resolve_operand_type(
 		Binding $binding,
@@ -308,7 +317,7 @@ final class WorkflowValidator {
 	 * @param array<string,int>                  $order_by_id
 	 * @param array<string,CapabilityDefinition> $resolved
 	 * @param ValidationIssue[]                  $issues
-	 * @return array{type:string,items:?string,sensitive:bool}|null
+	 * @return array{type:string,items:?string,sensitive:bool,semantic_type:?string}|null
 	 */
 	private function resolve_output_binding(
 		Binding $binding,
@@ -381,10 +390,17 @@ final class WorkflowValidator {
 	}
 
 	/**
-	 * @param array{type:string,items:?string,sensitive:bool} $source
-	 * @param array<string,mixed>                              $target
+	 * @param array{type:string,items:?string,sensitive:bool,semantic_type:?string} $source
+	 * @param array<string,mixed>                                                   $target
 	 */
 	private function schemas_compatible( array $source, array $target ): bool {
+		$target_semantic = is_string( $target['semantic_type'] ?? null ) && '' !== $target['semantic_type']
+			? $target['semantic_type']
+			: null;
+		if ( ! $this->semantic_types_compatible( $source['semantic_type'], $target_semantic ) ) {
+			return false;
+		}
+
 		$target_type = (string) ( $target['type'] ?? '' );
 		if ( ! $this->scalar_type_compatible( $source['type'], $target_type ) ) {
 			return false;
@@ -399,32 +415,39 @@ final class WorkflowValidator {
 		return null !== $source['items'] && null !== $target_items && $this->scalar_type_compatible( $source['items'], $target_items );
 	}
 
+	private function semantic_types_compatible( ?string $source, ?string $target ): bool {
+		return null === $target || ( null !== $source && $source === $target );
+	}
+
 	private function scalar_type_compatible( string $source, string $target ): bool {
 		return $source === $target || ( 'integer' === $source && 'number' === $target );
 	}
 
-	/** @param array<string,mixed> $schema @return array{type:string,items:?string,sensitive:bool} */
+	/** @param array<string,mixed> $schema @return array{type:string,items:?string,sensitive:bool,semantic_type:?string} */
 	private function schema_type( array $schema ): array {
 		return [
-			'type'      => (string) ( $schema['type'] ?? '' ),
-			'items'     => is_string( $schema['items'] ?? null ) ? $schema['items'] : null,
-			'sensitive' => true === ( $schema['sensitive'] ?? false ),
+			'type'          => (string) ( $schema['type'] ?? '' ),
+			'items'         => is_string( $schema['items'] ?? null ) ? $schema['items'] : null,
+			'sensitive'     => true === ( $schema['sensitive'] ?? false ),
+			'semantic_type' => is_string( $schema['semantic_type'] ?? null ) && '' !== $schema['semantic_type']
+				? $schema['semantic_type']
+				: null,
 		];
 	}
 
-	/** @return array{type:string,items:?string,sensitive:bool}|null */
+	/** @return array{type:string,items:?string,sensitive:bool,semantic_type:?string}|null */
 	private function literal_type( mixed $value ): ?array {
 		if ( is_string( $value ) ) {
-			return [ 'type' => 'string', 'items' => null, 'sensitive' => false ];
+			return [ 'type' => 'string', 'items' => null, 'sensitive' => false, 'semantic_type' => null ];
 		}
 		if ( is_int( $value ) ) {
-			return [ 'type' => 'integer', 'items' => null, 'sensitive' => false ];
+			return [ 'type' => 'integer', 'items' => null, 'sensitive' => false, 'semantic_type' => null ];
 		}
 		if ( is_float( $value ) && is_finite( $value ) ) {
-			return [ 'type' => 'number', 'items' => null, 'sensitive' => false ];
+			return [ 'type' => 'number', 'items' => null, 'sensitive' => false, 'semantic_type' => null ];
 		}
 		if ( is_bool( $value ) ) {
-			return [ 'type' => 'boolean', 'items' => null, 'sensitive' => false ];
+			return [ 'type' => 'boolean', 'items' => null, 'sensitive' => false, 'semantic_type' => null ];
 		}
 		if ( ! is_array( $value ) || ! array_is_list( $value ) ) {
 			return null;
@@ -439,19 +462,23 @@ final class WorkflowValidator {
 			if ( null === $item_type ) {
 				$item_type = $current['type'];
 			} elseif ( ! $this->scalar_type_compatible( $current['type'], $item_type ) && ! $this->scalar_type_compatible( $item_type, $current['type'] ) ) {
-				return [ 'type' => 'array', 'items' => 'mixed', 'sensitive' => false ];
+				return [ 'type' => 'array', 'items' => 'mixed', 'sensitive' => false, 'semantic_type' => null ];
 			} elseif ( 'number' === $current['type'] || 'number' === $item_type ) {
 				$item_type = 'number';
 			}
 		}
-		return [ 'type' => 'array', 'items' => $item_type, 'sensitive' => false ];
+		return [ 'type' => 'array', 'items' => $item_type, 'sensitive' => false, 'semantic_type' => null ];
 	}
 
 	/**
-	 * @param array{type:string,items:?string,sensitive:bool} $left
-	 * @param array{type:string,items:?string,sensitive:bool} $right
+	 * @param array{type:string,items:?string,sensitive:bool,semantic_type:?string} $left
+	 * @param array{type:string,items:?string,sensitive:bool,semantic_type:?string} $right
 	 */
-	private function condition_types_compatible( string $operator, array $left, array $right ): bool {
+	private function condition_types_compatible( string $operator, array $left, array $right, bool $right_is_literal ): bool {
+		if ( ! $right_is_literal && ! $this->semantic_types_compatible( $right['semantic_type'], $left['semantic_type'] ) ) {
+			return false;
+		}
+
 		if ( in_array( $operator, [ 'greater_than', 'greater_than_or_equal', 'less_than', 'less_than_or_equal' ], true ) ) {
 			return in_array( $right['type'], [ 'integer', 'number' ], true );
 		}

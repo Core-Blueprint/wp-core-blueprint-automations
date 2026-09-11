@@ -1,6 +1,36 @@
 (() => {
 	'use strict';
 
+	function semanticType(schema) {
+		const value = schema?.semantic_type;
+		return typeof value === 'string' && value !== '' ? value : null;
+	}
+
+	function semanticsCompatible(source, target) {
+		const sourceSemantic = semanticType(source);
+		const targetSemantic = semanticType(target);
+		if (targetSemantic === null) return true;
+		return sourceSemantic !== null && sourceSemantic === targetSemantic;
+	}
+
+	function typeCompatible(source, target) {
+		if (!source || !target || !semanticsCompatible(source, target)) return false;
+		if (source.type === target.type) {
+			if (source.type !== 'array') return true;
+			return source.items === target.items || (source.items === 'integer' && target.items === 'number');
+		}
+		return source.type === 'integer' && target.type === 'number';
+	}
+
+	if (typeof document === 'undefined') {
+		globalThis.cbAutomationsEditorHelpers = {
+			semanticType,
+			semanticsCompatible,
+			typeCompatible,
+		};
+		return;
+	}
+
 	const root = document.querySelector('[data-cb-automations-editor]');
 	const dataNode = document.getElementById('cb-automations-editor-data');
 	const form = document.querySelector('[data-cb-automations-editor-form]');
@@ -113,15 +143,6 @@
 		let index = 1;
 		while (used.has(`condition_${index}`)) index += 1;
 		return `condition_${index}`;
-	}
-
-	function typeCompatible(source, target) {
-		if (!source || !target) return false;
-		if (source.type === target.type) {
-			if (source.type !== 'array') return true;
-			return source.items === target.items || (source.items === 'integer' && target.items === 'number');
-		}
-		return source.type === 'integer' && target.type === 'number';
 	}
 
 	function outputEntries(context, index = 0) {
@@ -364,17 +385,18 @@
 	function conditionRightSchema(operator, leftSchema) {
 		if (!leftSchema) return { type: 'string', items: null, sensitive: false };
 		const sensitive = Boolean(leftSchema.sensitive);
+		const semantic_type = semanticType(leftSchema);
 		if (['contains', 'not_contains'].includes(operator) && leftSchema.type === 'array') {
-			return { type: leftSchema.items || 'string', items: null, sensitive };
+			return { type: leftSchema.items || 'string', items: null, sensitive, semantic_type };
 		}
 		if (['greater_than', 'greater_than_or_equal', 'less_than', 'less_than_or_equal'].includes(operator)) {
-			return { type: 'number', items: null, sensitive };
+			return { type: 'number', items: null, sensitive, semantic_type };
 		}
 		if (['equals', 'not_equals'].includes(operator) && leftSchema.type === 'integer') {
-			return { type: 'number', items: null, sensitive };
+			return { type: 'number', items: null, sensitive, semantic_type };
 		}
 		if (['equals', 'not_equals'].includes(operator) && leftSchema.type === 'array' && leftSchema.items === 'integer') {
-			return { type: 'array', items: 'number', sensitive };
+			return { type: 'array', items: 'number', sensitive, semantic_type };
 		}
 		return leftSchema;
 	}
