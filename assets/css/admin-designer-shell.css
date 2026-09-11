@@ -8,6 +8,18 @@
 	max-width: none;
 }
 
+.cb-automations-editor-page.is-builder-launch-pending > p,
+.cb-automations-editor-page.is-builder-launch-pending > .cb-automations-editor-heading,
+.cb-automations-editor-page.is-builder-launch-pending > .notice,
+.cb-automations-editor-page.is-builder-launch-pending > form,
+.cb-automations-editor-page.is-builder-launch-pending > noscript {
+	visibility: hidden;
+}
+
+.cb-automations-editor-page.is-builder-launch-pending {
+	min-height: 70vh;
+}
+
 .cb-automations-design-shell {
 	margin-top: var(--cb-space-4);
 }

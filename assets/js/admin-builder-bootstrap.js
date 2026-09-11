@@ -2,9 +2,11 @@
 	'use strict';
 
 	const STORAGE_KEY = 'cb-automations-builder-workflow';
+	const LAUNCH_TIMEOUT_MS = 1800;
 	const config = {
 		automationBuilder: 'Automation Builder',
 		openBuilder: 'Open builder',
+		libraryUrl: '',
 		...(window.cbAutomationsBuilderStrings || {}),
 	};
 
@@ -110,37 +112,62 @@
 			|| params.get('notice') === 'created'
 			|| stored === workflowId
 			|| stored === 'pending';
+		let launchedFromBuilderIntent = autoStart;
 
-		if (autoStart && workflowId) rememberBuilder(workflowId);
+		if (autoStart && workflowId) {
+			rememberBuilder(workflowId);
+			page.classList.add('is-builder-launch-pending');
+		}
 
 		shell.addEventListener('cb:design-shell:fullscreenchange', (event) => {
 			if (event.detail?.fullscreen) {
+				page.classList.remove('is-builder-launch-pending');
+				page.classList.add('is-builder-active');
 				if (workflowId) rememberBuilder(workflowId);
 				return;
 			}
+
+			page.classList.remove('is-builder-active', 'is-builder-launch-pending');
 			forgetBuilder(workflowId);
+			if (launchedFromBuilderIntent && config.libraryUrl) {
+				window.location.assign(String(config.libraryUrl));
+			}
 		});
 
 		form.addEventListener('submit', () => {
 			const fullscreen = shell.querySelector('[data-cb-design-shell-fullscreen]');
-			if (workflowId && fullscreen?.getAttribute('aria-pressed') === 'true') rememberBuilder(workflowId);
+			if (workflowId && fullscreen?.getAttribute('aria-pressed') === 'true') {
+				launchedFromBuilderIntent = true;
+				rememberBuilder(workflowId);
+			}
 		});
 
 		if (!autoStart) return;
 
+		let observer = null;
+		let timeout = null;
+		const finishLaunch = () => {
+			observer?.disconnect();
+			observer = null;
+			if (timeout) window.clearTimeout(timeout);
+			timeout = null;
+		};
 		const openBuilder = () => {
 			const button = page.querySelector('[data-cb-design-launch] .cb-core-design-launch');
 			if (!(button instanceof HTMLButtonElement)) return false;
+			finishLaunch();
 			button.click();
 			return true;
 		};
 
 		if (openBuilder()) return;
-		const observer = new MutationObserver(() => {
-			if (!openBuilder()) return;
-			observer.disconnect();
-		});
+		observer = new MutationObserver(() => openBuilder());
 		observer.observe(page, { childList: true, subtree: true });
+		timeout = window.setTimeout(() => {
+			finishLaunch();
+			page.classList.remove('is-builder-launch-pending');
+			launchedFromBuilderIntent = false;
+		}, LAUNCH_TIMEOUT_MS);
 	};
 
 	enhanceLibrary();

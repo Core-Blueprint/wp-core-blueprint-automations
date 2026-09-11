@@ -45,6 +45,7 @@ final class DesignerAssets {
 			[
 				'automationBuilder' => __( 'Automation Builder', 'core-blueprint-automations' ),
 				'openBuilder'       => __( 'Open builder', 'core-blueprint-automations' ),
+				'libraryUrl'        => AutomationsPage::url(),
 			]
 		);
 
