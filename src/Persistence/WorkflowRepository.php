@@ -167,8 +167,12 @@ final class WorkflowRepository {
 
 	private static function normalize_name( string $name ): string {
 		$name = trim( wp_strip_all_tags( $name ) );
-		if ( '' === $name || strlen( $name ) > 191 ) {
-			throw new \InvalidArgumentException( 'Workflow name must contain between 1 and 191 bytes.' );
+		$length = function_exists( 'mb_strlen' )
+			? mb_strlen( $name, 'UTF-8' )
+			: preg_match_all( '/./us', $name );
+
+		if ( '' === $name || false === $length || $length > 191 ) {
+			throw new \InvalidArgumentException( 'Workflow name must contain between 1 and 191 characters.' );
 		}
 		return $name;
 	}
