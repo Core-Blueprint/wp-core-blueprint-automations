@@ -8,9 +8,10 @@ use CB\Automations\Validation\ValidationResult;
 defined( 'ABSPATH' ) || exit;
 
 final readonly class WorkflowSaveResult {
-	public const SAVED             = 'saved';
-	public const VALIDATION_FAILED = 'validation_failed';
-	public const CONFLICT          = 'conflict';
+	public const SAVED               = 'saved';
+	public const VALIDATION_FAILED   = 'validation_failed';
+	public const PERSISTENCE_BLOCKED = 'persistence_blocked';
+	public const CONFLICT            = 'conflict';
 
 	private function __construct(
 		private string $status,
@@ -23,6 +24,10 @@ final readonly class WorkflowSaveResult {
 
 	public static function validation_failed( ValidationResult $validation ): self {
 		return new self( self::VALIDATION_FAILED, $validation );
+	}
+
+	public static function persistence_blocked( ValidationResult $validation ): self {
+		return new self( self::PERSISTENCE_BLOCKED, $validation );
 	}
 
 	public static function conflict( ValidationResult $validation ): self {
