@@ -33,6 +33,15 @@ test('Automation Builder maturity keeps shared-shell, canonical persistence and 
 	assert.match(bootstrap, /is-builder-launch-pending/);
 	assert.match(bootstrap, /window\.location\.assign\(String\(config\.libraryUrl\)\)/);
 	assert.match(bootstrap, /LAUNCH_TIMEOUT_MS/);
+	const openBuilderBody = bootstrap.match(/const openBuilder = \(\) => \{([\s\S]*?)\n\t\t\};/)?.[1] ?? '';
+	assert.match(openBuilderBody, /stopObserver\(\)/);
+	assert.match(openBuilderBody, /button\.click\(\)/);
+	assert.doesNotMatch(openBuilderBody, /finishLaunch\(\)/);
+	assert.match(bootstrap, /if \(event\.detail\?\.fullscreen\) \{\s*finishLaunch\(\);/);
+	assert.ok(
+		bootstrap.indexOf('timeout = window.setTimeout') < bootstrap.indexOf('if (openBuilder()) return;'),
+		'Builder launch timeout must start before the first click attempt so fallback remains armed until fullscreen is confirmed.'
+	);
 
 	// AD3: selected workflow cards map into a real contextual Inspector in the shared sidebar.
 	assert.match(bootstrap, /data-cb-design-shell-tab[\s\S]*inspector/);

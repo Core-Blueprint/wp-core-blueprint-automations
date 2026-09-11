@@ -190,8 +190,21 @@
 			page.classList.add('is-builder-launch-pending');
 		}
 
+		let observer = null;
+		let timeout = null;
+		const stopObserver = () => {
+			observer?.disconnect();
+			observer = null;
+		};
+		const finishLaunch = () => {
+			stopObserver();
+			if (timeout) window.clearTimeout(timeout);
+			timeout = null;
+		};
+
 		shell.addEventListener('cb:design-shell:fullscreenchange', (event) => {
 			if (event.detail?.fullscreen) {
+				finishLaunch();
 				page.classList.remove('is-builder-launch-pending');
 				page.classList.add('is-builder-active');
 				if (workflowId) rememberBuilder(workflowId);
@@ -215,30 +228,23 @@
 
 		if (!autoStart) return;
 
-		let observer = null;
-		let timeout = null;
-		const finishLaunch = () => {
-			observer?.disconnect();
-			observer = null;
-			if (timeout) window.clearTimeout(timeout);
-			timeout = null;
-		};
 		const openBuilder = () => {
 			const button = page.querySelector('[data-cb-design-launch] .cb-core-design-launch');
 			if (!(button instanceof HTMLButtonElement)) return false;
-			finishLaunch();
+			stopObserver();
 			button.click();
 			return true;
 		};
 
-		if (openBuilder()) return;
-		observer = new MutationObserver(() => openBuilder());
-		observer.observe(page, { childList: true, subtree: true });
 		timeout = window.setTimeout(() => {
 			finishLaunch();
 			page.classList.remove('is-builder-launch-pending');
 			launchedFromBuilderIntent = false;
 		}, LAUNCH_TIMEOUT_MS);
+
+		if (openBuilder()) return;
+		observer = new MutationObserver(() => openBuilder());
+		observer.observe(page, { childList: true, subtree: true });
 	};
 
 	enhanceLibrary();
