@@ -1,0 +1,169 @@
+.cb-automations-editor-heading {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 24px;
+	margin-bottom: 20px;
+}
+
+.cb-automations-editor-statuses {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+	padding-top: 6px;
+}
+
+.cb-automations-settings-grid {
+	display: grid;
+	grid-template-columns: minmax(280px, 1fr) minmax(240px, 360px);
+	gap: 24px;
+	align-items: start;
+}
+
+.cb-automations-settings-grid label,
+.cb-automations-condition-grid label {
+	display: block;
+	margin-bottom: 6px;
+}
+
+.cb-automations-linear-editor {
+	display: grid;
+	gap: 16px;
+	margin-top: 16px;
+}
+
+.cb-automations-stage {
+	position: relative;
+}
+
+.cb-automations-stage-heading {
+	display: flex;
+	align-items: baseline;
+	gap: 12px;
+	margin-bottom: 12px;
+}
+
+.cb-automations-stage-heading h2 {
+	margin: 0;
+}
+
+.cb-automations-stage-kicker {
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: .08em;
+	text-transform: uppercase;
+	opacity: .72;
+}
+
+.cb-automations-step {
+	padding: 16px;
+	border: 1px solid var(--cb-border, #dcdcde);
+	border-radius: 8px;
+	background: var(--cb-surface, #fff);
+}
+
+.cb-automations-step + .cb-automations-step {
+	margin-top: 12px;
+}
+
+.cb-automations-step-head {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 12px;
+	margin-bottom: 10px;
+}
+
+.cb-automations-capability-select,
+.cb-automations-binding-source,
+.cb-automations-condition-grid select {
+	width: 100%;
+	max-width: 100%;
+}
+
+.cb-automations-inputs {
+	margin-top: 16px;
+}
+
+.cb-automations-inputs h4 {
+	margin: 0 0 10px;
+}
+
+.cb-automations-input-row {
+	display: grid;
+	grid-template-columns: minmax(180px, .7fr) minmax(260px, 1.3fr);
+	gap: 16px;
+	align-items: start;
+	padding: 12px 0;
+	border-top: 1px solid var(--cb-border, #dcdcde);
+}
+
+.cb-automations-input-label span {
+	display: block;
+	margin-top: 4px;
+}
+
+.cb-automations-binding {
+	display: grid;
+	gap: 8px;
+}
+
+.cb-automations-literal input,
+.cb-automations-literal textarea,
+.cb-automations-literal select {
+	width: 100%;
+	max-width: 100%;
+}
+
+.cb-automations-condition-grid {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 16px;
+	align-items: start;
+}
+
+.cb-automations-validation-list {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.cb-automations-validation-list li {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	padding: 10px 0;
+	border-top: 1px solid var(--cb-border, #dcdcde);
+}
+
+.cb-automations-validation-list li:first-child {
+	border-top: 0;
+	padding-top: 0;
+}
+
+.cb-automations-validation-list code {
+	width: fit-content;
+}
+
+.cb-automations-table .description {
+	display: block;
+	margin-top: 4px;
+}
+
+.cb-core-form-row {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+	flex-wrap: wrap;
+}
+
+@media (max-width: 782px) {
+	.cb-automations-editor-heading,
+	.cb-automations-settings-grid,
+	.cb-automations-input-row,
+	.cb-automations-condition-grid {
+		display: grid;
+		grid-template-columns: 1fr;
+	}
+}
