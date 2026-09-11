@@ -72,7 +72,7 @@ final class AutomationsPage implements Page {
 			}
 
 			$page = isset( $_GET['paged'] ) && is_scalar( $_GET['paged'] )
-				? max( 1, absint( wp_unslash( (string) $_GET['paged'] ) )
+				? max( 1, absint( wp_unslash( (string) $_GET['paged'] ) ) )
 				: 1; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only pagination.
 			$this->template( 'automations.php', [ 'listing' => $reader->index( $page ) ] );
 		} catch ( \Throwable $error ) {
