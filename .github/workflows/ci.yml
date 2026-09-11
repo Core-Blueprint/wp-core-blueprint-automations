@@ -36,9 +36,13 @@ jobs:
           node --check assets/js/admin-editor.js
           node --check assets/js/admin-capability-picker.js
           node --check assets/js/admin-editor-polish.js
+          node --check assets/js/admin-validation-recovery.js
 
       - name: Capability picker regression
         run: node tests/js/capability-picker.test.mjs
+
+      - name: Validation recovery regression
+        run: node tests/js/validation-recovery.test.mjs
 
       - name: Bootstrap requirements regression
         run: php tests/unit/bootstrap-requirements.php
