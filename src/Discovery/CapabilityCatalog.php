@@ -3,11 +3,13 @@ declare(strict_types=1);
 
 namespace CB\Automations\Discovery;
 
+use CB\Automations\Capability\CapabilityKind;
 use CB\Core\Automation\ActionRegistry;
 use CB\Core\Automation\StateRegistry;
 use CB\Core\Automation\TriggerRegistry;
 use CB\Core\ExtensionRegistry;
 use RuntimeException;
+use UnexpectedValueException;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -66,9 +68,10 @@ final class CapabilityCatalog {
 
 		foreach ( $definitions as $definition ) {
 			$capability = CapabilityDefinition::from_base_definition( $kind, $definition );
-			if ( null !== $capability ) {
-				$projected[] = $capability;
+			if ( null === $capability ) {
+				throw new UnexpectedValueException( 'Base returned a malformed Automation Foundation capability definition.' );
 			}
+			$projected[] = $capability;
 		}
 
 		return $projected;
