@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  php:
+    name: PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.4', '8.5']
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+
+      - name: PHP syntax
+        run: find . -type f -name '*.php' -print0 | xargs -0 -n1 php -l
+
+      - name: Admin editor JavaScript syntax
+        run: |
+          node --check assets/js/admin-editor.js
+          node --check assets/js/admin-editor-polish.js
+
+      - name: Bootstrap requirements regression
+        run: php tests/unit/bootstrap-requirements.php
+
+      - name: Workflow definition invariants
+        run: php tests/unit/definition-invariants.php
+
+      - name: Workflow core regression matrix
+        run: php tests/unit/workflow-core.php
+
+      - name: Hostile codec regression matrix
+        run: php tests/unit/codec-hostile.php
+
+      - name: Privacy persistence regression
+        run: php tests/unit/privacy-policy.php
+
+      - name: Editor privacy projection regression
+        run: php tests/unit/editor-projection.php
+
+      - name: Independent proof workflows
+        run: php tests/unit/proof-workflows.php
+
+      - name: Demo provider registration contract
+        run: php tests/unit/demo-provider-contract.php
+
+      - name: Architecture regression guard
+        run: php tests/unit/architecture.php

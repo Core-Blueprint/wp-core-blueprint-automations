@@ -1,0 +1,150 @@
+/**
+ * Automations Designer presentation layer.
+ *
+ * Keeps the workflow model technical and precise while presenting the primary
+ * editing experience in human language. Technical identity stays available
+ * through progressive disclosure.
+ */
+
+.cb-automations-step-head code {
+	display: none;
+}
+
+.cb-automations-step-title {
+	min-width: 0;
+	color: var(--cb-text);
+	font-size: var(--cb-fs-sm);
+	font-weight: var(--cb-fw-semibold);
+	line-height: 1.35;
+}
+
+.cb-automations-step-head .button-link-delete {
+	flex: 0 0 auto;
+	opacity: .72;
+}
+
+.cb-automations-step-head .button-link-delete:hover,
+.cb-automations-step-head .button-link-delete:focus-visible {
+	opacity: 1;
+}
+
+.cb-automations-input-label strong {
+	display: block;
+	color: var(--cb-text);
+	font-weight: var(--cb-fw-semibold);
+}
+
+.cb-automations-condition-summary {
+	display: flex;
+	align-items: baseline;
+	gap: var(--cb-space-2);
+	margin-bottom: var(--cb-space-3);
+	padding: var(--cb-space-3);
+	border: 1px solid color-mix(in srgb, var(--cb-accent) 24%, var(--cb-border));
+	border-radius: var(--cb-radius-md);
+	background: color-mix(in srgb, var(--cb-tint-accent) 52%, var(--cb-surface-1));
+}
+
+.cb-automations-condition-summary__label {
+	flex: 0 0 auto;
+	color: var(--cb-text-muted);
+	font-size: var(--cb-fs-2xs);
+	font-weight: var(--cb-fw-bold);
+	letter-spacing: .08em;
+	text-transform: uppercase;
+}
+
+.cb-automations-condition-summary strong {
+	min-width: 0;
+	color: var(--cb-text);
+	font-size: var(--cb-fs-sm);
+	font-weight: var(--cb-fw-semibold);
+}
+
+.cb-automations-advanced {
+	margin-top: var(--cb-space-4);
+	padding-top: var(--cb-space-3);
+	border-top: 1px solid var(--cb-border);
+}
+
+.cb-automations-advanced > summary {
+	width: fit-content;
+	color: var(--cb-text-muted);
+	font-size: var(--cb-fs-xs);
+	font-weight: var(--cb-fw-semibold);
+	cursor: pointer;
+	user-select: none;
+}
+
+.cb-automations-advanced > summary:hover,
+.cb-automations-advanced > summary:focus-visible {
+	color: var(--cb-accent);
+}
+
+.cb-automations-advanced__body {
+	display: grid;
+	gap: var(--cb-space-3);
+	margin-top: var(--cb-space-3);
+	padding: var(--cb-space-3);
+	border: 1px solid var(--cb-border);
+	border-radius: var(--cb-radius-md);
+	background: var(--cb-surface-1);
+}
+
+.cb-automations-advanced__grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+	gap: var(--cb-space-3);
+	margin: 0;
+}
+
+.cb-automations-advanced__item {
+	min-width: 0;
+}
+
+.cb-automations-advanced__item dt {
+	margin-bottom: var(--cb-space-1);
+	color: var(--cb-text-muted);
+	font-size: var(--cb-fs-2xs);
+	font-weight: var(--cb-fw-semibold);
+	text-transform: uppercase;
+	letter-spacing: .04em;
+}
+
+.cb-automations-advanced__item dd {
+	margin: 0;
+	min-width: 0;
+}
+
+.cb-automations-advanced__item code,
+.cb-automations-technical-schema code {
+	display: block;
+	max-width: 100%;
+	overflow-wrap: anywhere;
+	white-space: normal;
+}
+
+.cb-automations-technical-schema {
+	display: grid;
+	gap: var(--cb-space-2);
+}
+
+.cb-automations-technical-schema > strong {
+	font-size: var(--cb-fs-xs);
+}
+
+.cb-automations-technical-schema__items {
+	display: grid;
+	gap: var(--cb-space-1);
+}
+
+@media (max-width: 782px) {
+	.cb-automations-condition-summary {
+		align-items: flex-start;
+		flex-direction: column;
+	}
+
+	.cb-automations-advanced__grid {
+		grid-template-columns: 1fr;
+	}
+}

@@ -1,0 +1,253 @@
+.cb-automations-index-page {
+	max-width: 1440px;
+}
+
+.cb-automations-create-panel,
+.cb-automations-workflows-panel {
+	margin-top: var(--cb-space-4) !important;
+}
+
+.cb-automations-create-panel h2,
+.cb-automations-workflows-panel h2 {
+	margin: 2px 0 var(--cb-space-1);
+}
+
+.cb-automations-create-panel > .description {
+	margin: 0;
+}
+
+.cb-automations-create-form {
+	margin-top: var(--cb-space-4);
+}
+
+.cb-automations-create-form input[type="text"] {
+	width: min(440px, 100%);
+	max-width: 100%;
+}
+
+.cb-automations-overview-heading {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: var(--cb-space-4);
+	margin-bottom: var(--cb-space-4);
+}
+
+.cb-automations-workflow-count {
+	display: inline-flex;
+	align-items: center;
+	min-height: 26px;
+	padding: 2px var(--cb-space-2);
+	border: 1px solid var(--cb-border);
+	border-radius: var(--cb-radius-pill);
+	background: var(--cb-surface-2);
+	color: var(--cb-text-muted);
+	font-size: var(--cb-fs-xs);
+	font-weight: var(--cb-fw-medium);
+	white-space: nowrap;
+}
+
+.cb-automations-workflow-list {
+	display: grid;
+	gap: var(--cb-space-3);
+}
+
+.cb-automations-workflow-card {
+	position: relative;
+	display: block;
+	overflow: hidden;
+	padding: var(--cb-space-4) var(--cb-space-5);
+	border: 1px solid var(--cb-border);
+	border-radius: var(--cb-radius-md);
+	background: var(--cb-surface-2);
+	box-shadow: var(--cb-shadow-sm);
+	color: var(--cb-text);
+	text-decoration: none;
+	transition: border-color 140ms ease, box-shadow 140ms ease, background-color 140ms ease, transform 140ms ease;
+}
+
+.cb-automations-workflow-card:hover,
+.cb-automations-workflow-card:focus,
+.cb-automations-workflow-card:active {
+	color: var(--cb-text);
+	text-decoration: none;
+}
+
+.cb-automations-workflow-card:hover {
+	transform: translateY(-1px);
+	background: color-mix(in srgb, var(--cb-surface-2) 94%, var(--cb-accent));
+}
+
+.cb-automations-workflow-card:focus-visible {
+	outline: 2px solid var(--cb-accent);
+	outline-offset: 2px;
+}
+
+.cb-automations-workflow-card.is-active {
+	border-color: color-mix(in srgb, var(--cb-success) 58%, var(--cb-border));
+	box-shadow: 0 0 0 1px color-mix(in srgb, var(--cb-success) 10%, transparent), var(--cb-shadow-sm);
+}
+
+.cb-automations-workflow-card.is-active:hover {
+	border-color: color-mix(in srgb, var(--cb-success) 76%, var(--cb-border));
+	box-shadow: 0 0 0 1px color-mix(in srgb, var(--cb-success) 18%, transparent), var(--cb-shadow-sm);
+}
+
+.cb-automations-workflow-card.has-error {
+	border-color: color-mix(in srgb, var(--cb-danger) 58%, var(--cb-border));
+	box-shadow: 0 0 0 1px color-mix(in srgb, var(--cb-danger) 10%, transparent), var(--cb-shadow-sm);
+}
+
+.cb-automations-workflow-card.has-error:hover {
+	border-color: color-mix(in srgb, var(--cb-danger) 76%, var(--cb-border));
+	box-shadow: 0 0 0 1px color-mix(in srgb, var(--cb-danger) 18%, transparent), var(--cb-shadow-sm);
+}
+
+.cb-automations-workflow-card__accent {
+	position: absolute;
+	inset: 0 auto 0 0;
+	width: 3px;
+	background: var(--cb-text-faint);
+}
+
+.cb-automations-workflow-card.is-active .cb-automations-workflow-card__accent {
+	background: var(--cb-success);
+}
+
+.cb-automations-workflow-card.has-error .cb-automations-workflow-card__accent {
+	background: var(--cb-danger);
+}
+
+.cb-automations-workflow-card__title-row {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	gap: var(--cb-space-5);
+	align-items: start;
+}
+
+.cb-automations-workflow-card__eyebrow {
+	display: block;
+	margin-bottom: 2px;
+	color: var(--cb-text-muted);
+	font-size: var(--cb-fs-2xs);
+	font-weight: var(--cb-fw-semibold);
+	letter-spacing: .08em;
+	text-transform: uppercase;
+}
+
+.cb-automations-workflow-card h3 {
+	margin: 0;
+	color: var(--cb-text);
+	font-size: var(--cb-fs-lg);
+	font-weight: var(--cb-fw-semibold);
+	line-height: 1.3;
+}
+
+.cb-automations-workflow-card__status {
+	display: grid;
+	justify-items: end;
+	gap: var(--cb-space-1);
+	text-align: right;
+}
+
+.cb-automations-workflow-card__status small {
+	color: var(--cb-text-muted);
+	font-size: var(--cb-fs-xs);
+}
+
+.cb-automations-workflow-card__health {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--cb-space-2);
+	font-size: var(--cb-fs-sm);
+	font-weight: var(--cb-fw-medium);
+}
+
+.cb-automations-workflow-card__health > span {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--cb-text-faint);
+}
+
+.cb-automations-workflow-card__health--error > span {
+	background: var(--cb-danger);
+}
+
+.cb-automations-workflow-card__steps {
+	display: flex;
+	gap: var(--cb-space-2);
+	flex-wrap: wrap;
+	margin-top: var(--cb-space-4);
+}
+
+.cb-automations-workflow-card__steps > span {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	min-height: 28px;
+	padding: 3px var(--cb-space-2);
+	border: 1px solid var(--cb-border);
+	border-radius: var(--cb-radius-pill);
+	background: var(--cb-surface-1);
+	color: var(--cb-text-muted);
+	font-size: var(--cb-fs-xs);
+}
+
+.cb-automations-workflow-card__steps strong {
+	color: var(--cb-text);
+	font-weight: var(--cb-fw-semibold);
+}
+
+.cb-automations-workflow-card__footer {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--cb-space-4);
+	margin-top: var(--cb-space-4);
+	padding-top: var(--cb-space-3);
+	border-top: 1px solid var(--cb-border);
+	color: var(--cb-text-muted);
+	font-size: var(--cb-fs-xs);
+}
+
+.cb-automations-workflow-card__open {
+	color: var(--cb-accent);
+	font-weight: var(--cb-fw-semibold);
+}
+
+.cb-automations-pagination {
+	margin-top: var(--cb-space-4);
+}
+
+@media (max-width: 782px) {
+	.cb-automations-create-form {
+		display: grid;
+		grid-template-columns: 1fr;
+	}
+
+	.cb-automations-create-form input[type="text"],
+	.cb-automations-create-form .button {
+		width: 100%;
+	}
+
+	.cb-automations-workflow-card {
+		padding: var(--cb-space-4);
+	}
+
+	.cb-automations-workflow-card__title-row {
+		grid-template-columns: 1fr;
+		gap: var(--cb-space-3);
+	}
+
+	.cb-automations-workflow-card__status {
+		justify-items: start;
+		text-align: left;
+	}
+
+	.cb-automations-workflow-card__footer {
+		align-items: flex-start;
+		flex-direction: column;
+		gap: var(--cb-space-2);
+	}
+}
