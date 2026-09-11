@@ -18,8 +18,8 @@ $course_completed = capability(
 	'course.completed',
 	[],
 	[
-		'user_id'   => field( 'integer', true ),
-		'course_id' => field( 'integer', true ),
+		'user_id'   => field( 'integer', true, false, null, 'wp.user_id' ),
+		'course_id' => field( 'integer', true, false, null, 'core-blueprint-lms.course_id' ),
 	]
 );
 
@@ -28,17 +28,17 @@ $course_current = capability(
 	$lms,
 	'course.current',
 	[
-		'user_id'   => field( 'integer', true ),
-		'course_id' => field( 'integer', true ),
+		'user_id'   => field( 'integer', true, false, null, 'wp.user_id' ),
+		'course_id' => field( 'integer', true, false, null, 'core-blueprint-lms.course_id' ),
 	],
 	[
 		'status'                 => field( 'string', true ),
 		'percentage'             => field( 'integer', true ),
 		'completed'              => field( 'boolean', true ),
-		'certificate_profile_id' => field( 'integer', true ),
-		'completion_date'        => field( 'string', true ),
-		'course_title'           => field( 'string', true ),
-		'completion_key'         => field( 'string', true ),
+		'certificate_profile_id' => field( 'integer', true, false, null, 'core-blueprint-certificates.profile_id' ),
+		'completion_date'        => field( 'string', true, false, null, 'core-blueprint.completion_date' ),
+		'course_title'           => field( 'string', true, false, null, 'core-blueprint.source_title' ),
+		'completion_key'         => field( 'string', true, false, null, 'core-blueprint.idempotency_source_id' ),
 	]
 );
 
@@ -47,12 +47,12 @@ $certificate_issue = capability(
 	$certificates,
 	'certificate.issue',
 	[
-		'profile_id'      => field( 'integer', true ),
-		'user_id'         => field( 'integer', true ),
-		'completion_date' => field( 'string', true ),
-		'title'           => field( 'string', false ),
-		'source_type'     => field( 'string', true ),
-		'source_id'       => field( 'string', true ),
+		'profile_id'      => field( 'integer', true, false, null, 'core-blueprint-certificates.profile_id' ),
+		'user_id'         => field( 'integer', true, false, null, 'wp.user_id' ),
+		'completion_date' => field( 'string', true, false, null, 'core-blueprint.completion_date' ),
+		'title'           => field( 'string', false, false, null, 'core-blueprint.source_title' ),
+		'source_type'     => field( 'string', true, false, null, 'core-blueprint.idempotency_source_type' ),
+		'source_id'       => field( 'string', true, false, null, 'core-blueprint.idempotency_source_id' ),
 	],
 	[
 		'certificate_id'     => field( 'integer', true ),
