@@ -41,13 +41,13 @@ final class WorkflowService {
 		ActivationState $activation_state,
 		Definition $definition,
 		int $user_id
-	): bool {
+	): WorkflowSaveResult {
 		$validation = $this->validator->validate( $definition );
 		if ( ! ActivationPolicy::allows( $activation_state, $validation ) ) {
-			return false;
+			return WorkflowSaveResult::validation_failed( $validation );
 		}
 
-		return WorkflowRepository::update(
+		$saved = WorkflowRepository::update(
 			$id,
 			$expected_revision,
 			$name,
@@ -55,5 +55,9 @@ final class WorkflowService {
 			$definition,
 			$user_id
 		);
+
+		return $saved
+			? WorkflowSaveResult::saved( $validation )
+			: WorkflowSaveResult::conflict( $validation );
 	}
 }
