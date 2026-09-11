@@ -64,6 +64,19 @@ $certificate_issue = capability(
 	]
 );
 
+assert_true( 'wp.user_id' === ( $course_completed->output_schema()['user_id']['semantic_type'] ?? null ), 'Golden LMS trigger user_id semantic identity drifted.' );
+assert_true( 'core-blueprint-lms.course_id' === ( $course_completed->output_schema()['course_id']['semantic_type'] ?? null ), 'Golden LMS trigger course_id semantic identity drifted.' );
+assert_true( 'core-blueprint-certificates.profile_id' === ( $course_current->output_schema()['certificate_profile_id']['semantic_type'] ?? null ), 'Golden LMS profile semantic identity drifted.' );
+assert_true( 'core-blueprint.completion_date' === ( $course_current->output_schema()['completion_date']['semantic_type'] ?? null ), 'Golden completion date semantic identity drifted.' );
+assert_true( 'core-blueprint.source_title' === ( $course_current->output_schema()['course_title']['semantic_type'] ?? null ), 'Golden source title semantic identity drifted.' );
+assert_true( 'core-blueprint.idempotency_source_id' === ( $course_current->output_schema()['completion_key']['semantic_type'] ?? null ), 'Golden completion key semantic identity drifted.' );
+assert_true( 'core-blueprint-certificates.profile_id' === ( $certificate_issue->input_schema()['profile_id']['semantic_type'] ?? null ), 'Golden Certificates profile semantic identity drifted.' );
+assert_true( 'wp.user_id' === ( $certificate_issue->input_schema()['user_id']['semantic_type'] ?? null ), 'Golden Certificates user semantic identity drifted.' );
+assert_true( 'core-blueprint.completion_date' === ( $certificate_issue->input_schema()['completion_date']['semantic_type'] ?? null ), 'Golden Certificates completion date semantic identity drifted.' );
+assert_true( 'core-blueprint.source_title' === ( $certificate_issue->input_schema()['title']['semantic_type'] ?? null ), 'Golden Certificates title semantic identity drifted.' );
+assert_true( 'core-blueprint.idempotency_source_type' === ( $certificate_issue->input_schema()['source_type']['semantic_type'] ?? null ), 'Golden Certificates source type semantic identity drifted.' );
+assert_true( 'core-blueprint.idempotency_source_id' === ( $certificate_issue->input_schema()['source_id']['semantic_type'] ?? null ), 'Golden Certificates source id semantic identity drifted.' );
+
 $definitions = [
 	'trigger:' . $lms . ':course.completed'         => $course_completed,
 	'state:' . $lms . ':course.current'              => $course_current,
