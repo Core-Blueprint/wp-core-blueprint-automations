@@ -72,10 +72,10 @@ if ( ! is_string( $definition_json ) ) {
 	$definition_json = '{}';
 }
 ?>
-<div class="wrap cb-core-wrap cb-automations-admin cb-automations-editor-page">
+<div class="wrap cb-core-wrap cb-automations-admin cb-automations-editor-page" data-cb-design-launch-root>
 	<p><a href="<?php echo esc_url( \CB\Automations\Admin\AutomationsPage::url() ); ?>">← <?php esc_html_e( 'Back to Automations', 'core-blueprint-automations' ); ?></a></p>
 
-	<div class="cb-automations-editor-heading">
+	<div class="cb-automations-editor-heading" data-cb-design-launch-context>
 		<div>
 			<h1 class="cb-core-title"><?php echo esc_html( $record->name() ); ?></h1>
 			<p class="cb-core-intro"><?php esc_html_e( 'Build a clear WHEN → GET DATA → ONLY IF → THEN workflow without leaving the automation context.', 'core-blueprint-automations' ); ?></p>
