@@ -37,3 +37,6 @@ jobs:
 
       - name: Privacy persistence regression
         run: php tests/unit/privacy-policy.php
+
+      - name: Architecture regression guard
+        run: php tests/unit/architecture.php
