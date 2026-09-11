@@ -3,6 +3,9 @@ declare(strict_types=1);
 
 namespace CB\Automations\Integration;
 
+use CB\Automations\Admin\AutomationsPage;
+use CB\Automations\Support\Requirements;
+use CB\Core\Admin\PageRegistry;
 use CB\Core\ExtensionRegistry;
 
 defined( 'ABSPATH' ) || exit;
@@ -19,6 +22,7 @@ final class Suite {
 
 		self::$initialized = true;
 		add_action( 'cb_core_register_extensions', [ self::class, 'register_extension' ] );
+		add_action( 'cb_core_register_pages', [ self::class, 'register_admin_page' ] );
 	}
 
 	public static function register_extension(): void {
@@ -30,6 +34,28 @@ final class Suite {
 			'id'           => self::EXTENSION_ID,
 			'plugin_file'  => CB_AUTOMATIONS_BASENAME,
 			'requires_api' => CB_AUTOMATIONS_REQUIRED_API,
+			'menu_url'     => admin_url( 'admin.php?page=' . AutomationsPage::SLUG ),
 		] );
+	}
+
+	public static function register_admin_page(): void {
+		if ( ! Requirements::runtime_ready() || ! class_exists( PageRegistry::class ) ) {
+			return;
+		}
+
+		PageRegistry::register(
+			new AutomationsPage(),
+			[
+				'components' => [
+					'actions',
+					'empty-state',
+					'fields',
+					'form-controls',
+					'notices',
+					'panels',
+					'status',
+				],
+			]
+		);
 	}
 }
