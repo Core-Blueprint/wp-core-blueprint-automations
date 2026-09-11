@@ -16,6 +16,7 @@ test('Automation Builder maturity keeps shared-shell, canonical persistence and 
 		controller,
 		assets,
 		finishCss,
+		designerCss,
 		template,
 	] = await Promise.all([
 		read('assets/js/admin-builder-bootstrap.js'),
@@ -27,6 +28,7 @@ test('Automation Builder maturity keeps shared-shell, canonical persistence and 
 		read('src/Admin/WorkflowController.php'),
 		read('src/Admin/DesignerAssets.php'),
 		read('assets/css/admin-builder-finish.css'),
+		read('assets/css/admin-designer-shell.css'),
 		read('templates/admin/workflow-editor.php'),
 	]);
 
@@ -37,6 +39,7 @@ test('Automation Builder maturity keeps shared-shell, canonical persistence and 
 	assert.match(bootstrap, /LAUNCH_TIMEOUT_MS/);
 	assert.match(template, /cb-automations-editor-page" data-cb-design-launch-root/);
 	assert.match(template, /cb-automations-editor-heading" data-cb-design-launch-context/);
+	assert.match(designerCss, /\.cb-automations-design-shell\.is-fullscreen\s*\{\s*margin-top:\s*0;/);
 	const openBuilderBody = bootstrap.match(/const openBuilder = \(\) => \{([\s\S]*?)\n\t\t\};/)?.[1] ?? '';
 	assert.match(openBuilderBody, /stopObserver\(\)/);
 	assert.match(openBuilderBody, /button\.click\(\)/);
