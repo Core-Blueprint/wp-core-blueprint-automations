@@ -8,24 +8,13 @@
 	max-width: none;
 }
 
-body.cb-automations-builder-launch-pending .cb-automations-editor-page > p,
-body.cb-automations-builder-launch-pending .cb-automations-editor-page > .cb-automations-editor-heading,
-body.cb-automations-builder-launch-pending .cb-automations-editor-page > .notice,
-body.cb-automations-builder-launch-pending .cb-automations-editor-page > form,
-body.cb-automations-builder-launch-pending .cb-automations-editor-page > noscript,
-.cb-automations-editor-page.is-builder-launch-pending > p,
-.cb-automations-editor-page.is-builder-launch-pending > .cb-automations-editor-heading,
-.cb-automations-editor-page.is-builder-launch-pending > .notice,
-.cb-automations-editor-page.is-builder-launch-pending > form,
-.cb-automations-editor-page.is-builder-launch-pending > noscript {
-	visibility: hidden;
-}
-
-body.cb-automations-builder-launch-pending .cb-automations-editor-page > p,
-body.cb-automations-builder-launch-pending .cb-automations-editor-page > .cb-automations-editor-heading,
-body.cb-automations-builder-launch-pending .cb-automations-editor-page > .notice,
-body.cb-automations-builder-launch-pending .cb-automations-editor-page > form,
-body.cb-automations-builder-launch-pending .cb-automations-editor-page > noscript {
+body.cb-automations-builder-launch-pending::after,
+.cb-automations-editor-page.is-builder-launch-pending::after {
+	content: '';
+	position: fixed;
+	inset: 0;
+	z-index: 2147483647;
+	background: var(--cb-surface-1);
 	animation: cb-automations-builder-launch-fallback 0s linear 2s forwards;
 }
 
@@ -35,7 +24,7 @@ body.cb-automations-builder-launch-pending .cb-automations-editor-page > noscrip
 
 @keyframes cb-automations-builder-launch-fallback {
 	to {
-		visibility: visible;
+		visibility: hidden;
 	}
 }
 
