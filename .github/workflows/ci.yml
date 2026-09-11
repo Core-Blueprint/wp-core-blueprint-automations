@@ -57,5 +57,8 @@ jobs:
       - name: Independent proof workflows
         run: php tests/unit/proof-workflows.php
 
+      - name: Demo provider registration contract
+        run: php tests/unit/demo-provider-contract.php
+
       - name: Architecture regression guard
         run: php tests/unit/architecture.php
