@@ -119,6 +119,10 @@
 	cursor: pointer;
 }
 
+.cb-automations-capability-picker:not([data-capability-kind="trigger"]) .cb-automations-capability-picker__clear {
+	display: none;
+}
+
 .cb-automations-capability-picker__clear:hover,
 .cb-automations-capability-picker__clear:focus-visible {
 	outline: 0;
