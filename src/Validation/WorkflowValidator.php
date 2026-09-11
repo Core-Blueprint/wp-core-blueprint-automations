@@ -101,7 +101,7 @@ final class WorkflowValidator {
 			);
 		}
 
-		return new ValidationResult( $issues );
+		return new ValidationResult( $issues, $this->contains_sensitive_paths( $definition, $resolved ) );
 	}
 
 	/** @param ValidationIssue[] $issues */
@@ -461,5 +461,42 @@ final class WorkflowValidator {
 		}
 
 		return $this->scalar_type_compatible( $left['type'], $right['type'] ) || $this->scalar_type_compatible( $right['type'], $left['type'] );
+	}
+
+	/** @param array<string,CapabilityDefinition> $resolved */
+	private function contains_sensitive_paths( Definition $definition, array $resolved ): bool {
+		foreach ( array_merge( $definition->states(), $definition->actions() ) as $step ) {
+			foreach ( $step->bindings() as $binding ) {
+				if ( $this->binding_is_sensitive( $binding, $resolved ) ) {
+					return true;
+				}
+			}
+		}
+
+		foreach ( $definition->conditions() as $condition ) {
+			if ( $this->binding_is_sensitive( $condition->left(), $resolved ) ) {
+				return true;
+			}
+			$right = $condition->right();
+			if ( null !== $right && $this->binding_is_sensitive( $right, $resolved ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/** @param array<string,CapabilityDefinition> $resolved */
+	private function binding_is_sensitive( Binding $binding, array $resolved ): bool {
+		if ( Binding::SOURCE_STEP_OUTPUT !== $binding->source() ) {
+			return false;
+		}
+		$source = $resolved[ (string) $binding->step_id() ] ?? null;
+		if ( null === $source ) {
+			return false;
+		}
+		$field  = (string) $binding->field();
+		$output = $source->output_schema();
+		return isset( $output[ $field ] ) && true === ( $output[ $field ]['sensitive'] ?? false );
 	}
 }
