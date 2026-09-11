@@ -12,8 +12,10 @@ $notice = isset( $_GET['notice'] ) && is_string( $_GET['notice'] )
 	: ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- bounded read-only notice routing.
 
 $notices = [
-	'created' => [ 'success', __( 'Automation draft created.', 'core-blueprint-automations' ) ],
-	'failed'  => [ 'error', __( 'The automation could not be created. Check the name and try again.', 'core-blueprint-automations' ) ],
+	'created'        => [ 'success', __( 'Automation draft created.', 'core-blueprint-automations' ) ],
+	'invalid_name'   => [ 'error', __( 'Enter an automation name between 1 and 191 characters.', 'core-blueprint-automations' ) ],
+	'storage_failed' => [ 'error', __( 'The automation could not be created because workflow storage is unavailable. No workflow was saved.', 'core-blueprint-automations' ) ],
+	'failed'         => [ 'error', __( 'The automation could not be created. No workflow was saved.', 'core-blueprint-automations' ) ],
 ];
 ?>
 <div class="wrap cb-core-wrap cb-automations-admin">
