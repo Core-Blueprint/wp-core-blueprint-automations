@@ -172,12 +172,11 @@
 		for (const option of outputOptions) {
 			const parsed = parseOutputValue(option.value);
 			if (!parsed) continue;
-			const label = humanGroupLabel(parsed.step_id, steps);
-			let group = groups.get(label);
+			let group = groups.get(parsed.step_id);
 			if (!group) {
 				group = document.createElement('optgroup');
-				group.label = label;
-				groups.set(label, group);
+				group.label = humanGroupLabel(parsed.step_id, steps);
+				groups.set(parsed.step_id, group);
 			}
 			group.append(option);
 		}
@@ -219,7 +218,7 @@
 	}
 
 	function sourceText(select, wrap) {
-		if (!select) return '';
+		if (!select || select.value === '') return '';
 		if (select.value === 'literal') return literalText(wrap);
 		return select.selectedOptions[0]?.textContent?.trim() || '';
 	}
