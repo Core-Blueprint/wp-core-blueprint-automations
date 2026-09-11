@@ -62,13 +62,18 @@ add_action( 'init', static function (): void {
 /* Base emits this after its public services are ready. */
 add_action( 'cb_core_booted', [ \CB\Automations\Plugin::class, 'boot' ] );
 
-/* Keep the product inert when Base or the Automation Foundation is unavailable. */
-add_action( 'plugins_loaded', static function (): void {
-	if ( \CB\Automations\Support\Requirements::runtime_ready() || ! is_admin() ) {
-		return;
-	}
-
+/*
+ * Keep the product inert when Base or the Automation Foundation is unavailable.
+ * Resolve translated/runtime contract diagnostics only when admin notices render;
+ * WordPress has completed `init` by this point, so Base services are not forced
+ * through their autoloaders during bootstrap or plugin activation.
+ */
+if ( is_admin() ) {
 	add_action( 'admin_notices', static function (): void {
+		if ( \CB\Automations\Support\Requirements::runtime_ready() ) {
+			return;
+		}
+
 		if ( ! current_user_can( 'activate_plugins' ) ) {
 			return;
 		}
@@ -79,4 +84,4 @@ add_action( 'plugins_loaded', static function (): void {
 			esc_html( \CB\Automations\Support\Requirements::operator_message() )
 		);
 	} );
-}, 30 );
+}
