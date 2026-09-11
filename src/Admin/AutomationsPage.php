@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace CB\Automations\Admin;
 
+use CB\Automations\Validation\ValidationResult;
 use CB\Automations\Validation\ValidationState;
 use CB\Core\Admin\Page;
 use CB\Core\UI\Status;
@@ -54,6 +55,12 @@ final class AutomationsPage implements Page {
 					$this->render_not_found();
 					return;
 				}
+
+				if ( self::requires_contract_recovery( $detail['validation'] ) ) {
+					$this->template( 'workflow-review.php', [ 'detail' => $detail ] );
+					return;
+				}
+
 				$this->template(
 					'workflow-editor.php',
 					[
@@ -65,7 +72,7 @@ final class AutomationsPage implements Page {
 			}
 
 			$page = isset( $_GET['paged'] ) && is_scalar( $_GET['paged'] )
-				? max( 1, absint( wp_unslash( (string) $_GET['paged'] ) ) )
+				? max( 1, absint( wp_unslash( (string) $_GET['paged'] ) )
 				: 1; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only pagination.
 			$this->template( 'automations.php', [ 'listing' => $reader->index( $page ) ] );
 		} catch ( \Throwable $error ) {
@@ -112,6 +119,19 @@ final class AutomationsPage implements Page {
 				? __( 'Enabled', 'core-blueprint-automations' )
 				: __( 'Disabled', 'core-blueprint-automations' )
 		);
+	}
+
+	private static function requires_contract_recovery( ValidationResult $validation ): bool {
+		foreach ( $validation->issues() as $issue ) {
+			$code = $issue->code();
+			if (
+				str_starts_with( $code, 'dependency.' )
+				|| in_array( $code, [ 'capability.missing', 'capability.schema_mismatch' ], true )
+			) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** @param array<string,mixed> $vars */
