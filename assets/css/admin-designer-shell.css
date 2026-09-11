@@ -20,14 +20,6 @@
 	min-height: 70vh;
 }
 
-.cb-automations-design-shell {
-	margin-top: var(--cb-space-4);
-}
-
-.cb-automations-design-shell.is-fullscreen {
-	margin-top: 0;
-}
-
 .cb-automations-design-shell .cb-core-design-shell__workspace {
 	grid-template-columns: minmax(190px, 220px) minmax(0, 1fr) minmax(280px, 340px);
 }
