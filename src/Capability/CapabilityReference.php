@@ -21,9 +21,9 @@ final readonly class CapabilityReference {
 
 		if (
 			! CapabilityKind::is_valid( $kind )
-			|| '' === $provider
-			|| '' === $id
-			|| 1 !== preg_match( '/^[1-9]\d*$/', $schema_version )
+			|| 1 !== preg_match( '/^[a-z][a-z0-9]*(?:-[a-z0-9]+)+$/D', $provider )
+			|| 1 !== preg_match( '/^[a-z][a-z0-9]*(?:\.[a-z][a-z0-9]*)+$/D', $id )
+			|| 1 !== preg_match( '/^[1-9][0-9]*$/D', $schema_version )
 		) {
 			return null;
 		}
