@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace CB\Automations\Discovery;
 
 use CB\Automations\Capability\CapabilityKind;
+use CB\Automations\Capability\CapabilityReference;
 use CB\Core\Automation\ActionRegistry;
 use CB\Core\Automation\StateRegistry;
 use CB\Core\Automation\TriggerRegistry;
@@ -47,6 +48,28 @@ final class CapabilityCatalog {
 		);
 
 		return $definitions;
+	}
+
+	/** Return the provider/id capability currently exposed by Base, regardless of stored schema version. */
+	public function current( CapabilityReference $reference ): ?CapabilityDefinition {
+		$this->assert_ready();
+
+		$definition = match ( $reference->kind() ) {
+			CapabilityKind::TRIGGER => TriggerRegistry::get( $reference->provider(), $reference->id() ),
+			CapabilityKind::STATE   => StateRegistry::get( $reference->provider(), $reference->id() ),
+			CapabilityKind::ACTION  => ActionRegistry::get( $reference->provider(), $reference->id() ),
+			default                 => null,
+		};
+
+		if ( null === $definition ) {
+			return null;
+		}
+
+		$capability = CapabilityDefinition::from_base_definition( $reference->kind(), $definition );
+		if ( null === $capability ) {
+			throw new UnexpectedValueException( 'Base returned a malformed Automation Foundation capability definition.' );
+		}
+		return $capability;
 	}
 
 	public function provider_status( string $provider ): ProviderStatus {
