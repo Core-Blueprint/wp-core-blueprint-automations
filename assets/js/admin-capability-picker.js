@@ -230,7 +230,7 @@
 		const kind = kindForSelect(select);
 		if (!kind) return;
 
-		const canClear = Array.from(select.options).some((option) => option.value === '');
+		const canClear = kind === 'trigger' && Array.from(select.options).some((option) => option.value === '');
 
 		select.dataset.cbCapabilityPickerEnhanced = '1';
 		select.hidden = true;
@@ -317,12 +317,25 @@
 			groupsNode.append(section);
 		}
 
-		const empty = el('p', { class: 'cb-automations-capability-picker__empty', hidden: capabilities.length > 0 }, strings.no_results);
+		const empty = el('p', {
+			class: 'cb-automations-capability-picker__empty',
+			role: 'status',
+			'aria-live': 'polite',
+			'aria-atomic': 'true',
+			hidden: capabilities.length > 0,
+		}, strings.no_results);
 		popover.append(searchLabel, search);
 		if (clearSelection) popover.append(clearSelection);
 		popover.append(groupsNode, empty);
 		wrapper.append(trigger, popover);
 		select.insertAdjacentElement('afterend', wrapper);
+
+		wrapper.addEventListener('keydown', (event) => {
+			if (event.key !== 'Escape' || !wrapper.classList.contains('is-open')) return;
+			event.preventDefault();
+			event.stopPropagation();
+			setExpanded(wrapper, false, true);
+		});
 
 		trigger.addEventListener('click', () => {
 			const opening = !wrapper.classList.contains('is-open');
