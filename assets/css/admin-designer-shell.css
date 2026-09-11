@@ -1,6 +1,7 @@
 /**
  * Automations consumer composition for the shared Core Blueprint Designer Shell.
- * Base owns the shell chrome. This file owns only Automations-specific layout.
+ * Base owns the shell chrome/fullscreen lifecycle. Automations owns only the
+ * linear workflow composition rendered inside the shared slots.
  */
 
 .cb-automations-editor-page {
@@ -11,11 +12,16 @@
 	margin-top: var(--cb-space-4);
 }
 
+.cb-automations-design-shell .cb-core-design-shell__workspace {
+	grid-template-columns: minmax(190px, 220px) minmax(0, 1fr) minmax(280px, 340px);
+}
+
 .cb-automations-design-shell__identity {
 	flex-wrap: wrap;
 }
 
-.cb-automations-design-shell__identity span {
+.cb-automations-design-shell__identity span,
+.cb-automations-builder-status {
 	color: var(--cb-text-muted);
 	font-size: var(--cb-fs-sm);
 }
@@ -77,6 +83,7 @@
 
 .cb-automations-design-shell__canvas {
 	padding: var(--cb-space-3);
+	overflow: auto;
 }
 
 .cb-automations-design-shell__canvas .cb-automations-linear-editor {
@@ -96,6 +103,37 @@
 	outline-offset: 2px;
 }
 
+.cb-automations-design-shell__sidebar {
+	top: 0;
+	height: auto;
+	max-height: none;
+	border: 1px solid var(--cb-border);
+	border-radius: var(--cb-radius-md);
+	background: var(--cb-surface-1);
+}
+
+.cb-automations-design-shell__sidebar .cb-core-design-shell__sidebar-tabs {
+	border-bottom: 1px solid var(--cb-border);
+	background: transparent;
+}
+
+.cb-automations-design-shell__sidebar .cb-core-design-shell__sidebar-tab {
+	padding: var(--cb-space-3) var(--cb-space-2);
+	border-right: 0;
+	border-bottom: 2px solid transparent;
+	background: transparent;
+	color: var(--cb-text-muted);
+}
+
+.cb-automations-design-shell__sidebar .cb-core-design-shell__sidebar-tab.is-active {
+	border-bottom-color: var(--cb-accent);
+	color: var(--cb-text-strong);
+}
+
+.cb-automations-design-shell__sidebar .cb-core-design-shell__sidebar-panel {
+	min-height: 0;
+}
+
 .cb-automations-design-shell__sidebar .cb-automations-panel-heading {
 	margin-bottom: var(--cb-space-3);
 }
@@ -110,17 +148,34 @@
 	overflow-wrap: anywhere;
 }
 
+.cb-automations-design-shell.is-fullscreen .cb-core-design-shell__canvas {
+	min-height: 0;
+	overflow: auto;
+}
+
+.cb-automations-design-shell.is-fullscreen .cb-automations-linear-editor {
+	padding-bottom: var(--cb-space-4);
+}
+
 .cb-automations-save-actions {
 	padding-right: var(--cb-space-1);
 }
 
 @media (max-width: 1280px) {
+	.cb-automations-design-shell .cb-core-design-shell__workspace {
+		grid-template-columns: minmax(170px, 200px) minmax(0, 1fr) minmax(260px, 300px);
+	}
+
 	.cb-automations-stage-nav nav {
-		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: 2px;
 	}
 }
 
 @media (max-width: 900px) {
+	.cb-automations-design-shell .cb-core-design-shell__workspace {
+		grid-template-columns: 1fr;
+	}
+
 	.cb-automations-stage-nav nav {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
