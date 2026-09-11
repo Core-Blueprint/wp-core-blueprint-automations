@@ -213,11 +213,15 @@
 				return;
 			}
 
-			page.classList.remove('is-builder-active', 'is-builder-launch-pending');
 			forgetBuilder(workflowId);
 			if (launchedFromBuilderIntent && config.libraryUrl) {
+				document.body?.classList.add(LAUNCH_PENDING_BODY_CLASS);
+				page.classList.add('is-builder-launch-pending');
 				window.location.assign(String(config.libraryUrl));
+				return;
 			}
+
+			page.classList.remove('is-builder-active', 'is-builder-launch-pending');
 		});
 
 		form.addEventListener('submit', () => {
