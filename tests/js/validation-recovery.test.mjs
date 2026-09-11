@@ -62,6 +62,30 @@ assert.deepEqual(
 	'Condition issues must target the affected operand.'
 );
 
+const obsoleteInput = {
+	code: 'binding.input_unknown',
+	path: 'states.0.bindings.legacy_email',
+	context: { field: 'legacy_email' },
+};
+assert.equal(helpers.recoveryLabel(obsoleteInput), 'Review capability');
+assert.deepEqual(
+	helpers.targetDescriptor(obsoleteInput),
+	{ type: 'capability', root: 'states', index: 0, field: '' },
+	'Unknown persisted inputs are not rendered as fields and must recover through the step capability.'
+);
+
+const triggerBindings = {
+	code: 'binding.trigger_has_bindings',
+	path: 'trigger.bindings',
+	context: {},
+};
+assert.equal(helpers.recoveryLabel(triggerBindings), 'Review trigger');
+assert.deepEqual(
+	helpers.targetDescriptor(triggerBindings),
+	{ type: 'capability', root: 'trigger', index: null, field: '' },
+	'Trigger binding recovery must target the trigger picker rather than a nonexistent input row.'
+);
+
 assert.equal(helpers.humanizeField('customer_id'), 'Customer ID');
 assert.equal(helpers.humanizeField('api_url'), 'API URL');
 
