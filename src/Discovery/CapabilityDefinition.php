@@ -3,6 +3,9 @@ declare(strict_types=1);
 
 namespace CB\Automations\Discovery;
 
+use CB\Automations\Capability\CapabilityKind;
+use CB\Automations\Capability\CapabilityReference;
+
 defined( 'ABSPATH' ) || exit;
 
 final readonly class CapabilityDefinition {
