@@ -359,13 +359,22 @@
 
 	function conditionRightSchema(operator, leftSchema) {
 		if (!leftSchema) return { type: 'string', items: null, sensitive: false };
+		const sensitive = Boolean(leftSchema.sensitive);
 		if (['contains', 'not_contains'].includes(operator) && leftSchema.type === 'array') {
-			return { type: leftSchema.items || 'string', items: null, sensitive: false };
+			return { type: leftSchema.items || 'string', items: null, sensitive };
 		}
 		if (['greater_than', 'greater_than_or_equal', 'less_than', 'less_than_or_equal'].includes(operator)) {
-			return { type: leftSchema.type === 'integer' ? 'integer' : 'number', items: null, sensitive: false };
+			return { type: leftSchema.type === 'integer' ? 'integer' : 'number', items: null, sensitive };
 		}
 		return leftSchema;
+	}
+
+	function defaultConditionRight(operator, leftSchema) {
+		if (operatorCatalog[operator]?.arity === 1) return null;
+		const rightSchema = conditionRightSchema(operator, leftSchema);
+		return rightSchema.sensitive
+			? null
+			: { source: 'literal', value: defaultLiteral(rightSchema) };
 	}
 
 	function renderCondition(condition, index) {
@@ -396,7 +405,7 @@
 			condition.left = leftSelect.value === 'literal' ? { source: 'literal', value: '' } : parseOutputKey(leftSelect.value);
 			const leftSchema = schemaForBinding(condition.left);
 			condition.operator = 'equals';
-			condition.right = { source: 'literal', value: defaultLiteral(leftSchema) };
+			condition.right = defaultConditionRight(condition.operator, leftSchema);
 			renderAll();
 		});
 		leftWrap.append(leftSelect);
@@ -422,9 +431,7 @@
 		operatorSelect.value = condition.operator;
 		operatorSelect.addEventListener('change', () => {
 			condition.operator = operatorSelect.value;
-			condition.right = operatorCatalog[condition.operator]?.arity === 1
-				? null
-				: { source: 'literal', value: defaultLiteral(conditionRightSchema(condition.operator, leftSchema)) };
+			condition.right = defaultConditionRight(condition.operator, leftSchema);
 			renderAll();
 		});
 		operatorWrap.append(operatorSelect);
@@ -478,13 +485,14 @@
 	});
 
 	addCondition.addEventListener('click', () => {
-		const output = outputEntries('condition')[0];
+		const outputs = outputEntries('condition');
+		const output = outputs.find((entry) => !entry.schema?.sensitive) || outputs[0];
 		if (!output) return;
 		state.conditions.push({
 			condition_id: nextConditionId(),
 			left: { source: 'step_output', step_id: output.step_id, field: output.field },
 			operator: 'equals',
-			right: { source: 'literal', value: defaultLiteral(output.schema) },
+			right: defaultConditionRight('equals', output.schema),
 		});
 		renderAll();
 	});
