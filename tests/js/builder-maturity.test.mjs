@@ -39,7 +39,7 @@ test('Automation Builder maturity keeps shared-shell, canonical persistence and 
 	assert.match(bootstrap, /LAUNCH_TIMEOUT_MS/);
 	assert.match(template, /cb-automations-editor-page" data-cb-design-launch-root/);
 	assert.match(template, /cb-automations-editor-heading" data-cb-design-launch-context/);
-	assert.match(designerCss, /\.cb-automations-design-shell\.is-fullscreen\s*\{\s*margin-top:\s*0;/);
+	assert.doesNotMatch(designerCss, /\.cb-automations-design-shell(?:\.is-fullscreen)?\s*\{[^}]*margin-top\s*:/);
 	const openBuilderBody = bootstrap.match(/const openBuilder = \(\) => \{([\s\S]*?)\n\t\t\};/)?.[1] ?? '';
 	assert.match(openBuilderBody, /stopObserver\(\)/);
 	assert.match(openBuilderBody, /button\.click\(\)/);
