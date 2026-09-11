@@ -34,7 +34,7 @@ final class Suite {
 			'id'           => self::EXTENSION_ID,
 			'plugin_file'  => CB_AUTOMATIONS_BASENAME,
 			'requires_api' => CB_AUTOMATIONS_REQUIRED_API,
-			'menu_url'     => admin_url( 'admin.php?page=' . AutomationsPage::SLUG ),
+			'menu_url'     => admin_url( 'admin.php?page=' . self::EXTENSION_ID ),
 		] );
 	}
 
