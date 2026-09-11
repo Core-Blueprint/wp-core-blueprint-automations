@@ -17,8 +17,16 @@ final class Requirements {
 			&& (int) $available_match[2] >= (int) $required_match[2];
 	}
 
-	/** @return string[] Stable machine-readable runtime issue IDs. */
-	public static function issues(): array {
+	/**
+	 * Bootstrap-safe checks used by the activation lifecycle.
+	 *
+	 * Do not autoload Base service classes here. Plugin activation can run before
+	 * the normal `init` lifecycle, and touching translated Base services at that
+	 * point can trigger WordPress' early text-domain warning.
+	 *
+	 * @return string[] Stable machine-readable bootstrap issue IDs.
+	 */
+	public static function bootstrap_issues(): array {
 		$issues = [];
 
 		if ( version_compare( PHP_VERSION, '8.4', '<' ) ) {
@@ -32,6 +40,19 @@ final class Requirements {
 
 		if ( ! self::api_compatible( (string) CB_CORE_API_VERSION, CB_AUTOMATIONS_REQUIRED_API ) ) {
 			$issues[] = 'base-api-incompatible';
+		}
+
+		return array_values( array_unique( $issues ) );
+	}
+
+	public static function bootstrap_ready(): bool {
+		return [] === self::bootstrap_issues();
+	}
+
+	/** @return string[] Stable machine-readable runtime issue IDs. */
+	public static function issues(): array {
+		$issues = self::bootstrap_issues();
+		if ( [] !== $issues ) {
 			return $issues;
 		}
 
