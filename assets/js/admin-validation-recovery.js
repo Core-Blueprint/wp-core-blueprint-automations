@@ -63,6 +63,8 @@
 		const code = String(issue?.code || '');
 		if (code === 'workflow.trigger_missing') return strings.choose_trigger || 'Choose trigger';
 		if (code === 'workflow.action_missing') return strings.add_action || 'Add action';
+		if (code === 'binding.trigger_has_bindings') return strings.review_trigger || 'Review trigger';
+		if (code === 'binding.input_unknown') return strings.review_capability || 'Review capability';
 		if (code === 'binding.required_missing') return strings.connect_input || 'Connect input';
 		if (code.startsWith('binding.') || code === 'privacy.sensitive_literal') return strings.fix_input || 'Fix input';
 		if (code.startsWith('dependency.') || code.startsWith('capability.')) return strings.choose_replacement || 'Choose replacement';
@@ -75,9 +77,12 @@
 		const root = parts[0] || '';
 		const index = /^\d+$/.test(parts[1] || '') ? Number(parts[1]) : null;
 		const field = fieldFromIssue(issue);
+		const code = String(issue?.code || '');
 
-		if (issue?.code === 'workflow.trigger_missing') return { type: 'trigger', root: 'trigger', index: null, field: '' };
-		if (issue?.code === 'workflow.action_missing') return { type: 'add_action', root: 'actions', index: null, field: '' };
+		if (code === 'workflow.trigger_missing') return { type: 'trigger', root: 'trigger', index: null, field: '' };
+		if (code === 'workflow.action_missing') return { type: 'add_action', root: 'actions', index: null, field: '' };
+		if (code === 'binding.trigger_has_bindings') return { type: 'capability', root: 'trigger', index: null, field: '' };
+		if (code === 'binding.input_unknown') return { type: 'capability', root, index, field: '' };
 		if (root === 'states' && index !== null && field) return { type: 'binding', root, index, field };
 		if (root === 'actions' && index !== null && field) return { type: 'binding', root, index, field };
 		if (root === 'conditions' && index !== null) return { type: 'condition', root, index, field: parts[2] || '' };
@@ -127,6 +132,8 @@
 		then_action: 'Then · Action %d',
 		choose_trigger: 'Choose trigger',
 		add_action: 'Add action',
+		review_trigger: 'Review trigger',
+		review_capability: 'Review capability',
 		connect_input: 'Connect input',
 		fix_input: 'Fix input',
 		choose_replacement: 'Choose replacement',
@@ -140,7 +147,6 @@
 
 	const summaryItems = Array.from(list.children).filter((item) => item instanceof HTMLElement);
 	let stale = false;
-	let staleStatus = null;
 
 	function el(tag, attrs = {}, text = null) {
 		const node = document.createElement(tag);
@@ -197,8 +203,10 @@
 			states: '[data-cb-automations-states]',
 			actions: '[data-cb-automations-actions]',
 		};
-		const container = root.querySelector(selectors[rootName] || '');
-		if (!container || index === null) return null;
+		const selector = selectors[rootName];
+		if (!selector || index === null) return null;
+		const container = root.querySelector(selector);
+		if (!container) return null;
 		return Array.from(container.children).filter((child) => child instanceof HTMLElement && child.classList.contains('cb-automations-step'))[index] || null;
 	}
 
@@ -219,9 +227,18 @@
 		if (!card) return null;
 		const grid = card.querySelector('.cb-automations-condition-grid');
 		if (!grid) return { container: card, focus: null, host: card };
-		if (field === 'left') return { container: grid.children[0] || card, focus: grid.children[0]?.querySelector('select, input, textarea, button') || null, host: card };
-		if (field === 'operator') return { container: grid.children[1] || card, focus: grid.children[1]?.querySelector('select') || null, host: card };
-		if (field === 'right') return { container: grid.children[2] || card, focus: grid.children[2]?.querySelector('select, input, textarea, button') || null, host: card };
+		if (field === 'left') {
+			const target = grid.children[0] || card;
+			return { container: target, focus: target.querySelector('select, input, textarea, button'), host: target };
+		}
+		if (field === 'operator') {
+			const target = grid.children[1] || card;
+			return { container: target, focus: target.querySelector('select'), host: target };
+		}
+		if (field === 'right') {
+			const target = grid.children[2] || card;
+			return { container: target, focus: target.querySelector('select, input, textarea, button'), host: target };
+		}
 		return { container: card, focus: card.querySelector('select, input, textarea, button'), host: card };
 	}
 
@@ -262,7 +279,8 @@
 				host: card,
 			};
 		}
-		const stage = descriptor.root ? root.querySelector(`[data-stage="${descriptor.root}"]`) : root;
+		const allowedStages = new Set(['trigger', 'states', 'conditions', 'actions']);
+		const stage = allowedStages.has(descriptor.root) ? root.querySelector(`[data-stage="${descriptor.root}"]`) : root;
 		return { container: stage || root, focus: null, host: stage || root };
 	}
 
@@ -316,7 +334,7 @@
 		panel.querySelectorAll('[data-cb-validation-jump]').forEach((button) => {
 			button.disabled = true;
 		});
-		staleStatus = el('p', {
+		const staleStatus = el('p', {
 			class: 'cb-automations-validation-stale',
 			role: 'status',
 		}, strings.save_recheck);
