@@ -54,7 +54,13 @@ final class AutomationsPage implements Page {
 					$this->render_not_found();
 					return;
 				}
-				$this->template( 'workflow-editor.php', [ 'detail' => $detail ] );
+				$this->template(
+					'workflow-editor.php',
+					[
+						'detail'      => $detail,
+						'editor_data' => WorkflowEditorData::build( $detail['record'], $detail['validation'] ),
+					]
+				);
 				return;
 			}
 
