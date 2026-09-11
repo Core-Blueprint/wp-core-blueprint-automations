@@ -62,6 +62,43 @@
 		createForm?.addEventListener('submit', () => rememberBuilder('pending'));
 	};
 
+	const ensureInspectorPanel = (shell) => {
+		const sidebar = shell.querySelector('.cb-automations-design-shell__sidebar');
+		const tabs = sidebar?.querySelector('.cb-core-design-shell__tabs');
+		if (!sidebar || !tabs) return;
+
+		const settingsTab = sidebar.querySelector('[data-cb-design-shell-tab="settings"]');
+		const settingsPanel = sidebar.querySelector('[data-cb-design-shell-panel="settings"]');
+		settingsTab?.setAttribute('data-cb-design-shell-sidebar-role', 'settings');
+		settingsPanel?.setAttribute('data-cb-design-shell-sidebar-role', 'settings');
+
+		if (!sidebar.querySelector('[data-cb-design-shell-tab="inspector"]')) {
+			const tab = document.createElement('button');
+			tab.type = 'button';
+			tab.className = 'cb-core-design-shell__tab';
+			tab.setAttribute('role', 'tab');
+			tab.setAttribute('aria-selected', 'false');
+			tab.setAttribute('data-cb-design-shell-tab', 'inspector');
+			tab.setAttribute('data-cb-design-shell-group', 'sidebar');
+			tab.setAttribute('data-cb-design-shell-sidebar-role', 'inspector');
+			tab.textContent = 'Inspector';
+			tabs.insertBefore(tab, tabs.firstChild);
+
+			const panel = document.createElement('section');
+			panel.className = 'cb-core-design-shell__panel';
+			panel.setAttribute('role', 'tabpanel');
+			panel.setAttribute('data-cb-design-shell-panel', 'inspector');
+			panel.setAttribute('data-cb-design-shell-group', 'sidebar');
+			panel.setAttribute('data-cb-design-shell-sidebar-role', 'inspector');
+			panel.hidden = true;
+			sidebar.append(panel);
+		}
+
+		if (window.cbCoreDesignerLaunch && typeof window.cbCoreDesignerLaunch === 'object') {
+			window.cbCoreDesignerLaunch.activeSidebarRole = 'settings';
+		}
+	};
+
 	const decorateSidebar = (shell) => {
 		const sidebar = shell.querySelector('.cb-automations-design-shell__sidebar');
 		if (!sidebar) return;
@@ -84,6 +121,7 @@
 
 		page.setAttribute('data-cb-design-launch-root', '');
 		heading.setAttribute('data-cb-design-launch-context', '');
+		ensureInspectorPanel(shell);
 		decorateSidebar(shell);
 
 		const identity = shell.querySelector('.cb-automations-design-shell__identity strong');
