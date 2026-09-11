@@ -35,6 +35,9 @@ jobs:
       - name: Workflow core regression matrix
         run: php tests/unit/workflow-core.php
 
+      - name: Hostile codec regression matrix
+        run: php tests/unit/codec-hostile.php
+
       - name: Privacy persistence regression
         run: php tests/unit/privacy-policy.php
 
