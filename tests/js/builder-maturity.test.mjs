@@ -50,6 +50,9 @@ test('Automation Builder maturity keeps shared-shell, canonical persistence and 
 	assert.match(inspector, /Selected step|selectedStep/);
 	assert.match(inspector, /GET DATA/);
 	assert.match(inspector, /ONLY IF/);
+	assert.match(inspector, /key: `state:\$\{value\?\.step_id \|\| index\}`/);
+	assert.match(inspector, /key: `condition:\$\{value\?\.condition_id \|\| index\}`/);
+	assert.match(inspector, /key: `action:\$\{value\?\.step_id \|\| index\}`/);
 
 	// AD4: existing editor state remains canonical while Base supplies session history mechanics.
 	assert.match(editor, /window\.cbAutomationsEditorSession/);

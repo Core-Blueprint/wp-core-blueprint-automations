@@ -55,17 +55,20 @@
 		if (statesRoot?.contains(card)) {
 			const cards = Array.from(statesRoot.children).filter((item) => item instanceof HTMLElement && item.classList.contains('cb-automations-step'));
 			const index = cards.indexOf(card);
-			return index >= 0 ? { key: `state:${index}`, stage: 'GET DATA', kind: 'Data lookup', value: definition.states?.[index] || null } : null;
+			const value = index >= 0 ? definition.states?.[index] || null : null;
+			return index >= 0 ? { key: `state:${value?.step_id || index}`, stage: 'GET DATA', kind: 'Data lookup', value } : null;
 		}
 		if (conditionsRoot?.contains(card)) {
 			const cards = Array.from(conditionsRoot.children).filter((item) => item instanceof HTMLElement && item.classList.contains('cb-automations-condition'));
 			const index = cards.indexOf(card);
-			return index >= 0 ? { key: `condition:${index}`, stage: 'ONLY IF', kind: 'Condition', value: definition.conditions?.[index] || null } : null;
+			const value = index >= 0 ? definition.conditions?.[index] || null : null;
+			return index >= 0 ? { key: `condition:${value?.condition_id || index}`, stage: 'ONLY IF', kind: 'Condition', value } : null;
 		}
 		if (actionsRoot?.contains(card)) {
 			const cards = Array.from(actionsRoot.children).filter((item) => item instanceof HTMLElement && item.classList.contains('cb-automations-step'));
 			const index = cards.indexOf(card);
-			return index >= 0 ? { key: `action:${index}`, stage: 'THEN', kind: 'Action', value: definition.actions?.[index] || null } : null;
+			const value = index >= 0 ? definition.actions?.[index] || null : null;
+			return index >= 0 ? { key: `action:${value?.step_id || index}`, stage: 'THEN', kind: 'Action', value } : null;
 		}
 		return null;
 	};
