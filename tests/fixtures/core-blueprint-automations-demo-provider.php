@@ -117,7 +117,7 @@ add_action(
 		ActionRegistry::register(
 			[
 				'provider'            => 'cb-automations-fixture',
-				'id'                  => 'follow_up.create',
+				'id'                  => 'followup.create',
 				'label'               => 'Create follow-up',
 				'description'         => 'Demo action with typed inputs for binding and editor review.',
 				'schema_version'      => '1',
