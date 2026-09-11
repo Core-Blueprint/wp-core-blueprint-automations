@@ -16,6 +16,7 @@ test('Automation Builder maturity keeps shared-shell, canonical persistence and 
 		controller,
 		assets,
 		finishCss,
+		template,
 	] = await Promise.all([
 		read('assets/js/admin-builder-bootstrap.js'),
 		read('assets/js/admin-builder-inspector.js'),
@@ -26,6 +27,7 @@ test('Automation Builder maturity keeps shared-shell, canonical persistence and 
 		read('src/Admin/WorkflowController.php'),
 		read('src/Admin/DesignerAssets.php'),
 		read('assets/css/admin-builder-finish.css'),
+		read('templates/admin/workflow-editor.php'),
 	]);
 
 	// AD2.1: Library is the outer product surface; Builder launch hides the embedded transition.
@@ -33,6 +35,8 @@ test('Automation Builder maturity keeps shared-shell, canonical persistence and 
 	assert.match(bootstrap, /is-builder-launch-pending/);
 	assert.match(bootstrap, /window\.location\.assign\(String\(config\.libraryUrl\)\)/);
 	assert.match(bootstrap, /LAUNCH_TIMEOUT_MS/);
+	assert.match(template, /cb-automations-editor-page" data-cb-design-launch-root/);
+	assert.match(template, /cb-automations-editor-heading" data-cb-design-launch-context/);
 	const openBuilderBody = bootstrap.match(/const openBuilder = \(\) => \{([\s\S]*?)\n\t\t\};/)?.[1] ?? '';
 	assert.match(openBuilderBody, /stopObserver\(\)/);
 	assert.match(openBuilderBody, /button\.click\(\)/);
