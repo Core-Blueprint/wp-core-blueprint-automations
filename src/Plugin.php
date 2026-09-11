@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace CB\Automations;
 
+use CB\Automations\Admin\AdminAssets;
+use CB\Automations\Admin\WorkflowController;
 use CB\Automations\Persistence\Schema;
 use CB\Automations\Support\Requirements;
 
@@ -26,6 +28,11 @@ final class Plugin {
 		}
 
 		self::$booted = true;
+
+		if ( is_admin() ) {
+			WorkflowController::init();
+			AdminAssets::init();
+		}
 	}
 
 	public static function is_booted(): bool {
