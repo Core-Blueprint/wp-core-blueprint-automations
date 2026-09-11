@@ -24,6 +24,11 @@ final class WorkflowService {
 	}
 
 	public function create( string $name, Definition $definition, int $user_id ): int {
+		$validation = $this->validator->validate( $definition );
+		if ( ! PersistencePolicy::allows( $validation ) ) {
+			throw new \DomainException( 'Workflow definition contains sensitive literal data that cannot be persisted safely.' );
+		}
+
 		return WorkflowRepository::create( $name, $definition, $user_id );
 	}
 
@@ -33,7 +38,8 @@ final class WorkflowService {
 
 	/**
 	 * Persist one editor revision. Draft/disabled definitions may be invalid;
-	 * enabling is fail-closed against the current capability source.
+	 * enabling is fail-closed against the current capability source. Sensitive
+	 * literals are never persisted, regardless of activation state.
 	 */
 	public function save(
 		int $id,
@@ -44,6 +50,9 @@ final class WorkflowService {
 		int $user_id
 	): WorkflowSaveResult {
 		$validation = $this->validator->validate( $definition );
+		if ( ! PersistencePolicy::allows( $validation ) ) {
+			return WorkflowSaveResult::persistence_blocked( $validation );
+		}
 		if ( ! ActivationPolicy::allows( $activation_state, $validation ) ) {
 			return WorkflowSaveResult::validation_failed( $validation );
 		}
