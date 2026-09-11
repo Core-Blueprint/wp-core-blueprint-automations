@@ -27,9 +27,11 @@ final class AdminAssets {
 		$overview_css = CB_AUTOMATIONS_DIR . 'assets/css/admin-overview.css';
 		$picker_css   = CB_AUTOMATIONS_DIR . 'assets/css/admin-capability-picker.css';
 		$polish_css   = CB_AUTOMATIONS_DIR . 'assets/css/admin-editor-polish.css';
+		$recovery_css = CB_AUTOMATIONS_DIR . 'assets/css/admin-validation-recovery.css';
 		$js           = CB_AUTOMATIONS_DIR . 'assets/js/admin-editor.js';
 		$picker_js    = CB_AUTOMATIONS_DIR . 'assets/js/admin-capability-picker.js';
 		$polish_js    = CB_AUTOMATIONS_DIR . 'assets/js/admin-editor-polish.js';
+		$recovery_js  = CB_AUTOMATIONS_DIR . 'assets/js/admin-validation-recovery.js';
 
 		wp_enqueue_style(
 			'cb-automations-admin',
@@ -57,6 +59,13 @@ final class AdminAssets {
 			CB_AUTOMATIONS_URL . 'assets/css/admin-editor-polish.css',
 			[ 'cb-automations-admin' ],
 			is_file( $polish_css ) ? (string) filemtime( $polish_css ) : CB_AUTOMATIONS_VERSION
+		);
+
+		wp_enqueue_style(
+			'cb-automations-admin-validation-recovery',
+			CB_AUTOMATIONS_URL . 'assets/css/admin-validation-recovery.css',
+			[ 'cb-automations-admin-editor-polish' ],
+			is_file( $recovery_css ) ? (string) filemtime( $recovery_css ) : CB_AUTOMATIONS_VERSION
 		);
 
 		wp_enqueue_script(
@@ -112,6 +121,37 @@ final class AdminAssets {
 				'condition'           => __( 'Condition', 'core-blueprint-automations' ),
 				'reads_as'            => __( 'Reads as', 'core-blueprint-automations' ),
 				'required_capability' => __( 'Required capability', 'core-blueprint-automations' ),
+			]
+		);
+
+		wp_enqueue_script(
+			'cb-automations-admin-validation-recovery',
+			CB_AUTOMATIONS_URL . 'assets/js/admin-validation-recovery.js',
+			[ 'cb-automations-admin-editor-polish' ],
+			is_file( $recovery_js ) ? (string) filemtime( $recovery_js ) : CB_AUTOMATIONS_VERSION,
+			true
+		);
+
+		wp_localize_script(
+			'cb-automations-admin-validation-recovery',
+			'cbAutomationsValidationRecoveryStrings',
+			[
+				'workflow'           => __( 'Workflow', 'core-blueprint-automations' ),
+				'when_trigger'       => __( 'When · Trigger', 'core-blueprint-automations' ),
+				'get_data'           => __( 'Get data · Data lookup %d', 'core-blueprint-automations' ),
+				'only_if'            => __( 'Only if · Condition %d', 'core-blueprint-automations' ),
+				'then_actions'       => __( 'Then · Actions', 'core-blueprint-automations' ),
+				'then_action'        => __( 'Then · Action %d', 'core-blueprint-automations' ),
+				'choose_trigger'     => __( 'Choose trigger', 'core-blueprint-automations' ),
+				'add_action'         => __( 'Add action', 'core-blueprint-automations' ),
+				'connect_input'      => __( 'Connect input', 'core-blueprint-automations' ),
+				'fix_input'          => __( 'Fix input', 'core-blueprint-automations' ),
+				'choose_replacement' => __( 'Choose replacement', 'core-blueprint-automations' ),
+				'review_condition'   => __( 'Review condition', 'core-blueprint-automations' ),
+				'review_issue'       => __( 'Review issue', 'core-blueprint-automations' ),
+				'technical_details'  => __( 'Technical details', 'core-blueprint-automations' ),
+				'saved_issue'        => __( 'Saved workflow issue', 'core-blueprint-automations' ),
+				'save_recheck'       => __( 'Changes made. Save the automation to re-check workflow health.', 'core-blueprint-automations' ),
 			]
 		);
 	}
