@@ -3,6 +3,7 @@
 
 	const STORAGE_KEY = 'cb-automations-builder-workflow';
 	const LAUNCH_TIMEOUT_MS = 1800;
+	const LAUNCH_PENDING_BODY_CLASS = 'cb-automations-builder-launch-pending';
 	const config = {
 		automationBuilder: 'Automation Builder',
 		openBuilder: 'Open builder',
@@ -200,6 +201,7 @@
 			stopObserver();
 			if (timeout) window.clearTimeout(timeout);
 			timeout = null;
+			document.body?.classList.remove(LAUNCH_PENDING_BODY_CLASS);
 		};
 
 		shell.addEventListener('cb:design-shell:fullscreenchange', (event) => {
@@ -226,7 +228,10 @@
 			}
 		});
 
-		if (!autoStart) return;
+		if (!autoStart) {
+			document.body?.classList.remove(LAUNCH_PENDING_BODY_CLASS);
+			return;
+		}
 
 		const openBuilder = () => {
 			const button = page.querySelector('[data-cb-design-launch] .cb-core-design-launch');
