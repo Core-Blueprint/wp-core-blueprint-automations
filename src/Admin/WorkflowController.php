@@ -82,7 +82,7 @@ final class WorkflowController {
 
 			$notice = match ( $result->status() ) {
 				WorkflowSaveResult::SAVED               => 'saved',
-				WorkflowSaveResult::VALIDATION_FAILED   => 'validation_failed',
+				WorkflowSaveResult::SAVED_DISABLED      => 'saved_disabled',
 				WorkflowSaveResult::PERSISTENCE_BLOCKED => 'persistence_blocked',
 				WorkflowSaveResult::CONFLICT            => 'conflict',
 				default                                 => 'failed',
