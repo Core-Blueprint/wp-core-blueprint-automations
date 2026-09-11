@@ -7,8 +7,8 @@ use CB\Automations\Binding\Binding;
 use CB\Automations\Capability\CapabilityKind;
 use CB\Automations\Condition\Condition;
 use CB\Automations\Condition\OperatorCatalog;
-use CB\Automations\Discovery\CapabilityCatalog;
 use CB\Automations\Discovery\CapabilityDefinition;
+use CB\Automations\Discovery\CapabilitySource;
 use CB\Automations\Discovery\ProviderStatus;
 use CB\Automations\Workflow\Definition;
 use CB\Automations\Workflow\Step;
@@ -16,14 +16,14 @@ use CB\Automations\Workflow\Step;
 defined( 'ABSPATH' ) || exit;
 
 final class WorkflowValidator {
-	public function __construct( private CapabilityCatalog $catalog ) {}
+	public function __construct( private CapabilitySource $catalog ) {}
 
 	public function validate( Definition $definition ): ValidationResult {
-		$issues       = [];
-		$resolved     = [];
-		$steps_by_id  = [];
-		$order_by_id  = [];
-		$order        = 0;
+		$issues      = [];
+		$resolved    = [];
+		$steps_by_id = [];
+		$order_by_id = [];
+		$order       = 0;
 
 		$trigger = $definition->trigger();
 		if ( null === $trigger ) {
@@ -454,9 +454,16 @@ final class WorkflowValidator {
 		}
 
 		if ( 'array' === $left['type'] || 'array' === $right['type'] ) {
-			return 'array' === $left['type'] && 'array' === $right['type']
-				&& null !== $left['items'] && null !== $right['items']
-				&& 'mixed' !== $left['items'] && 'mixed' !== $right['items']
+			if ( 'array' !== $left['type'] || 'array' !== $right['type'] ) {
+				return false;
+			}
+
+			/* Empty literal arrays carry no item type and are compatible with a typed array. */
+			if ( null === $left['items'] || null === $right['items'] ) {
+				return true;
+			}
+
+			return 'mixed' !== $left['items'] && 'mixed' !== $right['items']
 				&& ( $this->scalar_type_compatible( $left['items'], $right['items'] ) || $this->scalar_type_compatible( $right['items'], $left['items'] ) );
 		}
 
