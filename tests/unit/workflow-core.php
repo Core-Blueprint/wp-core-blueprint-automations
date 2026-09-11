@@ -143,8 +143,9 @@ function source( bool $work_active = true, bool $include_create = true, string $
 		'project.lookup',
 		[ 'contract_id' => field( 'integer', true, false, null, 'core-blueprint-contracts.contract_id' ) ],
 		[
-			'project_id' => field( 'integer', true, false, null, 'core-blueprint-work.project_id' ),
-			'tags'       => field( 'array', false, false, 'string' ),
+			'project_id'        => field( 'integer', true, false, null, 'core-blueprint-work.project_id' ),
+			'legacy_project_id' => field( 'integer' ),
+			'tags'              => field( 'array', false, false, 'string' ),
 		]
 	);
 	$create = capability(
@@ -272,6 +273,15 @@ $semantic_mismatch['actions'][0]['bindings']['project_id'] = [
 $semantic_mismatch_result = $validator->validate( DefinitionCodec::decode( $semantic_mismatch ) );
 assert_code( $semantic_mismatch_result, 'binding.type_mismatch', 'Explicitly different semantic IDs must not bind despite matching primitive types.' );
 
+$untyped_source_to_semantic_target = $encoded;
+$untyped_source_to_semantic_target['actions'][0]['bindings']['project_id'] = [
+	'source'  => 'step_output',
+	'step_id' => 'state_1',
+	'field'   => 'legacy_project_id',
+];
+$untyped_source_result = $validator->validate( DefinitionCodec::decode( $untyped_source_to_semantic_target ) );
+assert_code( $untyped_source_result, 'binding.type_mismatch', 'Semantic targets must reject untyped workflow outputs despite matching primitive types.' );
+
 $legacy_semantic_fallback = $encoded;
 $legacy_semantic_fallback['actions'][0]['bindings']['legacy_project_id'] = [
 	'source'  => 'step_output',
@@ -320,6 +330,26 @@ $semantic_condition['conditions'][0] = [
 ];
 $semantic_condition_result = $validator->validate( DefinitionCodec::decode( $semantic_condition ) );
 assert_code( $semantic_condition_result, 'condition.type_mismatch', 'Conditions must reject explicitly different semantic IDs despite matching primitive types.' );
+
+$untyped_semantic_condition = $encoded;
+$untyped_semantic_condition['conditions'][0] = [
+	'condition_id' => 'condition_1',
+	'left'         => [ 'source' => 'step_output', 'step_id' => 'state_1', 'field' => 'project_id' ],
+	'operator'     => 'equals',
+	'right'        => [ 'source' => 'step_output', 'step_id' => 'state_1', 'field' => 'legacy_project_id' ],
+];
+$untyped_semantic_condition_result = $validator->validate( DefinitionCodec::decode( $untyped_semantic_condition ) );
+assert_code( $untyped_semantic_condition_result, 'condition.type_mismatch', 'Typed condition subjects must reject untyped workflow-output comparisons.' );
+
+$literal_semantic_condition = $encoded;
+$literal_semantic_condition['conditions'][0] = [
+	'condition_id' => 'condition_1',
+	'left'         => [ 'source' => 'step_output', 'step_id' => 'state_1', 'field' => 'project_id' ],
+	'operator'     => 'equals',
+	'right'        => [ 'source' => 'literal', 'value' => 1 ],
+];
+$literal_semantic_condition_result = $validator->validate( DefinitionCodec::decode( $literal_semantic_condition ) );
+assert_true( ! $literal_semantic_condition_result->has_code( 'condition.type_mismatch' ), 'Typed condition subjects must continue to allow primitive literals.' );
 
 $unsupported = $encoded;
 $unsupported['conditions'][0]['operator'] = 'matches_magic';
