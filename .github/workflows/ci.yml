@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - automations-au1-workflow-definition
   pull_request:
 
 permissions:
