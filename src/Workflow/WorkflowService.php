@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace CB\Automations\Workflow;
 
 use CB\Automations\Discovery\CapabilityCatalog;
+use CB\Automations\Discovery\CapabilitySource;
 use CB\Automations\Persistence\WorkflowRecord;
 use CB\Automations\Persistence\WorkflowRepository;
 use CB\Automations\Validation\ValidationResult;
@@ -14,8 +15,8 @@ defined( 'ABSPATH' ) || exit;
 final class WorkflowService {
 	private WorkflowValidator $validator;
 
-	public function __construct( ?CapabilityCatalog $catalog = null ) {
-		$this->validator = new WorkflowValidator( $catalog ?? new CapabilityCatalog() );
+	public function __construct( ?CapabilitySource $source = null ) {
+		$this->validator = new WorkflowValidator( $source ?? new CapabilityCatalog() );
 	}
 
 	public function validate( Definition $definition ): ValidationResult {
@@ -32,7 +33,7 @@ final class WorkflowService {
 
 	/**
 	 * Persist one editor revision. Draft/disabled definitions may be invalid;
-	 * enabling is fail-closed against the current capability catalog.
+	 * enabling is fail-closed against the current capability source.
 	 */
 	public function save(
 		int $id,
