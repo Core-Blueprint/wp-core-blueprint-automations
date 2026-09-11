@@ -223,13 +223,21 @@ final class WorkflowRepository {
 
 	private static function normalize_name( string $name ): string {
 		$name = trim( wp_strip_all_tags( $name ) );
-		$length = function_exists( 'mb_strlen' )
-			? mb_strlen( $name, 'UTF-8' )
-			: preg_match_all( '/./us', $name );
-
-		if ( '' === $name || false === $length || $length > 191 ) {
+		if ( '' === $name ) {
 			throw new \InvalidArgumentException( 'Workflow name must contain between 1 and 191 characters.' );
 		}
+
+		/*
+		 * Count Unicode code points without depending on mbstring. The previous
+		 * fallback called preg_match_all() without its required matches argument,
+		 * which raised ArgumentCountError on hosts where mb_strlen() is absent.
+		 */
+		$matches = [];
+		$length  = preg_match_all( '/./us', $name, $matches );
+		if ( false === $length || $length > 191 ) {
+			throw new \InvalidArgumentException( 'Workflow name must contain between 1 and 191 characters.' );
+		}
+
 		return $name;
 	}
 }
