@@ -1,0 +1,59 @@
+<?php
+declare(strict_types=1);
+
+namespace CB\Automations\Workflow;
+
+use CB\Automations\Discovery\CapabilityCatalog;
+use CB\Automations\Persistence\WorkflowRecord;
+use CB\Automations\Persistence\WorkflowRepository;
+use CB\Automations\Validation\ValidationResult;
+use CB\Automations\Validation\WorkflowValidator;
+
+defined( 'ABSPATH' ) || exit;
+
+final class WorkflowService {
+	private WorkflowValidator $validator;
+
+	public function __construct( ?CapabilityCatalog $catalog = null ) {
+		$this->validator = new WorkflowValidator( $catalog ?? new CapabilityCatalog() );
+	}
+
+	public function validate( Definition $definition ): ValidationResult {
+		return $this->validator->validate( $definition );
+	}
+
+	public function create( string $name, Definition $definition, int $user_id ): int {
+		return WorkflowRepository::create( $name, $definition, $user_id );
+	}
+
+	public function find( int $id ): ?WorkflowRecord {
+		return WorkflowRepository::find( $id );
+	}
+
+	/**
+	 * Persist one editor revision. Draft/disabled definitions may be invalid;
+	 * enabling is fail-closed against the current capability catalog.
+	 */
+	public function save(
+		int $id,
+		int $expected_revision,
+		string $name,
+		ActivationState $activation_state,
+		Definition $definition,
+		int $user_id
+	): bool {
+		$validation = $this->validator->validate( $definition );
+		if ( ! ActivationPolicy::allows( $activation_state, $validation ) ) {
+			return false;
+		}
+
+		return WorkflowRepository::update(
+			$id,
+			$expected_revision,
+			$name,
+			$activation_state,
+			$definition,
+			$user_id
+		);
+	}
+}
