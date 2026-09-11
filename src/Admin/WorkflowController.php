@@ -6,6 +6,7 @@ namespace CB\Automations\Admin;
 use CB\Automations\Workflow\ActivationState;
 use CB\Automations\Workflow\Definition;
 use CB\Automations\Workflow\DefinitionCodec;
+use CB\Automations\Workflow\PersistencePolicy;
 use CB\Automations\Workflow\WorkflowSaveResult;
 use CB\Automations\Workflow\WorkflowService;
 use UnexpectedValueException;
@@ -13,8 +14,6 @@ use UnexpectedValueException;
 defined( 'ABSPATH' ) || exit;
 
 final class WorkflowController {
-	private const MAX_DEFINITION_BYTES = 262144;
-
 	private static bool $initialized = false;
 
 	public static function init(): void {
@@ -61,7 +60,7 @@ final class WorkflowController {
 			? wp_unslash( $_POST['definition_json'] )
 			: '';
 
-		if ( $id < 1 || $revision < 1 || null === $state || '' === $json || strlen( $json ) > self::MAX_DEFINITION_BYTES ) {
+		if ( $id < 1 || $revision < 1 || null === $state || '' === $json || ! PersistencePolicy::allows_encoded_definition( $json ) ) {
 			self::redirect( [ 'workflow' => max( 0, $id ), 'notice' => 'invalid' ] );
 		}
 
