@@ -6,7 +6,10 @@ defined( 'ABSPATH' ) || exit;
 
 final readonly class ValidationResult {
 	/** @param ValidationIssue[] $issues */
-	public function __construct( private array $issues ) {}
+	public function __construct(
+		private array $issues,
+		private bool $contains_sensitive_paths = false
+	) {}
 
 	public function is_valid(): bool {
 		return [] === $this->issues;
@@ -15,6 +18,10 @@ final readonly class ValidationResult {
 	/** @return ValidationIssue[] */
 	public function issues(): array {
 		return $this->issues;
+	}
+
+	public function contains_sensitive_paths(): bool {
+		return $this->contains_sensitive_paths;
 	}
 
 	public function has_code( string $code ): bool {
