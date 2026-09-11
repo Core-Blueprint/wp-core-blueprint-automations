@@ -32,7 +32,9 @@ jobs:
         run: find . -type f -name '*.php' -print0 | xargs -0 -n1 php -l
 
       - name: Admin editor JavaScript syntax
-        run: node --check assets/js/admin-editor.js
+        run: |
+          node --check assets/js/admin-editor.js
+          node --check assets/js/admin-editor-polish.js
 
       - name: Bootstrap requirements regression
         run: php tests/unit/bootstrap-requirements.php
