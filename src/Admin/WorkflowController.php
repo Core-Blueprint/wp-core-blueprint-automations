@@ -17,6 +17,8 @@ use UnexpectedValueException;
 defined( 'ABSPATH' ) || exit;
 
 final class WorkflowController {
+	private const ASYNC_FIELD = 'cb_automations_builder_async';
+
 	private static bool $initialized = false;
 
 	public static function init(): void {
@@ -69,7 +71,7 @@ final class WorkflowController {
 			: '';
 
 		if ( $id < 1 || $revision < 1 || null === $state || '' === $json || ! PersistencePolicy::allows_encoded_definition( $json ) ) {
-			self::redirect( [ 'workflow' => max( 0, $id ), 'notice' => 'invalid' ] );
+			self::reject_or_redirect( [ 'workflow' => max( 0, $id ), 'notice' => 'invalid' ], 400 );
 		}
 
 		try {
@@ -79,7 +81,7 @@ final class WorkflowController {
 			}
 			$definition = DefinitionCodec::decode( $decoded );
 		} catch ( JsonException | UnexpectedValueException $error ) {
-			self::redirect( [ 'workflow' => $id, 'notice' => 'invalid' ] );
+			self::reject_or_redirect( [ 'workflow' => $id, 'notice' => 'invalid' ], 400 );
 		}
 
 		try {
@@ -99,16 +101,20 @@ final class WorkflowController {
 				WorkflowSaveResult::CONFLICT            => 'conflict',
 				default                                 => 'failed',
 			};
+
+			if ( self::is_async_request() ) {
+				self::respond_save_result( $result, $notice, $revision, $state );
+			}
 			self::redirect( [ 'workflow' => $id, 'notice' => $notice ] );
 		} catch ( InvalidArgumentException $error ) {
-			self::redirect( [ 'workflow' => $id, 'notice' => 'invalid_name' ] );
+			self::reject_or_redirect( [ 'workflow' => $id, 'notice' => 'invalid_name' ], 400 );
 		} catch ( PersistenceFailure $error ) {
 			error_log( '[Core Blueprint Automations] Workflow save persistence failure: ' . $error->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- bounded diagnostic without workflow data.
-			self::redirect( [ 'workflow' => $id, 'notice' => 'storage_failed' ] );
+			self::reject_or_redirect( [ 'workflow' => $id, 'notice' => 'storage_failed' ], 500 );
 		} catch ( \Throwable $error ) {
 			// Never log the submitted definition: it may contain operator-entered literals.
 			error_log( '[Core Blueprint Automations] Workflow save failed: ' . $error->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- bounded diagnostic without workflow data.
-			self::redirect( [ 'workflow' => $id, 'notice' => 'failed' ] );
+			self::reject_or_redirect( [ 'workflow' => $id, 'notice' => 'failed' ], 500 );
 		}
 	}
 
@@ -123,6 +129,67 @@ final class WorkflowController {
 		if ( ! wp_verify_nonce( $nonce, $nonce_action ) ) {
 			wp_die( esc_html__( 'The request could not be verified. Reload the page and try again.', 'core-blueprint-automations' ), esc_html__( 'Invalid request', 'core-blueprint-automations' ), [ 'response' => 403 ] );
 		}
+	}
+
+	private static function is_async_request(): bool {
+		$value = isset( $_POST[ self::ASYNC_FIELD ] ) && is_scalar( $_POST[ self::ASYNC_FIELD ] )
+			? sanitize_text_field( wp_unslash( (string) $_POST[ self::ASYNC_FIELD ] ) )
+			: '';
+		return '1' === $value;
+	}
+
+	private static function respond_save_result( WorkflowSaveResult $result, string $notice, int $revision, ActivationState $state ): never {
+		$issues = [];
+		foreach ( $result->validation()->issues() as $issue ) {
+			$issues[] = [
+				'path'    => $issue->path(),
+				'message' => ValidationPresenter::message( $issue ),
+			];
+		}
+
+		$data = [
+			'notice'           => $notice,
+			'message'          => self::notice_message( $notice ),
+			'revision'         => $result->was_saved() ? $revision + 1 : $revision,
+			'activation_state' => WorkflowSaveResult::SAVED_DISABLED === $result->status() ? ActivationState::Disabled->value : $state->value,
+			'valid'            => $result->validation()->is_valid(),
+			'issues'           => $issues,
+		];
+
+		if ( $result->was_saved() ) {
+			wp_send_json_success( $data );
+			exit;
+		}
+
+		$status = WorkflowSaveResult::CONFLICT === $result->status() ? 409 : 400;
+		wp_send_json_error( $data, $status );
+		exit;
+	}
+
+	/** @param array<string,scalar> $query */
+	private static function reject_or_redirect( array $query, int $status ): never {
+		if ( self::is_async_request() ) {
+			$notice = sanitize_key( (string) ( $query['notice'] ?? 'failed' ) );
+			wp_send_json_error( [
+				'notice'  => $notice,
+				'message' => self::notice_message( $notice ),
+			], $status );
+			exit;
+		}
+		self::redirect( $query );
+	}
+
+	private static function notice_message( string $notice ): string {
+		return match ( $notice ) {
+			'saved'               => __( 'Automation saved.', 'core-blueprint-automations' ),
+			'saved_disabled'      => __( 'Changes saved. The automation remains disabled until the workflow is valid.', 'core-blueprint-automations' ),
+			'persistence_blocked' => __( 'The automation was not saved because a sensitive input contains a literal value.', 'core-blueprint-automations' ),
+			'conflict'            => __( 'This automation changed in another request. Reload the page before saving again.', 'core-blueprint-automations' ),
+			'invalid_name'        => __( 'Enter an automation name between 1 and 191 characters.', 'core-blueprint-automations' ),
+			'invalid'             => __( 'The submitted workflow could not be decoded safely. No changes were saved.', 'core-blueprint-automations' ),
+			'storage_failed'      => __( 'The automation could not be saved because workflow storage is unavailable.', 'core-blueprint-automations' ),
+			default               => __( 'The automation could not be saved. Reload the page before trying again.', 'core-blueprint-automations' ),
+		};
 	}
 
 	/** @param array<string,scalar> $query */

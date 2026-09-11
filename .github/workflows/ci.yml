@@ -39,6 +39,10 @@ jobs:
           node --check assets/js/admin-validation-recovery.js
           node --check assets/js/admin-condition-builder.js
           node --check assets/js/admin-builder-bootstrap.js
+          node --check assets/js/admin-builder-inspector.js
+          node --check assets/js/admin-builder-layout.js
+          node --check assets/js/admin-builder-save.js
+          node --check assets/js/admin-builder-history.js
           node --check assets/js/admin-designer-shell.js
 
       - name: Capability picker regression
@@ -55,6 +59,9 @@ jobs:
 
       - name: Shared Designer Shell regression
         run: node tests/js/designer-shell.test.mjs
+
+      - name: Automation Builder maturity regression
+        run: node tests/js/builder-maturity.test.mjs
 
       - name: Bootstrap requirements regression
         run: php tests/unit/bootstrap-requirements.php

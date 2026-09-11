@@ -6,6 +6,7 @@
 	const config = {
 		automationBuilder: 'Automation Builder',
 		openBuilder: 'Open builder',
+		inspector: 'Inspector',
 		libraryUrl: '',
 		history: 'History',
 		undo: 'Undo',
@@ -84,7 +85,7 @@
 			tab.setAttribute('data-cb-design-shell-tab', 'inspector');
 			tab.setAttribute('data-cb-design-shell-group', 'sidebar');
 			tab.setAttribute('data-cb-design-shell-sidebar-role', 'inspector');
-			tab.textContent = 'Inspector';
+			tab.textContent = config.inspector;
 			tabs.insertBefore(tab, tabs.firstChild);
 
 			const panel = document.createElement('section');

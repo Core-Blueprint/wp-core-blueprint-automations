@@ -12,6 +12,8 @@ defined( 'ABSPATH' ) || exit;
 final class DesignerAssets {
 	private const BOOTSTRAP_HANDLE = 'cb-automations-admin-builder-bootstrap';
 	private const INSPECTOR_HANDLE = 'cb-automations-admin-builder-inspector';
+	private const LAYOUT_HANDLE    = 'cb-automations-admin-builder-layout';
+	private const SAVE_HANDLE      = 'cb-automations-admin-builder-save';
 	private const HISTORY_MODULE   = 'cb-automations-admin-builder-history';
 
 	private static bool $initialized = false;
@@ -30,13 +32,16 @@ final class DesignerAssets {
 			return;
 		}
 
-		$css           = CB_AUTOMATIONS_DIR . 'assets/css/admin-designer-shell.css';
-		$inspector_css = CB_AUTOMATIONS_DIR . 'assets/css/admin-builder-inspector.css';
-		$authoring_css = CB_AUTOMATIONS_DIR . 'assets/css/admin-builder-authoring.css';
-		$js            = CB_AUTOMATIONS_DIR . 'assets/js/admin-designer-shell.js';
-		$bootstrap     = CB_AUTOMATIONS_DIR . 'assets/js/admin-builder-bootstrap.js';
-		$inspector     = CB_AUTOMATIONS_DIR . 'assets/js/admin-builder-inspector.js';
-		$history       = CB_AUTOMATIONS_DIR . 'assets/js/admin-builder-history.js';
+		$css            = CB_AUTOMATIONS_DIR . 'assets/css/admin-designer-shell.css';
+		$inspector_css  = CB_AUTOMATIONS_DIR . 'assets/css/admin-builder-inspector.css';
+		$authoring_css  = CB_AUTOMATIONS_DIR . 'assets/css/admin-builder-authoring.css';
+		$finish_css     = CB_AUTOMATIONS_DIR . 'assets/css/admin-builder-finish.css';
+		$js             = CB_AUTOMATIONS_DIR . 'assets/js/admin-designer-shell.js';
+		$bootstrap      = CB_AUTOMATIONS_DIR . 'assets/js/admin-builder-bootstrap.js';
+		$inspector      = CB_AUTOMATIONS_DIR . 'assets/js/admin-builder-inspector.js';
+		$layout         = CB_AUTOMATIONS_DIR . 'assets/js/admin-builder-layout.js';
+		$save           = CB_AUTOMATIONS_DIR . 'assets/js/admin-builder-save.js';
+		$history        = CB_AUTOMATIONS_DIR . 'assets/js/admin-builder-history.js';
 
 		wp_enqueue_script(
 			self::BOOTSTRAP_HANDLE,
@@ -51,6 +56,7 @@ final class DesignerAssets {
 			[
 				'automationBuilder' => __( 'Automation Builder', 'core-blueprint-automations' ),
 				'openBuilder'       => __( 'Open builder', 'core-blueprint-automations' ),
+				'inspector'         => __( 'Inspector', 'core-blueprint-automations' ),
 				'libraryUrl'        => AutomationsPage::url(),
 				'history'           => __( 'History', 'core-blueprint-automations' ),
 				'undo'              => __( 'Undo', 'core-blueprint-automations' ),
@@ -80,6 +86,45 @@ final class DesignerAssets {
 			]
 		);
 
+		wp_enqueue_script(
+			self::LAYOUT_HANDLE,
+			CB_AUTOMATIONS_URL . 'assets/js/admin-builder-layout.js',
+			[ self::INSPECTOR_HANDLE ],
+			is_file( $layout ) ? (string) filemtime( $layout ) : CB_AUTOMATIONS_VERSION,
+			true
+		);
+		wp_localize_script(
+			self::LAYOUT_HANDLE,
+			'cbAutomationsLayoutStrings',
+			[
+				'collapseWorkflow' => __( 'Collapse workflow navigation', 'core-blueprint-automations' ),
+				'expandWorkflow'   => __( 'Expand workflow navigation', 'core-blueprint-automations' ),
+				'collapseDetails'  => __( 'Collapse details sidebar', 'core-blueprint-automations' ),
+				'expandDetails'    => __( 'Expand details sidebar', 'core-blueprint-automations' ),
+			]
+		);
+
+		wp_enqueue_script(
+			self::SAVE_HANDLE,
+			CB_AUTOMATIONS_URL . 'assets/js/admin-builder-save.js',
+			[ self::INSPECTOR_HANDLE ],
+			is_file( $save ) ? (string) filemtime( $save ) : CB_AUTOMATIONS_VERSION,
+			true
+		);
+		wp_localize_script(
+			self::SAVE_HANDLE,
+			'cbAutomationsSaveStrings',
+			[
+				'saving'             => __( 'Saving automation…', 'core-blueprint-automations' ),
+				'failed'             => __( 'The automation could not be saved.', 'core-blueprint-automations' ),
+				'ready'              => __( 'Ready', 'core-blueprint-automations' ),
+				'needsAttention'     => __( 'Needs attention', 'core-blueprint-automations' ),
+				'validDescription'   => __( 'The current definition is valid against the live capability catalog.', 'core-blueprint-automations' ),
+				'invalidDescription' => __( 'Resolve these items before the automation can be enabled.', 'core-blueprint-automations' ),
+				'workflowIssue'      => __( 'Workflow issue', 'core-blueprint-automations' ),
+			]
+		);
+
 		if ( self::base_editor_available() ) {
 			if ( is_callable( [ DesignEditorAssets::class, 'enqueue_designer_mode' ] ) ) {
 				DesignEditorAssets::enqueue_designer_mode();
@@ -105,6 +150,12 @@ final class DesignerAssets {
 			CB_AUTOMATIONS_URL . 'assets/css/admin-builder-authoring.css',
 			[ 'cb-automations-admin-builder-inspector' ],
 			is_file( $authoring_css ) ? (string) filemtime( $authoring_css ) : CB_AUTOMATIONS_VERSION
+		);
+		wp_enqueue_style(
+			'cb-automations-admin-builder-finish',
+			CB_AUTOMATIONS_URL . 'assets/css/admin-builder-finish.css',
+			[ 'cb-automations-admin-builder-authoring' ],
+			is_file( $finish_css ) ? (string) filemtime( $finish_css ) : CB_AUTOMATIONS_VERSION
 		);
 
 		wp_enqueue_script_module(

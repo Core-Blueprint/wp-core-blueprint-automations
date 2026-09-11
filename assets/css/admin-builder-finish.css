@@ -1,0 +1,98 @@
+.cb-automations-builder-pane-toggle {
+	min-width: 32px;
+	min-height: 32px;
+	padding: 0;
+	font-size: var(--cb-fs-lg);
+	line-height: 1;
+}
+
+.cb-automations-builder-pane-toggle--palette {
+	margin: 0 0 var(--cb-space-3) auto;
+}
+
+.cb-automations-builder-pane-toggle--sidebar {
+	display: block;
+	margin: var(--cb-space-2) var(--cb-space-2) var(--cb-space-1) auto;
+}
+
+.cb-automations-design-shell.is-palette-collapsed .cb-core-design-shell__workspace {
+	grid-template-columns: 58px minmax(0, 1fr) minmax(280px, 340px);
+}
+
+.cb-automations-design-shell.is-palette-collapsed .cb-automations-stage-nav > .cb-automations-panel-eyebrow,
+.cb-automations-design-shell.is-palette-collapsed .cb-automations-stage-nav a strong,
+.cb-automations-design-shell.is-palette-collapsed .cb-automations-stage-nav a small {
+	display: none;
+}
+
+.cb-automations-design-shell.is-palette-collapsed .cb-automations-stage-nav nav {
+	gap: var(--cb-space-2);
+}
+
+.cb-automations-design-shell.is-palette-collapsed .cb-automations-stage-nav a {
+	display: flex;
+	justify-content: center;
+	padding-inline: 0;
+}
+
+.cb-automations-design-shell.is-palette-collapsed .cb-automations-stage-nav a > span {
+	grid-row: auto;
+}
+
+.cb-automations-design-shell.is-sidebar-collapsed .cb-core-design-shell__workspace {
+	grid-template-columns: minmax(190px, 220px) minmax(0, 1fr) 50px;
+}
+
+.cb-automations-design-shell.is-palette-collapsed.is-sidebar-collapsed .cb-core-design-shell__workspace {
+	grid-template-columns: 58px minmax(0, 1fr) 50px;
+}
+
+.cb-automations-design-shell.is-sidebar-collapsed .cb-core-design-shell__sidebar-tabs,
+.cb-automations-design-shell.is-sidebar-collapsed .cb-core-design-shell__sidebar-panel {
+	display: none !important;
+}
+
+.cb-automations-stage:not(:last-child)::after {
+	height: calc(var(--cb-space-4) + 2px);
+	bottom: calc(-1 * var(--cb-space-4) - 1px);
+}
+
+.cb-automations-design-shell.is-fullscreen .cb-core-design-shell__palette,
+.cb-automations-design-shell.is-fullscreen .cb-core-design-shell__sidebar {
+	min-height: 0;
+	overflow: auto;
+}
+
+@media (max-width: 1280px) {
+	.cb-automations-design-shell.is-palette-collapsed .cb-core-design-shell__workspace {
+		grid-template-columns: 58px minmax(0, 1fr) minmax(260px, 300px);
+	}
+
+	.cb-automations-design-shell.is-sidebar-collapsed .cb-core-design-shell__workspace {
+		grid-template-columns: minmax(170px, 200px) minmax(0, 1fr) 50px;
+	}
+
+	.cb-automations-design-shell.is-palette-collapsed.is-sidebar-collapsed .cb-core-design-shell__workspace {
+		grid-template-columns: 58px minmax(0, 1fr) 50px;
+	}
+}
+
+@media (max-width: 900px) {
+	.cb-automations-builder-pane-toggle {
+		display: none;
+	}
+
+	.cb-automations-design-shell.is-palette-collapsed .cb-core-design-shell__workspace,
+	.cb-automations-design-shell.is-sidebar-collapsed .cb-core-design-shell__workspace,
+	.cb-automations-design-shell.is-palette-collapsed.is-sidebar-collapsed .cb-core-design-shell__workspace {
+		grid-template-columns: 1fr;
+	}
+
+	.cb-automations-design-shell.is-palette-collapsed .cb-automations-stage-nav > .cb-automations-panel-eyebrow,
+	.cb-automations-design-shell.is-palette-collapsed .cb-automations-stage-nav a strong,
+	.cb-automations-design-shell.is-palette-collapsed .cb-automations-stage-nav a small,
+	.cb-automations-design-shell.is-sidebar-collapsed .cb-core-design-shell__sidebar-tabs,
+	.cb-automations-design-shell.is-sidebar-collapsed .cb-core-design-shell__sidebar-panel {
+		display: revert !important;
+	}
+}
