@@ -29,6 +29,7 @@ define( 'CB_AUTOMATIONS_DB_VERSION', '1' );
 define( 'CB_AUTOMATIONS_REQUIRED_API', '1.0' );
 define( 'CB_AUTOMATIONS_FILE', __FILE__ );
 define( 'CB_AUTOMATIONS_DIR', plugin_dir_path( __FILE__ ) );
+define( 'CB_AUTOMATIONS_URL', plugin_dir_url( __FILE__ ) );
 define( 'CB_AUTOMATIONS_BASENAME', plugin_basename( __FILE__ ) );
 
 spl_autoload_register( static function ( string $class ): void {
