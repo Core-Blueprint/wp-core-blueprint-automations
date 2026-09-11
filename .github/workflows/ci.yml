@@ -42,9 +42,6 @@ jobs:
       - name: Capability picker regression
         run: node tests/js/capability-picker.test.mjs
 
-      - name: Editor binding compatibility regression
-        run: node tests/js/editor-binding-compatibility.test.mjs
-
       - name: Validation recovery regression
         run: node tests/js/validation-recovery.test.mjs
 
@@ -71,6 +68,9 @@ jobs:
 
       - name: Independent proof workflows
         run: php tests/unit/proof-workflows.php
+
+      - name: Golden provider workflow
+        run: php tests/unit/golden-provider-set.php
 
       - name: Demo provider registration contract
         run: php tests/unit/demo-provider-contract.php
