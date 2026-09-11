@@ -35,7 +35,8 @@ try {
 	$encoded = DefinitionCodec::encode( $draft );
 	if (
 		1 !== ( $encoded['definition_version'] ?? null )
-		|| null !== ( $encoded['trigger'] ?? 'missing' )
+		|| ! array_key_exists( 'trigger', $encoded )
+		|| null !== $encoded['trigger']
 		|| [] !== ( $encoded['states'] ?? null )
 		|| [] !== ( $encoded['conditions'] ?? null )
 		|| [] !== ( $encoded['actions'] ?? null )
