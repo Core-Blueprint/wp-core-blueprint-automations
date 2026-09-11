@@ -341,14 +341,22 @@
 		panel.querySelector('.cb-automations-panel-heading')?.insertAdjacentElement('afterend', staleStatus);
 	}
 
+	function isPresentationOnlyEvent(event) {
+		return event.target instanceof Element && Boolean(event.target.closest('.cb-automations-capability-picker__search'));
+	}
+
 	list.addEventListener('click', (event) => {
 		const button = event.target.closest('[data-cb-validation-jump]');
 		if (!button || button.disabled) return;
 		focusIssue(Number(button.getAttribute('data-cb-validation-jump')));
 	});
 
-	root.addEventListener('change', () => queueMicrotask(markStale));
-	root.addEventListener('input', () => queueMicrotask(markStale));
+	root.addEventListener('change', (event) => {
+		if (!isPresentationOnlyEvent(event)) queueMicrotask(markStale);
+	});
+	root.addEventListener('input', (event) => {
+		if (!isPresentationOnlyEvent(event)) queueMicrotask(markStale);
+	});
 	root.addEventListener('click', (event) => {
 		if (event.target.closest('[data-cb-add-state], [data-cb-add-condition], [data-cb-add-action], .button-link-delete')) {
 			queueMicrotask(markStale);
