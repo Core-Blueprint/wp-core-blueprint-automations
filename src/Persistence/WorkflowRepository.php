@@ -40,6 +40,10 @@ final class WorkflowRepository {
 		);
 
 		if ( false === $result || (int) $wpdb->insert_id < 1 ) {
+			$reason = trim( (string) $wpdb->last_error );
+			if ( '' !== $reason ) {
+				error_log( '[Core Blueprint Automations] Workflow create database failure: ' . $reason ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- bounded diagnostic; workflow payload is never logged.
+			}
 			throw PersistenceFailure::database( 'create workflow' );
 		}
 
