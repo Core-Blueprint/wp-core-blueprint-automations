@@ -9,7 +9,7 @@ defined( 'ABSPATH' ) || exit;
 
 final readonly class WorkflowSaveResult {
 	public const SAVED               = 'saved';
-	public const VALIDATION_FAILED   = 'validation_failed';
+	public const SAVED_DISABLED      = 'saved_disabled';
 	public const PERSISTENCE_BLOCKED = 'persistence_blocked';
 	public const CONFLICT            = 'conflict';
 
@@ -22,8 +22,8 @@ final readonly class WorkflowSaveResult {
 		return new self( self::SAVED, $validation );
 	}
 
-	public static function validation_failed( ValidationResult $validation ): self {
-		return new self( self::VALIDATION_FAILED, $validation );
+	public static function saved_disabled( ValidationResult $validation ): self {
+		return new self( self::SAVED_DISABLED, $validation );
 	}
 
 	public static function persistence_blocked( ValidationResult $validation ): self {
@@ -43,6 +43,6 @@ final readonly class WorkflowSaveResult {
 	}
 
 	public function was_saved(): bool {
-		return self::SAVED === $this->status;
+		return in_array( $this->status, [ self::SAVED, self::SAVED_DISABLED ], true );
 	}
 }
