@@ -37,8 +37,15 @@ test('Automation Builder maturity keeps shared-shell, canonical persistence and 
 	assert.match(bootstrap, /is-builder-launch-pending/);
 	assert.match(bootstrap, /window\.location\.assign\(String\(config\.libraryUrl\)\)/);
 	assert.match(bootstrap, /LAUNCH_TIMEOUT_MS/);
+	assert.match(bootstrap, /LAUNCH_PENDING_BODY_CLASS/);
+	assert.match(bootstrap, /document\.body\?\.classList\.remove\(LAUNCH_PENDING_BODY_CLASS\)/);
+	assert.match(assets, /add_filter\( 'admin_body_class', \[ self::class, 'body_class' \] \)/);
+	assert.match(assets, /cb-automations-builder-launch-pending/);
+	assert.match(assets, /builder_launch_requested/);
 	assert.match(template, /cb-automations-editor-page" data-cb-design-launch-root/);
 	assert.match(template, /cb-automations-editor-heading" data-cb-design-launch-context/);
+	assert.match(designerCss, /body\.cb-automations-builder-launch-pending/);
+	assert.match(designerCss, /@keyframes cb-automations-builder-launch-fallback/);
 	assert.doesNotMatch(designerCss, /\.cb-automations-design-shell(?:\.is-fullscreen)?\s*\{[^}]*margin-top\s*:/);
 	const openBuilderBody = bootstrap.match(/const openBuilder = \(\) => \{([\s\S]*?)\n\t\t\};/)?.[1] ?? '';
 	assert.match(openBuilderBody, /stopObserver\(\)/);
