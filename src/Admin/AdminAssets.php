@@ -23,16 +23,24 @@ final class AdminAssets {
 			return;
 		}
 
-		$css        = CB_AUTOMATIONS_DIR . 'assets/css/admin-automations.css';
-		$polish_css = CB_AUTOMATIONS_DIR . 'assets/css/admin-editor-polish.css';
-		$js         = CB_AUTOMATIONS_DIR . 'assets/js/admin-editor.js';
-		$polish_js  = CB_AUTOMATIONS_DIR . 'assets/js/admin-editor-polish.js';
+		$css          = CB_AUTOMATIONS_DIR . 'assets/css/admin-automations.css';
+		$overview_css = CB_AUTOMATIONS_DIR . 'assets/css/admin-overview.css';
+		$polish_css   = CB_AUTOMATIONS_DIR . 'assets/css/admin-editor-polish.css';
+		$js           = CB_AUTOMATIONS_DIR . 'assets/js/admin-editor.js';
+		$polish_js    = CB_AUTOMATIONS_DIR . 'assets/js/admin-editor-polish.js';
 
 		wp_enqueue_style(
 			'cb-automations-admin',
 			CB_AUTOMATIONS_URL . 'assets/css/admin-automations.css',
 			[],
 			is_file( $css ) ? (string) filemtime( $css ) : CB_AUTOMATIONS_VERSION
+		);
+
+		wp_enqueue_style(
+			'cb-automations-admin-overview',
+			CB_AUTOMATIONS_URL . 'assets/css/admin-overview.css',
+			[ 'cb-automations-admin' ],
+			is_file( $overview_css ) ? (string) filemtime( $overview_css ) : CB_AUTOMATIONS_VERSION
 		);
 
 		wp_enqueue_style(
