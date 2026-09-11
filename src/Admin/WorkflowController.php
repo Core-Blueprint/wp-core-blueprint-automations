@@ -3,12 +3,14 @@ declare(strict_types=1);
 
 namespace CB\Automations\Admin;
 
+use CB\Automations\Persistence\PersistenceFailure;
 use CB\Automations\Workflow\ActivationState;
 use CB\Automations\Workflow\Definition;
 use CB\Automations\Workflow\DefinitionCodec;
 use CB\Automations\Workflow\PersistencePolicy;
 use CB\Automations\Workflow\WorkflowSaveResult;
 use CB\Automations\Workflow\WorkflowService;
+use InvalidArgumentException;
 use UnexpectedValueException;
 
 defined( 'ABSPATH' ) || exit;
@@ -41,8 +43,13 @@ final class WorkflowController {
 
 			$id = ( new WorkflowService() )->create( $name, $definition, get_current_user_id() );
 			self::redirect( [ 'workflow' => $id, 'notice' => 'created' ] );
+		} catch ( InvalidArgumentException $error ) {
+			self::redirect( [ 'notice' => 'invalid_name' ] );
+		} catch ( PersistenceFailure $error ) {
+			error_log( '[Core Blueprint Automations] Workflow create persistence failure: ' . $error->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- bounded diagnostic without workflow data.
+			self::redirect( [ 'notice' => 'storage_failed' ] );
 		} catch ( \Throwable $error ) {
-			error_log( '[Core Blueprint Automations] Workflow create failed: ' . $error->getMessage() );
+			error_log( '[Core Blueprint Automations] Workflow create failed: ' . $error->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- bounded diagnostic without workflow data.
 			self::redirect( [ 'notice' => 'failed' ] );
 		}
 	}
