@@ -10,11 +10,12 @@ defined( 'ABSPATH' ) || exit;
 
 /** Automations-specific adapter assets for the public Base Designer Shell. */
 final class DesignerAssets {
-	private const BOOTSTRAP_HANDLE = 'cb-automations-admin-builder-bootstrap';
-	private const INSPECTOR_HANDLE = 'cb-automations-admin-builder-inspector';
-	private const LAYOUT_HANDLE    = 'cb-automations-admin-builder-layout';
-	private const SAVE_HANDLE      = 'cb-automations-admin-builder-save';
-	private const HISTORY_MODULE   = 'cb-automations-admin-builder-history';
+	private const BOOTSTRAP_HANDLE          = 'cb-automations-admin-builder-bootstrap';
+	private const INSPECTOR_HANDLE          = 'cb-automations-admin-builder-inspector';
+	private const LAYOUT_HANDLE             = 'cb-automations-admin-builder-layout';
+	private const SAVE_HANDLE               = 'cb-automations-admin-builder-save';
+	private const HISTORY_MODULE            = 'cb-automations-admin-builder-history';
+	private const LAUNCH_PENDING_BODY_CLASS = 'cb-automations-builder-launch-pending';
 
 	private static bool $initialized = false;
 
@@ -25,6 +26,15 @@ final class DesignerAssets {
 
 		self::$initialized = true;
 		add_action( 'admin_enqueue_scripts', [ self::class, 'enqueue' ], 20 );
+		add_filter( 'admin_body_class', [ self::class, 'body_class' ] );
+	}
+
+	public static function body_class( string $classes ): string {
+		if ( ! self::builder_launch_requested() ) {
+			return $classes;
+		}
+
+		return trim( $classes . ' ' . self::LAUNCH_PENDING_BODY_CLASS );
 	}
 
 	public static function enqueue( string $hook ): void {
@@ -170,6 +180,28 @@ final class DesignerAssets {
 			[ '@cb-core/design-editor', 'cb-automations-admin-designer-shell' ],
 			is_file( $history ) ? (string) filemtime( $history ) : CB_AUTOMATIONS_VERSION
 		);
+	}
+
+	private static function builder_launch_requested(): bool {
+		$workflow_id = isset( $_GET['workflow'] ) && is_string( $_GET['workflow'] )
+			? absint( wp_unslash( $_GET['workflow'] ) )
+			: 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- bounded read-only admin routing.
+		if ( $workflow_id < 1 ) {
+			return false;
+		}
+
+		$builder = isset( $_GET['builder'] ) && is_string( $_GET['builder'] )
+			? sanitize_key( wp_unslash( $_GET['builder'] ) )
+			: ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- bounded read-only admin routing.
+		if ( '1' === $builder ) {
+			return true;
+		}
+
+		$notice = isset( $_GET['notice'] ) && is_string( $_GET['notice'] )
+			? sanitize_key( wp_unslash( $_GET['notice'] ) )
+			: ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- bounded read-only notice routing.
+
+		return 'created' === $notice;
 	}
 
 	private static function base_editor_available(): bool {
