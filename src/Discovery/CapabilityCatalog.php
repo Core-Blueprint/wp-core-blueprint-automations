@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 
 final class CapabilityCatalog {
 	public function is_ready(): bool {
-		return did_action( 'init' ) > 0;
+		return did_action( 'init' ) > 0 && ! doing_action( 'init' );
 	}
 
 	/** @return CapabilityDefinition[] */
@@ -79,6 +79,6 @@ final class CapabilityCatalog {
 			return;
 		}
 
-		throw new RuntimeException( 'Automation capability discovery is unavailable before WordPress init completes.' );
+		throw new RuntimeException( 'Automation capability discovery is unavailable until WordPress init has completed.' );
 	}
 }
