@@ -6,6 +6,7 @@ namespace CB\Automations\Persistence;
 use CB\Automations\Workflow\ActivationState;
 use CB\Automations\Workflow\Definition;
 use CB\Automations\Workflow\DefinitionCodec;
+use CB\Automations\Workflow\PersistencePolicy;
 use JsonException;
 
 defined( 'ABSPATH' ) || exit;
@@ -180,7 +181,11 @@ final class WorkflowRepository {
 		}
 
 		try {
-			$decoded = json_decode( (string) ( $row['definition_json'] ?? '' ), true, 64, JSON_THROW_ON_ERROR );
+			$encoded = (string) ( $row['definition_json'] ?? '' );
+			if ( ! PersistencePolicy::allows_encoded_definition( $encoded ) ) {
+				throw new JsonException( 'Stored workflow definition exceeds the supported size.' );
+			}
+			$decoded = json_decode( $encoded, true, 64, JSON_THROW_ON_ERROR );
 			if ( ! is_array( $decoded ) ) {
 				throw new JsonException( 'Workflow definition root must be an object.' );
 			}
@@ -206,7 +211,7 @@ final class WorkflowRepository {
 
 	private static function encode_definition( Definition $definition ): string {
 		$json = wp_json_encode( DefinitionCodec::encode( $definition ) );
-		if ( ! is_string( $json ) ) {
+		if ( ! is_string( $json ) || ! PersistencePolicy::allows_encoded_definition( $json ) ) {
 			throw PersistenceFailure::definition();
 		}
 		return $json;
