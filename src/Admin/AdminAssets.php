@@ -144,6 +144,8 @@ final class AdminAssets {
 				'then_action'        => __( 'Then · Action %d', 'core-blueprint-automations' ),
 				'choose_trigger'     => __( 'Choose trigger', 'core-blueprint-automations' ),
 				'add_action'         => __( 'Add action', 'core-blueprint-automations' ),
+				'review_trigger'     => __( 'Review trigger', 'core-blueprint-automations' ),
+				'review_capability'  => __( 'Review capability', 'core-blueprint-automations' ),
 				'connect_input'      => __( 'Connect input', 'core-blueprint-automations' ),
 				'fix_input'          => __( 'Fix input', 'core-blueprint-automations' ),
 				'choose_replacement' => __( 'Choose replacement', 'core-blueprint-automations' ),
