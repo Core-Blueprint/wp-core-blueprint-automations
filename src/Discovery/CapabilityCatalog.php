@@ -14,7 +14,7 @@ use UnexpectedValueException;
 
 defined( 'ABSPATH' ) || exit;
 
-final class CapabilityCatalog {
+final class CapabilityCatalog implements CapabilitySource {
 	public function is_ready(): bool {
 		return did_action( 'init' ) > 0 && ! doing_action( 'init' );
 	}
