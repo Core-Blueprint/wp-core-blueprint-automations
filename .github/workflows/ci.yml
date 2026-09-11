@@ -72,6 +72,9 @@ jobs:
       - name: Independent proof workflows
         run: php tests/unit/proof-workflows.php
 
+      - name: Golden provider workflow
+        run: php tests/unit/golden-provider-set.php
+
       - name: Demo provider registration contract
         run: php tests/unit/demo-provider-contract.php
 
