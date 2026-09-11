@@ -9,7 +9,8 @@
 	function semanticsCompatible(source, target) {
 		const sourceSemantic = semanticType(source);
 		const targetSemantic = semanticType(target);
-		return sourceSemantic === null || targetSemantic === null || sourceSemantic === targetSemantic;
+		if (targetSemantic === null) return true;
+		return sourceSemantic !== null && sourceSemantic === targetSemantic;
 	}
 
 	function typeCompatible(source, target) {
