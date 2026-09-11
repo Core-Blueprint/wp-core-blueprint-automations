@@ -13,7 +13,7 @@ const legacyInteger = { type: 'integer', items: null };
 assert.equal(helpers.typeCompatible(projectId, sameProjectId), true, 'Matching explicit semantic IDs must remain compatible.');
 assert.equal(helpers.typeCompatible(contractId, projectId), false, 'Different explicit semantic IDs must be rejected even when primitive types match.');
 assert.equal(helpers.typeCompatible(projectId, legacyInteger), true, 'Typed sources must remain compatible with legacy untyped targets when primitive types match.');
-assert.equal(helpers.typeCompatible(legacyInteger, projectId), true, 'Legacy untyped sources must remain compatible with typed targets when primitive types match.');
+assert.equal(helpers.typeCompatible(legacyInteger, projectId), false, 'Semantically typed targets must reject legacy untyped workflow outputs.');
 assert.equal(
 	helpers.typeCompatible(
 		{ type: 'integer', semantic_type: 'core-blueprint-work.project_id' },
@@ -21,6 +21,14 @@ assert.equal(
 	),
 	true,
 	'Existing integer-to-number widening must remain valid when semantics match.'
+);
+assert.equal(
+	helpers.typeCompatible(
+		{ type: 'integer' },
+		{ type: 'number', semantic_type: 'core-blueprint-work.project_id' }
+	),
+	false,
+	'Primitive widening must not let an untyped workflow output satisfy a semantic target.'
 );
 assert.equal(
 	helpers.typeCompatible(
