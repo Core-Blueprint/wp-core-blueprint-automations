@@ -70,6 +70,53 @@ final class WorkflowRepository {
 		return self::hydrate( $row );
 	}
 
+	/** @return WorkflowRecord[] */
+	public static function list( int $limit = 50, int $offset = 0 ): array {
+		global $wpdb;
+
+		$limit  = max( 1, min( 100, $limit ) );
+		$offset = max( 0, $offset );
+		$table  = Schema::table();
+		$rows   = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT id, name, activation_state, definition_version, definition_json, revision, created_by, updated_by, created_at, updated_at
+				 FROM {$table}
+				 ORDER BY updated_at DESC, id DESC
+				 LIMIT %d OFFSET %d",
+				$limit,
+				$offset
+			),
+			ARRAY_A
+		);
+
+		if ( ! is_array( $rows ) ) {
+			throw PersistenceFailure::database( 'list workflows' );
+		}
+		if ( [] === $rows && '' !== (string) $wpdb->last_error ) {
+			throw PersistenceFailure::database( 'list workflows' );
+		}
+
+		$records = [];
+		foreach ( $rows as $row ) {
+			if ( ! is_array( $row ) ) {
+				throw PersistenceFailure::definition();
+			}
+			$records[] = self::hydrate( $row );
+		}
+		return $records;
+	}
+
+	public static function count(): int {
+		global $wpdb;
+
+		$table = Schema::table();
+		$count = $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- table name is a trusted plugin-owned identifier.
+		if ( null === $count && '' !== (string) $wpdb->last_error ) {
+			throw PersistenceFailure::database( 'count workflows' );
+		}
+		return max( 0, (int) $count );
+	}
+
 	/**
 	 * Atomically replace editable workflow state when the caller still owns the
 	 * expected revision. False means stale editor state or a missing workflow.
