@@ -38,5 +38,8 @@ jobs:
       - name: Privacy persistence regression
         run: php tests/unit/privacy-policy.php
 
+      - name: Independent proof workflows
+        run: php tests/unit/proof-workflows.php
+
       - name: Architecture regression guard
         run: php tests/unit/architecture.php
