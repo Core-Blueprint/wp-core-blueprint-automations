@@ -2,15 +2,14 @@
 declare(strict_types=1);
 
 namespace CB\Automations\Support;
-
 defined( 'ABSPATH' ) || exit;
 
 final class Requirements {
 	public static function api_compatible( string $available, string $required ): bool {
-		if ( 1 !== preg_match( '/^(\\d+)\\.(\\d+)$/', $available, $available_match ) ) {
+		if ( 1 !== preg_match( '/^(\d+)\.(\d+)$/', $available, $available_match ) ) {
 			return false;
 		}
-		if ( 1 !== preg_match( '/^(\\d+)\\.(\\d+)$/', $required, $required_match ) ) {
+		if ( 1 !== preg_match( '/^(\d+)\.(\d+)$/', $required, $required_match ) ) {
 			return false;
 		}
 
@@ -41,10 +40,13 @@ final class Requirements {
 			'\\CB\\Core\\Automation\\TriggerRegistry',
 			'\\CB\\Core\\Automation\\ActionRegistry',
 			'\\CB\\Core\\Automation\\StateRegistry',
+			'\\CB\\Core\\Admin\\PageRegistry',
+			'\\CB\\Core\\Admin\\Page',
+			'\\CB\\Core\\UI\\Status',
 		];
 
-		foreach ( $required_contracts as $class ) {
-			if ( ! class_exists( $class ) ) {
+		foreach ( $required_contracts as $contract ) {
+			if ( ! class_exists( $contract ) && ! interface_exists( $contract ) ) {
 				$issues[] = 'automation-foundation-unavailable';
 				break;
 			}
@@ -71,7 +73,7 @@ final class Requirements {
 				CB_AUTOMATIONS_REQUIRED_API,
 				defined( 'CB_CORE_API_VERSION' ) ? (string) CB_CORE_API_VERSION : __( 'none', 'core-blueprint-automations' )
 			),
-			'automation-foundation-unavailable' => __( 'The Core Blueprint Automation Foundation is unavailable. Install a Base build that provides Trigger, Action, and State registries.', 'core-blueprint-automations' ),
+			'automation-foundation-unavailable' => __( 'Required public Core Blueprint Base contracts are unavailable. Install a Base build that provides the Automation Foundation and Core Admin page contracts.', 'core-blueprint-automations' ),
 			default => __( 'Ready', 'core-blueprint-automations' ),
 		};
 	}
