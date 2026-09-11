@@ -199,6 +199,10 @@ final class WorkflowValidator {
 			}
 
 			if ( Binding::SOURCE_LITERAL === $binding->source() ) {
+				if ( true === ( $schema[ $field ]['sensitive'] ?? false ) ) {
+					$issues[] = new ValidationIssue( 'privacy.sensitive_literal', $binding_path, [ 'field' => $field ] );
+					continue;
+				}
 				if ( ! $this->literal_matches_schema( $binding->value(), $schema[ $field ] ) ) {
 					$issues[] = new ValidationIssue( 'binding.type_mismatch', $binding_path, [ 'field' => $field ] );
 				}
@@ -253,6 +257,16 @@ final class WorkflowValidator {
 		$right_type = null;
 		if ( null !== $right ) {
 			$right_type = $this->resolve_operand_type( $right, $path . '.right', $consumer_order, $steps_by_id, $order_by_id, $resolved, $issues );
+		}
+
+		if (
+			null !== $right
+			&& (
+				( null !== $left_type && $left_type['sensitive'] && Binding::SOURCE_LITERAL === $right->source() )
+				|| ( null !== $right_type && $right_type['sensitive'] && Binding::SOURCE_LITERAL === $condition->left()->source() )
+			)
+		) {
+			$issues[] = new ValidationIssue( 'privacy.sensitive_literal', $path );
 		}
 
 		if ( null === $left_type ) {
@@ -473,8 +487,11 @@ final class WorkflowValidator {
 	/** @param array<string,CapabilityDefinition> $resolved */
 	private function contains_sensitive_paths( Definition $definition, array $resolved ): bool {
 		foreach ( array_merge( $definition->states(), $definition->actions() ) as $step ) {
-			foreach ( $step->bindings() as $binding ) {
-				if ( $this->binding_is_sensitive( $binding, $resolved ) ) {
+			$target       = $resolved[ $step->step_id() ] ?? null;
+			$input_schema = null === $target ? [] : $target->input_schema();
+
+			foreach ( $step->bindings() as $field => $binding ) {
+				if ( true === ( $input_schema[ $field ]['sensitive'] ?? false ) || $this->binding_is_sensitive( $binding, $resolved ) ) {
 					return true;
 				}
 			}
