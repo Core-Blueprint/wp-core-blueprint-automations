@@ -1,0 +1,245 @@
+.cb-automations-capability-picker {
+	position: relative;
+	width: 100%;
+}
+
+.cb-automations-capability-picker__trigger {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--cb-space-3);
+	width: 100%;
+	min-height: 58px;
+	padding: var(--cb-space-3);
+	border: 1px solid var(--cb-border);
+	border-radius: var(--cb-radius-md);
+	background: var(--cb-surface-1);
+	color: var(--cb-text);
+	text-align: left;
+	cursor: pointer;
+	transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
+}
+
+.cb-automations-capability-picker__trigger:hover {
+	border-color: color-mix(in srgb, var(--cb-accent) 45%, var(--cb-border));
+	background: var(--cb-surface-2);
+}
+
+.cb-automations-capability-picker__trigger:focus-visible,
+.cb-automations-capability-picker.is-open .cb-automations-capability-picker__trigger {
+	outline: 0;
+	border-color: var(--cb-accent);
+	box-shadow: 0 0 0 2px color-mix(in srgb, var(--cb-accent) 22%, transparent);
+}
+
+.cb-automations-capability-picker__trigger.is-unavailable {
+	border-color: color-mix(in srgb, var(--cb-danger) 40%, var(--cb-border));
+}
+
+.cb-automations-capability-picker__trigger-copy {
+	display: grid;
+	gap: 2px;
+	min-width: 0;
+}
+
+.cb-automations-capability-picker__title,
+.cb-automations-capability-picker__meta,
+.cb-automations-capability-picker__description {
+	display: block;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.cb-automations-capability-picker__title {
+	font-size: var(--cb-fs-sm);
+	font-weight: var(--cb-fw-semibold);
+	white-space: nowrap;
+}
+
+.cb-automations-capability-picker__meta {
+	color: var(--cb-text-muted);
+	font-size: var(--cb-fs-xs);
+}
+
+.cb-automations-capability-picker__description {
+	margin-top: 2px;
+	color: var(--cb-text-muted);
+	font-size: var(--cb-fs-xs);
+	white-space: nowrap;
+}
+
+.cb-automations-capability-picker__chevron {
+	width: 8px;
+	height: 8px;
+	flex: 0 0 8px;
+	margin-right: 2px;
+	border-right: 2px solid currentColor;
+	border-bottom: 2px solid currentColor;
+	transform: rotate(45deg) translateY(-2px);
+	transition: transform .15s ease;
+}
+
+.cb-automations-capability-picker.is-open .cb-automations-capability-picker__chevron {
+	transform: rotate(225deg) translate(-2px, -2px);
+}
+
+.cb-automations-capability-picker__popover {
+	position: absolute;
+	z-index: 100;
+	top: calc(100% + var(--cb-space-2));
+	left: 0;
+	width: min(100%, 680px);
+	min-width: min(420px, 100%);
+	padding: var(--cb-space-3);
+	border: 1px solid var(--cb-border);
+	border-radius: var(--cb-radius-md);
+	background: var(--cb-surface-1);
+	box-shadow: 0 16px 36px rgba(0, 0, 0, .16);
+}
+
+.cb-automations-capability-picker__search {
+	width: 100%;
+	max-width: none !important;
+	margin: 0 0 var(--cb-space-2) !important;
+}
+
+.cb-automations-capability-picker__clear {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 32px;
+	margin: 0 0 var(--cb-space-3);
+	padding: var(--cb-space-1) var(--cb-space-2);
+	border: 1px solid var(--cb-border);
+	border-radius: var(--cb-radius-sm);
+	background: transparent;
+	color: var(--cb-text-muted);
+	font-size: var(--cb-fs-xs);
+	cursor: pointer;
+}
+
+.cb-automations-capability-picker:not([data-capability-kind="trigger"]) .cb-automations-capability-picker__clear {
+	display: none;
+}
+
+.cb-automations-capability-picker__clear:hover,
+.cb-automations-capability-picker__clear:focus-visible {
+	outline: 0;
+	border-color: var(--cb-accent);
+	color: var(--cb-text);
+}
+
+.cb-automations-capability-picker__groups {
+	display: grid;
+	gap: var(--cb-space-3);
+	max-height: 360px;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	padding-right: 2px;
+}
+
+.cb-automations-capability-picker__group {
+	display: grid;
+	gap: var(--cb-space-1);
+}
+
+.cb-automations-capability-picker__group-heading {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--cb-space-2);
+	padding: var(--cb-space-1) var(--cb-space-2);
+	color: var(--cb-text-muted);
+	font-size: var(--cb-fs-2xs);
+	font-weight: var(--cb-fw-semibold);
+	letter-spacing: .04em;
+	text-transform: uppercase;
+}
+
+.cb-automations-capability-picker__option {
+	display: grid;
+	gap: 3px;
+	width: 100%;
+	padding: var(--cb-space-2) var(--cb-space-3);
+	border: 1px solid transparent;
+	border-radius: var(--cb-radius-sm);
+	background: transparent;
+	color: var(--cb-text);
+	text-align: left;
+	cursor: pointer;
+}
+
+.cb-automations-capability-picker__option:hover,
+.cb-automations-capability-picker__option:focus-visible {
+	outline: 0;
+	border-color: color-mix(in srgb, var(--cb-accent) 32%, var(--cb-border));
+	background: var(--cb-tint-accent);
+}
+
+.cb-automations-capability-picker__option.is-selected {
+	border-color: color-mix(in srgb, var(--cb-accent) 45%, var(--cb-border));
+	background: var(--cb-tint-accent);
+}
+
+.cb-automations-capability-picker__option.is-unavailable,
+.cb-automations-capability-picker__option:disabled {
+	cursor: not-allowed;
+	opacity: .62;
+}
+
+.cb-automations-capability-picker__option-title {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--cb-space-2);
+	font-size: var(--cb-fs-sm);
+}
+
+.cb-automations-capability-picker__option-description,
+.cb-automations-capability-picker__option-provider {
+	display: block;
+	color: var(--cb-text-muted);
+	font-size: var(--cb-fs-xs);
+}
+
+.cb-automations-capability-picker__option-provider {
+	font-size: var(--cb-fs-2xs);
+}
+
+.cb-automations-capability-picker__badge {
+	display: inline-flex;
+	align-items: center;
+	min-height: 20px;
+	padding: 1px var(--cb-space-2);
+	border: 1px solid color-mix(in srgb, var(--cb-danger) 35%, var(--cb-border));
+	border-radius: var(--cb-radius-pill);
+	background: color-mix(in srgb, var(--cb-danger) 10%, transparent);
+	color: var(--cb-danger);
+	font-size: var(--cb-fs-2xs);
+	font-weight: var(--cb-fw-semibold);
+	letter-spacing: 0;
+	text-transform: none;
+}
+
+.cb-automations-capability-picker__empty {
+	margin: 0;
+	padding: var(--cb-space-4) var(--cb-space-3);
+	border: 1px dashed var(--cb-border);
+	border-radius: var(--cb-radius-sm);
+	color: var(--cb-text-muted);
+	text-align: center;
+}
+
+@media (max-width: 782px) {
+	.cb-automations-capability-picker__popover {
+		position: static;
+		width: 100%;
+		min-width: 0;
+		margin-top: var(--cb-space-2);
+	}
+
+	.cb-automations-capability-picker__groups {
+		max-height: 300px;
+	}
+}
