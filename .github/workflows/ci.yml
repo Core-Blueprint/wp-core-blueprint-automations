@@ -38,6 +38,9 @@ jobs:
       - name: Privacy persistence regression
         run: php tests/unit/privacy-policy.php
 
+      - name: Editor privacy projection regression
+        run: php tests/unit/editor-projection.php
+
       - name: Independent proof workflows
         run: php tests/unit/proof-workflows.php
 
