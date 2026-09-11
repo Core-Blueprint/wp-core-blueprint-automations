@@ -84,6 +84,7 @@ final class AdminAssets {
 				'search_label'            => __( 'Search capabilities', 'core-blueprint-automations' ),
 				'search_placeholder'      => __( 'Search by capability, provider or description…', 'core-blueprint-automations' ),
 				'search_help'             => __( 'Search by capability, provider or description.', 'core-blueprint-automations' ),
+				'clear_selection'         => __( 'Clear selection', 'core-blueprint-automations' ),
 				'no_results'              => __( 'No capabilities match your search.', 'core-blueprint-automations' ),
 				'unavailable'             => __( 'Unavailable', 'core-blueprint-automations' ),
 				'unavailable_description' => __( 'This stored capability is no longer available. Choose a replacement.', 'core-blueprint-automations' ),

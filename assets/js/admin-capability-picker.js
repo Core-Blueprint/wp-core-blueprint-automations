@@ -85,6 +85,7 @@
 		search_label: 'Search capabilities',
 		search_placeholder: 'Search by capability, provider or description…',
 		search_help: 'Search by capability, provider or description.',
+		clear_selection: 'Clear selection',
 		no_results: 'No capabilities match your search.',
 		unavailable: 'Unavailable',
 		unavailable_description: 'This stored capability is no longer available. Choose a replacement.',
@@ -229,6 +230,8 @@
 		const kind = kindForSelect(select);
 		if (!kind) return;
 
+		const canClear = Array.from(select.options).some((option) => option.value === '');
+
 		select.dataset.cbCapabilityPickerEnhanced = '1';
 		select.hidden = true;
 		select.tabIndex = -1;
@@ -271,12 +274,22 @@
 			placeholder: strings.search_placeholder,
 			autocomplete: 'off',
 		});
+		const clearSelection = canClear && select.value
+			? el('button', { type: 'button', class: 'cb-automations-capability-picker__clear' }, strings.clear_selection)
+			: null;
 		const groupsNode = el('div', { class: 'cb-automations-capability-picker__groups' });
 		const capabilities = catalog.filter((capability) => capability?.reference?.kind === kind);
+		let groupIndex = 0;
 
 		for (const group of groupCapabilities(capabilities)) {
-			const section = el('section', { class: 'cb-automations-capability-picker__group' });
-			const heading = el('div', { class: 'cb-automations-capability-picker__group-heading' });
+			groupIndex += 1;
+			const headingId = `${popoverId}-provider-${groupIndex}`;
+			const section = el('section', {
+				class: 'cb-automations-capability-picker__group',
+				role: 'group',
+				'aria-labelledby': headingId,
+			});
+			const heading = el('div', { id: headingId, class: 'cb-automations-capability-picker__group-heading' });
 			heading.append(el('strong', {}, group.name));
 			if (!group.available) heading.append(el('span', { class: 'cb-automations-capability-picker__badge' }, strings.unavailable));
 			section.append(heading);
@@ -305,7 +318,9 @@
 		}
 
 		const empty = el('p', { class: 'cb-automations-capability-picker__empty', hidden: capabilities.length > 0 }, strings.no_results);
-		popover.append(searchLabel, search, groupsNode, empty);
+		popover.append(searchLabel, search);
+		if (clearSelection) popover.append(clearSelection);
+		popover.append(groupsNode, empty);
 		wrapper.append(trigger, popover);
 		select.insertAdjacentElement('afterend', wrapper);
 
@@ -347,6 +362,13 @@
 				focusRelativeOption(wrapper, null, 'last');
 			}
 		});
+
+		if (clearSelection) {
+			clearSelection.addEventListener('click', () => {
+				select.value = '';
+				select.dispatchEvent(new Event('change', { bubbles: true }));
+			});
+		}
 
 		groupsNode.addEventListener('click', (event) => {
 			const option = event.target.closest('.cb-automations-capability-picker__option');

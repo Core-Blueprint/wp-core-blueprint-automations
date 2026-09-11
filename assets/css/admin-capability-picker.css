@@ -95,13 +95,35 @@
 	border: 1px solid var(--cb-border);
 	border-radius: var(--cb-radius-md);
 	background: var(--cb-surface-1);
-	box-shadow: var(--cb-shadow-lg);
+	box-shadow: 0 16px 36px rgba(0, 0, 0, .16);
 }
 
 .cb-automations-capability-picker__search {
 	width: 100%;
 	max-width: none !important;
-	margin: 0 0 var(--cb-space-3) !important;
+	margin: 0 0 var(--cb-space-2) !important;
+}
+
+.cb-automations-capability-picker__clear {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 32px;
+	margin: 0 0 var(--cb-space-3);
+	padding: var(--cb-space-1) var(--cb-space-2);
+	border: 1px solid var(--cb-border);
+	border-radius: var(--cb-radius-sm);
+	background: transparent;
+	color: var(--cb-text-muted);
+	font-size: var(--cb-fs-xs);
+	cursor: pointer;
+}
+
+.cb-automations-capability-picker__clear:hover,
+.cb-automations-capability-picker__clear:focus-visible {
+	outline: 0;
+	border-color: var(--cb-accent);
+	color: var(--cb-text);
 }
 
 .cb-automations-capability-picker__groups {
