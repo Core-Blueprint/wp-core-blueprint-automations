@@ -276,7 +276,16 @@ final class WorkflowValidator {
 			$issues[] = new ValidationIssue( 'condition.type_mismatch', $path . '.left', [ 'operator' => $condition->operator() ] );
 			return;
 		}
-		if ( 2 === $operator['arity'] && null !== $right_type && ! $this->condition_types_compatible( $condition->operator(), $left_type, $right_type ) ) {
+		if (
+			2 === $operator['arity']
+			&& null !== $right_type
+			&& ! $this->condition_types_compatible(
+				$condition->operator(),
+				$left_type,
+				$right_type,
+				null !== $right && Binding::SOURCE_LITERAL === $right->source()
+			)
+		) {
 			$issues[] = new ValidationIssue( 'condition.type_mismatch', $path, [ 'operator' => $condition->operator() ] );
 		}
 	}
@@ -407,7 +416,7 @@ final class WorkflowValidator {
 	}
 
 	private function semantic_types_compatible( ?string $source, ?string $target ): bool {
-		return null === $source || null === $target || $source === $target;
+		return null === $target || ( null !== $source && $source === $target );
 	}
 
 	private function scalar_type_compatible( string $source, string $target ): bool {
@@ -465,8 +474,8 @@ final class WorkflowValidator {
 	 * @param array{type:string,items:?string,sensitive:bool,semantic_type:?string} $left
 	 * @param array{type:string,items:?string,sensitive:bool,semantic_type:?string} $right
 	 */
-	private function condition_types_compatible( string $operator, array $left, array $right ): bool {
-		if ( ! $this->semantic_types_compatible( $left['semantic_type'], $right['semantic_type'] ) ) {
+	private function condition_types_compatible( string $operator, array $left, array $right, bool $right_is_literal ): bool {
+		if ( ! $right_is_literal && ! $this->semantic_types_compatible( $right['semantic_type'], $left['semantic_type'] ) ) {
 			return false;
 		}
 
