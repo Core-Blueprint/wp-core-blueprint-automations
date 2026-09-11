@@ -118,7 +118,8 @@
 	function typeCompatible(source, target) {
 		if (!source || !target) return false;
 		if (source.type === target.type) {
-			return source.type !== 'array' || source.items === target.items;
+			if (source.type !== 'array') return true;
+			return source.items === target.items || (source.items === 'integer' && target.items === 'number');
 		}
 		return source.type === 'integer' && target.type === 'number';
 	}
@@ -324,7 +325,10 @@
 		card.append(head);
 		card.append(capabilitySelect(kind, step.capability, (key) => {
 			const reference = selectedReference(key);
-			if (!reference) return;
+			if (!reference) {
+				renderAll();
+				return;
+			}
 			step.capability = reference;
 			step.bindings = {};
 			renderAll();
@@ -364,7 +368,13 @@
 			return { type: leftSchema.items || 'string', items: null, sensitive };
 		}
 		if (['greater_than', 'greater_than_or_equal', 'less_than', 'less_than_or_equal'].includes(operator)) {
-			return { type: leftSchema.type === 'integer' ? 'integer' : 'number', items: null, sensitive };
+			return { type: 'number', items: null, sensitive };
+		}
+		if (['equals', 'not_equals'].includes(operator) && leftSchema.type === 'integer') {
+			return { type: 'number', items: null, sensitive };
+		}
+		if (['equals', 'not_equals'].includes(operator) && leftSchema.type === 'array' && leftSchema.items === 'integer') {
+			return { type: 'array', items: 'number', sensitive };
 		}
 		return leftSchema;
 	}

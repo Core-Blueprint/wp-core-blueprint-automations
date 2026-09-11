@@ -11,6 +11,7 @@ use CB\Automations\Workflow\PersistencePolicy;
 use CB\Automations\Workflow\WorkflowSaveResult;
 use CB\Automations\Workflow\WorkflowService;
 use InvalidArgumentException;
+use JsonException;
 use UnexpectedValueException;
 
 defined( 'ABSPATH' ) || exit;
@@ -77,6 +78,11 @@ final class WorkflowController {
 				throw new UnexpectedValueException( 'Workflow definition root must be an object.' );
 			}
 			$definition = DefinitionCodec::decode( $decoded );
+		} catch ( JsonException | UnexpectedValueException $error ) {
+			self::redirect( [ 'workflow' => $id, 'notice' => 'invalid' ] );
+		}
+
+		try {
 			$result = ( new WorkflowService() )->save(
 				$id,
 				$revision,
@@ -94,10 +100,15 @@ final class WorkflowController {
 				default                                 => 'failed',
 			};
 			self::redirect( [ 'workflow' => $id, 'notice' => $notice ] );
+		} catch ( InvalidArgumentException $error ) {
+			self::redirect( [ 'workflow' => $id, 'notice' => 'invalid_name' ] );
+		} catch ( PersistenceFailure $error ) {
+			error_log( '[Core Blueprint Automations] Workflow save persistence failure: ' . $error->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- bounded diagnostic without workflow data.
+			self::redirect( [ 'workflow' => $id, 'notice' => 'storage_failed' ] );
 		} catch ( \Throwable $error ) {
 			// Never log the submitted definition: it may contain operator-entered literals.
-			error_log( '[Core Blueprint Automations] Workflow save failed: ' . $error->getMessage() );
-			self::redirect( [ 'workflow' => $id, 'notice' => 'invalid' ] );
+			error_log( '[Core Blueprint Automations] Workflow save failed: ' . $error->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- bounded diagnostic without workflow data.
+			self::redirect( [ 'workflow' => $id, 'notice' => 'failed' ] );
 		}
 	}
 

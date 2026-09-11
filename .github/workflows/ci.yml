@@ -37,6 +37,9 @@ jobs:
       - name: Bootstrap requirements regression
         run: php tests/unit/bootstrap-requirements.php
 
+      - name: Workflow definition invariants
+        run: php tests/unit/definition-invariants.php
+
       - name: Workflow core regression matrix
         run: php tests/unit/workflow-core.php
 

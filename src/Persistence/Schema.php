@@ -21,7 +21,7 @@ final class Schema {
 
 	public static function maybe_upgrade(): void {
 		$current = (string) get_option( self::OPTION_DB_VERSION, '' );
-		if ( CB_AUTOMATIONS_DB_VERSION === $current && self::ready() ) {
+		if ( CB_AUTOMATIONS_DB_VERSION === $current ) {
 			return;
 		}
 

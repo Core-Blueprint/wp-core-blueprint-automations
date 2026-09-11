@@ -21,7 +21,9 @@ $notices = [
 	'saved_disabled'      => [ 'warning', __( 'Your changes were saved, but the automation remains disabled because the current workflow is not valid yet.', 'core-blueprint-automations' ) ],
 	'persistence_blocked' => [ 'error', __( 'The automation was not saved because a sensitive input contains a literal value. Connect sensitive inputs to a prior workflow output instead.', 'core-blueprint-automations' ) ],
 	'conflict'            => [ 'warning', __( 'This automation changed in another request. Reload the page before saving again.', 'core-blueprint-automations' ) ],
+	'invalid_name'        => [ 'error', __( 'Enter an automation name between 1 and 191 characters.', 'core-blueprint-automations' ) ],
 	'invalid'             => [ 'error', __( 'The submitted workflow could not be decoded safely. No changes were saved.', 'core-blueprint-automations' ) ],
+	'storage_failed'      => [ 'error', __( 'The automation could not be saved because workflow storage is unavailable. No changes were saved.', 'core-blueprint-automations' ) ],
 	'failed'              => [ 'error', __( 'The automation could not be saved. Reload the page before trying again.', 'core-blueprint-automations' ) ],
 ];
 

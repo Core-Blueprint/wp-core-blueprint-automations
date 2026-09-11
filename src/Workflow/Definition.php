@@ -107,6 +107,7 @@ final readonly class Definition {
 			if ( ! $value instanceof $class ) {
 				return false;
 			}
+		}
 		return true;
 	}
 }

@@ -15,7 +15,11 @@ final class Plugin {
 	private static ?string $boot_error = null;
 
 	public static function boot(): void {
-		if ( self::$booted || null !== self::$boot_error || ! Requirements::runtime_ready() ) {
+		/* AU1 is configuration-only. Frontend/runtime orchestration starts in AU2. */
+		if ( self::$booted || null !== self::$boot_error || ! is_admin() ) {
+			return;
+		}
+		if ( ! Requirements::runtime_ready() ) {
 			return;
 		}
 
@@ -28,11 +32,8 @@ final class Plugin {
 		}
 
 		self::$booted = true;
-
-		if ( is_admin() ) {
-			WorkflowController::init();
-			AdminAssets::init();
-		}
+		WorkflowController::init();
+		AdminAssets::init();
 	}
 
 	public static function is_booted(): bool {
