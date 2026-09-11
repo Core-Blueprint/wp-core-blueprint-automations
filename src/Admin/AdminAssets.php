@@ -23,15 +23,17 @@ final class AdminAssets {
 			return;
 		}
 
-		$css          = CB_AUTOMATIONS_DIR . 'assets/css/admin-automations.css';
-		$overview_css = CB_AUTOMATIONS_DIR . 'assets/css/admin-overview.css';
-		$picker_css   = CB_AUTOMATIONS_DIR . 'assets/css/admin-capability-picker.css';
-		$polish_css   = CB_AUTOMATIONS_DIR . 'assets/css/admin-editor-polish.css';
-		$recovery_css = CB_AUTOMATIONS_DIR . 'assets/css/admin-validation-recovery.css';
-		$js           = CB_AUTOMATIONS_DIR . 'assets/js/admin-editor.js';
-		$picker_js    = CB_AUTOMATIONS_DIR . 'assets/js/admin-capability-picker.js';
-		$polish_js    = CB_AUTOMATIONS_DIR . 'assets/js/admin-editor-polish.js';
-		$recovery_js  = CB_AUTOMATIONS_DIR . 'assets/js/admin-validation-recovery.js';
+		$css           = CB_AUTOMATIONS_DIR . 'assets/css/admin-automations.css';
+		$overview_css  = CB_AUTOMATIONS_DIR . 'assets/css/admin-overview.css';
+		$picker_css    = CB_AUTOMATIONS_DIR . 'assets/css/admin-capability-picker.css';
+		$polish_css    = CB_AUTOMATIONS_DIR . 'assets/css/admin-editor-polish.css';
+		$recovery_css  = CB_AUTOMATIONS_DIR . 'assets/css/admin-validation-recovery.css';
+		$condition_css = CB_AUTOMATIONS_DIR . 'assets/css/admin-condition-builder.css';
+		$js            = CB_AUTOMATIONS_DIR . 'assets/js/admin-editor.js';
+		$picker_js     = CB_AUTOMATIONS_DIR . 'assets/js/admin-capability-picker.js';
+		$polish_js     = CB_AUTOMATIONS_DIR . 'assets/js/admin-editor-polish.js';
+		$recovery_js   = CB_AUTOMATIONS_DIR . 'assets/js/admin-validation-recovery.js';
+		$condition_js  = CB_AUTOMATIONS_DIR . 'assets/js/admin-condition-builder.js';
 
 		wp_enqueue_style(
 			'cb-automations-admin',
@@ -66,6 +68,13 @@ final class AdminAssets {
 			CB_AUTOMATIONS_URL . 'assets/css/admin-validation-recovery.css',
 			[ 'cb-automations-admin-editor-polish' ],
 			is_file( $recovery_css ) ? (string) filemtime( $recovery_css ) : CB_AUTOMATIONS_VERSION
+		);
+
+		wp_enqueue_style(
+			'cb-automations-admin-condition-builder',
+			CB_AUTOMATIONS_URL . 'assets/css/admin-condition-builder.css',
+			[ 'cb-automations-admin-validation-recovery' ],
+			is_file( $condition_css ) ? (string) filemtime( $condition_css ) : CB_AUTOMATIONS_VERSION
 		);
 
 		wp_enqueue_script(
@@ -154,6 +163,46 @@ final class AdminAssets {
 				'technical_details'  => __( 'Technical details', 'core-blueprint-automations' ),
 				'saved_issue'        => __( 'Saved workflow issue', 'core-blueprint-automations' ),
 				'save_recheck'       => __( 'Changes made. Save the automation to re-check workflow health.', 'core-blueprint-automations' ),
+			]
+		);
+
+		wp_enqueue_script(
+			'cb-automations-admin-condition-builder',
+			CB_AUTOMATIONS_URL . 'assets/js/admin-condition-builder.js',
+			[ 'cb-automations-admin-validation-recovery' ],
+			is_file( $condition_js ) ? (string) filemtime( $condition_js ) : CB_AUTOMATIONS_VERSION,
+			true
+		);
+
+		wp_localize_script(
+			'cb-automations-admin-condition-builder',
+			'cbAutomationsConditionBuilderStrings',
+			[
+				'only_continue_if'             => __( 'Only continue if', 'core-blueprint-automations' ),
+				'rule_preview'                 => __( 'Rule preview', 'core-blueprint-automations' ),
+				'condition_value'              => __( 'Value', 'core-blueprint-automations' ),
+				'condition_rule'               => __( 'Rule', 'core-blueprint-automations' ),
+				'condition_compare'            => __( 'Compare with', 'core-blueprint-automations' ),
+				'choose_comparison'            => __( 'Choose a value or workflow data…', 'core-blueprint-automations' ),
+				'enter_value'                  => __( 'Enter a value', 'core-blueprint-automations' ),
+				'workflow_data'                => __( 'Workflow data', 'core-blueprint-automations' ),
+				'unavailable_data'             => __( 'Unavailable data', 'core-blueprint-automations' ),
+				'type_text'                    => __( 'Text', 'core-blueprint-automations' ),
+				'type_number'                  => __( 'Number', 'core-blueprint-automations' ),
+				'type_boolean'                 => __( 'True / false', 'core-blueprint-automations' ),
+				'type_list'                    => __( 'List', 'core-blueprint-automations' ),
+				'operator_equals'              => __( 'is', 'core-blueprint-automations' ),
+				'operator_not_equals'          => __( 'is not', 'core-blueprint-automations' ),
+				'operator_contains'            => __( 'contains', 'core-blueprint-automations' ),
+				'operator_not_contains'        => __( 'does not contain', 'core-blueprint-automations' ),
+				'operator_greater_than'        => __( 'is greater than', 'core-blueprint-automations' ),
+				'operator_greater_than_or_equal' => __( 'is at least', 'core-blueprint-automations' ),
+				'operator_less_than'           => __( 'is less than', 'core-blueprint-automations' ),
+				'operator_less_than_or_equal'  => __( 'is at most', 'core-blueprint-automations' ),
+				'operator_is_empty'            => __( 'is empty', 'core-blueprint-automations' ),
+				'operator_is_not_empty'        => __( 'is not empty', 'core-blueprint-automations' ),
+				'operator_array_is_empty'      => __( 'has no items', 'core-blueprint-automations' ),
+				'operator_array_is_not_empty'  => __( 'has items', 'core-blueprint-automations' ),
 			]
 		);
 	}

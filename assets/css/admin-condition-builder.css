@@ -1,0 +1,124 @@
+/* Human-first presentation for the existing typed condition controls. */
+
+.cb-automations-condition.is-human-condition .cb-automations-condition-human-lead {
+	margin: 0 0 var(--cb-space-2);
+	color: var(--cb-text);
+	font-size: var(--cb-fs-sm);
+	font-weight: var(--cb-fw-semibold);
+}
+
+.cb-automations-condition.is-human-condition .cb-automations-condition-grid {
+	grid-template-columns: minmax(240px, 1.4fr) minmax(170px, .72fr) minmax(240px, 1.2fr);
+	gap: var(--cb-space-3);
+	align-items: start;
+}
+
+.cb-automations-condition.is-human-condition .cb-automations-condition-grid.is-unary {
+	grid-template-columns: minmax(260px, 1.5fr) minmax(190px, .8fr);
+}
+
+.cb-automations-condition-control {
+	position: relative;
+	min-width: 0;
+}
+
+.cb-automations-condition-control > label {
+	position: absolute !important;
+	width: 1px !important;
+	height: 1px !important;
+	padding: 0 !important;
+	margin: -1px !important;
+	overflow: hidden !important;
+	clip: rect(0, 0, 0, 0) !important;
+	white-space: nowrap !important;
+	border: 0 !important;
+}
+
+.cb-automations-condition-control > select,
+.cb-automations-condition-control .cb-automations-binding-source,
+.cb-automations-condition-control .cb-automations-literal input,
+.cb-automations-condition-control .cb-automations-literal textarea,
+.cb-automations-condition-control .cb-automations-literal select {
+	width: 100%;
+	max-width: 100%;
+}
+
+.cb-automations-condition-control > select,
+.cb-automations-condition-control .cb-automations-binding-source {
+	min-height: 40px;
+}
+
+.cb-automations-condition-control.is-operator > select {
+	font-weight: var(--cb-fw-semibold);
+}
+
+.cb-automations-condition-control .cb-automations-binding {
+	display: grid;
+	gap: var(--cb-space-2);
+}
+
+.cb-automations-condition-control .cb-automations-literal {
+	display: grid;
+	gap: var(--cb-space-1);
+}
+
+.cb-automations-condition-type {
+	display: inline-flex;
+	align-items: center;
+	min-height: 22px;
+	margin-top: var(--cb-space-2);
+	padding: 1px var(--cb-space-2);
+	border: 1px solid var(--cb-border);
+	border-radius: var(--cb-radius-pill);
+	background: var(--cb-surface-1);
+	color: var(--cb-text-muted);
+	font-size: var(--cb-fs-2xs);
+	font-weight: var(--cb-fw-semibold);
+	line-height: 1.2;
+}
+
+.cb-automations-condition-type[hidden] {
+	display: none;
+}
+
+.cb-automations-condition.is-human-condition .cb-automations-condition-summary {
+	margin: var(--cb-space-3) 0 0;
+	padding: var(--cb-space-2) var(--cb-space-3);
+	border-color: var(--cb-border);
+	background: var(--cb-surface-1);
+}
+
+.cb-automations-condition.is-human-condition .cb-automations-condition-summary strong {
+	font-weight: var(--cb-fw-medium);
+}
+
+.cb-automations-condition.is-human-condition optgroup {
+	font-style: normal;
+	font-weight: var(--cb-fw-semibold);
+}
+
+.cb-automations-condition.has-validation-issue .cb-automations-condition-grid {
+	position: relative;
+}
+
+@media (max-width: 960px) {
+	.cb-automations-condition.is-human-condition .cb-automations-condition-grid,
+	.cb-automations-condition.is-human-condition .cb-automations-condition-grid.is-unary {
+		grid-template-columns: 1fr;
+	}
+
+	.cb-automations-condition-control.is-operator {
+		max-width: none;
+	}
+}
+
+@media (max-width: 782px) {
+	.cb-automations-condition.is-human-condition .cb-automations-condition-human-lead {
+		margin-bottom: var(--cb-space-3);
+	}
+
+	.cb-automations-condition.is-human-condition .cb-automations-condition-summary {
+		align-items: flex-start;
+		flex-direction: column;
+	}
+}
