@@ -44,7 +44,19 @@ final class Schema {
 			return false;
 		}
 
-		$columns = $wpdb->get_col( "SHOW COLUMNS FROM {$table}", 0 );
+		$rows = $wpdb->get_results( "SHOW COLUMNS FROM {$table}", ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- table name is plugin-owned.
+		if ( ! is_array( $rows ) ) {
+			return false;
+		}
+
+		$columns = [];
+		foreach ( $rows as $row ) {
+			if ( ! is_array( $row ) || ! isset( $row['Field'] ) ) {
+				continue;
+			}
+			$columns[ (string) $row['Field'] ] = $row;
+		}
+
 		$required = [
 			'id',
 			'name',
@@ -57,8 +69,28 @@ final class Schema {
 			'created_at',
 			'updated_at',
 		];
+		if ( [] !== array_diff( $required, array_keys( $columns ) ) ) {
+			return false;
+		}
 
-		return [] === array_diff( $required, array_map( 'strval', is_array( $columns ) ? $columns : [] ) );
+		if ( ! str_contains( strtolower( (string) ( $columns['id']['Extra'] ?? '' ) ), 'auto_increment' ) ) {
+			return false;
+		}
+
+		$expected_defaults = [
+			'activation_state'   => 'disabled',
+			'definition_version' => '1',
+			'revision'           => '1',
+			'created_by'         => '0',
+			'updated_by'         => '0',
+		];
+		foreach ( $expected_defaults as $field => $expected ) {
+			if ( (string) ( $columns[ $field ]['Default'] ?? '' ) !== $expected ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	private static function assert_ready(): void {
