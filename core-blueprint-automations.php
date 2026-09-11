@@ -59,8 +59,13 @@ add_action( 'init', static function (): void {
 	);
 }, 0 );
 
-/* Base emits this after its public services are ready. */
-add_action( 'cb_core_booted', [ \CB\Automations\Plugin::class, 'boot' ] );
+/*
+ * Boot the product runtime only after WordPress `init` begins. Base registers
+ * its own text domain at priority 0, so the full public-contract check can
+ * safely autoload Core Admin/Foundation classes here without triggering the
+ * WordPress 6.7+ early translation warning.
+ */
+add_action( 'init', [ \CB\Automations\Plugin::class, 'boot' ], 1 );
 
 /*
  * Keep the product inert when Base or the Automation Foundation is unavailable.
