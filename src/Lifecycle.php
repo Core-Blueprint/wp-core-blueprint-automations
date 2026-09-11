@@ -10,9 +10,9 @@ defined( 'ABSPATH' ) || exit;
 
 final class Lifecycle {
 	public static function activate(): void {
-		if ( ! Requirements::runtime_ready() ) {
+		if ( ! Requirements::bootstrap_ready() ) {
 			self::fail_activation(
-				'Core Blueprint Automations requires PHP 8.4 and an active, Core API 1.x compatible Core Blueprint Base installation that provides the Automation Foundation.'
+				'Core Blueprint Automations requires PHP 8.4 and an active, Core API 1.x compatible Core Blueprint Base installation.'
 			);
 		}
 
