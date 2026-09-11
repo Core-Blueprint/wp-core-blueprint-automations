@@ -35,6 +35,9 @@ jobs:
       - name: Admin editor JavaScript syntax
         run: node --check assets/js/admin-editor.js
 
+      - name: Bootstrap requirements regression
+        run: php tests/unit/bootstrap-requirements.php
+
       - name: Workflow core regression matrix
         run: php tests/unit/workflow-core.php
 
