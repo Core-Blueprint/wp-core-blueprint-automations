@@ -46,6 +46,9 @@ final class Suite {
 		PageRegistry::register(
 			new AutomationsPage(),
 			[
+				'foundations' => [
+					'design-editor',
+				],
 				'components' => [
 					'actions',
 					'empty-state',
