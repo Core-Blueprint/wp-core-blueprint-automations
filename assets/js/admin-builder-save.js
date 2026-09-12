@@ -82,8 +82,9 @@
 
 		const payload = new FormData(form);
 		payload.set(ASYNC_FIELD, '1');
+		const endpoint = form.getAttribute('action') || window.location.href;
 		try {
-			const response = await window.fetch(form.action || window.location.href, {
+			const response = await window.fetch(endpoint, {
 				method: 'POST',
 				body: payload,
 				credentials: 'same-origin',
