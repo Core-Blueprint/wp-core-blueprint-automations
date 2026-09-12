@@ -62,7 +62,7 @@
 		try {
 			const url = new URL(window.location.href);
 			url.searchParams.delete('notice');
-			url.searchParams.set('builder', '1');
+			url.searchParams.delete('builder');
 			window.history.replaceState({}, '', url.toString());
 		} catch (error) {
 			// URL cleanup is optional UI polish.
