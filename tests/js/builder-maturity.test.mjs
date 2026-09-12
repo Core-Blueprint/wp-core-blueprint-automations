@@ -55,6 +55,13 @@ test('Automation Builder maturity keeps shared-shell, canonical persistence and 
 	assert.match(inspector, /key: `condition:\$\{value\?\.condition_id \|\| index\}`/);
 	assert.match(inspector, /key: `action:\$\{value\?\.step_id \|\| index\}`/);
 
+	// AD3 polish: discrete reordering consumes Base Designer Motion with stable semantic identities.
+	assert.match(editor, /window\.cbCore\?\.designEditor\?\.motion\?\.animateLayoutChange/);
+	assert.match(editor, /animateLayoutChange\(motionRoot, mutate\)/);
+	assert.match(editor, /'data-cb-design-motion-key': `\$\{context\}:\$\{step\.step_id\}`/);
+	assert.match(editor, /'data-cb-design-motion-key': `condition:\$\{condition\.condition_id\}`/);
+	assert.doesNotMatch(editor, /getBoundingClientRect|prefers-reduced-motion|cubic-bezier|\.animate\(\s*\[/);
+
 	// AD4: existing editor state remains canonical while Base supplies session history mechanics.
 	assert.match(editor, /window\.cbAutomationsEditorSession/);
 	assert.match(editor, /cb-automations:definitionchange/);
