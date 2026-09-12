@@ -356,16 +356,21 @@ final class JobRepository {
 
 	private static function normalize_datetime( string $value ): string {
 		$value = trim( $value );
-		$parsed = \DateTimeImmutable::createFromFormat( '!Y-m-d H:i:s', $value, new \DateTimeZone( 'UTC' ) );
-		$errors = \DateTimeImmutable::getLastErrors();
-		if (
-			false === $parsed
-			|| ( is_array( $errors ) && ( 0 !== $errors['warning_count'] || 0 !== $errors['error_count'] ) )
-			|| $parsed->format( 'Y-m-d H:i:s' ) !== $value
-		) {
-			throw new \InvalidArgumentException( 'Invalid automation job UTC timestamp.' );
+		$formats = [ 'Y-m-d H:i:s.u', 'Y-m-d H:i:s' ];
+
+		foreach ( $formats as $format ) {
+			$parsed = \DateTimeImmutable::createFromFormat( '!' . $format, $value, new \DateTimeZone( 'UTC' ) );
+			$errors = \DateTimeImmutable::getLastErrors();
+			if (
+				false !== $parsed
+				&& ( false === $errors || ( 0 === $errors['warning_count'] && 0 === $errors['error_count'] ) )
+				&& $parsed->format( $format ) === $value
+			) {
+				return $parsed->format( 'Y-m-d H:i:s' );
+			}
 		}
-		return $value;
+
+		throw new \InvalidArgumentException( 'Invalid automation job UTC timestamp.' );
 	}
 
 	private static function now(): string {
