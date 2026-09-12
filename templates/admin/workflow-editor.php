@@ -15,16 +15,30 @@ $notice     = isset( $_GET['notice'] ) && is_string( $_GET['notice'] )
 	? sanitize_key( wp_unslash( $_GET['notice'] ) )
 	: ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- bounded read-only notice routing.
 
+$principal_user_id = $record->execution_principal_user_id();
+$principal_user = $principal_user_id > 0 ? get_userdata( $principal_user_id ) : false;
+$principal_label = $principal_user instanceof WP_User
+	? sprintf( '%s (#%d)', $principal_user->display_name, $principal_user_id )
+	: ( $principal_user_id > 0
+		? sprintf( __( 'Unavailable user #%d', 'core-blueprint-automations' ), $principal_user_id )
+		: __( 'No execution principal assigned', 'core-blueprint-automations' ) );
+
 $notices = [
-	'created'             => [ 'success', __( 'Automation draft created. Configure the workflow below.', 'core-blueprint-automations' ) ],
-	'saved'               => [ 'success', __( 'Automation saved.', 'core-blueprint-automations' ) ],
-	'saved_disabled'      => [ 'warning', __( 'Your changes were saved, but the automation remains disabled because the current workflow is not valid yet.', 'core-blueprint-automations' ) ],
-	'persistence_blocked' => [ 'error', __( 'The automation was not saved because a sensitive input contains a literal value. Connect sensitive inputs to a prior workflow output instead.', 'core-blueprint-automations' ) ],
-	'conflict'            => [ 'warning', __( 'This automation changed in another request. Reload the page before saving again.', 'core-blueprint-automations' ) ],
-	'invalid_name'        => [ 'error', __( 'Enter an automation name between 1 and 191 characters.', 'core-blueprint-automations' ) ],
-	'invalid'             => [ 'error', __( 'The submitted workflow could not be decoded safely. No changes were saved.', 'core-blueprint-automations' ) ],
-	'storage_failed'      => [ 'error', __( 'The automation could not be saved because workflow storage is unavailable. No changes were saved.', 'core-blueprint-automations' ) ],
-	'failed'              => [ 'error', __( 'The automation could not be saved. Reload the page before trying again.', 'core-blueprint-automations' ) ],
+	'created'                                => [ 'success', __( 'Automation draft created. Configure the workflow below.', 'core-blueprint-automations' ) ],
+	'saved'                                  => [ 'success', __( 'Automation saved.', 'core-blueprint-automations' ) ],
+	'saved_disabled'                         => [ 'warning', __( 'Your changes were saved, but the automation remains disabled because the current workflow is not valid yet.', 'core-blueprint-automations' ) ],
+	'saved_disabled_execution_unavailable'   => [ 'warning', __( 'Changes saved. The automation remains disabled because secure runtime encryption is unavailable on this site.', 'core-blueprint-automations' ) ],
+	'saved_disabled_principal_missing'       => [ 'warning', __( 'Changes saved. Assign your account as execution authority before enabling this automation.', 'core-blueprint-automations' ) ],
+	'saved_disabled_principal_invalid'       => [ 'warning', __( 'Changes saved. The stored execution authority is no longer a valid WordPress user.', 'core-blueprint-automations' ) ],
+	'saved_disabled_principal_denied'        => [ 'warning', __( 'Changes saved. The execution principal no longer has all permissions required by this workflow.', 'core-blueprint-automations' ) ],
+	'saved_disabled_operator_denied'         => [ 'warning', __( 'Changes saved. Your account does not have all permissions required to enable this workflow.', 'core-blueprint-automations' ) ],
+	'saved_disabled_capability_unavailable'  => [ 'warning', __( 'Changes saved. Execution authority could not be verified against the current capability contracts.', 'core-blueprint-automations' ) ],
+	'persistence_blocked'                    => [ 'error', __( 'The automation was not saved because a sensitive input contains a literal value. Connect sensitive inputs to a prior workflow output instead.', 'core-blueprint-automations' ) ],
+	'conflict'                               => [ 'warning', __( 'This automation changed in another request. Reload the page before saving again.', 'core-blueprint-automations' ) ],
+	'invalid_name'                           => [ 'error', __( 'Enter an automation name between 1 and 191 characters.', 'core-blueprint-automations' ) ],
+	'invalid'                                => [ 'error', __( 'The submitted workflow could not be decoded safely. No changes were saved.', 'core-blueprint-automations' ) ],
+	'storage_failed'                         => [ 'error', __( 'The automation could not be saved because workflow storage is unavailable. No changes were saved.', 'core-blueprint-automations' ) ],
+	'failed'                                 => [ 'error', __( 'The automation could not be saved. Reload the page before trying again.', 'core-blueprint-automations' ) ],
 ];
 
 $editor_data['strings'] = [
@@ -161,7 +175,13 @@ if ( ! is_string( $definition_json ) ) {
 						<div class="cb-automations-panel-heading"><div><span class="cb-automations-panel-eyebrow"><?php esc_html_e( 'Automation', 'core-blueprint-automations' ); ?></span><h2><?php esc_html_e( 'Workflow settings', 'core-blueprint-automations' ); ?></h2></div></div>
 						<div class="cb-automations-settings-grid">
 							<div><label for="cb-automation-name"><strong><?php esc_html_e( 'Name', 'core-blueprint-automations' ); ?></strong></label><input id="cb-automation-name" name="name" type="text" class="regular-text" maxlength="191" required value="<?php echo esc_attr( $record->name() ); ?>" /></div>
-							<div><label for="cb-automation-activation"><strong><?php esc_html_e( 'Activation', 'core-blueprint-automations' ); ?></strong></label><select id="cb-automation-activation" name="activation_state"><option value="disabled" <?php selected( 'disabled', $record->activation_state()->value ); ?>><?php esc_html_e( 'Disabled', 'core-blueprint-automations' ); ?></option><option value="enabled" <?php selected( 'enabled', $record->activation_state()->value ); ?>><?php esc_html_e( 'Enabled', 'core-blueprint-automations' ); ?></option></select><p class="description"><?php esc_html_e( 'Enabled workflows must be fully valid against the current capability catalog.', 'core-blueprint-automations' ); ?></p></div>
+							<div><label for="cb-automation-activation"><strong><?php esc_html_e( 'Activation', 'core-blueprint-automations' ); ?></strong></label><select id="cb-automation-activation" name="activation_state"><option value="disabled" <?php selected( 'disabled', $record->activation_state()->value ); ?>><?php esc_html_e( 'Disabled', 'core-blueprint-automations' ); ?></option><option value="enabled" <?php selected( 'enabled', $record->activation_state()->value ); ?>><?php esc_html_e( 'Enabled', 'core-blueprint-automations' ); ?></option></select><p class="description"><?php esc_html_e( 'Enabled workflows must be valid and both the execution principal and current operator must hold every provider-required capability.', 'core-blueprint-automations' ); ?></p></div>
+							<div>
+								<strong><?php esc_html_e( 'Execution authority', 'core-blueprint-automations' ); ?></strong>
+								<p data-cb-automations-principal-label><?php echo esc_html( $principal_label ); ?></p>
+								<label><input type="checkbox" name="rebind_execution_principal" value="1" data-cb-automations-rebind-principal /> <?php esc_html_e( 'Use my account as execution principal when saving', 'core-blueprint-automations' ); ?></label>
+								<p class="description"><?php esc_html_e( 'Core Blueprint never accepts an arbitrary Run as user ID from the browser. The server binds your current WordPress account and re-checks its permissions on every execution.', 'core-blueprint-automations' ); ?></p>
+							</div>
 						</div>
 					</section>
 
@@ -185,7 +205,7 @@ if ( ! is_string( $definition_json ) ) {
 		<p class="submit cb-core-actions cb-automations-save-actions"><button type="submit" class="button button-primary cb-core-button cb-core-button--primary"><?php esc_html_e( 'Save automation', 'core-blueprint-automations' ); ?></button></p>
 	</form>
 
-	<noscript><div class="notice notice-warning"><p><?php esc_html_e( 'The visual workflow editor requires JavaScript. Name and activation can still be submitted using the currently stored definition.', 'core-blueprint-automations' ); ?></p></div></noscript>
+	<noscript><div class="notice notice-warning"><p><?php esc_html_e( 'The visual workflow editor requires JavaScript. Name, activation and execution-authority intent can still be submitted using the currently stored definition.', 'core-blueprint-automations' ); ?></p></div></noscript>
 
 	<script type="application/json" id="cb-automations-editor-data"><?php echo wp_json_encode( $editor_data, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_json_encode with all HTML-sensitive characters hex-escaped. ?></script>
 </div>

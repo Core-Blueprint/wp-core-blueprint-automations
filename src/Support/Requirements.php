@@ -2,6 +2,9 @@
 declare(strict_types=1);
 
 namespace CB\Automations\Support;
+
+use CB\Automations\Runtime\Vault;
+
 defined( 'ABSPATH' ) || exit;
 
 final class Requirements {
@@ -50,7 +53,7 @@ final class Requirements {
 	}
 
 	/** @return string[] Stable machine-readable runtime issue IDs. */
-	public static function issues(): array {
+	public static function runtime_issues(): array {
 		$issues = self::bootstrap_issues();
 		if ( [] !== $issues ) {
 			return $issues;
@@ -61,9 +64,10 @@ final class Requirements {
 			'\\CB\\Core\\Automation\\TriggerRegistry',
 			'\\CB\\Core\\Automation\\ActionRegistry',
 			'\\CB\\Core\\Automation\\StateRegistry',
-			'\\CB\\Core\\Admin\\PageRegistry',
-			'\\CB\\Core\\Admin\\Page',
-			'\\CB\\Core\\UI\\Status',
+			'\\CB\\Core\\Automation\\TriggerEvent',
+			'\\CB\\Core\\Automation\\InvocationContext',
+			'\\CB\\Core\\Automation\\ActionInvoker',
+			'\\CB\\Core\\Automation\\StateInvoker',
 		];
 
 		foreach ( $required_contracts as $contract ) {
@@ -77,7 +81,54 @@ final class Requirements {
 	}
 
 	public static function runtime_ready(): bool {
-		return [] === self::issues();
+		return [] === self::runtime_issues();
+	}
+
+	/** @return string[] Stable machine-readable execution issue IDs. */
+	public static function execution_issues(): array {
+		$issues = self::runtime_issues();
+		if ( [] !== $issues ) {
+			return $issues;
+		}
+		if ( ! Vault::available() ) {
+			$issues[] = 'runtime-crypto-unavailable';
+		}
+		return array_values( array_unique( $issues ) );
+	}
+
+	public static function execution_ready(): bool {
+		return [] === self::execution_issues();
+	}
+
+	/** @return string[] Stable machine-readable admin issue IDs. */
+	public static function admin_issues(): array {
+		$issues = self::runtime_issues();
+		if ( [] !== $issues ) {
+			return $issues;
+		}
+
+		$required_contracts = [
+			'\\CB\\Core\\Admin\\PageRegistry',
+			'\\CB\\Core\\Admin\\Page',
+			'\\CB\\Core\\UI\\Status',
+		];
+
+		foreach ( $required_contracts as $contract ) {
+			if ( ! class_exists( $contract ) && ! interface_exists( $contract ) ) {
+				$issues[] = 'core-admin-unavailable';
+				break;
+			}
+
+		return array_values( array_unique( $issues ) );
+	}
+
+	public static function admin_ready(): bool {
+		return [] === self::admin_issues();
+	}
+
+	/** @return string[] */
+	public static function issues(): array {
+		return self::admin_issues();
 	}
 
 	public static function operator_message(): string {
@@ -94,13 +145,14 @@ final class Requirements {
 				CB_AUTOMATIONS_REQUIRED_API,
 				defined( 'CB_CORE_API_VERSION' ) ? (string) CB_CORE_API_VERSION : __( 'none', 'core-blueprint-automations' )
 			),
-			'automation-foundation-unavailable' => __( 'Required public Core Blueprint Base contracts are unavailable. Install a Base build that provides the Automation Foundation and Core Admin page contracts.', 'core-blueprint-automations' ),
+			'automation-foundation-unavailable' => __( 'Required public Core Blueprint Base Automation Foundation contracts are unavailable.', 'core-blueprint-automations' ),
+			'core-admin-unavailable' => __( 'Required public Core Blueprint Base admin contracts are unavailable.', 'core-blueprint-automations' ),
 			default => __( 'Ready', 'core-blueprint-automations' ),
 		};
 	}
 
 	private static function primary_issue(): string {
-		$issues = self::issues();
+		$issues = self::admin_issues();
 		return (string) ( $issues[0] ?? '' );
 	}
 }

@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace CB\Automations\Admin;
 
+use CB\Automations\Runtime\RunStatus;
+use CB\Automations\Runtime\StepStatus;
 use CB\Automations\Validation\ValidationResult;
 use CB\Automations\Validation\ValidationState;
 use CB\Core\Admin\Page;
@@ -119,6 +121,55 @@ final class AutomationsPage implements Page {
 				? __( 'Enabled', 'core-blueprint-automations' )
 				: __( 'Disabled', 'core-blueprint-automations' )
 		);
+	}
+
+	public static function run_status( RunStatus $status ): string {
+		$variant = match ( $status ) {
+			RunStatus::Succeeded => 'active',
+			RunStatus::Failed => 'error',
+			RunStatus::Running,
+			RunStatus::RetryWait,
+			RunStatus::Blocked,
+			RunStatus::Indeterminate => 'warning',
+			default => 'idle',
+		};
+		return Status::render( $variant, self::run_status_label( $status ) );
+	}
+
+	public static function run_status_label( RunStatus $status ): string {
+		return match ( $status ) {
+			RunStatus::Queued => __( 'Queued', 'core-blueprint-automations' ),
+			RunStatus::Running => __( 'Running', 'core-blueprint-automations' ),
+			RunStatus::RetryWait => __( 'Waiting to retry', 'core-blueprint-automations' ),
+			RunStatus::Blocked => __( 'Blocked', 'core-blueprint-automations' ),
+			RunStatus::Succeeded => __( 'Succeeded', 'core-blueprint-automations' ),
+			RunStatus::Skipped => __( 'Skipped', 'core-blueprint-automations' ),
+			RunStatus::Failed => __( 'Failed', 'core-blueprint-automations' ),
+			RunStatus::Cancelled => __( 'Cancelled', 'core-blueprint-automations' ),
+			RunStatus::Indeterminate => __( 'Outcome unknown', 'core-blueprint-automations' ),
+		};
+	}
+
+	public static function step_status( StepStatus $status ): string {
+		$variant = match ( $status ) {
+			StepStatus::Succeeded => 'active',
+			StepStatus::Failed => 'error',
+			StepStatus::Blocked,
+			StepStatus::Indeterminate,
+			StepStatus::Interrupted => 'warning',
+			default => 'idle',
+		};
+		$label = match ( $status ) {
+			StepStatus::Running => __( 'Running', 'core-blueprint-automations' ),
+			StepStatus::Succeeded => __( 'Succeeded', 'core-blueprint-automations' ),
+			StepStatus::Skipped => __( 'Skipped', 'core-blueprint-automations' ),
+			StepStatus::Failed => __( 'Failed', 'core-blueprint-automations' ),
+			StepStatus::Blocked => __( 'Blocked', 'core-blueprint-automations' ),
+			StepStatus::Cancelled => __( 'Cancelled', 'core-blueprint-automations' ),
+			StepStatus::Indeterminate => __( 'Outcome unknown', 'core-blueprint-automations' ),
+			StepStatus::Interrupted => __( 'Interrupted', 'core-blueprint-automations' ),
+		};
+		return Status::render( $variant, $label );
 	}
 
 	private static function requires_contract_recovery( ValidationResult $validation ): bool {

@@ -66,6 +66,57 @@ jobs:
       - name: Bootstrap requirements regression
         run: php tests/unit/bootstrap-requirements.php
 
+      - name: AU2 runtime bootstrap boundary
+        run: php tests/unit/runtime-bootstrap.php
+
+      - name: AU2 execution authority policy
+        run: php tests/unit/execution-authority.php
+
+      - name: AU2 runtime schema v2
+        run: php tests/unit/runtime-schema.php
+
+      - name: AU2 Runtime Vault
+        run: php tests/unit/runtime-vault.php
+
+      - name: AU2 queue state machine
+        run: php tests/unit/queue-state-machine.php
+
+      - name: AU2 trigger intake and fan-out
+        run: php tests/unit/runtime-intake.php
+
+      - name: AU2 G1 intake concurrency proof
+        run: php tests/unit/runtime-g1.php
+
+      - name: AU2 State execution slice
+        run: php tests/unit/runtime-state-execution.php
+
+      - name: AU2 Condition execution slice
+        run: php tests/unit/runtime-condition-execution.php
+
+      - name: AU2 Action execution slice
+        run: php tests/unit/runtime-action-execution.php
+
+      - name: AU2 durable run pipeline
+        run: php tests/unit/runtime-run-pipeline.php
+
+      - name: Golden LMS to Certificates runtime
+        run: php tests/unit/golden-runtime.php
+
+      - name: AU2 crash and recovery fencing
+        run: php tests/unit/runtime-crash-recovery.php
+
+      - name: AU2 G2 adversarial runtime matrix
+        run: php tests/unit/runtime-g2.php
+
+      - name: AU2 metadata-only run observability
+        run: php tests/unit/runtime-observability.php
+
+      - name: AU2.9 operator recovery
+        run: php tests/unit/runtime-operator-recovery.php
+
+      - name: AU2.9 operator Runs access closure
+        run: php tests/unit/runtime-operator-access.php
+
       - name: Workflow definition invariants
         run: php tests/unit/definition-invariants.php
 

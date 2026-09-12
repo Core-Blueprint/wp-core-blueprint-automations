@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace CB\Automations\Integration;
 
+use CB\Automations\Admin\AutomationRunsPage;
 use CB\Automations\Admin\AutomationsPage;
 use CB\Automations\Support\Requirements;
 use CB\Core\Admin\PageRegistry;
@@ -39,7 +40,7 @@ final class Suite {
 	}
 
 	public static function register_admin_page(): void {
-		if ( ! Requirements::runtime_ready() || ! class_exists( PageRegistry::class ) ) {
+		if ( ! Requirements::admin_ready() || ! class_exists( PageRegistry::class ) ) {
 			return;
 		}
 
@@ -56,6 +57,17 @@ final class Suite {
 					'form-controls',
 					'notices',
 					'panels',
+					'status',
+				],
+			]
+		);
+
+		PageRegistry::register(
+			new AutomationRunsPage(),
+			[
+				'components' => [
+					'actions',
+					'notices',
 					'status',
 				],
 			]

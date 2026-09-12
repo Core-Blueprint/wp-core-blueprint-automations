@@ -10,14 +10,12 @@ $scan_roots = [
 
 $forbidden = [
 	'CB\\Core\\Automation\\Internal' => 'Private Base Automation Foundation internals must never be consumed.',
-	'CapabilityRegistry::executor' => 'AU1 must never invoke action executors.',
-	'CapabilityRegistry::state_resolver' => 'AU1 must never invoke state resolvers.',
-	'cb_core_automation_trigger_emitted' => 'AU1 must not subscribe to runtime trigger emission.',
+	'CapabilityRegistry::executor' => 'Automations must never bypass the public action invocation boundary.',
+	'CapabilityRegistry::state_resolver' => 'Automations must never bypass the public state invocation boundary.',
 	'wp_set_current_user' => 'Workflow execution must never impersonate the configuring user.',
-	'wp_schedule_event' => 'AU1 must not introduce cron execution.',
-	'wp_schedule_single_event' => 'AU1 must not introduce cron execution.',
-	'as_enqueue_async_action' => 'AU1 must not introduce Action Scheduler execution.',
-	'as_schedule_single_action' => 'AU1 must not introduce Action Scheduler execution.',
+	'wp_schedule_event' => 'Runtime worker wake-ups must not become a recurring WP-Cron scheduler.',
+	'as_enqueue_async_action' => 'Automations must not introduce an Action Scheduler dependency.',
+	'as_schedule_single_action' => 'Automations must not introduce an Action Scheduler dependency.',
 	'CB\\Core\\Admin\\PageBase' => 'Extensions implement the public Page interface directly; PageBase is internal.',
 ];
 
@@ -26,7 +24,7 @@ $failures = [];
 
 foreach ( $forbidden_dirs as $directory ) {
 	if ( is_dir( $root . '/src/' . $directory ) ) {
-		$failures[] = 'Forbidden AU1 runtime directory exists: src/' . $directory;
+		$failures[] = 'Forbidden runtime directory exists: src/' . $directory;
 	}
 }
 

@@ -15,6 +15,8 @@ final readonly class WorkflowRecord {
 		private ActivationState $activation_state,
 		private Definition $definition,
 		private int $revision,
+		private int $execution_principal_user_id,
+		private string $trigger_key,
 		private int $created_by,
 		private int $updated_by,
 		private string $created_at,
@@ -26,6 +28,8 @@ final readonly class WorkflowRecord {
 	public function activation_state(): ActivationState { return $this->activation_state; }
 	public function definition(): Definition { return $this->definition; }
 	public function revision(): int { return $this->revision; }
+	public function execution_principal_user_id(): int { return $this->execution_principal_user_id; }
+	public function trigger_key(): string { return $this->trigger_key; }
 	public function created_by(): int { return $this->created_by; }
 	public function updated_by(): int { return $this->updated_by; }
 	public function created_at(): string { return $this->created_at; }

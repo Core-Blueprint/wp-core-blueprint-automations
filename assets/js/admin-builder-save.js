@@ -21,6 +21,8 @@
 	const name = form?.querySelector('[name="name"]');
 	const activation = form?.querySelector('[name="activation_state"]');
 	const definition = form?.querySelector('[data-cb-automations-definition]');
+	const principalLabel = form?.querySelector('[data-cb-automations-principal-label]');
+	const rebindPrincipal = form?.querySelector('[data-cb-automations-rebind-principal]');
 	const health = shell?.querySelector('.cb-automations-validation-panel');
 	if (!(form instanceof HTMLFormElement) || !shell || !(save instanceof HTMLButtonElement) || typeof window.fetch !== 'function') return;
 
@@ -99,6 +101,7 @@
 		const submittedDefinition = parseDefinition(submittedDefinitionJson);
 		const submittedName = name instanceof HTMLInputElement ? name.value : null;
 		const submittedActivation = activation instanceof HTMLSelectElement ? activation.value : null;
+		const submittedRebind = rebindPrincipal instanceof HTMLInputElement ? rebindPrincipal.checked : false;
 		emit('saving', strings.saving);
 
 		const payload = new FormData(form);
@@ -127,13 +130,20 @@
 			const definitionDirty = definition instanceof HTMLInputElement && definition.value !== submittedDefinitionJson;
 			const nameDirty = name instanceof HTMLInputElement && submittedName !== null && name.value !== submittedName;
 			const activationDirty = activation instanceof HTMLSelectElement && submittedActivation !== null && activation.value !== submittedActivation;
-			const currentDirty = definitionDirty || nameDirty || activationDirty;
+			const rebindDirty = rebindPrincipal instanceof HTMLInputElement && rebindPrincipal.checked !== submittedRebind;
+			const currentDirty = definitionDirty || nameDirty || activationDirty || rebindDirty;
 
 			if (revision instanceof HTMLInputElement && Number.isInteger(Number(result.data?.revision))) {
 				revision.value = String(result.data.revision);
 			}
 			if (!activationDirty && activation instanceof HTMLSelectElement && ['enabled', 'disabled'].includes(result.data?.activation_state)) {
 				activation.value = result.data.activation_state;
+			}
+			if (principalLabel && typeof result.data?.execution_principal_label === 'string' && result.data.execution_principal_label) {
+				principalLabel.textContent = result.data.execution_principal_label;
+			}
+			if (!rebindDirty && submittedRebind && rebindPrincipal instanceof HTMLInputElement) {
+				rebindPrincipal.checked = false;
 			}
 			if (!definitionDirty) updateHealth(result);
 			cleanLocation();
