@@ -211,6 +211,9 @@ final class RunRepository {
 		if ( false === $result ) {
 			throw PersistenceFailure::database( 'transition automation run status' );
 		}
+		if ( 1 === $result && $to->is_terminal() ) {
+			RunContextRepository::purge( $run_id );
+		}
 		return 1 === $result;
 	}
 
