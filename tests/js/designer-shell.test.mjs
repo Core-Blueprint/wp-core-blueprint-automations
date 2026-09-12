@@ -22,6 +22,7 @@ test('Automations consumes the public Base Designer Shell without owning shared 
 	assert.match(assets, /['"]@cb-core\/design-editor['"]/);
 	assert.match(assets, /is_callable\( \[ DesignEditorAssets::class, ['"]enqueue_designer_mode['"] \] \)/);
 	assert.match(assets, /enqueue_designer_mode\( __\( 'Automation Builder'/);
+	assert.match(assets, /'properties'\s*=>\s*__\( 'Properties'/);
 	assert.doesNotMatch(assets, /admin-builder-bootstrap\.js|admin-builder-layout\.js|assets\/js\/features\/designer-launch\.js/);
 
 	assert.match(template, /data-cb-design-launch-root/);
@@ -43,6 +44,11 @@ test('Automations consumes the public Base Designer Shell without owning shared 
 	assert.match(moduleSource, /import\s*\{\s*createDesignerShell\s*\}\s*from\s*['"]@cb-core\/design-editor['"]/);
 	assert.match(moduleSource, /createDesignerShell\(root,\s*\{/);
 	assert.match(moduleSource, /sidebar:\s*['"]settings['"]/);
+	assert.match(moduleSource, /cb-automations-panel-eyebrow/);
+	assert.match(moduleSource, /workflowSidebar\.setAttribute\('aria-label', workflowLabel\)/);
+	assert.match(moduleSource, /propertiesSidebar\.setAttribute\('aria-label', propertiesLabel\)/);
+	assert.match(moduleSource, /cbAutomationsInspectorStrings\?\.properties/);
+	assert.match(moduleSource, /workflowTitle\.remove\(\)/);
 	assert.doesNotMatch(moduleSource, /CB_CORE_URL|assets\/js\/design\/|assets\/css\/design\//);
 
 	assert.doesNotMatch(styles, /\.cb-automations-design-shell \.cb-core-design-shell__workspace/);
