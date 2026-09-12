@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace CB\Automations\Admin;
 
 use CB\Automations\Persistence\PersistenceFailure;
+use CB\Automations\Validation\ValidationState;
 use CB\Automations\Workflow\ActivationState;
 use CB\Automations\Workflow\Definition;
 use CB\Automations\Workflow\DefinitionCodec;
@@ -102,7 +103,7 @@ final class WorkflowController {
 			$notice = self::notice_for_result( $result );
 
 			if ( self::is_async_request() ) {
-				self::respond_save_result( $result, $notice, $revision, $state );
+				self::respond_save_result( $result, $notice, $revision, $state, $name );
 			}
 			self::redirect( [ 'workflow' => $id, 'notice' => $notice ] );
 		} catch ( InvalidArgumentException $error ) {
@@ -158,7 +159,13 @@ final class WorkflowController {
 		};
 	}
 
-	private static function respond_save_result( WorkflowSaveResult $result, string $notice, int $revision, ActivationState $requested_state ): never {
+	private static function respond_save_result(
+		WorkflowSaveResult $result,
+		string $notice,
+		int $revision,
+		ActivationState $requested_state,
+		string $persisted_name
+	): never {
 		$issues = [];
 		foreach ( $result->validation()->issues() as $issue ) {
 			$issues[] = [
@@ -173,7 +180,9 @@ final class WorkflowController {
 			'notice'                      => $notice,
 			'message'                     => self::notice_message( $notice ),
 			'revision'                    => $result->was_saved() ? $revision + 1 : $revision,
+			'name'                        => $persisted_name,
 			'activation_state'            => $persisted_state->value,
+			'validation_state'            => ValidationState::from_result( $result->validation() )->value,
 			'execution_principal_user_id' => $principal_user_id,
 			'execution_principal_label'   => null === $principal_user_id ? '' : self::principal_label( $principal_user_id ),
 			'activation_block_reason'     => $result->activation_block_reason(),

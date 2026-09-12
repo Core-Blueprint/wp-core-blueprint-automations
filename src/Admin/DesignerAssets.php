@@ -78,14 +78,20 @@ final class DesignerAssets {
 			self::SAVE_HANDLE,
 			'cbAutomationsSaveStrings',
 			[
-				'saving'             => __( 'Saving automation…', 'core-blueprint-automations' ),
-				'failed'             => __( 'The automation could not be saved.', 'core-blueprint-automations' ),
-				'savedWithChanges'   => __( 'Automation saved. Newer edits are not saved yet.', 'core-blueprint-automations' ),
-				'ready'              => __( 'Ready', 'core-blueprint-automations' ),
-				'needsAttention'     => __( 'Needs attention', 'core-blueprint-automations' ),
-				'validDescription'   => __( 'The current definition is valid against the live capability catalog.', 'core-blueprint-automations' ),
-				'invalidDescription' => __( 'Resolve these items before the automation can be enabled.', 'core-blueprint-automations' ),
-				'workflowIssue'      => __( 'Workflow issue', 'core-blueprint-automations' ),
+				'saving'                          => __( 'Saving automation…', 'core-blueprint-automations' ),
+				'failed'                          => __( 'The automation could not be saved.', 'core-blueprint-automations' ),
+				'savedWithChanges'                => __( 'Automation saved. Newer edits are not saved yet.', 'core-blueprint-automations' ),
+				'ready'                           => __( 'Ready', 'core-blueprint-automations' ),
+				'needsAttention'                  => __( 'Needs attention', 'core-blueprint-automations' ),
+				'validDescription'                => __( 'The current definition is valid against the live capability catalog.', 'core-blueprint-automations' ),
+				'invalidDescription'              => __( 'Resolve these items before the automation can be enabled.', 'core-blueprint-automations' ),
+				'workflowIssue'                   => __( 'Workflow issue', 'core-blueprint-automations' ),
+				'activationEnabled'               => __( 'Enabled', 'core-blueprint-automations' ),
+				'activationDisabled'              => __( 'Disabled', 'core-blueprint-automations' ),
+				'validationValid'                 => __( 'Valid', 'core-blueprint-automations' ),
+				'validationNeedsReview'           => __( 'Needs review', 'core-blueprint-automations' ),
+				'validationDependencyUnavailable' => __( 'Dependency unavailable', 'core-blueprint-automations' ),
+				'validationInvalid'               => __( 'Invalid', 'core-blueprint-automations' ),
 			]
 		);
 
