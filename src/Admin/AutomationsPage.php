@@ -13,7 +13,7 @@ use CB\Core\UI\Status;
 defined( 'ABSPATH' ) || exit;
 
 final class AutomationsPage implements Page {
-	public const SLUG       = 'core-blueprint-automations';
+	public const SLUG       = 'core-blueprint-automations-workflows';
 	public const CAPABILITY = 'manage_options';
 
 	public function slug(): string {
@@ -46,10 +46,7 @@ final class AutomationsPage implements Page {
 		}
 
 		try {
-			$workflow_id = isset( $_GET['workflow'] ) && is_scalar( $_GET['workflow'] )
-				? absint( wp_unslash( (string) $_GET['workflow'] ) )
-				: 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only routing.
-
+			$workflow_id = self::requested_workflow_id();
 			$reader = new WorkflowAdminReadService();
 			if ( $workflow_id > 0 ) {
 				$detail = $reader->detail( $workflow_id );
@@ -81,6 +78,13 @@ final class AutomationsPage implements Page {
 			error_log( '[Core Blueprint Automations] Admin page read failed: ' . $error->getMessage() );
 			$this->render_unavailable();
 		}
+	}
+
+	/** Read-only workflow route selector shared by rendering and asset gates. */
+	public static function requested_workflow_id(): int {
+		return isset( $_GET['workflow'] ) && is_scalar( $_GET['workflow'] )
+			? absint( wp_unslash( (string) $_GET['workflow'] ) )
+			: 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- bounded read-only routing.
 	}
 
 	/** @param array<string,scalar> $query */

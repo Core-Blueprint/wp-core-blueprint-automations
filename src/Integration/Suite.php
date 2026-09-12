@@ -15,6 +15,7 @@ defined( 'ABSPATH' ) || exit;
 
 final class Suite {
 	public const EXTENSION_ID = 'core-blueprint-automations';
+	public const MENU_SLUG    = 'core-blueprint-automations';
 
 	private static bool $initialized = false;
 
@@ -37,7 +38,7 @@ final class Suite {
 			'id'           => self::EXTENSION_ID,
 			'plugin_file'  => CB_AUTOMATIONS_BASENAME,
 			'requires_api' => CB_AUTOMATIONS_REQUIRED_API,
-			'menu_url'     => admin_url( 'admin.php?page=' . self::EXTENSION_ID ),
+			'menu_url'     => admin_url( 'admin.php?page=' . self::MENU_SLUG ),
 		] );
 	}
 
@@ -51,7 +52,7 @@ final class Suite {
 
 		MenuGroupRegistry::register(
 			new MenuGroup(
-				AutomationsPage::SLUG,
+				self::MENU_SLUG,
 				__( 'Automations', 'core-blueprint-automations' ),
 				__( 'Automations', 'core-blueprint-automations' ),
 				RunHistoryCapability::CAPABILITY,
@@ -61,9 +62,6 @@ final class Suite {
 			[ $workflows, $runs ],
 			[
 				AutomationsPage::SLUG => [
-					'foundations' => [
-						'design-editor',
-					],
 					'components' => [
 						'actions',
 						'empty-state',

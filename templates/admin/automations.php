@@ -40,7 +40,7 @@ $notices = [
 	<?php endif; ?>
 
 	<section class="cb-core-panel cb-automations-create-panel">
-		<span class="cb-automations-panel-eyebrow"><?php esc_html_e( 'Automation designer', 'core-blueprint-automations' ); ?></span>
+		<span class="cb-automations-panel-eyebrow"><?php esc_html_e( 'Automation Builder', 'core-blueprint-automations' ); ?></span>
 		<h2><?php esc_html_e( 'Create automation', 'core-blueprint-automations' ); ?></h2>
 		<p class="description"><?php esc_html_e( 'Start with a name, then build a clear When → Get data → Only if → Then workflow.', 'core-blueprint-automations' ); ?></p>
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="cb-core-form-row cb-automations-create-form">
@@ -64,9 +64,7 @@ $notices = [
 		</div>
 
 		<?php if ( empty( $listing['items'] ) ) : ?>
-			<div class="cb-core-empty-state">
-				<p><?php esc_html_e( 'No automations have been created yet.', 'core-blueprint-automations' ); ?></p>
-			</div>
+			<div class="cb-core-empty-state"><p><?php esc_html_e( 'No automations have been created yet.', 'core-blueprint-automations' ); ?></p></div>
 		<?php else : ?>
 			<div class="cb-automations-workflow-list">
 				<?php foreach ( $listing['items'] as $item ) : ?>
@@ -77,26 +75,20 @@ $notices = [
 					$issue_count      = count( $item['validation']->issues() );
 					$is_valid         = $item['validation']->is_valid();
 					$is_enabled       = 'enabled' === $record->activation_state()->value;
-					$activation_label = $is_enabled
-						? __( 'Enabled', 'core-blueprint-automations' )
-						: __( 'Disabled', 'core-blueprint-automations' );
-					$updated          = '' !== $record->updated_at()
-						? get_date_from_gmt( preg_replace( '/\.\d+$/', '', $record->updated_at() ), get_option( 'date_format' ) . ' ' . get_option( 'time_format' ) )
-						: '—';
+					$activation_label = $is_enabled ? __( 'Enabled', 'core-blueprint-automations' ) : __( 'Disabled', 'core-blueprint-automations' );
+					$updated          = '' !== $record->updated_at() ? get_date_from_gmt( preg_replace( '/\.\d+$/', '', $record->updated_at() ), get_option( 'date_format' ) . ' ' . get_option( 'time_format' ) ) : '—';
 					$trigger_count    = null === $definition->trigger() ? 0 : 1;
 					$state_count      = count( $definition->states() );
 					$condition_count  = count( $definition->conditions() );
 					$action_count     = count( $definition->actions() );
 					$target_state     = $is_enabled ? 'disabled' : 'enabled';
-					$toggle_label     = $is_enabled
-						? __( 'Disable', 'core-blueprint-automations' )
-						: __( 'Enable', 'core-blueprint-automations' );
+					$toggle_label     = $is_enabled ? __( 'Disable', 'core-blueprint-automations' ) : __( 'Enable', 'core-blueprint-automations' );
 
 					if ( ! $is_valid ) {
-						$card_state     = 'has-error';
+						$card_state = 'has-error';
 						$status_variant = 'error';
-						$status_label   = __( 'Needs attention', 'core-blueprint-automations' );
-						$status_detail  = sprintf(
+						$status_label = __( 'Needs attention', 'core-blueprint-automations' );
+						$status_detail = sprintf(
 							/* translators: 1: activation state, 2: validation state, 3: issue count. */
 							__( '%1$s · %2$s · %3$s', 'core-blueprint-automations' ),
 							$activation_label,
@@ -104,25 +96,22 @@ $notices = [
 							sprintf( _n( '%d issue', '%d issues', $issue_count, 'core-blueprint-automations' ), $issue_count )
 						);
 					} elseif ( $is_enabled ) {
-						$card_state     = 'is-active';
+						$card_state = 'is-active';
 						$status_variant = 'active';
-						$status_label   = __( 'Enabled', 'core-blueprint-automations' );
-						$status_detail  = __( 'Valid · ready to run', 'core-blueprint-automations' );
+						$status_label = __( 'Enabled', 'core-blueprint-automations' );
+						$status_detail = __( 'Valid · ready to run', 'core-blueprint-automations' );
 					} else {
-						$card_state     = 'is-inactive';
+						$card_state = 'is-inactive';
 						$status_variant = 'idle';
-						$status_label   = __( 'Disabled', 'core-blueprint-automations' );
-						$status_detail  = __( 'Valid · will not run', 'core-blueprint-automations' );
+						$status_label = __( 'Disabled', 'core-blueprint-automations' );
+						$status_detail = __( 'Valid · will not run', 'core-blueprint-automations' );
 					}
 					?>
 					<article class="cb-automations-workflow-card <?php echo esc_attr( $card_state ); ?>">
 						<span class="cb-automations-workflow-card__accent" aria-hidden="true"></span>
 						<div class="cb-automations-workflow-card__main">
 							<div class="cb-automations-workflow-card__title-row">
-								<div>
-									<span class="cb-automations-workflow-card__eyebrow"><?php esc_html_e( 'Automation', 'core-blueprint-automations' ); ?></span>
-									<h3><a class="cb-automations-workflow-card__title-link" href="<?php echo esc_url( $edit_url ); ?>"><?php echo esc_html( $record->name() ); ?></a></h3>
-								</div>
+								<div><span class="cb-automations-workflow-card__eyebrow"><?php esc_html_e( 'Automation', 'core-blueprint-automations' ); ?></span><h3><a class="cb-automations-workflow-card__title-link" href="<?php echo esc_url( $edit_url ); ?>"><?php echo esc_html( $record->name() ); ?></a></h3></div>
 								<div class="cb-automations-workflow-card__status">
 									<?php if ( 'error' === $status_variant ) : ?>
 										<span class="cb-automations-workflow-card__health cb-automations-workflow-card__health--error"><span aria-hidden="true"></span><?php echo esc_html( $status_label ); ?></span>
@@ -159,22 +148,20 @@ $notices = [
 			</div>
 
 			<?php if ( $listing['pages'] > 1 ) : ?>
-				<div class="tablenav bottom cb-automations-pagination">
-					<div class="tablenav-pages">
-						<?php
-						echo wp_kses_post(
-							paginate_links( [
-								'base'      => add_query_arg( 'paged', '%#%', \CB\Automations\Admin\AutomationsPage::url() ),
-								'format'    => '',
-								'current'   => $listing['page'],
-								'total'     => $listing['pages'],
-								'prev_text' => __( '‹ Previous', 'core-blueprint-automations' ),
-								'next_text' => __( 'Next ›', 'core-blueprint-automations' ),
-							] )
-						);
-						?>
-					</div>
-				</div>
+				<div class="tablenav bottom cb-automations-pagination"><div class="tablenav-pages">
+					<?php
+					echo wp_kses_post(
+						paginate_links( [
+							'base'      => add_query_arg( 'paged', '%#%', \CB\Automations\Admin\AutomationsPage::url() ),
+							'format'    => '',
+							'current'   => $listing['page'],
+							'total'     => $listing['pages'],
+							'prev_text' => __( '‹ Previous', 'core-blueprint-automations' ),
+							'next_text' => __( 'Next ›', 'core-blueprint-automations' ),
+						] )
+					);
+					?>
+				</div></div>
 			<?php endif; ?>
 		<?php endif; ?>
 	</section>

@@ -1,15 +1,11 @@
 /**
  * Automations consumer composition for the shared Core Blueprint Designer Shell.
- * Base owns the shell chrome/fullscreen lifecycle. Automations owns only the
- * linear workflow composition rendered inside the shared slots.
+ * Base owns the shell grid, panel rails and focus-mode lifecycle. Automations
+ * owns only workflow content rendered inside the shared palette/canvas/sidebar.
  */
 
 .cb-automations-editor-page {
 	max-width: none;
-}
-
-.cb-automations-design-shell .cb-core-design-shell__workspace {
-	grid-template-columns: minmax(190px, 220px) minmax(0, 1fr) minmax(280px, 340px);
 }
 
 .cb-automations-design-shell__identity {
@@ -158,22 +154,12 @@
 }
 
 @media (max-width: 1280px) {
-	/* Base moves the shared sidebar to row 2 at this breakpoint. Keep the
-	 * consumer workspace two-column so no phantom desktop sidebar column remains. */
-	.cb-automations-design-shell .cb-core-design-shell__workspace {
-		grid-template-columns: minmax(170px, 200px) minmax(0, 1fr);
-	}
-
 	.cb-automations-stage-nav nav {
 		gap: 2px;
 	}
 }
 
 @media (max-width: 900px) {
-	.cb-automations-design-shell .cb-core-design-shell__workspace {
-		grid-template-columns: 1fr;
-	}
-
 	.cb-automations-stage-nav nav {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}

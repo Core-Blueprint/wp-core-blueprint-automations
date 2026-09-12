@@ -86,7 +86,7 @@ if ( ! is_string( $definition_json ) ) {
 	$definition_json = '{}';
 }
 ?>
-<div class="wrap cb-core-wrap cb-automations-admin cb-automations-editor-page" data-cb-design-launch-root data-cb-design-launch-mode="direct" data-cb-design-exit-url="<?php echo esc_url( \CB\Automations\Admin\AutomationsPage::url() ); ?>">
+<div class="wrap cb-core-wrap cb-automations-admin cb-automations-editor-page" data-cb-design-launch-root data-cb-design-launch-mode="direct" data-cb-design-title="<?php echo esc_attr__( 'Automation Builder', 'core-blueprint-automations' ); ?>" data-cb-design-exit-url="<?php echo esc_url( \CB\Automations\Admin\AutomationsPage::url() ); ?>">
 	<p><a href="<?php echo esc_url( \CB\Automations\Admin\AutomationsPage::url() ); ?>">← <?php esc_html_e( 'Back to Automations', 'core-blueprint-automations' ); ?></a></p>
 
 	<div class="cb-automations-editor-heading" data-cb-design-launch-context>
@@ -114,11 +114,17 @@ if ( ! is_string( $definition_json ) ) {
 		<div class="cb-core-design-shell cb-automations-design-shell" data-cb-design-shell data-cb-automations-designer-shell>
 			<div class="cb-core-design-shell__toolbar">
 				<div class="cb-core-design-shell__toolbar-group cb-automations-design-shell__identity">
-					<strong><?php esc_html_e( 'Automation Designer', 'core-blueprint-automations' ); ?></strong>
+					<strong><?php esc_html_e( 'Automation Builder', 'core-blueprint-automations' ); ?></strong>
 					<span><?php esc_html_e( 'Linear workflow', 'core-blueprint-automations' ); ?></span>
+				</div>
+				<div class="cb-core-design-shell__toolbar-group cb-automations-builder-history-controls">
+					<span data-cb-design-shell-group-label><?php esc_html_e( 'History', 'core-blueprint-automations' ); ?></span>
+					<button type="button" class="button cb-core-button" data-cb-design-shell-undo disabled><?php esc_html_e( 'Undo', 'core-blueprint-automations' ); ?></button>
+					<button type="button" class="button cb-core-button" data-cb-design-shell-redo disabled><?php esc_html_e( 'Redo', 'core-blueprint-automations' ); ?></button>
 				</div>
 				<div class="cb-core-design-shell__toolbar-group">
 					<button type="button" class="button cb-core-button cb-core-button--secondary" data-cb-design-shell-fullscreen data-cb-design-shell-fullscreen-enter-label="<?php esc_attr_e( 'Open focus mode', 'core-blueprint-automations' ); ?>" data-cb-design-shell-fullscreen-exit-label="<?php esc_attr_e( 'Exit focus mode', 'core-blueprint-automations' ); ?>" aria-pressed="false"><span data-cb-design-shell-fullscreen-label><?php esc_html_e( 'Open focus mode', 'core-blueprint-automations' ); ?></span></button>
+					<span class="cb-automations-builder-status" data-cb-design-shell-status aria-live="polite"></span>
 					<button type="submit" class="button button-primary cb-core-button cb-core-button--primary" data-cb-design-shell-primary-action><?php esc_html_e( 'Save automation', 'core-blueprint-automations' ); ?></button>
 				</div>
 			</div>
@@ -166,12 +172,18 @@ if ( ! is_string( $definition_json ) ) {
 				</main>
 
 				<aside class="cb-core-design-shell__sidebar cb-automations-design-shell__sidebar">
-					<div class="cb-core-design-shell__tabs" role="tablist" aria-label="<?php esc_attr_e( 'Automation details', 'core-blueprint-automations' ); ?>">
-						<button type="button" class="cb-core-design-shell__tab is-active" role="tab" aria-selected="true" data-cb-design-shell-tab="settings" data-cb-design-shell-group="sidebar"><?php esc_html_e( 'Settings', 'core-blueprint-automations' ); ?></button>
-						<button type="button" class="cb-core-design-shell__tab" role="tab" aria-selected="false" data-cb-design-shell-tab="health" data-cb-design-shell-group="sidebar"><?php esc_html_e( 'Health', 'core-blueprint-automations' ); ?></button>
+					<div class="cb-core-design-shell__tabs cb-core-design-shell__sidebar-tabs" role="tablist" aria-label="<?php esc_attr_e( 'Automation details', 'core-blueprint-automations' ); ?>">
+						<button type="button" class="cb-core-design-shell__tab cb-core-design-shell__sidebar-tab" role="tab" aria-selected="false" data-cb-design-shell-tab="inspector" data-cb-design-shell-group="sidebar"><?php esc_html_e( 'Inspector', 'core-blueprint-automations' ); ?></button>
+						<button type="button" class="cb-core-design-shell__tab cb-core-design-shell__sidebar-tab is-active" role="tab" aria-selected="true" data-cb-design-shell-tab="settings" data-cb-design-shell-group="sidebar"><?php esc_html_e( 'Settings', 'core-blueprint-automations' ); ?></button>
+						<button type="button" class="cb-core-design-shell__tab cb-core-design-shell__sidebar-tab" role="tab" aria-selected="false" data-cb-design-shell-tab="health" data-cb-design-shell-group="sidebar"><?php esc_html_e( 'Health', 'core-blueprint-automations' ); ?></button>
 					</div>
 
-					<section class="cb-core-design-shell__panel" role="tabpanel" data-cb-design-shell-panel="settings" data-cb-design-shell-group="sidebar">
+					<section class="cb-core-design-shell__panel cb-core-design-shell__sidebar-panel" role="tabpanel" data-cb-design-shell-panel="inspector" data-cb-design-shell-group="sidebar" hidden>
+						<div class="cb-automations-panel-heading"><div><span class="cb-automations-panel-eyebrow"><?php esc_html_e( 'Inspector', 'core-blueprint-automations' ); ?></span><h2><?php esc_html_e( 'Inspector', 'core-blueprint-automations' ); ?></h2></div></div>
+						<p class="description"><?php esc_html_e( 'Select a workflow step to inspect its context.', 'core-blueprint-automations' ); ?></p>
+					</section>
+
+					<section class="cb-core-design-shell__panel cb-core-design-shell__sidebar-panel" role="tabpanel" data-cb-design-shell-panel="settings" data-cb-design-shell-group="sidebar">
 						<div class="cb-automations-panel-heading"><div><span class="cb-automations-panel-eyebrow"><?php esc_html_e( 'Automation', 'core-blueprint-automations' ); ?></span><h2><?php esc_html_e( 'Workflow settings', 'core-blueprint-automations' ); ?></h2></div></div>
 						<div class="cb-automations-settings-grid">
 							<div><label for="cb-automation-name"><strong><?php esc_html_e( 'Name', 'core-blueprint-automations' ); ?></strong></label><input id="cb-automation-name" name="name" type="text" class="regular-text" maxlength="191" required value="<?php echo esc_attr( $record->name() ); ?>" /></div>
@@ -185,7 +197,7 @@ if ( ! is_string( $definition_json ) ) {
 						</div>
 					</section>
 
-					<section class="cb-core-design-shell__panel cb-automations-validation-panel" role="tabpanel" data-cb-design-shell-panel="health" data-cb-design-shell-group="sidebar" hidden>
+					<section class="cb-core-design-shell__panel cb-core-design-shell__sidebar-panel cb-automations-validation-panel" role="tabpanel" data-cb-design-shell-panel="health" data-cb-design-shell-group="sidebar" hidden>
 						<div class="cb-automations-panel-heading"><div><span class="cb-automations-panel-eyebrow"><?php esc_html_e( 'Workflow health', 'core-blueprint-automations' ); ?></span><h2><?php echo esc_html( $validation->is_valid() ? __( 'Ready', 'core-blueprint-automations' ) : __( 'Needs attention', 'core-blueprint-automations' ) ); ?></h2></div></div>
 						<?php if ( $validation->is_valid() ) : ?>
 							<p class="description"><?php esc_html_e( 'The current definition is valid against the live capability catalog.', 'core-blueprint-automations' ); ?></p>
