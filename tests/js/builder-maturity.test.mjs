@@ -54,6 +54,8 @@ test('Automation Builder maturity keeps shared-shell, canonical persistence and 
 	assert.match(inspector, /key: `state:\$\{value\?\.step_id \|\| index\}`/);
 	assert.match(inspector, /key: `condition:\$\{value\?\.condition_id \|\| index\}`/);
 	assert.match(inspector, /key: `action:\$\{value\?\.step_id \|\| index\}`/);
+	assert.match(inspector, /if \(match\) \{[\s\S]*?selectCard\(match, \{ open: false \}\);[\s\S]*?return;[\s\S]*?\}[\s\S]*?selected = null;/);
+	assert.match(inspector, /selected = null;[\s\S]*?renderInspector\(null\);/);
 
 	// AD3 polish: discrete reordering consumes Base Designer Motion with stable semantic identities.
 	assert.match(editor, /window\.cbCore\?\.designEditor\?\.motion\?\.animateLayoutChange/);
@@ -71,6 +73,9 @@ test('Automation Builder maturity keeps shared-shell, canonical persistence and 
 	assert.match(history, /history\.undo\(\)/);
 	assert.match(history, /history\.redo\(\)/);
 	assert.match(history, /animateLayoutChange\(api\.root, applyDefinition\)/);
+	assert.match(history, /event\.detail\?\.baselineDefinition/);
+	assert.match(history, /event\.detail\?\.currentDirty === true/);
+	assert.match(history, /history\.execute\(commandFor\(current\)\)/);
 	assert.doesNotMatch(history, /getBoundingClientRect|prefers-reduced-motion|cubic-bezier|\.animate\(\s*\[/);
 	assert.doesNotMatch(history, /assets\/js\/design\/|CB_CORE_URL/);
 
@@ -80,6 +85,15 @@ test('Automation Builder maturity keeps shared-shell, canonical persistence and 
 	assert.match(save, /form\.getAttribute\('action'\) \|\| window\.location\.href/);
 	assert.match(save, /window\.fetch\(endpoint/);
 	assert.doesNotMatch(save, /window\.fetch\(form\.action/);
+	assert.match(save, /let saving = false/);
+	assert.match(save, /if \(saving\) return/);
+	assert.match(save, /save\.disabled = true/);
+	assert.match(save, /save\.disabled = false/);
+	assert.doesNotMatch(save, /AbortController/);
+	assert.match(save, /baselineDefinition: submittedDefinition/);
+	assert.match(save, /currentDirty: definitionDirty/);
+	assert.match(save, /savedWithChanges/);
+	assert.match(assets, /savedWithChanges/);
 	assert.match(save, /searchParams\.delete\('builder'\)/);
 	assert.doesNotMatch(save, /searchParams\.set\(\s*['"]builder['"]/);
 	assert.match(save, /cb:design-shell:savechange/);
