@@ -82,9 +82,11 @@ if ( ! $version_failed ) {
 
 $root = dirname( __DIR__, 2 );
 $repository = file_get_contents( $root . '/src/Persistence/RunContextRepository.php' );
+$run_repository = file_get_contents( $root . '/src/Persistence/RunRepository.php' );
+$recovery_repository = file_get_contents( $root . '/src/Persistence/OperatorRecoveryRepository.php' );
 $requirements = file_get_contents( $root . '/src/Support/Requirements.php' );
 $service = file_get_contents( $root . '/src/Workflow/WorkflowService.php' );
-if ( false === $repository || false === $requirements || false === $service ) {
+if ( false === $repository || false === $run_repository || false === $recovery_repository || false === $requirements || false === $service ) {
 	throw new RuntimeException( 'Could not read Runtime Vault boundary sources.' );
 }
 if ( ! str_contains( $repository, 'Vault::seal' ) || ! str_contains( $repository, 'Vault::open' ) ) {
@@ -92,6 +94,12 @@ if ( ! str_contains( $repository, 'Vault::seal' ) || ! str_contains( $repository
 }
 if ( str_contains( $repository, 'json_encode( $context' ) || str_contains( $repository, 'wp_json_encode( $context' ) ) {
 	throw new RuntimeException( 'Run context repository contains a plaintext JSON persistence path.' );
+}
+if ( ! str_contains( $run_repository, '$to->is_terminal()' ) || ! str_contains( $run_repository, 'RunContextRepository::purge( $run_id )' ) ) {
+	throw new RuntimeException( 'Terminal runtime status transitions no longer purge encrypted working context.' );
+}
+if ( ! str_contains( $recovery_repository, '$target->is_terminal()' ) || ! str_contains( $recovery_repository, 'RunContextRepository::purge( $run_id )' ) ) {
+	throw new RuntimeException( 'Terminal operator recovery resolutions no longer purge encrypted working context.' );
 }
 if ( ! str_contains( $requirements, 'public static function execution_ready(): bool' ) || ! str_contains( $requirements, 'Vault::available()' ) ) {
 	throw new RuntimeException( 'Secure execution readiness is not gated on Runtime Vault availability.' );
