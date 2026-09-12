@@ -90,6 +90,14 @@ test('Automation Builder maturity keeps shared-shell, canonical persistence and 
 	assert.match(controller, /revision'\s*=>\s*\$result->was_saved\(\)\s*\?\s*\$revision\s*\+\s*1\s*:\s*\$revision/);
 	assert.doesNotMatch(controller, /WorkflowRepository::(?:create|update)\(/);
 
+	// AD5 closure: the exact canonical definition is the save payload and the reopen source.
+	assert.match(template, /\$definition_json\s*=\s*wp_json_encode\(\s*\$editor_data\['workflow'\]\['definition'\]\s*\)/);
+	assert.match(template, /name="definition_json"[^>]*data-cb-automations-definition/);
+	assert.match(editor, /const state = JSON\.parse\(JSON\.stringify\(data\.workflow\?\.definition/);
+	assert.match(editor, /hidden\.value = JSON\.stringify\(definition\)/);
+	assert.match(editor, /form\.addEventListener\('submit', \(\) => sync\('submit'\)\)/);
+	assert.match(editor, /renderAll\('initial'\)/);
+
 	// Adaptive layout stays consumer-owned while Base remains sole fullscreen implementation.
 	assert.match(layout, /is-palette-collapsed/);
 	assert.match(layout, /is-sidebar-collapsed/);
