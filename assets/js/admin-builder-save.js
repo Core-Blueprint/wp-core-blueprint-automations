@@ -5,6 +5,7 @@
 	const strings = {
 		saving: 'Saving automation…',
 		failed: 'The automation could not be saved.',
+		savedWithChanges: 'Automation saved. Newer edits are not saved yet.',
 		ready: 'Ready',
 		needsAttention: 'Needs attention',
 		validDescription: 'The current definition is valid against the live capability catalog.',
@@ -16,15 +17,25 @@
 	const shell = document.querySelector('[data-cb-automations-designer-shell]');
 	const save = shell?.querySelector('[data-cb-design-shell-primary-action]');
 	const revision = form?.querySelector('[name="revision"]');
+	const name = form?.querySelector('[name="name"]');
 	const activation = form?.querySelector('[name="activation_state"]');
+	const definition = form?.querySelector('[data-cb-automations-definition]');
 	const health = shell?.querySelector('.cb-automations-validation-panel');
 	if (!(form instanceof HTMLFormElement) || !shell || !(save instanceof HTMLButtonElement) || typeof window.fetch !== 'function') return;
 
-	let controller = null;
-	const emit = (state, message = '') => {
+	let saving = false;
+	const parseDefinition = (value) => {
+		try {
+			const parsed = JSON.parse(String(value || '{}'));
+			return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : null;
+		} catch (error) {
+			return null;
+		}
+	};
+	const emit = (state, message = '', extra = {}) => {
 		shell.dispatchEvent(new CustomEvent('cb:design-shell:savechange', {
 			bubbles: true,
-			detail: Object.freeze({ state, message: String(message || '') }),
+			detail: Object.freeze({ state, message: String(message || ''), ...extra }),
 		}));
 	};
 	const responseMessage = (payload, fallback) => {
@@ -76,8 +87,14 @@
 	form.addEventListener('submit', async (event) => {
 		if (event.submitter !== save) return;
 		event.preventDefault();
-		controller?.abort();
-		controller = new AbortController();
+		if (saving) return;
+
+		saving = true;
+		save.disabled = true;
+		const submittedDefinitionJson = definition instanceof HTMLInputElement ? definition.value : '';
+		const submittedDefinition = parseDefinition(submittedDefinitionJson);
+		const submittedName = name instanceof HTMLInputElement ? name.value : null;
+		const submittedActivation = activation instanceof HTMLSelectElement ? activation.value : null;
 		emit('saving', strings.saving);
 
 		const payload = new FormData(form);
@@ -88,7 +105,6 @@
 				method: 'POST',
 				body: payload,
 				credentials: 'same-origin',
-				signal: controller.signal,
 			});
 			const body = await response.text();
 			let result = null;
@@ -103,20 +119,33 @@
 			if (!response.ok || result?.success !== true) {
 				throw new Error(responseMessage(result, strings.failed));
 			}
+
+			const definitionDirty = definition instanceof HTMLInputElement && definition.value !== submittedDefinitionJson;
+			const nameDirty = name instanceof HTMLInputElement && submittedName !== null && name.value !== submittedName;
+			const activationDirty = activation instanceof HTMLSelectElement && submittedActivation !== null && activation.value !== submittedActivation;
+			const currentDirty = definitionDirty || nameDirty || activationDirty;
+
 			if (revision instanceof HTMLInputElement && Number.isInteger(Number(result.data?.revision))) {
 				revision.value = String(result.data.revision);
 			}
-			if (activation instanceof HTMLSelectElement && ['enabled', 'disabled'].includes(result.data?.activation_state)) {
+			if (!activationDirty && activation instanceof HTMLSelectElement && ['enabled', 'disabled'].includes(result.data?.activation_state)) {
 				activation.value = result.data.activation_state;
 			}
-			updateHealth(result);
+			if (!definitionDirty) updateHealth(result);
 			cleanLocation();
-			emit('saved', responseMessage(result, save.textContent?.trim() || ''));
+			emit(
+				'saved',
+				currentDirty ? strings.savedWithChanges : responseMessage(result, save.textContent?.trim() || ''),
+				{
+					baselineDefinition: submittedDefinition,
+					currentDirty: definitionDirty,
+				}
+			);
 		} catch (error) {
-			if (error?.name === 'AbortError') return;
 			emit('error', error instanceof Error && error.message ? error.message : strings.failed);
 		} finally {
-			controller = null;
+			saving = false;
+			save.disabled = false;
 		}
 	});
 })();
