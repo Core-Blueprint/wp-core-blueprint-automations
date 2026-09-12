@@ -9,6 +9,7 @@ use CB\Automations\Admin\OperatorRecoveryController;
 use CB\Automations\Admin\RecoveryCapability;
 use CB\Automations\Admin\RunHistoryCapability;
 use CB\Automations\Admin\RunsAssets;
+use CB\Automations\Admin\WorkflowActivationController;
 use CB\Automations\Admin\WorkflowController;
 use CB\Automations\Persistence\Schema;
 use CB\Automations\Runtime\RuntimeWorker;
@@ -50,6 +51,7 @@ final class Plugin {
 		RecoveryCapability::init();
 		OperatorRecoveryController::init();
 		WorkflowController::init();
+		WorkflowActivationController::init();
 		AdminAssets::init();
 		RunsAssets::init();
 		DesignerAssets::init();

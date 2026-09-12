@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace CB\Automations\Admin;
 
 use CB\Core\Admin\Page;
+
 defined( 'ABSPATH' ) || exit;
 
 final class AutomationRunsPage implements Page {
@@ -18,7 +19,7 @@ final class AutomationRunsPage implements Page {
 	}
 
 	public function menu_title(): string {
-		return __( 'Automation Runs', 'core-blueprint-automations' );
+		return __( 'Runs', 'core-blueprint-automations' );
 	}
 
 	public function capability(): string {
@@ -26,7 +27,7 @@ final class AutomationRunsPage implements Page {
 	}
 
 	public function position(): ?int {
-		return 111;
+		return 20;
 	}
 
 	public function render(): void {

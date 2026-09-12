@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace CB\Automations\Admin;
 
-use CB\Core\Admin\PageRegistry;
+use CB\Core\Admin\MenuGroupRegistry;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -19,7 +19,7 @@ final class AdminAssets {
 	}
 
 	public static function enqueue( string $hook ): void {
-		if ( $hook !== PageRegistry::hook_suffix( AutomationsPage::SLUG ) ) {
+		if ( $hook !== MenuGroupRegistry::hook_suffix( AutomationsPage::SLUG ) ) {
 			return;
 		}
 
@@ -178,31 +178,31 @@ final class AdminAssets {
 			'cb-automations-admin-condition-builder',
 			'cbAutomationsConditionBuilderStrings',
 			[
-				'only_continue_if'             => __( 'Only continue if', 'core-blueprint-automations' ),
-				'rule_preview'                 => __( 'Rule preview', 'core-blueprint-automations' ),
-				'condition_value'              => __( 'Value', 'core-blueprint-automations' ),
-				'condition_rule'               => __( 'Rule', 'core-blueprint-automations' ),
-				'condition_compare'            => __( 'Compare with', 'core-blueprint-automations' ),
-				'choose_comparison'            => __( 'Choose a value or workflow data…', 'core-blueprint-automations' ),
-				'enter_value'                  => __( 'Enter a value', 'core-blueprint-automations' ),
-				'workflow_data'                => __( 'Workflow data', 'core-blueprint-automations' ),
-				'unavailable_data'             => __( 'Unavailable data', 'core-blueprint-automations' ),
-				'type_text'                    => __( 'Text', 'core-blueprint-automations' ),
-				'type_number'                  => __( 'Number', 'core-blueprint-automations' ),
-				'type_boolean'                 => __( 'True / false', 'core-blueprint-automations' ),
-				'type_list'                    => __( 'List', 'core-blueprint-automations' ),
-				'operator_equals'              => __( 'is', 'core-blueprint-automations' ),
-				'operator_not_equals'          => __( 'is not', 'core-blueprint-automations' ),
-				'operator_contains'            => __( 'contains', 'core-blueprint-automations' ),
-				'operator_not_contains'        => __( 'does not contain', 'core-blueprint-automations' ),
-				'operator_greater_than'        => __( 'is greater than', 'core-blueprint-automations' ),
+				'only_continue_if'               => __( 'Only continue if', 'core-blueprint-automations' ),
+				'rule_preview'                   => __( 'Rule preview', 'core-blueprint-automations' ),
+				'condition_value'                => __( 'Value', 'core-blueprint-automations' ),
+				'condition_rule'                 => __( 'Rule', 'core-blueprint-automations' ),
+				'condition_compare'              => __( 'Compare with', 'core-blueprint-automations' ),
+				'choose_comparison'              => __( 'Choose a value or workflow data…', 'core-blueprint-automations' ),
+				'enter_value'                    => __( 'Enter a value', 'core-blueprint-automations' ),
+				'workflow_data'                  => __( 'Workflow data', 'core-blueprint-automations' ),
+				'unavailable_data'               => __( 'Unavailable data', 'core-blueprint-automations' ),
+				'type_text'                      => __( 'Text', 'core-blueprint-automations' ),
+				'type_number'                    => __( 'Number', 'core-blueprint-automations' ),
+				'type_boolean'                   => __( 'True / false', 'core-blueprint-automations' ),
+				'type_list'                      => __( 'List', 'core-blueprint-automations' ),
+				'operator_equals'                => __( 'is', 'core-blueprint-automations' ),
+				'operator_not_equals'            => __( 'is not', 'core-blueprint-automations' ),
+				'operator_contains'              => __( 'contains', 'core-blueprint-automations' ),
+				'operator_not_contains'          => __( 'does not contain', 'core-blueprint-automations' ),
+				'operator_greater_than'          => __( 'is greater than', 'core-blueprint-automations' ),
 				'operator_greater_than_or_equal' => __( 'is at least', 'core-blueprint-automations' ),
-				'operator_less_than'           => __( 'is less than', 'core-blueprint-automations' ),
-				'operator_less_than_or_equal'  => __( 'is at most', 'core-blueprint-automations' ),
-				'operator_is_empty'            => __( 'is empty', 'core-blueprint-automations' ),
-				'operator_is_not_empty'        => __( 'is not empty', 'core-blueprint-automations' ),
-				'operator_array_is_empty'      => __( 'has no items', 'core-blueprint-automations' ),
-				'operator_array_is_not_empty'  => __( 'has items', 'core-blueprint-automations' ),
+				'operator_less_than'             => __( 'is less than', 'core-blueprint-automations' ),
+				'operator_less_than_or_equal'    => __( 'is at most', 'core-blueprint-automations' ),
+				'operator_is_empty'              => __( 'is empty', 'core-blueprint-automations' ),
+				'operator_is_not_empty'          => __( 'is not empty', 'core-blueprint-automations' ),
+				'operator_array_is_empty'        => __( 'has no items', 'core-blueprint-automations' ),
+				'operator_array_is_not_empty'    => __( 'has items', 'core-blueprint-automations' ),
 			]
 		);
 	}

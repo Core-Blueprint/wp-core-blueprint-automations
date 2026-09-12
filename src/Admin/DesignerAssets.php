@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace CB\Automations\Admin;
 
-use CB\Core\Admin\PageRegistry;
+use CB\Core\Admin\MenuGroupRegistry;
 use CB\Core\Design\Editor\Assets as DesignEditorAssets;
 
 defined( 'ABSPATH' ) || exit;
@@ -12,7 +12,6 @@ defined( 'ABSPATH' ) || exit;
 final class DesignerAssets {
 	private const BOOTSTRAP_HANDLE = 'cb-automations-admin-builder-bootstrap';
 	private const INSPECTOR_HANDLE = 'cb-automations-admin-builder-inspector';
-	private const LAYOUT_HANDLE    = 'cb-automations-admin-builder-layout';
 	private const SAVE_HANDLE      = 'cb-automations-admin-builder-save';
 	private const HISTORY_MODULE   = 'cb-automations-admin-builder-history';
 
@@ -28,7 +27,7 @@ final class DesignerAssets {
 	}
 
 	public static function enqueue( string $hook ): void {
-		if ( $hook !== PageRegistry::hook_suffix( AutomationsPage::SLUG ) ) {
+		if ( $hook !== MenuGroupRegistry::hook_suffix( AutomationsPage::SLUG ) ) {
 			return;
 		}
 
@@ -39,7 +38,6 @@ final class DesignerAssets {
 		$js             = CB_AUTOMATIONS_DIR . 'assets/js/admin-designer-shell.js';
 		$bootstrap      = CB_AUTOMATIONS_DIR . 'assets/js/admin-builder-bootstrap.js';
 		$inspector      = CB_AUTOMATIONS_DIR . 'assets/js/admin-builder-inspector.js';
-		$layout         = CB_AUTOMATIONS_DIR . 'assets/js/admin-builder-layout.js';
 		$save           = CB_AUTOMATIONS_DIR . 'assets/js/admin-builder-save.js';
 		$history        = CB_AUTOMATIONS_DIR . 'assets/js/admin-builder-history.js';
 
@@ -86,24 +84,6 @@ final class DesignerAssets {
 		);
 
 		wp_enqueue_script(
-			self::LAYOUT_HANDLE,
-			CB_AUTOMATIONS_URL . 'assets/js/admin-builder-layout.js',
-			[ self::INSPECTOR_HANDLE ],
-			is_file( $layout ) ? (string) filemtime( $layout ) : CB_AUTOMATIONS_VERSION,
-			true
-		);
-		wp_localize_script(
-			self::LAYOUT_HANDLE,
-			'cbAutomationsLayoutStrings',
-			[
-				'collapseWorkflow' => __( 'Collapse workflow navigation', 'core-blueprint-automations' ),
-				'expandWorkflow'   => __( 'Expand workflow navigation', 'core-blueprint-automations' ),
-				'collapseDetails'  => __( 'Collapse details sidebar', 'core-blueprint-automations' ),
-				'expandDetails'    => __( 'Expand details sidebar', 'core-blueprint-automations' ),
-			]
-		);
-
-		wp_enqueue_script(
 			self::SAVE_HANDLE,
 			CB_AUTOMATIONS_URL . 'assets/js/admin-builder-save.js',
 			[ self::INSPECTOR_HANDLE ],
@@ -126,7 +106,7 @@ final class DesignerAssets {
 		);
 
 		if ( self::base_editor_available() ) {
-			DesignEditorAssets::enqueue_designer_mode();
+			DesignEditorAssets::enqueue_designer_mode( __( 'Automation Builder', 'core-blueprint-automations' ) );
 		}
 
 		wp_enqueue_style(

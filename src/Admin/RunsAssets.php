@@ -3,7 +3,8 @@ declare(strict_types=1);
 
 namespace CB\Automations\Admin;
 
-use CB\Core\Admin\PageRegistry;
+use CB\Core\Admin\MenuGroupRegistry;
+
 defined( 'ABSPATH' ) || exit;
 
 final class RunsAssets {
@@ -18,7 +19,7 @@ final class RunsAssets {
 	}
 
 	public static function enqueue( string $hook ): void {
-		if ( $hook !== PageRegistry::hook_suffix( AutomationRunsPage::SLUG ) ) {
+		if ( $hook !== MenuGroupRegistry::hook_suffix( AutomationRunsPage::SLUG ) ) {
 			return;
 		}
 

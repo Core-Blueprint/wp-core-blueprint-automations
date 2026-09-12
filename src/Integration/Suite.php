@@ -5,8 +5,10 @@ namespace CB\Automations\Integration;
 
 use CB\Automations\Admin\AutomationRunsPage;
 use CB\Automations\Admin\AutomationsPage;
+use CB\Automations\Admin\RunHistoryCapability;
 use CB\Automations\Support\Requirements;
-use CB\Core\Admin\PageRegistry;
+use CB\Core\Admin\MenuGroup;
+use CB\Core\Admin\MenuGroupRegistry;
 use CB\Core\ExtensionRegistry;
 
 defined( 'ABSPATH' ) || exit;
@@ -23,7 +25,7 @@ final class Suite {
 
 		self::$initialized = true;
 		add_action( 'cb_core_register_extensions', [ self::class, 'register_extension' ] );
-		add_action( 'cb_core_register_pages', [ self::class, 'register_admin_page' ] );
+		add_action( 'cb_core_register_pages', [ self::class, 'register_admin_pages' ] );
 	}
 
 	public static function register_extension(): void {
@@ -39,36 +41,45 @@ final class Suite {
 		] );
 	}
 
-	public static function register_admin_page(): void {
-		if ( ! Requirements::admin_ready() || ! class_exists( PageRegistry::class ) ) {
+	public static function register_admin_pages(): void {
+		if ( ! Requirements::admin_ready() || ! class_exists( MenuGroupRegistry::class ) || ! class_exists( MenuGroup::class ) ) {
 			return;
 		}
 
-		PageRegistry::register(
-			new AutomationsPage(),
-			[
-				'foundations' => [
-					'design-editor',
-				],
-				'components' => [
-					'actions',
-					'empty-state',
-					'fields',
-					'form-controls',
-					'notices',
-					'panels',
-					'status',
-				],
-			]
-		);
+		$workflows = new AutomationsPage();
+		$runs      = new AutomationRunsPage();
 
-		PageRegistry::register(
-			new AutomationRunsPage(),
+		MenuGroupRegistry::register(
+			new MenuGroup(
+				AutomationsPage::SLUG,
+				__( 'Automations', 'core-blueprint-automations' ),
+				__( 'Automations', 'core-blueprint-automations' ),
+				RunHistoryCapability::CAPABILITY,
+				'dashicons-controls-repeat',
+				58
+			),
+			[ $workflows, $runs ],
 			[
-				'components' => [
-					'actions',
-					'notices',
-					'status',
+				AutomationsPage::SLUG => [
+					'foundations' => [
+						'design-editor',
+					],
+					'components' => [
+						'actions',
+						'empty-state',
+						'fields',
+						'form-controls',
+						'notices',
+						'panels',
+						'status',
+					],
+				],
+				AutomationRunsPage::SLUG => [
+					'components' => [
+						'actions',
+						'notices',
+						'status',
+					],
 				],
 			]
 		);

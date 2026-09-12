@@ -25,7 +25,7 @@ final class AutomationsPage implements Page {
 	}
 
 	public function menu_title(): string {
-		return __( 'Automations', 'core-blueprint-automations' );
+		return __( 'Workflows', 'core-blueprint-automations' );
 	}
 
 	public function capability(): string {
@@ -33,7 +33,7 @@ final class AutomationsPage implements Page {
 	}
 
 	public function position(): ?int {
-		return 110;
+		return 10;
 	}
 
 	public function render(): void {

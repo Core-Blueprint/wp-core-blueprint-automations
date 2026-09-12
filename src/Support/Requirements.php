@@ -108,7 +108,8 @@ final class Requirements {
 		}
 
 		$required_contracts = [
-			'\\CB\\Core\\Admin\\PageRegistry',
+			'\\CB\\Core\\Admin\\MenuGroup',
+			'\\CB\\Core\\Admin\\MenuGroupRegistry',
 			'\\CB\\Core\\Admin\\Page',
 			'\\CB\\Core\\UI\\Status',
 		];
