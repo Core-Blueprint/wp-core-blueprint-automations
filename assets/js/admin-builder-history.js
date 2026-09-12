@@ -1,11 +1,11 @@
-import { CommandHistory, EditorState, ProjectState } from '@cb-core/design-editor';
+import { CommandHistory, EditorState, ProjectState, animateLayoutChange } from '@cb-core/design-editor';
 
 const api = window.cbAutomationsEditorSession;
 const shell = document.querySelector('[data-cb-automations-designer-shell]');
 const undo = shell?.querySelector('[data-cb-design-shell-undo]');
 const redo = shell?.querySelector('[data-cb-design-shell-redo]');
 
-if (api?.snapshot && api?.replace && shell && undo instanceof HTMLButtonElement && redo instanceof HTMLButtonElement) {
+if (api?.snapshot && api?.replace && api?.root && shell && undo instanceof HTMLButtonElement && redo instanceof HTMLButtonElement) {
 	const clone = (value) => JSON.parse(JSON.stringify(value));
 	const projectFor = (definition) => ({
 		schema_version: 1,
@@ -41,7 +41,8 @@ if (api?.snapshot && api?.replace && shell && undo instanceof HTMLButtonElement 
 		try {
 			const changed = direction === 'undo' ? history.undo() : history.redo();
 			if (!changed) return;
-			api.replace(definitionFrom(projectState.current()), { source: 'history' });
+			const applyDefinition = () => api.replace(definitionFrom(projectState.current()), { source: 'history' });
+			animateLayoutChange(api.root, applyDefinition);
 		} finally {
 			applying = false;
 			syncButtons();
