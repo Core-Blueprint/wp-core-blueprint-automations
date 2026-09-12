@@ -8,26 +8,6 @@
 	max-width: none;
 }
 
-body.cb-automations-builder-launch-pending::after,
-.cb-automations-editor-page.is-builder-launch-pending::after {
-	content: '';
-	position: fixed;
-	inset: 0;
-	z-index: 2147483647;
-	background: var(--cb-surface-1);
-	animation: cb-automations-builder-launch-fallback 0s linear 2s forwards;
-}
-
-.cb-automations-editor-page.is-builder-launch-pending {
-	min-height: 70vh;
-}
-
-@keyframes cb-automations-builder-launch-fallback {
-	to {
-		visibility: hidden;
-	}
-}
-
 .cb-automations-design-shell .cb-core-design-shell__workspace {
 	grid-template-columns: minmax(190px, 220px) minmax(0, 1fr) minmax(280px, 340px);
 }
