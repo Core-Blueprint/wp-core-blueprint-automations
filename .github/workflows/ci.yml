@@ -38,6 +38,7 @@ jobs:
           node --check assets/js/admin-editor-polish.js
           node --check assets/js/admin-validation-recovery.js
           node --check assets/js/admin-condition-builder.js
+          node --check assets/js/admin-designer-shell.js
 
       - name: Capability picker regression
         run: node tests/js/capability-picker.test.mjs
@@ -50,6 +51,9 @@ jobs:
 
       - name: Human condition builder regression
         run: node tests/js/condition-builder.test.mjs
+
+      - name: Shared Designer Shell regression
+        run: node tests/js/designer-shell.test.mjs
 
       - name: Bootstrap requirements regression
         run: php tests/unit/bootstrap-requirements.php
