@@ -118,6 +118,7 @@ final class Requirements {
 				$issues[] = 'core-admin-unavailable';
 				break;
 			}
+		}
 
 		return array_values( array_unique( $issues ) );
 	}
