@@ -56,9 +56,12 @@
 		actions: [],
 	}));
 
-	state.states = Array.isArray(state.states) ? state.states : [];
-	state.conditions = Array.isArray(state.conditions) ? state.conditions : [];
-	state.actions = Array.isArray(state.actions) ? state.actions : [];
+	function normalizeState() {
+		state.states = Array.isArray(state.states) ? state.states : [];
+		state.conditions = Array.isArray(state.conditions) ? state.conditions : [];
+		state.actions = Array.isArray(state.actions) ? state.actions : [];
+	}
+	normalizeState();
 
 	const byKind = { trigger: [], state: [], action: [] };
 	const byRef = new Map();
@@ -336,13 +339,54 @@
 		triggerRoot.append(card);
 	}
 
+	function motionRootFor(collection) {
+		if (collection === state.states) return statesRoot;
+		if (collection === state.conditions) return conditionsRoot;
+		if (collection === state.actions) return actionsRoot;
+		return null;
+	}
+
+	function reorder(collection, index, direction) {
+		const target = index + direction;
+		if (target < 0 || target >= collection.length) return;
+		const mutate = () => {
+			const [item] = collection.splice(index, 1);
+			collection.splice(target, 0, item);
+			renderAll();
+		};
+		const motionRoot = motionRootFor(collection);
+		const animateLayoutChange = window.cbCore?.designEditor?.motion?.animateLayoutChange;
+		if (motionRoot && typeof animateLayoutChange === 'function') {
+			animateLayoutChange(motionRoot, mutate);
+			return;
+		}
+		mutate();
+	}
+
+	function reorderControls(collection, index) {
+		const group = el('span', { class: 'cb-automations-step-reorder' });
+		const up = el('button', { type: 'button', class: 'button button-small', disabled: index <= 0 }, strings.move_up || 'Move up');
+		const down = el('button', { type: 'button', class: 'button button-small', disabled: index >= collection.length - 1 }, strings.move_down || 'Move down');
+		up.addEventListener('click', () => reorder(collection, index, -1));
+		down.addEventListener('click', () => reorder(collection, index, 1));
+		group.append(up, down);
+		return group;
+	}
+
 	function renderStep(step, kind, context, index, remove) {
-		const card = el('div', { class: 'cb-automations-step cb-automations-repeatable-step' });
+		const card = el('div', {
+			class: 'cb-automations-step cb-automations-repeatable-step',
+			'data-cb-design-motion-key': `${context}:${step.step_id}`,
+		});
 		const head = el('div', { class: 'cb-automations-step-head' });
 		head.append(el('code', {}, step.step_id));
+		const actions = el('span', { class: 'cb-automations-step-head__actions' });
+		const collection = context === 'state' ? state.states : state.actions;
+		actions.append(reorderControls(collection, index));
 		const removeButton = el('button', { type: 'button', class: 'button-link-delete' }, strings.remove || 'Remove');
 		removeButton.addEventListener('click', remove);
-		head.append(removeButton);
+		actions.append(removeButton);
+		head.append(actions);
 		card.append(head);
 		card.append(capabilitySelect(kind, step.capability, (key) => {
 			const reference = selectedReference(key);
@@ -410,15 +454,21 @@
 	}
 
 	function renderCondition(condition, index) {
-		const card = el('div', { class: 'cb-automations-step cb-automations-condition' });
+		const card = el('div', {
+			class: 'cb-automations-step cb-automations-condition',
+			'data-cb-design-motion-key': `condition:${condition.condition_id}`,
+		});
 		const head = el('div', { class: 'cb-automations-step-head' });
 		head.append(el('code', {}, condition.condition_id));
+		const actions = el('span', { class: 'cb-automations-step-head__actions' });
+		actions.append(reorderControls(state.conditions, index));
 		const removeButton = el('button', { type: 'button', class: 'button-link-delete' }, strings.remove || 'Remove');
 		removeButton.addEventListener('click', () => {
 			state.conditions.splice(index, 1);
 			renderAll();
 		});
-		head.append(removeButton);
+		actions.append(removeButton);
+		head.append(actions);
 		card.append(head);
 
 		const outputs = outputEntries('condition');
@@ -490,16 +540,31 @@
 		addCondition.disabled = outputEntries('condition').length === 0;
 	}
 
-	function sync() {
-		hidden.value = JSON.stringify(state);
+	function sync(source = 'editor') {
+		const definition = clone(state);
+		hidden.value = JSON.stringify(definition);
+		root.dispatchEvent(new CustomEvent('cb-automations:definitionchange', {
+			bubbles: true,
+			detail: Object.freeze({ source: String(source || 'editor'), definition }),
+		}));
 	}
 
-	function renderAll() {
+	function renderAll(source = 'editor') {
 		renderTrigger();
 		renderStates();
 		renderConditions();
 		renderActions();
-		sync();
+		sync(source);
+	}
+
+	function replaceDefinition(next, { source = 'external' } = {}) {
+		if (!next || typeof next !== 'object' || Array.isArray(next)) {
+			throw new TypeError('Automation editor replacement requires a workflow definition object.');
+		}
+		Object.keys(state).forEach((key) => delete state[key]);
+		Object.assign(state, clone(next));
+		normalizeState();
+		renderAll(source);
 	}
 
 	addState.addEventListener('click', () => {
@@ -529,6 +594,13 @@
 		renderAll();
 	});
 
-	form.addEventListener('submit', sync);
-	renderAll();
+	window.cbAutomationsEditorSession = Object.freeze({
+		root,
+		form,
+		snapshot: () => clone(state),
+		replace: (definition, options = {}) => replaceDefinition(definition, options),
+	});
+
+	form.addEventListener('submit', () => sync('submit'));
+	renderAll('initial');
 })();
