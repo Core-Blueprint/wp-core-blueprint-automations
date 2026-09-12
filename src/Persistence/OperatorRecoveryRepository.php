@@ -58,6 +58,9 @@ final class OperatorRecoveryRepository {
 				$target
 			);
 			self::update_run( $run_id, $expected_cursor, $resulting_cursor, $target );
+			if ( $target->is_terminal() ) {
+				RunContextRepository::purge( $run_id );
+			}
 			if ( $rearm_job ) {
 				self::rearm_locked_job( (int) $job['id'], (string) $job['status'] );
 			}
