@@ -3,12 +3,15 @@ declare(strict_types=1);
 
 $root = dirname( __DIR__, 2 );
 $schema = file_get_contents( $root . '/src/Persistence/Schema.php' );
+$run_repository = file_get_contents( $root . '/src/Persistence/RunRepository.php' );
+$history_repository = file_get_contents( $root . '/src/Persistence/RunHistoryRepository.php' );
+$recovery_repository = file_get_contents( $root . '/src/Persistence/OperatorRecoveryRepository.php' );
 $repository = file_get_contents( $root . '/src/Persistence/WorkflowRepository.php' );
 $record = file_get_contents( $root . '/src/Persistence/WorkflowRecord.php' );
 $trigger_key = file_get_contents( $root . '/src/Runtime/TriggerKey.php' );
 $bootstrap = file_get_contents( $root . '/core-blueprint-automations.php' );
 
-if ( false === $schema || false === $repository || false === $record || false === $trigger_key || false === $bootstrap ) {
+if ( false === $schema || false === $run_repository || false === $history_repository || false === $recovery_repository || false === $repository || false === $record || false === $trigger_key || false === $bootstrap ) {
 	fwrite( STDERR, "Could not read AU2 runtime schema sources.\n" );
 	exit( 1 );
 }
@@ -36,6 +39,7 @@ foreach ( [
 foreach ( [
 	'execution_principal_user_id',
 	'trigger_key',
+	'run_cursor varchar(128)',
 	'UNIQUE KEY event_fingerprint',
 	'UNIQUE KEY event_workflow',
 	'UNIQUE KEY node_attempt',
@@ -46,6 +50,20 @@ foreach ( [
 ] as $needle ) {
 	if ( ! str_contains( $schema, $needle ) ) {
 		$failures[] = 'Missing AU2 persistence invariant: ' . $needle;
+	}
+}
+
+if ( preg_match( '/(?:^|[\s,(])cursor\s+varchar\s*\(/mi', $schema ) ) {
+	$failures[] = 'Runs schema reintroduced reserved MariaDB column name cursor.';
+}
+foreach ( [ $run_repository, $history_repository, $recovery_repository ] as $run_sql_source ) {
+	if ( preg_match( '/\b(?:SET|AND|SELECT|status,)\s+cursor\b/i', $run_sql_source ) ) {
+		$failures[] = 'Runtime SQL reintroduced bare reserved cursor column usage.';
+		break;
+	}
+	if ( ! str_contains( $run_sql_source, 'run_cursor' ) ) {
+		$failures[] = 'Runtime run persistence no longer uses canonical run_cursor column.';
+		break;
 	}
 }
 
