@@ -116,6 +116,7 @@ final class DesignerAssets {
 			[
 				'saving'             => __( 'Saving automation…', 'core-blueprint-automations' ),
 				'failed'             => __( 'The automation could not be saved.', 'core-blueprint-automations' ),
+				'savedWithChanges'   => __( 'Automation saved. Newer edits are not saved yet.', 'core-blueprint-automations' ),
 				'ready'              => __( 'Ready', 'core-blueprint-automations' ),
 				'needsAttention'     => __( 'Needs attention', 'core-blueprint-automations' ),
 				'validDescription'   => __( 'The current definition is valid against the live capability catalog.', 'core-blueprint-automations' ),
