@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 require __DIR__ . '/workflow-core.php';
 
+use CB\Automations\Admin\EditorDefinitionProjection;
 use CB\Automations\Binding\Binding;
 use CB\Automations\Capability\CapabilityKind;
 use CB\Automations\Discovery\ProviderStatus;
@@ -138,6 +139,18 @@ assert_true( ! $result->contains_sensitive_paths(), 'Golden provider workflow sh
 $encoded = DefinitionCodec::encode( $definition );
 $round_trip = DefinitionCodec::encode( DefinitionCodec::decode( $encoded ) );
 assert_true( $round_trip === $encoded, 'Golden provider workflow must round-trip without semantic drift.' );
+
+$projection = EditorDefinitionProjection::project( $encoded, $definitions );
+assert_true( 0 === $projection['redacted'], 'Golden provider workflow must reopen without editor redaction.' );
+assert_true( $encoded === $projection['definition'], 'Golden provider workflow must reach the editor without semantic drift.' );
+
+$browser_json = json_encode( $projection['definition'], JSON_THROW_ON_ERROR );
+$rehydrated = json_decode( $browser_json, true, 512, JSON_THROW_ON_ERROR );
+assert_true( is_array( $rehydrated ) && $rehydrated === $encoded, 'Golden provider workflow must survive the server-to-browser JSON handoff exactly.' );
+assert_true(
+	DefinitionCodec::encode( DefinitionCodec::decode( $rehydrated ) ) === $encoded,
+	'Golden provider workflow must survive save → reopen → editor rehydrate without semantic drift.'
+);
 
 assert_true(
 	'core-blueprint-lms' === ( $encoded['trigger']['capability']['provider'] ?? null )
