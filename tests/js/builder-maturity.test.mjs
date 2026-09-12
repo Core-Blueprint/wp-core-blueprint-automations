@@ -32,32 +32,17 @@ test('Automation Builder maturity keeps shared-shell, canonical persistence and 
 		read('templates/admin/workflow-editor.php'),
 	]);
 
-	// AD2.1: Library is the outer product surface; Builder launch hides the embedded transition.
-	assert.match(bootstrap, /libraryUrl/);
-	assert.match(bootstrap, /is-builder-launch-pending/);
-	assert.match(bootstrap, /window\.location\.assign\(String\(config\.libraryUrl\)\)/);
-	assert.match(bootstrap, /LAUNCH_TIMEOUT_MS/);
-	assert.match(bootstrap, /LAUNCH_PENDING_BODY_CLASS/);
-	assert.match(bootstrap, /document\.body\?\.classList\.remove\(LAUNCH_PENDING_BODY_CLASS\)/);
-	assert.match(bootstrap, /document\.body\?\.classList\.add\(LAUNCH_PENDING_BODY_CLASS\)[\s\S]*window\.location\.assign\(String\(config\.libraryUrl\)\)/);
-	assert.match(assets, /add_filter\( 'admin_body_class', \[ self::class, 'body_class' \] \)/);
-	assert.match(assets, /cb-automations-builder-launch-pending/);
-	assert.match(assets, /builder_launch_requested/);
-	assert.match(template, /cb-automations-editor-page" data-cb-design-launch-root/);
-	assert.match(template, /cb-automations-editor-heading" data-cb-design-launch-context/);
-	assert.match(designerCss, /body\.cb-automations-builder-launch-pending::after/);
-	assert.match(designerCss, /position:\s*fixed;[\s\S]*inset:\s*0;[\s\S]*z-index:\s*2147483647;/);
-	assert.match(designerCss, /@keyframes cb-automations-builder-launch-fallback/);
+	// AD2.1: the workflow editor is a Base-owned direct Designer route, not a simulated manual launch.
+	assert.match(template, /data-cb-design-launch-root/);
+	assert.match(template, /data-cb-design-launch-mode="direct"/);
+	assert.match(template, /data-cb-design-exit-url="<\?php echo esc_url\( \\CB\\Automations\\Admin\\AutomationsPage::url\(\) \); \?>"/);
+	assert.match(assets, /DesignEditorAssets::enqueue_designer_mode\(\)/);
+	assert.match(assets, /is_callable\( \[ DesignEditorAssets::class, 'enqueue_designer_mode' \] \)/);
+	assert.doesNotMatch(assets, /admin_body_class|builder_launch_requested|cb-automations-builder-launch-pending|libraryUrl/);
+	assert.doesNotMatch(bootstrap, /sessionStorage|LAUNCH_TIMEOUT_MS|LAUNCH_PENDING_BODY_CLASS|MutationObserver|window\.location\.assign|searchParams\.set\(\s*['"]builder['"]/);
+	assert.doesNotMatch(bootstrap, /data-cb-design-launch[^\n]*cb-core-design-launch/);
+	assert.doesNotMatch(designerCss, /cb-automations-builder-launch-pending|cb-automations-builder-launch-fallback|z-index:\s*2147483647/);
 	assert.doesNotMatch(designerCss, /\.cb-automations-design-shell(?:\.is-fullscreen)?\s*\{[^}]*margin-top\s*:/);
-	const openBuilderBody = bootstrap.match(/const openBuilder = \(\) => \{([\s\S]*?)\n\t\t\};/)?.[1] ?? '';
-	assert.match(openBuilderBody, /stopObserver\(\)/);
-	assert.match(openBuilderBody, /button\.click\(\)/);
-	assert.doesNotMatch(openBuilderBody, /finishLaunch\(\)/);
-	assert.match(bootstrap, /if \(event\.detail\?\.fullscreen\) \{\s*finishLaunch\(\);/);
-	assert.ok(
-		bootstrap.indexOf('timeout = window.setTimeout') < bootstrap.indexOf('if (openBuilder()) return;'),
-		'Builder launch timeout must start before the first click attempt so fallback remains armed until fullscreen is confirmed.'
-	);
 
 	// AD3: selected workflow cards map into a real contextual Inspector in the shared sidebar.
 	assert.match(bootstrap, /data-cb-design-shell-tab[\s\S]*inspector/);
@@ -100,7 +85,6 @@ test('Automation Builder maturity keeps shared-shell, canonical persistence and 
 	assert.doesNotMatch(finishCss, /position\s*:\s*fixed|100dvh/);
 
 	// Public Base boundaries only; no execution-runtime maturity sneaks into this UI batch.
-	assert.match(assets, /DesignEditorAssets::enqueue_designer_mode/);
 	assert.match(assets, /@cb-core\/design-editor/);
 	assert.doesNotMatch(assets, /assets\/js\/design\/|assets\/css\/design\//);
 	for (const source of [bootstrap, inspector, history, layout, save, editor]) {
