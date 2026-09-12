@@ -64,16 +64,19 @@
 }
 
 @media (max-width: 1280px) {
+	/* Base moves the shared sidebar below palette + canvas on tablet. Collapsed
+	 * pane states must preserve that two-column composition instead of restoring
+	 * the desktop sidebar column. */
 	.cb-automations-design-shell.is-palette-collapsed .cb-core-design-shell__workspace {
-		grid-template-columns: 58px minmax(0, 1fr) minmax(260px, 300px);
+		grid-template-columns: 58px minmax(0, 1fr);
 	}
 
 	.cb-automations-design-shell.is-sidebar-collapsed .cb-core-design-shell__workspace {
-		grid-template-columns: minmax(170px, 200px) minmax(0, 1fr) 50px;
+		grid-template-columns: minmax(170px, 200px) minmax(0, 1fr);
 	}
 
 	.cb-automations-design-shell.is-palette-collapsed.is-sidebar-collapsed .cb-core-design-shell__workspace {
-		grid-template-columns: 58px minmax(0, 1fr) 50px;
+		grid-template-columns: 58px minmax(0, 1fr);
 	}
 }
 
