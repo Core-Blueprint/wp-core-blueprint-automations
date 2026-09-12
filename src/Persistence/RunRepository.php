@@ -44,7 +44,7 @@ final class RunRepository {
 			$wpdb->prepare(
 				"INSERT INTO {$table}
 				 (run_uuid, correlation_id, event_receipt_id, workflow_id, workflow_revision, execution_principal_user_id,
-				  definition_version, definition_json, definition_hash, status, cursor, failure_code, created_at, started_at, finished_at, updated_at)
+				  definition_version, definition_json, definition_hash, status, run_cursor, failure_code, created_at, started_at, finished_at, updated_at)
 				 VALUES (%s, %s, %d, %d, %d, %d, %d, %s, %s, %s, '', '', %s, NULL, NULL, %s)
 				 ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id)",
 				$run_uuid,
@@ -111,7 +111,7 @@ final class RunRepository {
 			$wpdb->prepare(
 				"SELECT id, run_uuid, correlation_id, event_receipt_id, workflow_id, workflow_revision,
 				        execution_principal_user_id, definition_version, definition_json, definition_hash,
-				        status, cursor, failure_code
+				        status, run_cursor, failure_code
 				 FROM {$table} WHERE id = %d LIMIT 1",
 				$id
 			),
@@ -143,8 +143,8 @@ final class RunRepository {
 		$result = $wpdb->query(
 			$wpdb->prepare(
 				"UPDATE {$table}
-				 SET cursor = %s, updated_at = %s
-				 WHERE id = %d AND cursor = %s AND status IN (%s, %s)",
+				 SET run_cursor = %s, updated_at = %s
+				 WHERE id = %d AND run_cursor = %s AND status IN (%s, %s)",
 				$next_cursor,
 				current_time( 'mysql', true ),
 				$run_id,
@@ -229,7 +229,7 @@ final class RunRepository {
 		$definition_json = (string) ( $row['definition_json'] ?? '' );
 		$definition_hash = (string) ( $row['definition_hash'] ?? '' );
 		$status = RunStatus::tryFrom( (string) ( $row['status'] ?? '' ) );
-		$cursor = (string) ( $row['cursor'] ?? '' );
+		$cursor = (string) ( $row['run_cursor'] ?? '' );
 		$failure_code = self::normalize_error_code( (string) ( $row['failure_code'] ?? '' ) );
 
 		if (
