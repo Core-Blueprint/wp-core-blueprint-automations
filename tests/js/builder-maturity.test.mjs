@@ -62,14 +62,16 @@ test('Automation Builder maturity keeps shared-shell, canonical persistence and 
 	assert.match(editor, /'data-cb-design-motion-key': `condition:\$\{condition\.condition_id\}`/);
 	assert.doesNotMatch(editor, /getBoundingClientRect|prefers-reduced-motion|cubic-bezier|\.animate\(\s*\[/);
 
-	// AD4: existing editor state remains canonical while Base supplies session history mechanics.
+	// AD4: existing editor state remains canonical while Base supplies history and Motion mechanics.
 	assert.match(editor, /window\.cbAutomationsEditorSession/);
 	assert.match(editor, /cb-automations:definitionchange/);
 	assert.match(editor, /Move up|move_up/);
 	assert.match(editor, /Move down|move_down/);
-	assert.match(history, /import \{ CommandHistory, EditorState, ProjectState \} from '@cb-core\/design-editor'/);
+	assert.match(history, /import \{[^}]*CommandHistory[^}]*EditorState[^}]*ProjectState[^}]*animateLayoutChange[^}]*\} from '@cb-core\/design-editor'/);
 	assert.match(history, /history\.undo\(\)/);
 	assert.match(history, /history\.redo\(\)/);
+	assert.match(history, /animateLayoutChange\(api\.root, applyDefinition\)/);
+	assert.doesNotMatch(history, /getBoundingClientRect|prefers-reduced-motion|cubic-bezier|\.animate\(\s*\[/);
 	assert.doesNotMatch(history, /assets\/js\/design\/|CB_CORE_URL/);
 
 	// AD5: Save-in-place adapts the existing canonical form/controller path, not persistence ownership.
@@ -78,6 +80,8 @@ test('Automation Builder maturity keeps shared-shell, canonical persistence and 
 	assert.match(save, /form\.getAttribute\('action'\) \|\| window\.location\.href/);
 	assert.match(save, /window\.fetch\(endpoint/);
 	assert.doesNotMatch(save, /window\.fetch\(form\.action/);
+	assert.match(save, /searchParams\.delete\('builder'\)/);
+	assert.doesNotMatch(save, /searchParams\.set\(\s*['"]builder['"]/);
 	assert.match(save, /cb:design-shell:savechange/);
 	assert.match(controller, /new\s+WorkflowService\(\)\s*\)->save\(/);
 	assert.match(controller, /self::guard\( 'cb_automations_save_workflow' \)/);
