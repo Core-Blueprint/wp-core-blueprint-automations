@@ -339,12 +339,28 @@
 		triggerRoot.append(card);
 	}
 
+	function motionRootFor(collection) {
+		if (collection === state.states) return statesRoot;
+		if (collection === state.conditions) return conditionsRoot;
+		if (collection === state.actions) return actionsRoot;
+		return null;
+	}
+
 	function reorder(collection, index, direction) {
 		const target = index + direction;
 		if (target < 0 || target >= collection.length) return;
-		const [item] = collection.splice(index, 1);
-		collection.splice(target, 0, item);
-		renderAll();
+		const mutate = () => {
+			const [item] = collection.splice(index, 1);
+			collection.splice(target, 0, item);
+			renderAll();
+		};
+		const motionRoot = motionRootFor(collection);
+		const animateLayoutChange = window.cbCore?.designEditor?.motion?.animateLayoutChange;
+		if (motionRoot && typeof animateLayoutChange === 'function') {
+			animateLayoutChange(motionRoot, mutate);
+			return;
+		}
+		mutate();
 	}
 
 	function reorderControls(collection, index) {
@@ -358,7 +374,10 @@
 	}
 
 	function renderStep(step, kind, context, index, remove) {
-		const card = el('div', { class: 'cb-automations-step cb-automations-repeatable-step' });
+		const card = el('div', {
+			class: 'cb-automations-step cb-automations-repeatable-step',
+			'data-cb-design-motion-key': `${context}:${step.step_id}`,
+		});
 		const head = el('div', { class: 'cb-automations-step-head' });
 		head.append(el('code', {}, step.step_id));
 		const actions = el('span', { class: 'cb-automations-step-head__actions' });
@@ -435,7 +454,10 @@
 	}
 
 	function renderCondition(condition, index) {
-		const card = el('div', { class: 'cb-automations-step cb-automations-condition' });
+		const card = el('div', {
+			class: 'cb-automations-step cb-automations-condition',
+			'data-cb-design-motion-key': `condition:${condition.condition_id}`,
+		});
 		const head = el('div', { class: 'cb-automations-step-head' });
 		head.append(el('code', {}, condition.condition_id));
 		const actions = el('span', { class: 'cb-automations-step-head__actions' });
