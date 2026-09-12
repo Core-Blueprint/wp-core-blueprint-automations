@@ -148,7 +148,7 @@ $notices = [
 										<input type="hidden" name="action" value="cb_automations_toggle_workflow" />
 										<input type="hidden" name="workflow_id" value="<?php echo esc_attr( (string) $record->id() ); ?>" />
 										<input type="hidden" name="activation_state" value="<?php echo esc_attr( $target_state ); ?>" />
-										<?php wp_nonce_field( \CB\Automations\Admin\WorkflowActivationController::nonce_action( $record->id() ), '_cb_automations_nonce' ); ?>
+										<input type="hidden" name="_cb_automations_nonce" value="<?php echo esc_attr( wp_create_nonce( \CB\Automations\Admin\WorkflowActivationController::nonce_action( $record->id() ) ) ); ?>" />
 										<button type="submit" class="button cb-core-button cb-core-button--secondary" aria-label="<?php echo esc_attr( sprintf( '%s: %s', $toggle_label, $record->name() ) ); ?>"><?php echo esc_html( $toggle_label ); ?></button>
 									</form>
 								</div>
