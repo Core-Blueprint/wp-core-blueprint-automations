@@ -16,6 +16,7 @@
 	const form = document.querySelector('[data-cb-automations-editor-form]');
 	const shell = document.querySelector('[data-cb-automations-designer-shell]');
 	const save = shell?.querySelector('[data-cb-design-shell-primary-action]');
+	const status = shell?.querySelector('[data-cb-design-shell-status]');
 	const revision = form?.querySelector('[name="revision"]');
 	const name = form?.querySelector('[name="name"]');
 	const activation = form?.querySelector('[name="activation_state"]');
@@ -33,9 +34,12 @@
 		}
 	};
 	const emit = (state, message = '', extra = {}) => {
+		const text = String(message || '');
+		if (status) status.textContent = text;
+		shell.toggleAttribute('aria-busy', state === 'saving');
 		shell.dispatchEvent(new CustomEvent('cb:design-shell:savechange', {
 			bubbles: true,
-			detail: Object.freeze({ state, message: String(message || ''), ...extra }),
+			detail: Object.freeze({ state, message: text, ...extra }),
 		}));
 	};
 	const responseMessage = (payload, fallback) => {
