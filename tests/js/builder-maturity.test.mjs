@@ -94,6 +94,9 @@ test('Automation Builder maturity keeps shared-shell, canonical persistence and 
 	assert.match(save, /currentDirty: definitionDirty/);
 	assert.match(save, /savedWithChanges/);
 	assert.match(assets, /savedWithChanges/);
+	assert.match(save, /data-cb-design-shell-status/);
+	assert.match(save, /status\.textContent = text/);
+	assert.match(save, /toggleAttribute\('aria-busy', state === 'saving'\)/);
 	assert.match(save, /searchParams\.delete\('builder'\)/);
 	assert.doesNotMatch(save, /searchParams\.set\(\s*['"]builder['"]/);
 	assert.match(save, /cb:design-shell:savechange/);
