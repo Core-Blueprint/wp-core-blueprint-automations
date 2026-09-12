@@ -134,7 +134,13 @@
 		if (!selected) return;
 		const cards = Array.from(root.querySelectorAll('.cb-automations-step, .cb-automations-condition'));
 		const match = cards.find((card) => cardRecord(card)?.key === selected);
-		if (match) selectCard(match, { open: false });
+		if (match) {
+			selectCard(match, { open: false });
+			return;
+		}
+		selected = null;
+		root.querySelectorAll('.cb-automations-step.is-builder-selected, .cb-automations-condition.is-builder-selected').forEach((item) => item.classList.remove('is-builder-selected'));
+		renderInspector(null);
 	};
 
 	const decorate = () => {
