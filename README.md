@@ -49,12 +49,12 @@ Trigger
 → State
 → Conditions
 → Actions
-→ terminal history
+→ run history
 ```
 
 Runtime payloads and step outputs are stored in the encrypted Runtime Vault rather than exposed through run history. Jobs use leases and run-level fencing so stale workers cannot acknowledge or overwrite work owned by a newer worker. Worker failures use bounded infrastructure retry; mutating Action outcomes that cannot be proven are never blindly replayed.
 
-Terminal run states include success, skipped, failed, blocked, cancelled and indeterminate/outcome-unknown states.
+Terminal run states are succeeded, skipped, failed and cancelled. Blocked and indeterminate/outcome-unknown runs halt automatic execution without becoming terminal so an operator can inspect or recover them explicitly.
 
 ## Run history and operator recovery
 
