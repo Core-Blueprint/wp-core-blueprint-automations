@@ -9,9 +9,16 @@ if (root) {
 	const propertiesLabel = String(window.cbAutomationsInspectorStrings?.properties || '').trim() || 'Properties';
 	const propertiesSidebar = root.querySelector('.cb-core-design-shell__sidebar');
 
-	if (workflowSidebar) workflowSidebar.setAttribute('aria-label', workflowLabel);
+	const applyPanelTitle = (panel, title) => {
+		if (!panel || !title) return;
+		panel.dataset.cbDesignShellPanelTitle = title;
+		const heading = panel.querySelector(':scope > .cb-core-design-shell__panel-header [data-cb-design-shell-panel-heading]');
+		if (heading) heading.textContent = title;
+	};
+
+	applyPanelTitle(workflowSidebar, workflowLabel);
+	applyPanelTitle(propertiesSidebar, propertiesLabel);
 	if (workflowTitle) workflowTitle.remove();
-	if (propertiesSidebar) propertiesSidebar.setAttribute('aria-label', propertiesLabel);
 
 	createDesignerShell(root, {
 		defaultPanels: {
