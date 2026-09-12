@@ -96,6 +96,10 @@ test('Automation Builder maturity keeps shared-shell, canonical persistence and 
 	assert.match(finishCss, /is-palette-collapsed/);
 	assert.match(finishCss, /is-sidebar-collapsed/);
 	assert.doesNotMatch(finishCss, /position\s*:\s*fixed|100dvh/);
+	assert.match(designerCss, /@media \(max-width: 1280px\)[\s\S]*?grid-template-columns:\s*minmax\(170px, 200px\) minmax\(0, 1fr\);/);
+	assert.doesNotMatch(designerCss, /minmax\(260px, 300px\)/);
+	assert.match(finishCss, /@media \(max-width: 1280px\)[\s\S]*?is-palette-collapsed[\s\S]*?grid-template-columns:\s*58px minmax\(0, 1fr\);/);
+	assert.match(finishCss, /@media \(max-width: 1280px\)[\s\S]*?is-sidebar-collapsed[\s\S]*?grid-template-columns:\s*minmax\(170px, 200px\) minmax\(0, 1fr\);/);
 
 	// Public Base boundaries only; no execution-runtime maturity sneaks into this UI batch.
 	assert.match(assets, /@cb-core\/design-editor/);
