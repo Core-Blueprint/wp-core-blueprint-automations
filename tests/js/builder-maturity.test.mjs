@@ -35,7 +35,7 @@ test('Automation Builder maturity keeps shared-shell, canonical persistence and 
 	// AD2.1: the workflow editor is a Base-owned direct Designer route, not a simulated manual launch.
 	assert.match(template, /data-cb-design-launch-root/);
 	assert.match(template, /data-cb-design-launch-mode="direct"/);
-	assert.match(template, /data-cb-design-exit-url="<\?php echo esc_url\( \\CB\\Automations\\Admin\\AutomationsPage::url\(\) \); \?>"/);
+	assert.ok(template.includes('data-cb-design-exit-url="<?php echo esc_url( \\CB\\Automations\\Admin\\AutomationsPage::url() ); ?>"'));
 	assert.match(assets, /DesignEditorAssets::enqueue_designer_mode\(\)/);
 	assert.match(assets, /is_callable\( \[ DesignEditorAssets::class, 'enqueue_designer_mode' \] \)/);
 	assert.doesNotMatch(assets, /admin_body_class|builder_launch_requested|cb-automations-builder-launch-pending|libraryUrl/);
