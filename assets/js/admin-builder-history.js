@@ -73,8 +73,16 @@ if (api?.snapshot && api?.replace && api?.root && shell && undo instanceof HTMLB
 
 	shell.addEventListener('cb:design-shell:savechange', (event) => {
 		if (String(event.detail?.state || '') !== 'saved') return;
-		projectState.replace(projectFor(api.snapshot()), { source: 'baseline' });
+		const suppliedBaseline = event.detail?.baselineDefinition;
+		const baseline = suppliedBaseline && typeof suppliedBaseline === 'object' && !Array.isArray(suppliedBaseline)
+			? clone(suppliedBaseline)
+			: api.snapshot();
+		const current = api.snapshot();
+		projectState.replace(projectFor(baseline), { source: 'baseline' });
 		history.clear();
+		if (event.detail?.currentDirty === true && !sameDefinition(baseline, current)) {
+			history.execute(commandFor(current));
+		}
 		syncButtons();
 	});
 
