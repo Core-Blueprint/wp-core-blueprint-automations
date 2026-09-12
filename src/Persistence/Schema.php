@@ -97,7 +97,7 @@ final class Schema {
 				[
 					'id', 'run_uuid', 'correlation_id', 'event_receipt_id', 'workflow_id', 'workflow_revision',
 					'execution_principal_user_id', 'definition_version', 'definition_json', 'definition_hash',
-					'status', 'cursor', 'failure_code', 'created_at', 'started_at', 'finished_at', 'updated_at',
+					'status', 'run_cursor', 'failure_code', 'created_at', 'started_at', 'finished_at', 'updated_at',
 				]
 			)
 			&& self::table_ready(
@@ -284,7 +284,7 @@ final class Schema {
 				definition_json longtext NOT NULL,
 				definition_hash char(64) NOT NULL,
 				status varchar(24) NOT NULL DEFAULT 'queued',
-				cursor varchar(128) NOT NULL DEFAULT '',
+				run_cursor varchar(128) NOT NULL DEFAULT '',
 				failure_code varchar(191) NOT NULL DEFAULT '',
 				created_at datetime(6) NOT NULL,
 				started_at datetime(6) NULL DEFAULT NULL,
