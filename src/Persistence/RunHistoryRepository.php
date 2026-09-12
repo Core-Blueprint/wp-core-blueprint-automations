@@ -17,7 +17,7 @@ final class RunHistoryRepository {
 		$offset = max( 0, $offset );
 		$workflow_id = max( 0, $workflow_id );
 		$table = Schema::runs_table();
-		$fields = 'id, run_uuid, correlation_id, workflow_id, workflow_revision, execution_principal_user_id, status, cursor, failure_code, created_at, started_at, finished_at, updated_at';
+		$fields = 'id, run_uuid, correlation_id, workflow_id, workflow_revision, execution_principal_user_id, status, run_cursor, failure_code, created_at, started_at, finished_at, updated_at';
 		if ( $workflow_id > 0 ) {
 			$sql = $wpdb->prepare(
 				"SELECT {$fields} FROM {$table} WHERE workflow_id = %d ORDER BY id DESC LIMIT %d OFFSET %d",
@@ -57,7 +57,7 @@ final class RunHistoryRepository {
 		$table = Schema::runs_table();
 		$row = $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT id, run_uuid, correlation_id, workflow_id, workflow_revision, execution_principal_user_id, status, cursor, failure_code, created_at, started_at, finished_at, updated_at
+				"SELECT id, run_uuid, correlation_id, workflow_id, workflow_revision, execution_principal_user_id, status, run_cursor, failure_code, created_at, started_at, finished_at, updated_at
 				 FROM {$table} WHERE id = %d LIMIT 1",
 				$run_id
 			),
@@ -114,7 +114,7 @@ final class RunHistoryRepository {
 			'workflow_revision' => $revision,
 			'execution_principal_user_id' => $principal,
 			'status' => $status,
-			'cursor' => (string) ( $row['cursor'] ?? '' ),
+			'cursor' => (string) ( $row['run_cursor'] ?? '' ),
 			'failure_code' => self::safe_code( (string) ( $row['failure_code'] ?? '' ) ),
 			'created_at' => self::safe_time( $row['created_at'] ?? null ),
 			'started_at' => self::safe_time( $row['started_at'] ?? null ),
