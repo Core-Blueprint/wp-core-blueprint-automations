@@ -75,7 +75,9 @@ test('Automation Builder maturity keeps shared-shell, canonical persistence and 
 	// AD5: Save-in-place adapts the existing canonical form/controller path, not persistence ownership.
 	assert.match(save, /new FormData\(form\)/);
 	assert.match(save, /payload\.set\(ASYNC_FIELD, '1'\)/);
-	assert.match(save, /window\.fetch\(form\.action \|\| window\.location\.href/);
+	assert.match(save, /form\.getAttribute\('action'\) \|\| window\.location\.href/);
+	assert.match(save, /window\.fetch\(endpoint/);
+	assert.doesNotMatch(save, /window\.fetch\(form\.action/);
 	assert.match(save, /cb:design-shell:savechange/);
 	assert.match(controller, /new\s+WorkflowService\(\)\s*\)->save\(/);
 	assert.match(controller, /self::guard\( 'cb_automations_save_workflow' \)/);
