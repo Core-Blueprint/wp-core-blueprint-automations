@@ -167,7 +167,7 @@ final class OperatorRecoveryRepository {
 		$table = Schema::runs_table();
 		$row = $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT id, status, cursor FROM {$table} WHERE id = %d LIMIT 1 FOR UPDATE",
+				"SELECT id, status, run_cursor FROM {$table} WHERE id = %d LIMIT 1 FOR UPDATE",
 				$run_id
 			),
 			ARRAY_A
@@ -178,7 +178,7 @@ final class OperatorRecoveryRepository {
 			}
 			throw new OperatorRecoveryFailure( 'recovery.run_missing' );
 		}
-		if ( RunStatus::Indeterminate->value !== (string) ( $row['status'] ?? '' ) || $expected_cursor !== (string) ( $row['cursor'] ?? '' ) ) {
+		if ( RunStatus::Indeterminate->value !== (string) ( $row['status'] ?? '' ) || $expected_cursor !== (string) ( $row['run_cursor'] ?? '' ) ) {
 			throw new OperatorRecoveryFailure( 'recovery.run_conflict' );
 		}
 	}
@@ -267,8 +267,8 @@ final class OperatorRecoveryRepository {
 		if ( RunStatus::Queued === $target ) {
 			$sql = $wpdb->prepare(
 				"UPDATE {$table}
-				 SET status = %s, cursor = %s, failure_code = '', finished_at = NULL, updated_at = %s
-				 WHERE id = %d AND status = %s AND cursor = %s",
+				 SET status = %s, run_cursor = %s, failure_code = '', finished_at = NULL, updated_at = %s
+				 WHERE id = %d AND status = %s AND run_cursor = %s",
 				$target->value,
 				$resulting_cursor,
 				$now,
@@ -280,8 +280,8 @@ final class OperatorRecoveryRepository {
 			$failure_code = RunStatus::Cancelled === $target ? 'recovery.abandoned_unresolved' : '';
 			$sql = $wpdb->prepare(
 				"UPDATE {$table}
-				 SET status = %s, cursor = %s, failure_code = %s, finished_at = %s, updated_at = %s
-				 WHERE id = %d AND status = %s AND cursor = %s",
+				 SET status = %s, run_cursor = %s, failure_code = %s, finished_at = %s, updated_at = %s
+				 WHERE id = %d AND status = %s AND run_cursor = %s",
 				$target->value,
 				$resulting_cursor,
 				$failure_code,
