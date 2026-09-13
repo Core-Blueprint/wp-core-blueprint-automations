@@ -12,6 +12,7 @@
  * Domain Path:       /languages
  * Requires at least: 7.0
  * Requires PHP:      8.4
+ * Requires Plugins: core-blueprint
  *
  * @package CB_Automations
  */
@@ -39,8 +40,8 @@ if ( version_compare( PHP_VERSION, '8.4', '<' ) ) {
 		}
 		deactivate_plugins( plugin_basename( __FILE__ ) );
 		wp_die(
-			esc_html( sprintf( 'Core Blueprint Automations requires PHP 8.4 or newer. This server runs PHP %s.', PHP_VERSION ) ),
-			esc_html( 'Core Blueprint dependency required' ),
+			esc_html( sprintf( 'PHP %1$s or newer is required. This server runs PHP %2$s.', '8.4', PHP_VERSION ) ),
+			esc_html( 'Core Blueprint requirements not met' ),
 			[
 				'link_url'  => admin_url( 'plugins.php' ),
 				'link_text' => 'Plugins',
@@ -55,7 +56,7 @@ if ( version_compare( PHP_VERSION, '8.4', '<' ) ) {
 		printf(
 			'<div class="notice notice-error"><p><strong>%s</strong> %s</p></div>',
 			esc_html( 'Core Blueprint Automations:' ),
-			esc_html( sprintf( 'PHP 8.4 or newer is required. This server runs PHP %s.', PHP_VERSION ) )
+			esc_html( sprintf( 'PHP %1$s or newer is required. This server runs PHP %2$s.', '8.4', PHP_VERSION ) )
 		);
 	} );
 	return;
