@@ -29,7 +29,7 @@ $request_approved = capability(
 $contact_lookup = capability(
 	CapabilityKind::STATE,
 	$crm,
-	'contact.by_email',
+	'contact.by.email',
 	[ 'email' => field( 'string', true ) ],
 	[ 'contact_id' => field( 'integer', true ) ]
 );
@@ -37,7 +37,7 @@ $contact_lookup = capability(
 $add_activity = capability(
 	CapabilityKind::ACTION,
 	$crm,
-	'contact.add_activity',
+	'contact.add.activity',
 	[
 		'contact_id' => field( 'integer', true ),
 		'request_id' => field( 'integer', true ),
@@ -47,9 +47,9 @@ $add_activity = capability(
 );
 
 $definitions = [
-	'trigger:' . $requests . ':request.approved'    => $request_approved,
-	'state:' . $crm . ':contact.by_email'           => $contact_lookup,
-	'action:' . $crm . ':contact.add_activity'      => $add_activity,
+	'trigger:' . $requests . ':request.approved'     => $request_approved,
+	'state:' . $crm . ':contact.by.email'            => $contact_lookup,
+	'action:' . $crm . ':contact.add.activity'       => $add_activity,
 ];
 
 $statuses = [
@@ -69,7 +69,7 @@ $definition = definition(
 	[
 		step(
 			'state_1',
-			reference( CapabilityKind::STATE, $crm, 'contact.by_email' ),
+			reference( CapabilityKind::STATE, $crm, 'contact.by.email' ),
 			[ 'email' => Binding::step_output( 'trigger_1', 'email' ) ]
 		),
 	],
@@ -77,7 +77,7 @@ $definition = definition(
 	[
 		step(
 			'action_1',
-			reference( CapabilityKind::ACTION, $crm, 'contact.add_activity' ),
+			reference( CapabilityKind::ACTION, $crm, 'contact.add.activity' ),
 			[
 				'contact_id' => Binding::step_output( 'state_1', 'contact_id' ),
 				'request_id' => Binding::step_output( 'trigger_1', 'request_id' ),

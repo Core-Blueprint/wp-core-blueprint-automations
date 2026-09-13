@@ -11,6 +11,12 @@
 		validDescription: 'The current definition is valid against the live capability catalog.',
 		invalidDescription: 'Resolve these items before the automation can be enabled.',
 		workflowIssue: 'Workflow issue',
+		activationEnabled: 'Enabled',
+		activationDisabled: 'Disabled',
+		validationValid: 'Valid',
+		validationNeedsReview: 'Needs review',
+		validationDependencyUnavailable: 'Dependency unavailable',
+		validationInvalid: 'Invalid',
 		...(window.cbAutomationsSaveStrings || {}),
 	};
 	const form = document.querySelector('[data-cb-automations-editor-form]');
@@ -21,7 +27,13 @@
 	const name = form?.querySelector('[name="name"]');
 	const activation = form?.querySelector('[name="activation_state"]');
 	const definition = form?.querySelector('[data-cb-automations-definition]');
+	const principalLabel = form?.querySelector('[data-cb-automations-principal-label]');
+	const rebindPrincipal = form?.querySelector('[data-cb-automations-rebind-principal]');
 	const health = shell?.querySelector('.cb-automations-validation-panel');
+	const headingTitle = document.querySelector('.cb-automations-editor-heading .cb-core-title');
+	const headingStatuses = document.querySelectorAll('.cb-automations-editor-statuses .cb-core-status');
+	const activationStatus = headingStatuses.item(0);
+	const validationStatus = headingStatuses.item(1);
 	if (!(form instanceof HTMLFormElement) || !shell || !(save instanceof HTMLButtonElement) || typeof window.fetch !== 'function') return;
 
 	let saving = false;
@@ -45,6 +57,41 @@
 	const responseMessage = (payload, fallback) => {
 		const message = payload?.data?.message;
 		return typeof message === 'string' && message.trim() ? message.trim() : fallback;
+	};
+	const updateStatusIndicator = (indicator, label, dotClass) => {
+		if (!(indicator instanceof HTMLElement) || !label || !dotClass) return;
+		const labelNode = indicator.querySelector('.cb-core-status__label');
+		const dot = indicator.querySelector('.cb-core-status__dot');
+		if (labelNode) labelNode.textContent = label;
+		if (dot) {
+			dot.classList.remove(
+				'cb-core-status__dot--success',
+				'cb-core-status__dot--warning',
+				'cb-core-status__dot--danger',
+				'cb-core-status__dot--muted'
+			);
+			dot.classList.add(dotClass);
+		}
+	};
+	const updatePersistedStatuses = (payload, updateValidation) => {
+		const activationState = String(payload?.data?.activation_state || '');
+		if (activationState === 'enabled') {
+			updateStatusIndicator(activationStatus, strings.activationEnabled, 'cb-core-status__dot--success');
+		} else if (activationState === 'disabled') {
+			updateStatusIndicator(activationStatus, strings.activationDisabled, 'cb-core-status__dot--muted');
+		}
+
+		if (!updateValidation) return;
+		const validationState = String(payload?.data?.validation_state || '');
+		const validationPresentation = {
+			valid: [strings.validationValid, 'cb-core-status__dot--success'],
+			needs_review: [strings.validationNeedsReview, 'cb-core-status__dot--warning'],
+			dependency_unavailable: [strings.validationDependencyUnavailable, 'cb-core-status__dot--warning'],
+			invalid: [strings.validationInvalid, 'cb-core-status__dot--danger'],
+		}[validationState];
+		if (validationPresentation) {
+			updateStatusIndicator(validationStatus, validationPresentation[0], validationPresentation[1]);
+		}
 	};
 	const updateHealth = (payload) => {
 		if (!health || typeof payload?.data?.valid !== 'boolean') return;
@@ -99,6 +146,7 @@
 		const submittedDefinition = parseDefinition(submittedDefinitionJson);
 		const submittedName = name instanceof HTMLInputElement ? name.value : null;
 		const submittedActivation = activation instanceof HTMLSelectElement ? activation.value : null;
+		const submittedRebind = rebindPrincipal instanceof HTMLInputElement ? rebindPrincipal.checked : false;
 		emit('saving', strings.saving);
 
 		const payload = new FormData(form);
@@ -127,7 +175,8 @@
 			const definitionDirty = definition instanceof HTMLInputElement && definition.value !== submittedDefinitionJson;
 			const nameDirty = name instanceof HTMLInputElement && submittedName !== null && name.value !== submittedName;
 			const activationDirty = activation instanceof HTMLSelectElement && submittedActivation !== null && activation.value !== submittedActivation;
-			const currentDirty = definitionDirty || nameDirty || activationDirty;
+			const rebindDirty = rebindPrincipal instanceof HTMLInputElement && rebindPrincipal.checked !== submittedRebind;
+			const currentDirty = definitionDirty || nameDirty || activationDirty || rebindDirty;
 
 			if (revision instanceof HTMLInputElement && Number.isInteger(Number(result.data?.revision))) {
 				revision.value = String(result.data.revision);
@@ -135,6 +184,16 @@
 			if (!activationDirty && activation instanceof HTMLSelectElement && ['enabled', 'disabled'].includes(result.data?.activation_state)) {
 				activation.value = result.data.activation_state;
 			}
+			if (!nameDirty && headingTitle && typeof result.data?.name === 'string' && result.data.name) {
+				headingTitle.textContent = result.data.name;
+			}
+			if (principalLabel && typeof result.data?.execution_principal_label === 'string' && result.data.execution_principal_label) {
+				principalLabel.textContent = result.data.execution_principal_label;
+			}
+			if (!rebindDirty && submittedRebind && rebindPrincipal instanceof HTMLInputElement) {
+				rebindPrincipal.checked = false;
+			}
+			updatePersistedStatuses(result, !definitionDirty);
 			if (!definitionDirty) updateHealth(result);
 			cleanLocation();
 			emit(

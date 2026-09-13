@@ -12,10 +12,23 @@ $notice = isset( $_GET['notice'] ) && is_string( $_GET['notice'] )
 	: ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- bounded read-only notice routing.
 
 $notices = [
-	'created'        => [ 'success', __( 'Automation draft created.', 'core-blueprint-automations' ) ],
-	'invalid_name'   => [ 'error', __( 'Enter an automation name between 1 and 191 characters.', 'core-blueprint-automations' ) ],
-	'storage_failed' => [ 'error', __( 'The automation could not be created because workflow storage is unavailable. No workflow was saved.', 'core-blueprint-automations' ) ],
-	'failed'         => [ 'error', __( 'The automation could not be created. No workflow was saved.', 'core-blueprint-automations' ) ],
+	'created'                                => [ 'success', __( 'Automation draft created.', 'core-blueprint-automations' ) ],
+	'enabled'                                => [ 'success', __( 'Automation enabled.', 'core-blueprint-automations' ) ],
+	'disabled'                               => [ 'success', __( 'Automation disabled.', 'core-blueprint-automations' ) ],
+	'saved_disabled'                         => [ 'warning', __( 'The automation remains disabled because the workflow is not valid yet.', 'core-blueprint-automations' ) ],
+	'saved_disabled_execution_unavailable'   => [ 'warning', __( 'The automation remains disabled because secure runtime encryption is unavailable on this site.', 'core-blueprint-automations' ) ],
+	'saved_disabled_principal_missing'       => [ 'warning', __( 'The automation remains disabled. Open the builder and assign your account as execution authority first.', 'core-blueprint-automations' ) ],
+	'saved_disabled_principal_invalid'       => [ 'warning', __( 'The automation remains disabled because its stored execution authority is no longer a valid WordPress user.', 'core-blueprint-automations' ) ],
+	'saved_disabled_principal_denied'        => [ 'warning', __( 'The automation remains disabled because its execution principal no longer has all required permissions.', 'core-blueprint-automations' ) ],
+	'saved_disabled_operator_denied'         => [ 'warning', __( 'The automation remains disabled because your account does not have all permissions required to enable it.', 'core-blueprint-automations' ) ],
+	'saved_disabled_capability_unavailable'  => [ 'warning', __( 'The automation remains disabled because execution authority could not be verified against the current capability contracts.', 'core-blueprint-automations' ) ],
+	'persistence_blocked'                    => [ 'error', __( 'The automation state was not changed because the stored workflow contains data that cannot be persisted safely.', 'core-blueprint-automations' ) ],
+	'conflict'                               => [ 'warning', __( 'This automation changed in another request. Reload the page before changing its state.', 'core-blueprint-automations' ) ],
+	'not_found'                              => [ 'error', __( 'The automation could not be found. No state was changed.', 'core-blueprint-automations' ) ],
+	'invalid'                                => [ 'error', __( 'The requested automation state was invalid. No state was changed.', 'core-blueprint-automations' ) ],
+	'invalid_name'                           => [ 'error', __( 'Enter an automation name between 1 and 191 characters.', 'core-blueprint-automations' ) ],
+	'storage_failed'                         => [ 'error', __( 'The automation could not be saved because workflow storage is unavailable. No workflow state was changed.', 'core-blueprint-automations' ) ],
+	'failed'                                 => [ 'error', __( 'The automation could not be updated. Reload the page before trying again.', 'core-blueprint-automations' ) ],
 ];
 ?>
 <div class="wrap cb-core-wrap cb-automations-admin cb-automations-index-page">
@@ -27,7 +40,7 @@ $notices = [
 	<?php endif; ?>
 
 	<section class="cb-core-panel cb-automations-create-panel">
-		<span class="cb-automations-panel-eyebrow"><?php esc_html_e( 'Automation designer', 'core-blueprint-automations' ); ?></span>
+		<span class="cb-automations-panel-eyebrow"><?php esc_html_e( 'Automation Builder', 'core-blueprint-automations' ); ?></span>
 		<h2><?php esc_html_e( 'Create automation', 'core-blueprint-automations' ); ?></h2>
 		<p class="description"><?php esc_html_e( 'Start with a name, then build a clear When → Get data → Only if → Then workflow.', 'core-blueprint-automations' ); ?></p>
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="cb-core-form-row cb-automations-create-form">
@@ -51,35 +64,31 @@ $notices = [
 		</div>
 
 		<?php if ( empty( $listing['items'] ) ) : ?>
-			<div class="cb-core-empty-state">
-				<p><?php esc_html_e( 'No automations have been created yet.', 'core-blueprint-automations' ); ?></p>
-			</div>
+			<div class="cb-core-empty-state"><p><?php esc_html_e( 'No automations have been created yet.', 'core-blueprint-automations' ); ?></p></div>
 		<?php else : ?>
 			<div class="cb-automations-workflow-list">
 				<?php foreach ( $listing['items'] as $item ) : ?>
 					<?php
-					$record          = $item['record'];
-					$definition      = $record->definition();
-					$edit_url        = \CB\Automations\Admin\AutomationsPage::url( [ 'workflow' => $record->id() ] );
-					$issue_count     = count( $item['validation']->issues() );
-					$is_valid        = $item['validation']->is_valid();
-					$is_enabled      = 'enabled' === $record->activation_state()->value;
-					$activation_label = $is_enabled
-						? __( 'Enabled', 'core-blueprint-automations' )
-						: __( 'Disabled', 'core-blueprint-automations' );
-					$updated         = '' !== $record->updated_at()
-						? get_date_from_gmt( preg_replace( '/\.\d+$/', '', $record->updated_at() ), get_option( 'date_format' ) . ' ' . get_option( 'time_format' ) )
-						: '—';
-					$trigger_count   = null === $definition->trigger() ? 0 : 1;
-					$state_count     = count( $definition->states() );
-					$condition_count = count( $definition->conditions() );
-					$action_count    = count( $definition->actions() );
+					$record           = $item['record'];
+					$definition       = $record->definition();
+					$edit_url         = \CB\Automations\Admin\AutomationsPage::url( [ 'workflow' => $record->id() ] );
+					$issue_count      = count( $item['validation']->issues() );
+					$is_valid         = $item['validation']->is_valid();
+					$is_enabled       = 'enabled' === $record->activation_state()->value;
+					$activation_label = $is_enabled ? __( 'Enabled', 'core-blueprint-automations' ) : __( 'Disabled', 'core-blueprint-automations' );
+					$updated          = '' !== $record->updated_at() ? get_date_from_gmt( preg_replace( '/\.\d+$/', '', $record->updated_at() ), get_option( 'date_format' ) . ' ' . get_option( 'time_format' ) ) : '—';
+					$trigger_count    = null === $definition->trigger() ? 0 : 1;
+					$state_count      = count( $definition->states() );
+					$condition_count  = count( $definition->conditions() );
+					$action_count     = count( $definition->actions() );
+					$target_state     = $is_enabled ? 'disabled' : 'enabled';
+					$toggle_label     = $is_enabled ? __( 'Disable', 'core-blueprint-automations' ) : __( 'Enable', 'core-blueprint-automations' );
 
 					if ( ! $is_valid ) {
-						$card_state     = 'has-error';
+						$card_state = 'has-error';
 						$status_variant = 'error';
-						$status_label   = __( 'Needs attention', 'core-blueprint-automations' );
-						$status_detail  = sprintf(
+						$status_label = __( 'Needs attention', 'core-blueprint-automations' );
+						$status_detail = sprintf(
 							/* translators: 1: activation state, 2: validation state, 3: issue count. */
 							__( '%1$s · %2$s · %3$s', 'core-blueprint-automations' ),
 							$activation_label,
@@ -87,25 +96,22 @@ $notices = [
 							sprintf( _n( '%d issue', '%d issues', $issue_count, 'core-blueprint-automations' ), $issue_count )
 						);
 					} elseif ( $is_enabled ) {
-						$card_state     = 'is-active';
+						$card_state = 'is-active';
 						$status_variant = 'active';
-						$status_label   = __( 'Enabled', 'core-blueprint-automations' );
-						$status_detail  = __( 'Valid · ready to run', 'core-blueprint-automations' );
+						$status_label = __( 'Enabled', 'core-blueprint-automations' );
+						$status_detail = __( 'Valid · ready to run', 'core-blueprint-automations' );
 					} else {
-						$card_state     = 'is-inactive';
+						$card_state = 'is-inactive';
 						$status_variant = 'idle';
-						$status_label   = __( 'Disabled', 'core-blueprint-automations' );
-						$status_detail  = __( 'Valid · will not run', 'core-blueprint-automations' );
+						$status_label = __( 'Disabled', 'core-blueprint-automations' );
+						$status_detail = __( 'Valid · will not run', 'core-blueprint-automations' );
 					}
 					?>
-					<a class="cb-automations-workflow-card <?php echo esc_attr( $card_state ); ?>" href="<?php echo esc_url( $edit_url ); ?>">
+					<article class="cb-automations-workflow-card <?php echo esc_attr( $card_state ); ?>">
 						<span class="cb-automations-workflow-card__accent" aria-hidden="true"></span>
 						<div class="cb-automations-workflow-card__main">
 							<div class="cb-automations-workflow-card__title-row">
-								<div>
-									<span class="cb-automations-workflow-card__eyebrow"><?php esc_html_e( 'Automation', 'core-blueprint-automations' ); ?></span>
-									<h3><?php echo esc_html( $record->name() ); ?></h3>
-								</div>
+								<div><span class="cb-automations-workflow-card__eyebrow"><?php esc_html_e( 'Automation', 'core-blueprint-automations' ); ?></span><h3><a class="cb-automations-workflow-card__title-link" href="<?php echo esc_url( $edit_url ); ?>"><?php echo esc_html( $record->name() ); ?></a></h3></div>
 								<div class="cb-automations-workflow-card__status">
 									<?php if ( 'error' === $status_variant ) : ?>
 										<span class="cb-automations-workflow-card__health cb-automations-workflow-card__health--error"><span aria-hidden="true"></span><?php echo esc_html( $status_label ); ?></span>
@@ -125,30 +131,37 @@ $notices = [
 
 							<div class="cb-automations-workflow-card__footer">
 								<span><?php printf( esc_html__( 'Updated %s', 'core-blueprint-automations' ), esc_html( $updated ) ); ?></span>
-								<span class="cb-automations-workflow-card__open"><?php esc_html_e( 'Open designer', 'core-blueprint-automations' ); ?> →</span>
+								<div class="cb-automations-workflow-card__actions">
+									<a class="button cb-core-button cb-core-button--secondary" href="<?php echo esc_url( $edit_url ); ?>"><?php esc_html_e( 'Open builder', 'core-blueprint-automations' ); ?></a>
+									<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="cb-automations-workflow-card__toggle">
+										<input type="hidden" name="action" value="cb_automations_toggle_workflow" />
+										<input type="hidden" name="workflow_id" value="<?php echo esc_attr( (string) $record->id() ); ?>" />
+										<input type="hidden" name="activation_state" value="<?php echo esc_attr( $target_state ); ?>" />
+										<input type="hidden" name="_cb_automations_nonce" value="<?php echo esc_attr( wp_create_nonce( \CB\Automations\Admin\WorkflowActivationController::nonce_action( $record->id() ) ) ); ?>" />
+										<button type="submit" class="button cb-core-button cb-core-button--secondary" aria-label="<?php echo esc_attr( sprintf( '%s: %s', $toggle_label, $record->name() ) ); ?>"><?php echo esc_html( $toggle_label ); ?></button>
+									</form>
+								</div>
 							</div>
 						</div>
-					</a>
+					</article>
 				<?php endforeach; ?>
 			</div>
 
 			<?php if ( $listing['pages'] > 1 ) : ?>
-				<div class="tablenav bottom cb-automations-pagination">
-					<div class="tablenav-pages">
-						<?php
-						echo wp_kses_post(
-							paginate_links( [
-								'base'      => add_query_arg( 'paged', '%#%', \CB\Automations\Admin\AutomationsPage::url() ),
-								'format'    => '',
-								'current'   => $listing['page'],
-								'total'     => $listing['pages'],
-								'prev_text' => __( '‹ Previous', 'core-blueprint-automations' ),
-								'next_text' => __( 'Next ›', 'core-blueprint-automations' ),
-							] )
-						);
-						?>
-					</div>
-				</div>
+				<div class="tablenav bottom cb-automations-pagination"><div class="tablenav-pages">
+					<?php
+					echo wp_kses_post(
+						paginate_links( [
+							'base'      => add_query_arg( 'paged', '%#%', \CB\Automations\Admin\AutomationsPage::url() ),
+							'format'    => '',
+							'current'   => $listing['page'],
+							'total'     => $listing['pages'],
+							'prev_text' => __( '‹ Previous', 'core-blueprint-automations' ),
+							'next_text' => __( 'Next ›', 'core-blueprint-automations' ),
+						] )
+					);
+					?>
+				</div></div>
 			<?php endif; ?>
 		<?php endif; ?>
 	</section>

@@ -4,9 +4,11 @@ declare(strict_types=1);
 namespace CB\Automations\Admin;
 
 use CB\Automations\Persistence\PersistenceFailure;
+use CB\Automations\Validation\ValidationState;
 use CB\Automations\Workflow\ActivationState;
 use CB\Automations\Workflow\Definition;
 use CB\Automations\Workflow\DefinitionCodec;
+use CB\Automations\Workflow\ExecutionAuthorityDecision;
 use CB\Automations\Workflow\PersistencePolicy;
 use CB\Automations\Workflow\WorkflowSaveResult;
 use CB\Automations\Workflow\WorkflowService;
@@ -69,6 +71,9 @@ final class WorkflowController {
 		$json     = isset( $_POST['definition_json'] ) && is_string( $_POST['definition_json'] )
 			? wp_unslash( $_POST['definition_json'] )
 			: '';
+		$rebind_execution_principal = isset( $_POST['rebind_execution_principal'] )
+			&& is_scalar( $_POST['rebind_execution_principal'] )
+			&& '1' === sanitize_text_field( wp_unslash( (string) $_POST['rebind_execution_principal'] ) );
 
 		if ( $id < 1 || $revision < 1 || null === $state || '' === $json || ! PersistencePolicy::allows_encoded_definition( $json ) ) {
 			self::reject_or_redirect( [ 'workflow' => max( 0, $id ), 'notice' => 'invalid' ], 400 );
@@ -91,19 +96,14 @@ final class WorkflowController {
 				$name,
 				$state,
 				$definition,
-				get_current_user_id()
+				get_current_user_id(),
+				$rebind_execution_principal
 			);
 
-			$notice = match ( $result->status() ) {
-				WorkflowSaveResult::SAVED               => 'saved',
-				WorkflowSaveResult::SAVED_DISABLED      => 'saved_disabled',
-				WorkflowSaveResult::PERSISTENCE_BLOCKED => 'persistence_blocked',
-				WorkflowSaveResult::CONFLICT            => 'conflict',
-				default                                 => 'failed',
-			};
+			$notice = self::notice_for_result( $result );
 
 			if ( self::is_async_request() ) {
-				self::respond_save_result( $result, $notice, $revision, $state );
+				self::respond_save_result( $result, $notice, $revision, $state, $name );
 			}
 			self::redirect( [ 'workflow' => $id, 'notice' => $notice ] );
 		} catch ( InvalidArgumentException $error ) {
@@ -138,7 +138,34 @@ final class WorkflowController {
 		return '1' === $value;
 	}
 
-	private static function respond_save_result( WorkflowSaveResult $result, string $notice, int $revision, ActivationState $state ): never {
+	private static function notice_for_result( WorkflowSaveResult $result ): string {
+		if ( WorkflowSaveResult::SAVED_DISABLED === $result->status() ) {
+			return match ( $result->activation_block_reason() ) {
+				WorkflowSaveResult::EXECUTION_UNAVAILABLE => 'saved_disabled_execution_unavailable',
+				ExecutionAuthorityDecision::PRINCIPAL_MISSING => 'saved_disabled_principal_missing',
+				ExecutionAuthorityDecision::PRINCIPAL_INVALID => 'saved_disabled_principal_invalid',
+				ExecutionAuthorityDecision::PRINCIPAL_PERMISSION_DENIED => 'saved_disabled_principal_denied',
+				ExecutionAuthorityDecision::OPERATOR_PERMISSION_DENIED => 'saved_disabled_operator_denied',
+				ExecutionAuthorityDecision::CAPABILITY_UNAVAILABLE => 'saved_disabled_capability_unavailable',
+				default => 'saved_disabled',
+			};
+		}
+
+		return match ( $result->status() ) {
+			WorkflowSaveResult::SAVED               => 'saved',
+			WorkflowSaveResult::PERSISTENCE_BLOCKED => 'persistence_blocked',
+			WorkflowSaveResult::CONFLICT            => 'conflict',
+			default                                 => 'failed',
+		};
+	}
+
+	private static function respond_save_result(
+		WorkflowSaveResult $result,
+		string $notice,
+		int $revision,
+		ActivationState $requested_state,
+		string $persisted_name
+	): never {
 		$issues = [];
 		foreach ( $result->validation()->issues() as $issue ) {
 			$issues[] = [
@@ -147,13 +174,20 @@ final class WorkflowController {
 			];
 		}
 
+		$persisted_state = $result->activation_state() ?? $requested_state;
+		$principal_user_id = $result->execution_principal_user_id();
 		$data = [
-			'notice'           => $notice,
-			'message'          => self::notice_message( $notice ),
-			'revision'         => $result->was_saved() ? $revision + 1 : $revision,
-			'activation_state' => WorkflowSaveResult::SAVED_DISABLED === $result->status() ? ActivationState::Disabled->value : $state->value,
-			'valid'            => $result->validation()->is_valid(),
-			'issues'           => $issues,
+			'notice'                      => $notice,
+			'message'                     => self::notice_message( $notice ),
+			'revision'                    => $result->was_saved() ? $revision + 1 : $revision,
+			'name'                        => $persisted_name,
+			'activation_state'            => $persisted_state->value,
+			'validation_state'            => ValidationState::from_result( $result->validation() )->value,
+			'execution_principal_user_id' => $principal_user_id,
+			'execution_principal_label'   => null === $principal_user_id ? '' : self::principal_label( $principal_user_id ),
+			'activation_block_reason'     => $result->activation_block_reason(),
+			'valid'                       => $result->validation()->is_valid(),
+			'issues'                      => $issues,
 		];
 
 		if ( $result->was_saved() ) {
@@ -179,16 +213,32 @@ final class WorkflowController {
 		self::redirect( $query );
 	}
 
+	private static function principal_label( int $user_id ): string {
+		$user = $user_id > 0 ? get_userdata( $user_id ) : false;
+		if ( $user instanceof \WP_User ) {
+			return sprintf( '%s (#%d)', $user->display_name, $user_id );
+		}
+		return $user_id > 0
+			? sprintf( __( 'Unavailable user #%d', 'core-blueprint-automations' ), $user_id )
+			: __( 'No execution principal assigned', 'core-blueprint-automations' );
+	}
+
 	private static function notice_message( string $notice ): string {
 		return match ( $notice ) {
-			'saved'               => __( 'Automation saved.', 'core-blueprint-automations' ),
-			'saved_disabled'      => __( 'Changes saved. The automation remains disabled until the workflow is valid.', 'core-blueprint-automations' ),
+			'saved' => __( 'Automation saved.', 'core-blueprint-automations' ),
+			'saved_disabled' => __( 'Changes saved. The automation remains disabled until the workflow is valid.', 'core-blueprint-automations' ),
+			'saved_disabled_execution_unavailable' => __( 'Changes saved. The automation remains disabled because secure runtime encryption is unavailable on this site.', 'core-blueprint-automations' ),
+			'saved_disabled_principal_missing' => __( 'Changes saved. Assign your account as execution authority before enabling this automation.', 'core-blueprint-automations' ),
+			'saved_disabled_principal_invalid' => __( 'Changes saved. The stored execution authority is no longer a valid WordPress user.', 'core-blueprint-automations' ),
+			'saved_disabled_principal_denied' => __( 'Changes saved. The execution principal no longer has all permissions required by this workflow.', 'core-blueprint-automations' ),
+			'saved_disabled_operator_denied' => __( 'Changes saved. Your account does not have all permissions required to enable this workflow.', 'core-blueprint-automations' ),
+			'saved_disabled_capability_unavailable' => __( 'Changes saved. Execution authority could not be verified against the current capability contracts.', 'core-blueprint-automations' ),
 			'persistence_blocked' => __( 'The automation was not saved because a sensitive input contains a literal value.', 'core-blueprint-automations' ),
-			'conflict'            => __( 'This automation changed in another request. Reload the page before saving again.', 'core-blueprint-automations' ),
-			'invalid_name'        => __( 'Enter an automation name between 1 and 191 characters.', 'core-blueprint-automations' ),
-			'invalid'             => __( 'The submitted workflow could not be decoded safely. No changes were saved.', 'core-blueprint-automations' ),
-			'storage_failed'      => __( 'The automation could not be saved because workflow storage is unavailable.', 'core-blueprint-automations' ),
-			default               => __( 'The automation could not be saved. Reload the page before trying again.', 'core-blueprint-automations' ),
+			'conflict' => __( 'This automation changed in another request. Reload the page before saving again.', 'core-blueprint-automations' ),
+			'invalid_name' => __( 'Enter an automation name between 1 and 191 characters.', 'core-blueprint-automations' ),
+			'invalid' => __( 'The submitted workflow could not be decoded safely. No changes were saved.', 'core-blueprint-automations' ),
+			'storage_failed' => __( 'The automation could not be saved because workflow storage is unavailable.', 'core-blueprint-automations' ),
+			default => __( 'The automation could not be saved. Reload the page before trying again.', 'core-blueprint-automations' ),
 		};
 	}
 

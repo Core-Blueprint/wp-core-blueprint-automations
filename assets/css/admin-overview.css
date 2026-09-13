@@ -62,25 +62,12 @@
 	background: var(--cb-surface-2);
 	box-shadow: var(--cb-shadow-sm);
 	color: var(--cb-text);
-	text-decoration: none;
 	transition: border-color 140ms ease, box-shadow 140ms ease, background-color 140ms ease, transform 140ms ease;
-}
-
-.cb-automations-workflow-card:hover,
-.cb-automations-workflow-card:focus,
-.cb-automations-workflow-card:active {
-	color: var(--cb-text);
-	text-decoration: none;
 }
 
 .cb-automations-workflow-card:hover {
 	transform: translateY(-1px);
 	background: color-mix(in srgb, var(--cb-surface-2) 94%, var(--cb-accent));
-}
-
-.cb-automations-workflow-card:focus-visible {
-	outline: 2px solid var(--cb-accent);
-	outline-offset: 2px;
 }
 
 .cb-automations-workflow-card.is-active {
@@ -137,10 +124,25 @@
 
 .cb-automations-workflow-card h3 {
 	margin: 0;
-	color: var(--cb-text);
 	font-size: var(--cb-fs-lg);
 	font-weight: var(--cb-fw-semibold);
 	line-height: 1.3;
+}
+
+.cb-automations-workflow-card__title-link {
+	color: var(--cb-text);
+	text-decoration: none;
+}
+
+.cb-automations-workflow-card__title-link:hover {
+	color: var(--cb-accent);
+	text-decoration: none;
+}
+
+.cb-automations-workflow-card__title-link:focus-visible {
+	outline: 2px solid var(--cb-accent);
+	outline-offset: 3px;
+	border-radius: 2px;
 }
 
 .cb-automations-workflow-card__status {
@@ -211,9 +213,20 @@
 	font-size: var(--cb-fs-xs);
 }
 
-.cb-automations-workflow-card__open {
-	color: var(--cb-accent);
-	font-weight: var(--cb-fw-semibold);
+.cb-automations-workflow-card__actions {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: var(--cb-space-2);
+	flex-wrap: wrap;
+}
+
+.cb-automations-workflow-card__toggle {
+	margin: 0;
+}
+
+.cb-automations-workflow-card__actions .button {
+	margin: 0;
 }
 
 .cb-automations-pagination {
@@ -248,6 +261,11 @@
 	.cb-automations-workflow-card__footer {
 		align-items: flex-start;
 		flex-direction: column;
-		gap: var(--cb-space-2);
+		gap: var(--cb-space-3);
+	}
+
+	.cb-automations-workflow-card__actions {
+		width: 100%;
+		justify-content: flex-start;
 	}
 }

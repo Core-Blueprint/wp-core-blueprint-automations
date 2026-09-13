@@ -7,6 +7,7 @@ use CB\Automations\Discovery\CapabilityCatalog;
 use CB\Automations\Discovery\CapabilitySource;
 use CB\Automations\Persistence\WorkflowRecord;
 use CB\Automations\Persistence\WorkflowRepository;
+use CB\Automations\Support\Requirements;
 use CB\Automations\Validation\ValidationResult;
 use CB\Automations\Validation\WorkflowValidator;
 
@@ -14,9 +15,11 @@ defined( 'ABSPATH' ) || exit;
 
 final class WorkflowService {
 	private WorkflowValidator $validator;
+	private CapabilitySource $source;
 
 	public function __construct( ?CapabilitySource $source = null ) {
-		$this->validator = new WorkflowValidator( $source ?? new CapabilityCatalog() );
+		$this->source = $source ?? new CapabilityCatalog();
+		$this->validator = new WorkflowValidator( $this->source );
 	}
 
 	public function validate( Definition $definition ): ValidationResult {
@@ -38,10 +41,8 @@ final class WorkflowService {
 
 	/**
 	 * Persist one editor revision. Draft definitions may be invalid, but an
-	 * invalid definition can never remain enabled. When an operator requests
-	 * Enabled for an invalid definition we preserve the edits as Disabled and
-	 * return an explicit result so the UI can explain what happened.
-	 * Sensitive literals remain a hard persistence block in every state.
+	 * invalid, unauthorized or cryptographically unsafe definition can never
+	 * remain enabled. Execution authority is never inferred from audit metadata.
 	 */
 	public function save(
 		int $id,
@@ -49,16 +50,45 @@ final class WorkflowService {
 		string $name,
 		ActivationState $activation_state,
 		Definition $definition,
-		int $user_id
+		int $user_id,
+		bool $rebind_execution_principal = false
 	): WorkflowSaveResult {
 		$validation = $this->validator->validate( $definition );
 		if ( ! PersistencePolicy::allows( $validation ) ) {
 			return WorkflowSaveResult::persistence_blocked( $validation );
 		}
 
-		$target_state = ActivationPolicy::allows( $activation_state, $validation )
-			? $activation_state
-			: ActivationState::Disabled;
+		$current = WorkflowRepository::find( $id );
+		if ( null === $current ) {
+			return WorkflowSaveResult::conflict( $validation );
+		}
+
+		$principal_user_id = $rebind_execution_principal
+			? $user_id
+			: $current->execution_principal_user_id();
+		$target_state = $activation_state;
+		$block_reason = null;
+
+		if ( ActivationState::Enabled === $activation_state ) {
+			if ( ! $validation->is_valid() ) {
+				$target_state = ActivationState::Disabled;
+				$block_reason = WorkflowSaveResult::WORKFLOW_INVALID;
+			} elseif ( ! Requirements::execution_ready() ) {
+				$target_state = ActivationState::Disabled;
+				$block_reason = WorkflowSaveResult::EXECUTION_UNAVAILABLE;
+			} else {
+				$authority = ExecutionPrincipalPolicy::evaluate(
+					$definition,
+					$principal_user_id,
+					$user_id,
+					$this->source
+				);
+				if ( ! $authority->is_allowed() ) {
+					$target_state = ActivationState::Disabled;
+					$block_reason = $authority->reason();
+				}
+			}
+		}
 
 		$saved = WorkflowRepository::update(
 			$id,
@@ -66,6 +96,7 @@ final class WorkflowService {
 			$name,
 			$target_state,
 			$definition,
+			$principal_user_id,
 			$user_id
 		);
 
@@ -73,8 +104,14 @@ final class WorkflowService {
 			return WorkflowSaveResult::conflict( $validation );
 		}
 
-		return $target_state !== $activation_state
-			? WorkflowSaveResult::saved_disabled( $validation )
-			: WorkflowSaveResult::saved( $validation );
+		if ( $target_state !== $activation_state ) {
+			return WorkflowSaveResult::saved_disabled(
+				$validation,
+				$principal_user_id,
+				$block_reason ?? WorkflowSaveResult::WORKFLOW_INVALID
+			);
+		}
+
+		return WorkflowSaveResult::saved( $validation, $target_state, $principal_user_id );
 	}
 }

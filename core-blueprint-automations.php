@@ -25,7 +25,7 @@ if ( defined( 'CB_AUTOMATIONS_FILE' ) ) {
 }
 
 define( 'CB_AUTOMATIONS_VERSION', '1.0.0-rc1' );
-define( 'CB_AUTOMATIONS_DB_VERSION', '1' );
+define( 'CB_AUTOMATIONS_DB_VERSION', '2' );
 define( 'CB_AUTOMATIONS_REQUIRED_API', '1.0' );
 define( 'CB_AUTOMATIONS_FILE', __FILE__ );
 define( 'CB_AUTOMATIONS_DIR', plugin_dir_path( __FILE__ ) );
@@ -60,22 +60,18 @@ add_action( 'init', static function (): void {
 }, 0 );
 
 /*
- * Boot the product runtime only after WordPress `init` begins. Base registers
- * its own text domain at priority 0, so the full public-contract check can
- * safely autoload Core Admin/Foundation classes here without triggering the
- * WordPress 6.7+ early translation warning.
+ * Boot the request-neutral product runtime after WordPress `init` begins.
+ * Admin-only controllers and assets are gated separately inside Plugin::boot().
  */
 add_action( 'init', [ \CB\Automations\Plugin::class, 'boot' ], 1 );
 
 /*
- * Keep the product inert when Base or the Automation Foundation is unavailable.
- * Resolve translated/runtime contract diagnostics only when admin notices render;
- * WordPress has completed `init` by this point, so Base services are not forced
- * through their autoloaders during bootstrap or plugin activation.
+ * Keep admin UX inert when its Base contracts are unavailable while allowing
+ * request-neutral runtime readiness to remain a separate concern.
  */
 if ( is_admin() ) {
 	add_action( 'admin_notices', static function (): void {
-		if ( \CB\Automations\Support\Requirements::runtime_ready() ) {
+		if ( \CB\Automations\Support\Requirements::admin_ready() ) {
 			return;
 		}
 

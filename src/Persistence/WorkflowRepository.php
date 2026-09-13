@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace CB\Automations\Persistence;
 
+use CB\Automations\Runtime\TriggerKey;
 use CB\Automations\Workflow\ActivationState;
 use CB\Automations\Workflow\Definition;
 use CB\Automations\Workflow\DefinitionCodec;
@@ -23,20 +24,23 @@ final class WorkflowRepository {
 		$table = Schema::table();
 		$now   = current_time( 'mysql', true );
 		$json  = self::encode_definition( $definition );
+		$trigger_key = TriggerKey::for_definition( $definition );
 
 		$result = $wpdb->insert(
 			$table,
 			[
-				'name'               => $name,
-				'activation_state'   => ActivationState::Disabled->value,
-				'definition_version' => $definition->definition_version(),
-				'definition_json'    => $json,
-				'created_by'         => $user_id,
-				'updated_by'         => $user_id,
-				'created_at'         => $now,
-				'updated_at'         => $now,
+				'name'                        => $name,
+				'activation_state'            => ActivationState::Disabled->value,
+				'definition_version'          => $definition->definition_version(),
+				'definition_json'             => $json,
+				'execution_principal_user_id' => 0,
+				'trigger_key'                 => $trigger_key,
+				'created_by'                  => $user_id,
+				'updated_by'                  => $user_id,
+				'created_at'                  => $now,
+				'updated_at'                  => $now,
 			],
-			[ '%s', '%s', '%d', '%s', '%d', '%d', '%s', '%s' ]
+			[ '%s', '%s', '%d', '%s', '%d', '%s', '%d', '%d', '%s', '%s' ]
 		);
 
 		if ( false === $result || (int) $wpdb->insert_id < 1 ) {
@@ -59,7 +63,7 @@ final class WorkflowRepository {
 		$table = Schema::table();
 		$row   = $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT id, name, activation_state, definition_version, definition_json, revision, created_by, updated_by, created_at, updated_at FROM {$table} WHERE id = %d LIMIT 1",
+				"SELECT id, name, activation_state, definition_version, definition_json, revision, execution_principal_user_id, trigger_key, created_by, updated_by, created_at, updated_at FROM {$table} WHERE id = %d LIMIT 1",
 				$id
 			),
 			ARRAY_A
@@ -84,7 +88,7 @@ final class WorkflowRepository {
 		$table  = Schema::table();
 		$rows   = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT id, name, activation_state, definition_version, definition_json, revision, created_by, updated_by, created_at, updated_at
+				"SELECT id, name, activation_state, definition_version, definition_json, revision, execution_principal_user_id, trigger_key, created_by, updated_by, created_at, updated_at
 				 FROM {$table}
 				 ORDER BY updated_at DESC, id DESC
 				 LIMIT %d OFFSET %d",
@@ -101,14 +105,42 @@ final class WorkflowRepository {
 			throw PersistenceFailure::database( 'list workflows' );
 		}
 
-		$records = [];
-		foreach ( $rows as $row ) {
-			if ( ! is_array( $row ) ) {
-				throw PersistenceFailure::definition();
-			}
-			$records[] = self::hydrate( $row );
+		return self::hydrate_rows( $rows );
+	}
+
+	/** @return WorkflowRecord[] */
+	public static function list_enabled_for_trigger( string $trigger_key, int $limit = 100, int $offset = 0 ): array {
+		global $wpdb;
+		if ( '' === $trigger_key || ! TriggerKey::is_valid( $trigger_key ) ) {
+			throw new \InvalidArgumentException( 'Runtime trigger key must be a canonical SHA-256 key.' );
 		}
-		return $records;
+
+		$limit = max( 1, min( 500, $limit ) );
+		$offset = max( 0, $offset );
+		$table = Schema::table();
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT id, name, activation_state, definition_version, definition_json, revision, execution_principal_user_id, trigger_key, created_by, updated_by, created_at, updated_at
+				 FROM {$table}
+				 WHERE activation_state = %s AND trigger_key = %s
+				 ORDER BY id ASC
+				 LIMIT %d OFFSET %d",
+				ActivationState::Enabled->value,
+				$trigger_key,
+				$limit,
+				$offset
+			),
+			ARRAY_A
+		);
+
+		if ( ! is_array( $rows ) ) {
+			throw PersistenceFailure::database( 'match enabled workflows' );
+		}
+		if ( [] === $rows && '' !== (string) $wpdb->last_error ) {
+			throw PersistenceFailure::database( 'match enabled workflows' );
+		}
+
+		return self::hydrate_rows( $rows );
 	}
 
 	public static function count(): int {
@@ -122,21 +154,18 @@ final class WorkflowRepository {
 		return max( 0, (int) $count );
 	}
 
-	/**
-	 * Atomically replace editable workflow state when the caller still owns the
-	 * expected revision. False means stale editor state or a missing workflow.
-	 */
 	public static function update(
 		int $id,
 		int $expected_revision,
 		string $name,
 		ActivationState $activation_state,
 		Definition $definition,
+		int $execution_principal_user_id,
 		int $user_id
 	): bool {
 		global $wpdb;
 
-		if ( $id < 1 || $expected_revision < 1 || $user_id < 0 ) {
+		if ( $id < 1 || $expected_revision < 1 || $execution_principal_user_id < 0 || $user_id < 0 ) {
 			throw new \InvalidArgumentException( 'Invalid workflow update cursor.' );
 		}
 
@@ -144,6 +173,7 @@ final class WorkflowRepository {
 		$table = Schema::table();
 		$json  = self::encode_definition( $definition );
 		$now   = current_time( 'mysql', true );
+		$trigger_key = TriggerKey::for_definition( $definition );
 
 		$result = $wpdb->query(
 			$wpdb->prepare(
@@ -152,6 +182,8 @@ final class WorkflowRepository {
 				     activation_state = %s,
 				     definition_version = %d,
 				     definition_json = %s,
+				     execution_principal_user_id = %d,
+				     trigger_key = %s,
 				     revision = revision + 1,
 				     updated_by = %d,
 				     updated_at = %s
@@ -160,6 +192,8 @@ final class WorkflowRepository {
 				$activation_state->value,
 				$definition->definition_version(),
 				$json,
+				$execution_principal_user_id,
+				$trigger_key,
 				$user_id,
 				$now,
 				$id,
@@ -174,13 +208,34 @@ final class WorkflowRepository {
 		return 1 === $result;
 	}
 
+	/** @param array<int,array<string,mixed>> $rows @return WorkflowRecord[] */
+	private static function hydrate_rows( array $rows ): array {
+		$records = [];
+		foreach ( $rows as $row ) {
+			if ( ! is_array( $row ) ) {
+				throw PersistenceFailure::definition();
+			}
+			$records[] = self::hydrate( $row );
+		}
+		return $records;
+	}
+
 	/** @param array<string,mixed> $row */
 	private static function hydrate( array $row ): WorkflowRecord {
 		$id       = (int) ( $row['id'] ?? 0 );
 		$revision = (int) ( $row['revision'] ?? 0 );
+		$principal = (int) ( $row['execution_principal_user_id'] ?? -1 );
+		$trigger_key = (string) ( $row['trigger_key'] ?? '' );
 		$state    = ActivationState::tryFrom( (string) ( $row['activation_state'] ?? '' ) );
 
-		if ( $id < 1 || $revision < 1 || null === $state || Definition::VERSION !== (int) ( $row['definition_version'] ?? 0 ) ) {
+		if (
+			$id < 1
+			|| $revision < 1
+			|| $principal < 0
+			|| ! TriggerKey::is_valid( $trigger_key )
+			|| null === $state
+			|| Definition::VERSION !== (int) ( $row['definition_version'] ?? 0 )
+		) {
 			throw PersistenceFailure::definition();
 		}
 
@@ -194,7 +249,11 @@ final class WorkflowRepository {
 				throw new JsonException( 'Workflow definition root must be an object.' );
 			}
 			$definition = DefinitionCodec::decode( $decoded );
-		} catch ( \Throwable $error ) {
+		} catch ( \Throwable ) {
+			throw PersistenceFailure::definition();
+		}
+
+		if ( TriggerKey::for_definition( $definition ) !== $trigger_key ) {
 			throw PersistenceFailure::definition();
 		}
 
@@ -206,6 +265,8 @@ final class WorkflowRepository {
 			$state,
 			$definition,
 			$revision,
+			$principal,
+			$trigger_key,
 			max( 0, (int) ( $row['created_by'] ?? 0 ) ),
 			max( 0, (int) ( $row['updated_by'] ?? 0 ) ),
 			(string) ( $row['created_at'] ?? '' ),
@@ -227,11 +288,6 @@ final class WorkflowRepository {
 			throw new \InvalidArgumentException( 'Workflow name must contain between 1 and 191 characters.' );
 		}
 
-		/*
-		 * Count Unicode code points without depending on mbstring. The previous
-		 * fallback called preg_match_all() without its required matches argument,
-		 * which raised ArgumentCountError on hosts where mb_strlen() is absent.
-		 */
 		$matches = [];
 		$length  = preg_match_all( '/./us', $name, $matches );
 		if ( false === $length || $length > 191 ) {
