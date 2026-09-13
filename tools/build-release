@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+SLUG="core-blueprint-automations"
+VERSION="$(sed -n 's/^ \* Version:[[:space:]]*//p' "$ROOT/core-blueprint-automations.php" | head -n 1)"
+DIST="$ROOT/dist"
+ZIP="$DIST/${SLUG}-${VERSION}.zip"
+STAGE="$(mktemp -d)"
+LOCALES=(nl_NL de_DE fr_FR es_ES it_IT pt_PT)
+trap 'rm -rf "$STAGE"' EXIT
+
+[[ -n "$VERSION" ]] || { echo 'Release build failed: plugin version is unavailable.' >&2; exit 1; }
+for command in php node python3 wp msgfmt rsync zip unzip; do
+  command -v "$command" >/dev/null 2>&1 || { echo "Release build failed: required command is unavailable: $command" >&2; exit 1; }
+done
+
+"$ROOT/tools/i18n/check"
+
+while IFS= read -r -d '' file; do
+  php -l "$file" >/dev/null
+done < <(find "$ROOT" -type f -name '*.php' -not -path '*/dist/*' -not -path '*/build/*' -print0)
+
+while IFS= read -r -d '' file; do
+  node --check "$file" >/dev/null
+done < <(find "$ROOT/assets/js" -type f -name '*.js' -print0)
+
+mkdir -p "$DIST" "$STAGE/$SLUG"
+rm -f "$ZIP"
+
+for path in core-blueprint-automations.php uninstall.php src assets templates languages; do
+  [[ -e "$ROOT/$path" ]] || { echo "Release build failed: required runtime path is missing: $path" >&2; exit 1; }
+done
+
+rsync -a \
+  --exclude '.git' --exclude '.github' --exclude '.gitignore' \
+  --exclude 'dist' --exclude 'build' --exclude 'tests' --exclude 'tools' --exclude 'docs' \
+  --exclude 'node_modules' --exclude 'vendor' --exclude '.DS_Store' \
+  "$ROOT/" "$STAGE/$SLUG/"
+
+rm -f "$STAGE/$SLUG/languages/"*.mo
+for locale in "${LOCALES[@]}"; do
+  po="$STAGE/$SLUG/languages/core-blueprint-automations-${locale}.po"
+  mo="$STAGE/$SLUG/languages/core-blueprint-automations-${locale}.mo"
+  [[ -f "$po" ]] || { echo "Release build failed: reviewed PO is missing for $locale" >&2; exit 1; }
+  msgfmt --check-format --check-header -o "$mo" "$po"
+done
+
+find "$STAGE/$SLUG" -exec touch -t 198001010000 {} +
+(
+  cd "$STAGE"
+  zip -X -q -r "$ZIP" "$SLUG"
+)
+
+unzip -tqq "$ZIP"
+ZIP_ENTRIES="$(unzip -Z1 "$ZIP")"
+FIRST_ENTRY="${ZIP_ENTRIES%%$'\n'*}"
+[[ "$FIRST_ENTRY" == "$SLUG/" ]] || { echo 'Release build failed: invalid ZIP root.' >&2; exit 1; }
+grep -Fxq "$SLUG/core-blueprint-automations.php" <<< "$ZIP_ENTRIES" || { echo 'Release build failed: plugin bootstrap missing from ZIP.' >&2; exit 1; }
+if grep -Eq "^${SLUG}/(\.git/|\.github/|tests/|tools/|docs/|dist/|build/|node_modules/|vendor/)" <<< "$ZIP_ENTRIES"; then
+  echo 'Release build failed: development-only files leaked into customer ZIP.' >&2
+  exit 1
+fi
+for locale in "${LOCALES[@]}"; do
+  grep -Fxq "$SLUG/languages/core-blueprint-automations-${locale}.mo" <<< "$ZIP_ENTRIES" || { echo "Release build failed: compiled MO missing for $locale" >&2; exit 1; }
+done
+
+echo "Built $ZIP"
