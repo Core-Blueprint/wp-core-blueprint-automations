@@ -32,24 +32,58 @@ define( 'CB_AUTOMATIONS_DIR', plugin_dir_path( __FILE__ ) );
 define( 'CB_AUTOMATIONS_URL', plugin_dir_url( __FILE__ ) );
 define( 'CB_AUTOMATIONS_BASENAME', plugin_basename( __FILE__ ) );
 
+if ( version_compare( PHP_VERSION, '8.4', '<' ) ) {
+	register_activation_hook( __FILE__, static function (): void {
+		if ( ! function_exists( 'deactivate_plugins' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
+		deactivate_plugins( plugin_basename( __FILE__ ) );
+		wp_die(
+			esc_html( sprintf( 'Core Blueprint Automations requires PHP 8.4 or newer. This server runs PHP %s.', PHP_VERSION ) ),
+			esc_html( 'Core Blueprint dependency required' ),
+			[
+				'link_url'  => admin_url( 'plugins.php' ),
+				'link_text' => 'Plugins',
+			]
+		);
+	} );
+
+	add_action( 'admin_notices', static function (): void {
+		if ( ! current_user_can( 'activate_plugins' ) ) {
+			return;
+		}
+		printf(
+			'<div class="notice notice-error"><p><strong>%s</strong> %s</p></div>',
+			esc_html( 'Core Blueprint Automations:' ),
+			esc_html( sprintf( 'PHP 8.4 or newer is required. This server runs PHP %s.', PHP_VERSION ) )
+		);
+	} );
+	return;
+}
+
 spl_autoload_register( static function ( string $class ): void {
 	$prefix = 'CB\\Automations\\';
-	if ( ! str_starts_with( $class, $prefix ) ) {
+	$length = strlen( $prefix );
+	if ( 0 !== strncmp( $class, $prefix, $length ) ) {
 		return;
 	}
 
-	$relative = substr( $class, strlen( $prefix ) );
+	$relative = substr( $class, $length );
 	$file     = CB_AUTOMATIONS_DIR . 'src/' . str_replace( '\\', '/', $relative ) . '.php';
 	if ( is_file( $file ) ) {
 		require_once $file;
 	}
 } );
 
-/* Register suite identity before product runtime gating. */
-\CB\Automations\Integration\Suite::init();
-
 register_activation_hook( __FILE__, [ \CB\Automations\Lifecycle::class, 'activate' ] );
 register_deactivation_hook( __FILE__, [ \CB\Automations\Lifecycle::class, 'deactivate' ] );
+
+/* Register lightweight suite identity only after canonical Bootstrap readiness. */
+add_action( 'plugins_loaded', static function (): void {
+	if ( \CB\Automations\Support\Requirements::runtime_ready() ) {
+		\CB\Automations\Integration\Suite::init();
+	}
+}, 1 );
 
 add_action( 'init', static function (): void {
 	load_plugin_textdomain(
