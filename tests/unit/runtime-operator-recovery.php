@@ -35,10 +35,14 @@ if ( str_contains( $decision, "failed" ) ) {
 	throw new RuntimeException( 'AU2.9 MVP must not expose a generic/manual failure resolution.' );
 }
 
-$job_lock = strpos( $repository, 'FROM {$table}' . "\n\t\t\t\t WHERE subject_type" );
-$run_lock = strpos( $repository, 'SELECT id, status, cursor FROM {$table} WHERE id' );
-if ( false === $job_lock || false === $run_lock || $job_lock >= $run_lock ) {
-	throw new RuntimeException( 'Recovery lock order must be durable run-job first, then run.' );
+$job_lock = strpos( $repository, 'private static function lock_terminal_run_job' );
+$run_lock = strpos( $repository, 'private static function lock_indeterminate_run' );
+$attempt_lock = strpos( $repository, 'private static function lock_indeterminate_attempt' );
+if ( false === $job_lock || false === $run_lock || false === $attempt_lock || ! ( $job_lock < $run_lock && $run_lock < $attempt_lock ) ) {
+	throw new RuntimeException( 'Recovery lock order must be durable run-job first, then run, then Action attempt.' );
+}
+if ( ! str_contains( substr( $repository, $job_lock, $run_lock - $job_lock ), 'FOR UPDATE' ) || ! str_contains( substr( $repository, $run_lock, $attempt_lock - $run_lock ), 'FOR UPDATE' ) ) {
+	throw new RuntimeException( 'Recovery durable job/run locks are no longer row-locked.' );
 }
 if ( ! str_contains( $repository, "JobStatus::Leased === \$status" ) || ! str_contains( $repository, "'recovery.job_active'" ) ) {
 	throw new RuntimeException( 'Recovery does not refuse an actively leased run-job.' );
@@ -46,7 +50,7 @@ if ( ! str_contains( $repository, "JobStatus::Leased === \$status" ) || ! str_co
 if ( ! str_contains( $repository, 'RunStatus::Indeterminate->value' ) || ! str_contains( $repository, 'StepStatus::Indeterminate->value' ) ) {
 	throw new RuntimeException( 'Recovery does not revalidate the indeterminate run and Action attempt under lock.' );
 }
-if ( ! str_contains( $repository, "SET status = %s, cursor = %s" ) || ! str_contains( $repository, 'rearm_locked_job' ) ) {
+if ( ! str_contains( $repository, 'SET status = %s, run_cursor = %s' ) || ! str_contains( $repository, 'rearm_locked_job' ) ) {
 	throw new RuntimeException( 'Recovery-only requeue/rearm path is missing.' );
 }
 if ( ! str_contains( $repository, 'START TRANSACTION' ) || ! str_contains( $repository, 'COMMIT' ) || ! str_contains( $repository, 'ROLLBACK' ) ) {

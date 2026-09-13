@@ -39,11 +39,16 @@ if ( ! str_contains( $sources['receipts'], 'Vault::seal' ) || ! str_contains( $s
 if ( ! str_contains( $sources['receipts'], "hash( 'sha256'" ) ) {
 	$failures[] = 'Event receipt dedupe fingerprint is not SHA-256 based.';
 }
-if ( ! str_contains( $sources['jobs'], 'claim_for( JobSubjectType $subject_type' ) ) {
-	$failures[] = 'Queue cannot claim event jobs independently from run jobs.';
+if ( ! str_contains( $sources['jobs'], 'public static function claim(' ) ) {
+	$failures[] = 'Queue cannot claim durable event/run jobs through the canonical worker boundary.';
 }
-if ( ! str_contains( $sources['worker'], 'claim_for( JobSubjectType::Event' ) || str_contains( $sources['worker'], 'claim_for( JobSubjectType::Run' ) ) {
-	$failures[] = 'AU2.0F worker must process event jobs only.';
+if (
+	! str_contains( $sources['worker'], 'JobRepository::claim(' )
+	|| ! str_contains( $sources['worker'], 'JobSubjectType::Event === $job->subject_type()' )
+	|| ! str_contains( $sources['worker'], 'JobSubjectType::Run === $job->subject_type()' )
+	|| ! str_contains( $sources['worker'], 'RunPipeline::execute(' )
+) {
+	$failures[] = 'Unified AU2 worker does not route durable Event and Run jobs through their canonical paths.';
 }
 if ( ! str_contains( $sources['materializer'], 'START TRANSACTION' ) || ! str_contains( $sources['materializer'], 'RunRepository::create_snapshot' ) ) {
 	$failures[] = 'Background fan-out is not transactionally materializing immutable runs.';
@@ -69,7 +74,7 @@ if ( ! str_contains( $sources['plugin'], 'RuntimeWorker::init();' ) || ! str_con
 
 foreach ( [ $sources['intake'], $sources['worker'], $sources['materializer'] ] as $source ) {
 	if ( str_contains( $source, 'ActionInvoker::invoke' ) || str_contains( $source, 'StateInvoker::resolve' ) ) {
-		$failures[] = 'AU2.0F must not execute provider state or actions.';
+		$failures[] = 'Intake/worker/materializer must not bypass the canonical execution pipeline with direct provider invocation.';
 		break;
 	}
 }

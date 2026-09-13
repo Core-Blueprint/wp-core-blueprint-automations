@@ -44,8 +44,12 @@ if ( ! str_contains( $runs, 'ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id)' ) 
 if ( ! str_contains( $materializer, 'FOR UPDATE' ) && ! str_contains( $receipts, 'FOR UPDATE' ) ) {
 	$failures[] = 'Event materialization does not serialize on the receipt row.';
 }
-if ( ! str_contains( $worker, 'claim_for( JobSubjectType::Event' ) ) {
-	$failures[] = 'G1 worker is not isolated to event jobs.';
+if (
+	! str_contains( $worker, 'JobRepository::claim(' )
+	|| ! str_contains( $worker, 'JobSubjectType::Event === $job->subject_type()' )
+	|| ! str_contains( $worker, 'JobSubjectType::Run === $job->subject_type()' )
+) {
+	$failures[] = 'G1 worker no longer routes the unified durable queue by subject type.';
 }
 
 $provider = 'core-blueprint-lms';
@@ -102,7 +106,7 @@ if ( count( $matching_workflows ) !== count( $run_jobs ) ) {
 
 foreach ( [ $receipts, $jobs, $runs, $materializer, $worker ] as $source ) {
 	if ( str_contains( $source, 'ActionInvoker::invoke' ) || str_contains( $source, 'StateInvoker::resolve' ) ) {
-		$failures[] = 'G1 intake/concurrency proof must execute zero provider capabilities.';
+		$failures[] = 'G1 intake/concurrency path must not bypass the canonical execution pipeline with direct provider invocation.';
 		break;
 	}
 }
