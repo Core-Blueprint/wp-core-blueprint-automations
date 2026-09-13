@@ -20,16 +20,8 @@ final class Requirements {
 			&& (int) $available_match[2] >= (int) $required_match[2];
 	}
 
-	/**
-	 * Bootstrap-safe checks used by the activation lifecycle.
-	 *
-	 * Do not autoload Base service classes here. Plugin activation can run before
-	 * the normal `init` lifecycle, and touching translated Base services at that
-	 * point can trigger WordPress' early text-domain warning.
-	 *
-	 * @return string[] Stable machine-readable bootstrap issue IDs.
-	 */
-	public static function bootstrap_issues(): array {
+	/** @return string[] Canonical Bootstrap v1 issue IDs. */
+	public static function issues(): array {
 		$issues = [];
 
 		if ( version_compare( PHP_VERSION, '8.4', '<' ) ) {
@@ -48,13 +40,23 @@ final class Requirements {
 		return array_values( array_unique( $issues ) );
 	}
 
-	public static function bootstrap_ready(): bool {
-		return [] === self::bootstrap_issues();
+	/** Canonical Bootstrap v1 readiness: PHP + Base marker + compatible Core API only. */
+	public static function runtime_ready(): bool {
+		return [] === self::issues();
 	}
 
-	/** @return string[] Stable machine-readable runtime issue IDs. */
-	public static function runtime_issues(): array {
-		$issues = self::bootstrap_issues();
+	/** Compatibility aliases retained for the existing activation lifecycle/tests. */
+	public static function bootstrap_issues(): array {
+		return self::issues();
+	}
+
+	public static function bootstrap_ready(): bool {
+		return self::runtime_ready();
+	}
+
+	/** @return string[] Automations product-runtime issue IDs. */
+	public static function product_issues(): array {
+		$issues = self::issues();
 		if ( [] !== $issues ) {
 			return $issues;
 		}
@@ -80,13 +82,18 @@ final class Requirements {
 		return array_values( array_unique( $issues ) );
 	}
 
-	public static function runtime_ready(): bool {
-		return [] === self::runtime_issues();
+	public static function product_ready(): bool {
+		return [] === self::product_issues();
+	}
+
+	/** Legacy diagnostic name retained; this still reports product-runtime issues. */
+	public static function runtime_issues(): array {
+		return self::product_issues();
 	}
 
 	/** @return string[] Stable machine-readable execution issue IDs. */
 	public static function execution_issues(): array {
-		$issues = self::runtime_issues();
+		$issues = self::product_issues();
 		if ( [] !== $issues ) {
 			return $issues;
 		}
@@ -102,7 +109,7 @@ final class Requirements {
 
 	/** @return string[] Stable machine-readable admin issue IDs. */
 	public static function admin_issues(): array {
-		$issues = self::runtime_issues();
+		$issues = self::product_issues();
 		if ( [] !== $issues ) {
 			return $issues;
 		}
@@ -126,11 +133,6 @@ final class Requirements {
 
 	public static function admin_ready(): bool {
 		return [] === self::admin_issues();
-	}
-
-	/** @return string[] */
-	public static function issues(): array {
-		return self::admin_issues();
 	}
 
 	public static function operator_message(): string {

@@ -26,7 +26,7 @@ final class Plugin {
 		if ( self::$runtime_booted || null !== self::$boot_error ) {
 			return;
 		}
-		if ( ! Requirements::runtime_ready() ) {
+		if ( ! Requirements::product_ready() ) {
 			return;
 		}
 
