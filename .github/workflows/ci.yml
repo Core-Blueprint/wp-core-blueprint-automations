@@ -32,16 +32,7 @@ jobs:
         run: find . -type f -name '*.php' -print0 | xargs -0 -n1 php -l
 
       - name: Admin editor JavaScript syntax
-        run: |
-          node --check assets/js/admin-editor.js
-          node --check assets/js/admin-capability-picker.js
-          node --check assets/js/admin-editor-polish.js
-          node --check assets/js/admin-validation-recovery.js
-          node --check assets/js/admin-condition-builder.js
-          node --check assets/js/admin-builder-inspector.js
-          node --check assets/js/admin-builder-save.js
-          node --check assets/js/admin-builder-history.js
-          node --check assets/js/admin-designer-shell.js
+        run: find assets/js -maxdepth 1 -type f -name '*.js' -print0 | sort -z | xargs -0 -n1 node --check
 
       - name: Capability picker regression
         run: node tests/js/capability-picker.test.mjs
@@ -64,6 +55,9 @@ jobs:
       - name: Bootstrap requirements regression
         run: php tests/unit/bootstrap-requirements.php
 
+      - name: Admin product surface regression
+        run: php tests/unit/admin-product-surface.php
+
       - name: AU2 runtime bootstrap boundary
         run: php tests/unit/runtime-bootstrap.php
 
@@ -78,6 +72,9 @@ jobs:
 
       - name: AU2 queue state machine
         run: php tests/unit/queue-state-machine.php
+
+      - name: AU2 queue datetime hydration contract
+        run: php tests/unit/job-datetime-contract.php
 
       - name: AU2 trigger intake and fan-out
         run: php tests/unit/runtime-intake.php
