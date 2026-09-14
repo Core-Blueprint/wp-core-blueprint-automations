@@ -56,12 +56,11 @@ final class Requirements {
 
 	/** @return string[] Automations product-runtime issue IDs. */
 	public static function product_issues(): array {
-		$issues = self::issues();
-		if ( [] !== $issues ) {
-			return $issues;
+		if ( ! self::runtime_ready() ) {
+			return [];
 		}
 
-		$required_contracts = [
+		foreach ( [
 			'\\CB\\Core\\ExtensionRegistry',
 			'\\CB\\Core\\Automation\\TriggerRegistry',
 			'\\CB\\Core\\Automation\\ActionRegistry',
@@ -70,29 +69,30 @@ final class Requirements {
 			'\\CB\\Core\\Automation\\InvocationContext',
 			'\\CB\\Core\\Automation\\ActionInvoker',
 			'\\CB\\Core\\Automation\\StateInvoker',
-		];
-
-		foreach ( $required_contracts as $contract ) {
+		] as $contract ) {
 			if ( ! class_exists( $contract ) && ! interface_exists( $contract ) ) {
-				$issues[] = 'automation-foundation-unavailable';
-				break;
+				return [ 'automation-foundation-unavailable' ];
 			}
 		}
 
-		return array_values( array_unique( $issues ) );
+		return [];
 	}
 
 	public static function product_ready(): bool {
-		return [] === self::product_issues();
+		return self::runtime_ready() && [] === self::product_issues();
 	}
 
-	/** Legacy diagnostic name retained; this still reports product-runtime issues. */
+	/** Legacy diagnostic name retained; this reports combined Bootstrap + product-runtime issues. */
 	public static function runtime_issues(): array {
-		return self::product_issues();
+		return array_values( array_unique( array_merge( self::issues(), self::product_issues() ) ) );
 	}
 
 	/** @return string[] Stable machine-readable execution issue IDs. */
 	public static function execution_issues(): array {
+		if ( ! self::runtime_ready() ) {
+			return self::issues();
+		}
+
 		$issues = self::product_issues();
 		if ( [] !== $issues ) {
 			return $issues;
@@ -109,19 +109,21 @@ final class Requirements {
 
 	/** @return string[] Stable machine-readable admin issue IDs. */
 	public static function admin_issues(): array {
+		if ( ! self::runtime_ready() ) {
+			return self::issues();
+		}
+
 		$issues = self::product_issues();
 		if ( [] !== $issues ) {
 			return $issues;
 		}
 
-		$required_contracts = [
+		foreach ( [
 			'\\CB\\Core\\Admin\\MenuGroup',
 			'\\CB\\Core\\Admin\\MenuGroupRegistry',
 			'\\CB\\Core\\Admin\\Page',
 			'\\CB\\Core\\UI\\Status',
-		];
-
-		foreach ( $required_contracts as $contract ) {
+		] as $contract ) {
 			if ( ! class_exists( $contract ) && ! interface_exists( $contract ) ) {
 				$issues[] = 'core-admin-unavailable';
 				break;
@@ -135,28 +137,42 @@ final class Requirements {
 		return [] === self::admin_issues();
 	}
 
+	/** Canonical untranslated Bootstrap activation explanation. */
+	public static function activation_message(): string {
+		return match ( self::primary_issue( self::issues() ) ) {
+			'php-version' => sprintf( 'PHP %1$s or newer is required. This server runs PHP %2$s.', '8.4', PHP_VERSION ),
+			'base-missing' => 'Core Blueprint must be installed and active.',
+			'base-api-incompatible' => sprintf(
+				'Core API %1$s or a newer compatible minor version is required. Available Core API: %2$s.',
+				CB_AUTOMATIONS_REQUIRED_API,
+				defined( 'CB_CORE_API_VERSION' ) ? (string) CB_CORE_API_VERSION : 'none'
+			),
+			default => 'Ready',
+		};
+	}
+
+	/** Admin-facing explanation while preserving machine-readable readiness layers. */
 	public static function operator_message(): string {
-		return match ( self::primary_issue() ) {
+		return match ( self::primary_issue( self::admin_issues() ) ) {
 			'php-version' => sprintf(
-				/* translators: %s: current PHP version. */
-				__( 'PHP 8.4 or newer is required. This server runs PHP %s.', 'core-blueprint-automations' ),
+				__( 'PHP %1$s or newer is required. This server runs PHP %2$s.', 'core-blueprint-automations' ),
+				'8.4',
 				PHP_VERSION
 			),
-			'base-missing' => __( 'An active Core Blueprint Base installation is required.', 'core-blueprint-automations' ),
+			'base-missing' => __( 'Core Blueprint must be installed and active.', 'core-blueprint-automations' ),
 			'base-api-incompatible' => sprintf(
-				/* translators: 1: required Core API version, 2: available Core API version. */
-				__( 'Core API %1$s or a newer compatible minor version is required. This site provides %2$s.', 'core-blueprint-automations' ),
+				__( 'Core API %1$s or a newer compatible minor version is required. Available Core API: %2$s.', 'core-blueprint-automations' ),
 				CB_AUTOMATIONS_REQUIRED_API,
 				defined( 'CB_CORE_API_VERSION' ) ? (string) CB_CORE_API_VERSION : __( 'none', 'core-blueprint-automations' )
 			),
-			'automation-foundation-unavailable' => __( 'Required public Core Blueprint Base Automation Foundation contracts are unavailable.', 'core-blueprint-automations' ),
-			'core-admin-unavailable' => __( 'Required public Core Blueprint Base admin contracts are unavailable.', 'core-blueprint-automations' ),
+			'automation-foundation-unavailable',
+			'core-admin-unavailable' => __( 'Required Core Blueprint Base contracts are unavailable.', 'core-blueprint-automations' ),
 			default => __( 'Ready', 'core-blueprint-automations' ),
 		};
 	}
 
-	private static function primary_issue(): string {
-		$issues = self::admin_issues();
+	/** @param string[] $issues */
+	private static function primary_issue( array $issues ): string {
 		return (string) ( $issues[0] ?? '' );
 	}
 }

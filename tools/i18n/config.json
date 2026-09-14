@@ -1,0 +1,11 @@
+{
+  "product": "Core Blueprint Automations",
+  "domain": "core-blueprint-automations",
+  "main_file": "core-blueprint-automations.php",
+  "version_constant": "CB_AUTOMATIONS_VERSION",
+  "exclude": [".git", ".github", "docs", "languages", "tests", "tools", "dist", "build"],
+  "skip_js": false,
+  "commit_mo": false,
+  "commit_l10n_php": false,
+  "source_paths": ["core-blueprint-automations.php", "src", "assets", "templates", "uninstall.php"]
+}
