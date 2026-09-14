@@ -3,66 +3,117 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SLUG="core-blueprint-automations"
-VERSION="$(sed -n 's/^ \* Version:[[:space:]]*//p' "$ROOT/core-blueprint-automations.php" | head -n 1)"
+ENTRY="$ROOT/core-blueprint-automations.php"
 DIST="$ROOT/dist"
-ZIP="$DIST/${SLUG}-${VERSION}.zip"
 STAGE="$(mktemp -d)"
 LOCALES=(nl_NL de_DE fr_FR es_ES it_IT pt_PT)
 trap 'rm -rf "$STAGE"' EXIT
 
-[[ -n "$VERSION" ]] || { echo 'Release build failed: plugin version is unavailable.' >&2; exit 1; }
-for command in php node python3 wp msgfmt rsync zip unzip; do
-  command -v "$command" >/dev/null 2>&1 || { echo "Release build failed: required command is unavailable: $command" >&2; exit 1; }
+fail() {
+  printf 'Automations release build failed: %s\n' "$*" >&2
+  exit 1
+}
+
+header_value() {
+  local file="$1" label="$2"
+  sed -n "s/^[[:space:]]*\\*[[:space:]]*${label}:[[:space:]]*//p" "$file" | head -n 1 | tr -d '\r'
+}
+
+define_value() {
+  local file="$1" name="$2"
+  sed -n "s/.*define([[:space:]]*['\"]${name}['\"][[:space:]]*,[[:space:]]*['\"]\\([^'\"]*\\)['\"].*/\\1/p" "$file" | head -n 1
+}
+
+[[ -f "$ENTRY" ]] || fail "plugin entrypoint is missing"
+VERSION="$(header_value "$ENTRY" 'Version')"
+REQUIRES_PHP="$(header_value "$ENTRY" 'Requires PHP')"
+CONSTANT_VERSION="$(define_value "$ENTRY" 'CB_AUTOMATIONS_VERSION')"
+REQUIRED_API="$(define_value "$ENTRY" 'CB_AUTOMATIONS_REQUIRED_API')"
+[[ -n "$VERSION" ]] || fail "plugin Version header is missing"
+[[ "$CONSTANT_VERSION" == "$VERSION" ]] || fail "Version header and CB_AUTOMATIONS_VERSION differ"
+[[ "$REQUIRES_PHP" == '8.4' ]] || fail "Requires PHP must be 8.4, found ${REQUIRES_PHP:-missing}"
+[[ "$REQUIRED_API" == '1.0' ]] || fail "CB_AUTOMATIONS_REQUIRED_API must be 1.0, found ${REQUIRED_API:-missing}"
+
+for command in php python3 wp msgfmt node zip unzip sha256sum; do
+  command -v "$command" >/dev/null 2>&1 || fail "missing required command: $command"
 done
 
 "$ROOT/tools/i18n/check"
 
 while IFS= read -r -d '' file; do
-  php -l "$file" >/dev/null
-done < <(find "$ROOT" -type f -name '*.php' -not -path '*/dist/*' -not -path '*/build/*' -print0)
+  php -l "$file" >/dev/null || fail "PHP lint failed: $file"
+done < <(find "$ROOT" -type f -name '*.php' -not -path '*/.git/*' -not -path '*/dist/*' -not -path '*/build/*' -print0)
+while IFS= read -r -d '' file; do
+  node --check "$file" >/dev/null || fail "JavaScript syntax failed: $file"
+done < <(find "$ROOT/assets" -type f -name '*.js' -print0)
+
+# Product behavior/unit authority remains .github/workflows/ci.yml. Packaging
+# intentionally does not duplicate that large evolving test selection.
+PACKAGE_ROOT="$STAGE/$SLUG"
+ZIP="$DIST/$SLUG-$VERSION.zip"
+CHECKSUM="$ZIP.sha256"
+mkdir -p "$DIST" "$PACKAGE_ROOT"
+rm -f "$ZIP" "$CHECKSUM"
+
+for path in core-blueprint-automations.php uninstall.php; do
+  [[ -f "$ROOT/$path" ]] || fail "required release file is missing: $path"
+  cp "$ROOT/$path" "$PACKAGE_ROOT/"
+done
+for path in src assets templates languages; do
+  [[ -d "$ROOT/$path" ]] || fail "required release directory is missing: $path"
+  cp -R "$ROOT/$path" "$PACKAGE_ROOT/"
+done
+
+POT="$PACKAGE_ROOT/languages/core-blueprint-automations.pot"
+[[ -s "$POT" ]] || fail "canonical POT is missing from release staging"
+rm -f "$PACKAGE_ROOT/languages/"*.mo
+for locale in "${LOCALES[@]}"; do
+  po="$PACKAGE_ROOT/languages/core-blueprint-automations-${locale}.po"
+  mo="$PACKAGE_ROOT/languages/core-blueprint-automations-${locale}.mo"
+  [[ -s "$po" ]] || fail "reviewed PO is missing for $locale"
+  msgfmt --check-format --check-header -o "$mo" "$po"
+  [[ -s "$mo" ]] || fail "compiled MO is missing for $locale"
+done
 
 while IFS= read -r -d '' file; do
-  node --check "$file" >/dev/null
-done < <(find "$ROOT/assets/js" -type f -name '*.js' -print0)
+  php -l "$file" >/dev/null || fail "staged PHP lint failed: $file"
+done < <(find "$PACKAGE_ROOT" -type f -name '*.php' -print0)
+while IFS= read -r -d '' file; do
+  node --check "$file" >/dev/null || fail "staged JavaScript syntax failed: $file"
+done < <(find "$PACKAGE_ROOT/assets" -type f -name '*.js' -print0)
 
-mkdir -p "$DIST" "$STAGE/$SLUG"
-rm -f "$ZIP"
-
-for path in core-blueprint-automations.php uninstall.php src assets templates languages; do
-  [[ -e "$ROOT/$path" ]] || { echo "Release build failed: required runtime path is missing: $path" >&2; exit 1; }
-done
-
-rsync -a \
-  --exclude '.git' --exclude '.github' --exclude '.gitignore' \
-  --exclude 'dist' --exclude 'build' --exclude 'tests' --exclude 'tools' --exclude 'docs' \
-  --exclude 'node_modules' --exclude 'vendor' --exclude '.DS_Store' \
-  "$ROOT/" "$STAGE/$SLUG/"
-
-rm -f "$STAGE/$SLUG/languages/"*.mo
-for locale in "${LOCALES[@]}"; do
-  po="$STAGE/$SLUG/languages/core-blueprint-automations-${locale}.po"
-  mo="$STAGE/$SLUG/languages/core-blueprint-automations-${locale}.mo"
-  [[ -f "$po" ]] || { echo "Release build failed: reviewed PO is missing for $locale" >&2; exit 1; }
-  msgfmt --check-format --check-header -o "$mo" "$po"
-done
-
-find "$STAGE/$SLUG" -exec touch -t 198001010000 {} +
+find "$PACKAGE_ROOT" -exec touch -t 198001010000 {} +
 (
   cd "$STAGE"
-  zip -X -q -r "$ZIP" "$SLUG"
+  zip -X -q "$ZIP" "$SLUG/"
+  find "$SLUG" -type f -print | LC_ALL=C sort | zip -X -q "$ZIP" -@
 )
 
 unzip -tqq "$ZIP"
 ZIP_ENTRIES="$(unzip -Z1 "$ZIP")"
 FIRST_ENTRY="${ZIP_ENTRIES%%$'\n'*}"
-[[ "$FIRST_ENTRY" == "$SLUG/" ]] || { echo 'Release build failed: invalid ZIP root.' >&2; exit 1; }
-grep -Fxq "$SLUG/core-blueprint-automations.php" <<< "$ZIP_ENTRIES" || { echo 'Release build failed: plugin bootstrap missing from ZIP.' >&2; exit 1; }
-if grep -Eq "^${SLUG}/(\.git/|\.github/|tests/|tools/|docs/|dist/|build/|node_modules/|vendor/)" <<< "$ZIP_ENTRIES"; then
-  echo 'Release build failed: development-only files leaked into customer ZIP.' >&2
-  exit 1
+[[ "$FIRST_ENTRY" == "$SLUG/" ]] || fail "release ZIP root is not $SLUG/"
+if grep -Eq '(^|/)(\.git|\.github|tests|tools|docs|dist|build|node_modules|vendor)(/|$)' <<<"$ZIP_ENTRIES"; then
+  fail "development-only files leaked into the release ZIP"
 fi
+for required in "$SLUG/core-blueprint-automations.php" "$SLUG/uninstall.php" "$SLUG/languages/core-blueprint-automations.pot"; do
+  grep -Fxq "$required" <<<"$ZIP_ENTRIES" || fail "required release file missing from ZIP: $required"
+done
 for locale in "${LOCALES[@]}"; do
-  grep -Fxq "$SLUG/languages/core-blueprint-automations-${locale}.mo" <<< "$ZIP_ENTRIES" || { echo "Release build failed: compiled MO missing for $locale" >&2; exit 1; }
+  for ext in po mo; do
+    required="$SLUG/languages/core-blueprint-automations-${locale}.${ext}"
+    grep -Fxq "$required" <<<"$ZIP_ENTRIES" || fail "required catalog missing from ZIP: $required"
+  done
 done
 
-echo "Built $ZIP"
+PACKAGED_ENTRY="$PACKAGE_ROOT/core-blueprint-automations.php"
+PACKAGED_VERSION="$(header_value "$PACKAGED_ENTRY" 'Version')"
+PACKAGED_CONSTANT="$(define_value "$PACKAGED_ENTRY" 'CB_AUTOMATIONS_VERSION')"
+[[ "$PACKAGED_VERSION" == "$VERSION" && "$PACKAGED_CONSTANT" == "$VERSION" ]] || fail "packaged version identity does not match source"
+
+(
+  cd "$DIST"
+  sha256sum "$(basename "$ZIP")" > "$(basename "$CHECKSUM")"
+)
+SHA256="$(awk '{print $1}' "$CHECKSUM")"
+printf 'Automations release build: PASS\nPackage: %s\nCanonical root: %s/\nSHA-256: %s\n' "$ZIP" "$SLUG" "$SHA256"
