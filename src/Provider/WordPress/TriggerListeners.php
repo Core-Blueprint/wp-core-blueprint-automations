@@ -271,7 +271,32 @@ final class TriggerListeners {
 		if ( '' === $type || '' === $action ) {
 			return;
 		}
-		self::emit( 'update.completed', [ 'type' => $type, 'action' => $action ] );
+
+		$items = [];
+		foreach ( [ 'plugin', 'theme' ] as $single_key ) {
+			if ( isset( $hook_extra[ $single_key ] ) && is_string( $hook_extra[ $single_key ] ) && '' !== $hook_extra[ $single_key ] ) {
+				$items[] = $hook_extra[ $single_key ];
+			}
+		}
+		foreach ( [ 'plugins', 'themes' ] as $list_key ) {
+			if ( ! isset( $hook_extra[ $list_key ] ) || ! is_array( $hook_extra[ $list_key ] ) ) {
+				continue;
+			}
+			foreach ( $hook_extra[ $list_key ] as $item ) {
+				if ( is_string( $item ) && '' !== $item ) {
+					$items[] = $item;
+				}
+			}
+		}
+		if ( 'core' === $type && [] === $items ) {
+			$items[] = 'wordpress-core';
+		}
+
+		$payload = [ 'type' => $type, 'action' => $action ];
+		if ( [] !== $items ) {
+			$payload['items'] = array_values( array_unique( $items ) );
+		}
+		self::emit( 'update.completed', $payload );
 	}
 
 	private static function emit_user( string $trigger_id, int $user_id ): void {
