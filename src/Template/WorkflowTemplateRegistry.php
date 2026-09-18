@@ -73,8 +73,12 @@ final class WorkflowTemplateRegistry {
 		return self::$templates[ trim( $provider ) . '::' . trim( $id ) ] ?? null;
 	}
 
+	public static function is_ready(): bool {
+		return self::$collected || ( did_action( 'init' ) > 0 && ! doing_action( 'init' ) );
+	}
+
 	private static function collect(): void {
-		if ( self::$collected ) {
+		if ( self::$collected || ! self::is_ready() ) {
 			return;
 		}
 		self::$collected = true;
