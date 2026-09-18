@@ -213,6 +213,7 @@ The first WordPress Action set should cover common site automation without intro
 
 ### Users
 
+- `user.create`
 - `user.update`
 - `user.add_role`
 - `user.remove_role`
