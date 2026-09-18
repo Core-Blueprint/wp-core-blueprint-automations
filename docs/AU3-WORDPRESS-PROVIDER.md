@@ -336,3 +336,45 @@ This keeps AI replaceable and non-authoritative while preserving the existing pe
 13. Full runtime/golden/staging closure.
 
 The canonical AU3 goal is broad coverage of meaningful native WordPress automation semantics, not one-to-one exposure of every internal WordPress action/filter.
+
+
+## Current implementation status
+
+Implemented on `au3-wordpress-core-provider` / PR #13:
+
+- WordPress provider bootstrap;
+- 34 typed native WordPress triggers;
+- 5 bounded read-only WordPress State capabilities;
+- 19 governed WordPress Actions;
+- provider-agnostic Workflow Template Foundation;
+- three WordPress starter templates;
+- overview template gallery and editable template instantiation;
+- AU3 source/regression contracts wired into the existing PHP 8.4/8.5 CI matrix.
+
+Deliberately deferred beyond this first staging candidate:
+
+- arbitrary option/meta watchers;
+- plugin/theme/core mutation Actions;
+- destructive user deletion Action;
+- Multisite-specific provider module;
+- scheduled user-facing triggers;
+- delay/wait workflow nodes;
+- branching/if-else graph semantics;
+- AI workflow composition.
+
+### Staging acceptance checklist
+
+For the first manual AU3 pass:
+
+1. Open Automations and confirm WordPress capabilities appear grouped under Core Blueprint Automations.
+2. Create a blank workflow and confirm native WordPress Trigger, State and Action choices are available.
+3. Create each starter template and confirm it opens as a normal editable workflow.
+4. Assign the current operator as execution authority and save/enable a valid workflow.
+5. Prove at least one user event workflow end-to-end.
+6. Prove at least one post/CPT event workflow end-to-end.
+7. Prove at least one comment or taxonomy workflow end-to-end.
+8. Confirm Runs records the execution without exposing sensitive runtime values.
+9. Confirm revisions/autosaves do not create generic post runs.
+10. Confirm an execution principal without the required object permission fails closed.
+
+GitHub Actions infrastructure may be unavailable independently of source correctness. A run with no executed steps is neither a code failure nor a test PASS and must not be used as release evidence.
