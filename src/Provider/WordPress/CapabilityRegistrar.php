@@ -294,8 +294,8 @@ final class CapabilityRegistrar {
 		return [
 			'provider' => self::PROVIDER,
 			'id' => $id,
-			'label' => __( $label, 'core-blueprint-automations' ),
-			'description' => __( $description, 'core-blueprint-automations' ),
+			'label' => $label,
+			'description' => $description,
 			'schema_version' => self::VERSION,
 			'input_schema' => $input,
 			'output_schema' => $output,
@@ -309,8 +309,8 @@ final class CapabilityRegistrar {
 		return [
 			'provider' => self::PROVIDER,
 			'id' => $id,
-			'label' => __( $label, 'core-blueprint-automations' ),
-			'description' => __( $description, 'core-blueprint-automations' ),
+			'label' => $label,
+			'description' => $description,
 			'schema_version' => self::VERSION,
 			'input_schema' => $input,
 			'output_schema' => $output,
