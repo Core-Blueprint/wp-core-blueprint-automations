@@ -5,6 +5,7 @@ namespace CB\Automations\Admin;
 
 use CB\Automations\Runtime\RunStatus;
 use CB\Automations\Runtime\StepStatus;
+use CB\Automations\Template\WorkflowTemplateRegistry;
 use CB\Automations\Validation\ValidationResult;
 use CB\Automations\Validation\ValidationState;
 use CB\Core\Admin\Page;
@@ -73,7 +74,13 @@ final class AutomationsPage implements Page {
 			$page = isset( $_GET['paged'] ) && is_scalar( $_GET['paged'] )
 				? max( 1, absint( wp_unslash( (string) $_GET['paged'] ) ) )
 				: 1; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only pagination.
-			$this->template( 'automations.php', [ 'listing' => $reader->index( $page ) ] );
+			$this->template(
+				'automations.php',
+				[
+					'listing'   => $reader->index( $page ),
+					'templates' => WorkflowTemplateRegistry::all(),
+				]
+			);
 		} catch ( \Throwable $error ) {
 			error_log( '[Core Blueprint Automations] Admin page read failed: ' . $error->getMessage() );
 			$this->render_unavailable();
