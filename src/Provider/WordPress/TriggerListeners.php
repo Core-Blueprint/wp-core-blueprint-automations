@@ -113,16 +113,26 @@ final class TriggerListeners {
 	}
 
 	public static function post_inserted( int $post_id, \WP_Post $post, bool $update, ?\WP_Post $post_before ): void {
-		unset( $post_before );
-		if ( $update || ! self::is_content_post( $post ) || 'auto-draft' === $post->post_status ) {
+		unset( $post_id );
+		if ( ! self::is_content_post( $post ) || 'auto-draft' === $post->post_status ) {
 			return;
 		}
-		self::emit( 'post.created', self::post_payload( $post ) );
+
+		$is_first_persisted_version = ! $update
+			|| ( $post_before instanceof \WP_Post && 'auto-draft' === $post_before->post_status );
+
+		if ( $is_first_persisted_version ) {
+			self::emit( 'post.created', self::post_payload( $post ) );
+		}
 	}
 
 	public static function post_updated( int $post_id, \WP_Post $post_after, \WP_Post $post_before ): void {
-		unset( $post_id, $post_before );
-		if ( ! self::is_content_post( $post_after ) || 'auto-draft' === $post_after->post_status ) {
+		unset( $post_id );
+		if (
+			! self::is_content_post( $post_after )
+			|| 'auto-draft' === $post_after->post_status
+			|| 'auto-draft' === $post_before->post_status
+		) {
 			return;
 		}
 		self::emit( 'post.updated', self::post_payload( $post_after ) );
