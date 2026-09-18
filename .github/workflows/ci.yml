@@ -136,5 +136,14 @@ jobs:
       - name: Demo provider registration contract
         run: php tests/unit/demo-provider-contract.php
 
+      - name: AU3 WordPress provider schemas
+        run: php tests/unit/wordpress-provider-schemas.php
+
+      - name: AU3 WordPress hook and security contract
+        run: php tests/unit/wordpress-provider-contract.php
+
+      - name: AU3 workflow template foundation
+        run: php tests/unit/workflow-template-contract.php
+
       - name: Architecture regression guard
         run: php tests/unit/architecture.php
