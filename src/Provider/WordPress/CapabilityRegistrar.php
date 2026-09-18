@@ -171,6 +171,15 @@ final class CapabilityRegistrar {
 	/** @return array<int,array<string,mixed>> */
 	private static function action_definitions(): array {
 		return [
+			self::action( 'user.create', __( 'Create user', 'core-blueprint-automations' ), __( 'Creates a WordPress user with a generated strong password and optional role.', 'core-blueprint-automations' ), [
+				'user_login' => self::field( 'string', true ),
+				'user_email' => self::field( 'string', true, true ),
+				'display_name' => self::field( 'string' ),
+				'role' => self::field( 'string', false, false, 'wp.user_role' ),
+				'send_notification' => self::field( 'boolean' ),
+			], [
+				'user_id' => self::field( 'integer', true, false, 'wp.user_id' ),
+			], 'create_users', [ WordPressAction::class, 'create_user' ] ),
 			self::action( 'user.update', __( 'Update user', 'core-blueprint-automations' ), __( 'Updates selected safe WordPress user fields.', 'core-blueprint-automations' ), [
 				'user_id' => self::field( 'integer', true, false, 'wp.user_id' ),
 				'display_name' => self::field( 'string' ),
