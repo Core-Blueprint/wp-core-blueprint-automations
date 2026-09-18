@@ -54,8 +54,8 @@ namespace {
 	if ( 5 !== count( $states ) ) {
 		$failures[] = 'Expected 5 native WordPress states, got ' . count( $states ) . '.';
 	}
-	if ( 18 !== count( $actions ) ) {
-		$failures[] = 'Expected 18 native WordPress actions, got ' . count( $actions ) . '.';
+	if ( 19 !== count( $actions ) ) {
+		$failures[] = 'Expected 19 native WordPress actions, got ' . count( $actions ) . '.';
 	}
 
 	$expected_triggers = [
@@ -69,7 +69,7 @@ namespace {
 	];
 	$expected_states = [ 'user.current','post.current','comment.current','attachment.current','term.current' ];
 	$expected_actions = [
-		'user.update','user.add_role','user.remove_role',
+		'user.create','user.update','user.add_role','user.remove_role',
 		'post.create','post.update','post.change_status','post.trash','post.restore','post.delete',
 		'comment.change_status','comment.trash','comment.restore','comment.delete',
 		'term.create','term.update','term.delete','post.set_terms','mail.send',
