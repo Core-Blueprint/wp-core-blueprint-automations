@@ -37,7 +37,7 @@ foreach ( [ 'user_pass', 'user_activation_key', 'meta_input', 'auth_cookie' ] as
 if ( ! str_contains( $listeners, 'unset( $new_pass );' ) ) {
 	$failures[] = 'Password reset adapter does not explicitly discard the plaintext password.';
 }
-if ( ! str_contains( $listeners, "in_array( $post->post_type, [ 'revision', 'attachment' ], true )" ) ) {
+if ( ! str_contains( $listeners, "in_array( \$post->post_type, [ 'revision', 'attachment' ], true )" ) ) {
 	$failures[] = 'Generic post trigger adapter no longer excludes revision/attachment noise.';
 }
 if ( ! str_contains( $listeners, 'wp_is_post_autosave( $post )' ) ) {
