@@ -9,6 +9,43 @@ defined( 'ABSPATH' ) || exit;
 
 final class WordPressAction {
 	/** @param array<string,mixed> $input @return array<string,mixed>|\WP_Error */
+	public static function create_user( array $input, InvocationContext $context ): array|\WP_Error {
+		if ( ! user_can( $context->principal_user_id(), 'create_users' ) ) {
+			return self::denied();
+		}
+		$login = sanitize_user( (string) ( $input['user_login'] ?? '' ), true );
+		$email = sanitize_email( (string) ( $input['user_email'] ?? '' ) );
+		if ( '' === $login || '' === $email || ! is_email( $email ) || username_exists( $login ) || email_exists( $email ) ) {
+			return self::invalid( 'user' );
+		}
+
+		$data = [
+			'user_login' => $login,
+			'user_email' => $email,
+			'user_pass' => wp_generate_password( 24, true, true ),
+		];
+		if ( array_key_exists( 'display_name', $input ) ) {
+			$data['display_name'] = (string) $input['display_name'];
+		}
+		if ( array_key_exists( 'role', $input ) ) {
+			$role = sanitize_key( (string) $input['role'] );
+			if ( '' === $role || ! wp_roles()->is_role( $role ) || ! user_can( $context->principal_user_id(), 'promote_users' ) ) {
+				return self::denied();
+			}
+			$data['role'] = $role;
+		}
+
+		$result = wp_insert_user( $data );
+		if ( is_wp_error( $result ) || $result < 1 ) {
+			return self::failed( 'user_create' );
+		}
+		if ( true === ( $input['send_notification'] ?? false ) ) {
+			wp_new_user_notification( (int) $result, null, 'user' );
+		}
+		return [ 'user_id' => (int) $result ];
+	}
+
+	/** @param array<string,mixed> $input @return array<string,mixed>|\WP_Error */
 	public static function update_user( array $input, InvocationContext $context ): array|\WP_Error {
 		$user_id = (int) ( $input['user_id'] ?? 0 );
 		if ( $user_id < 1 || ! get_userdata( $user_id ) instanceof \WP_User ) {
