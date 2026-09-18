@@ -43,6 +43,9 @@ if ( ! str_contains( $listeners, "in_array( \$post->post_type, [ 'revision', 'at
 if ( ! str_contains( $listeners, 'wp_is_post_autosave( $post )' ) ) {
 	$failures[] = 'Generic post trigger adapter no longer suppresses autosave noise.';
 }
+if ( ! str_contains( $listeners, "'auto-draft' === $post_before->post_status" ) ) {
+	$failures[] = 'First persisted Block Editor auto-draft transition must remain a post.created event.';
+}
 if ( ! str_contains( $listeners, 'Emitter::emit( CapabilityRegistrar::PROVIDER' ) ) {
 	$failures[] = 'WordPress events do not flow through the public Base Emitter.';
 }
