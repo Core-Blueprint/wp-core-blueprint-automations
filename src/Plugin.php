@@ -12,9 +12,11 @@ use CB\Automations\Admin\RunsAssets;
 use CB\Automations\Admin\WorkflowActivationController;
 use CB\Automations\Admin\WorkflowController;
 use CB\Automations\Persistence\Schema;
+use CB\Automations\Provider\WordPress\WordPressProvider;
 use CB\Automations\Runtime\RuntimeWorker;
 use CB\Automations\Runtime\TriggerIntake;
 use CB\Automations\Support\Requirements;
+use CB\Automations\Template\StarterTemplates;
 defined( 'ABSPATH' ) || exit;
 
 final class Plugin {
@@ -39,6 +41,8 @@ final class Plugin {
 		}
 
 		self::$runtime_booted = true;
+		WordPressProvider::init();
+		StarterTemplates::init();
 		RuntimeWorker::init();
 		TriggerIntake::init();
 
