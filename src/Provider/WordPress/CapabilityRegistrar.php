@@ -132,6 +132,7 @@ final class CapabilityRegistrar {
 			self::trigger( 'update.completed', __( 'WordPress update completed', 'core-blueprint-automations' ), __( 'A WordPress upgrader process completed.', 'core-blueprint-automations' ), [
 				'type' => self::field( 'string', true ),
 				'action' => self::field( 'string', true ),
+				'items' => self::array_field( 'string' ),
 			] ),
 		];
 	}
