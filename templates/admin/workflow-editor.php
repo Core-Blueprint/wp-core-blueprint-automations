@@ -25,6 +25,7 @@ $principal_label = $principal_user instanceof WP_User
 
 $notices = [
 	'created'                                => [ 'success', __( 'Automation draft created. Configure the workflow below.', 'core-blueprint-automations' ) ],
+	'created_template'                       => [ 'success', __( 'Automation created from a starter template. Review the workflow, assign execution authority and enable it when ready.', 'core-blueprint-automations' ) ],
 	'saved'                                  => [ 'success', __( 'Automation saved.', 'core-blueprint-automations' ) ],
 	'saved_disabled'                         => [ 'warning', __( 'Your changes were saved, but the automation remains disabled because the current workflow is not valid yet.', 'core-blueprint-automations' ) ],
 	'saved_disabled_execution_unavailable'   => [ 'warning', __( 'Changes saved. The automation remains disabled because secure runtime encryption is unavailable on this site.', 'core-blueprint-automations' ) ],
