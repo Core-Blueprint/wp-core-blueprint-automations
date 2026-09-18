@@ -66,6 +66,7 @@ final class Requirements {
 			'\\CB\\Core\\Automation\\TriggerRegistry',
 			'\\CB\\Core\\Automation\\ActionRegistry',
 			'\\CB\\Core\\Automation\\StateRegistry',
+			'\\CB\\Core\\Automation\\Emitter',
 			'\\CB\\Core\\Automation\\TriggerEvent',
 			'\\CB\\Core\\Automation\\InvocationContext',
 			'\\CB\\Core\\Automation\\ActionInvoker',
