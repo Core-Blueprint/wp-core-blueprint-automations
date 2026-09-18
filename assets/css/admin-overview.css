@@ -3,11 +3,13 @@
 }
 
 .cb-automations-create-panel,
+.cb-automations-templates-panel,
 .cb-automations-workflows-panel {
 	margin-top: var(--cb-space-4) !important;
 }
 
 .cb-automations-create-panel h2,
+.cb-automations-templates-panel h2,
 .cb-automations-workflows-panel h2 {
 	margin: 2px 0 var(--cb-space-1);
 }
@@ -23,6 +25,48 @@
 .cb-automations-create-form input[type="text"] {
 	width: min(440px, 100%);
 	max-width: 100%;
+}
+
+
+.cb-automations-template-grid {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: var(--cb-space-3);
+	margin-top: var(--cb-space-4);
+}
+
+.cb-automations-template-card {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	gap: var(--cb-space-4);
+	min-height: 190px;
+	padding: var(--cb-space-4);
+	border: 1px solid var(--cb-border);
+	border-radius: var(--cb-radius-md);
+	background: var(--cb-surface-2);
+}
+
+.cb-automations-template-card h3 {
+	margin: var(--cb-space-1) 0 var(--cb-space-2);
+	font-size: var(--cb-fs-lg);
+}
+
+.cb-automations-template-card p {
+	margin: 0;
+	color: var(--cb-text-muted);
+}
+
+.cb-automations-template-card__category {
+	color: var(--cb-text-muted);
+	font-size: var(--cb-fs-2xs);
+	font-weight: var(--cb-fw-semibold);
+	letter-spacing: .08em;
+	text-transform: uppercase;
+}
+
+.cb-automations-template-card form {
+	margin: 0;
 }
 
 .cb-automations-overview-heading {
@@ -234,6 +278,10 @@
 }
 
 @media (max-width: 782px) {
+	.cb-automations-template-grid {
+		grid-template-columns: 1fr;
+	}
+
 	.cb-automations-create-form {
 		display: grid;
 		grid-template-columns: 1fr;
