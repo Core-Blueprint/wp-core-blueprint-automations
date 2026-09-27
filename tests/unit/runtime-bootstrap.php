@@ -14,7 +14,7 @@ if ( false === $plugin || false === $requirements || false === $suite || false =
 
 $failures = [];
 
-$runtime_gate = strpos( $plugin, 'Requirements::runtime_ready()' );
+$runtime_gate = strpos( $plugin, 'Requirements::product_ready()' );
 $runtime_boot = strpos( $plugin, 'self::$runtime_booted = true;' );
 $admin_gate = strpos( $plugin, "if ( ! is_admin() || ! Requirements::admin_ready() )" );
 $admin_init = strpos( $plugin, 'WorkflowController::init();' );
@@ -40,8 +40,11 @@ foreach ( [
 	}
 }
 
+if ( ! str_contains( $requirements, 'public static function product_ready(): bool' ) ) {
+	$failures[] = 'Product runtime readiness is not separated from Bootstrap readiness.';
+}
 if ( ! str_contains( $requirements, 'public static function admin_ready(): bool' ) ) {
-	$failures[] = 'Admin readiness is not separated from runtime readiness.';
+	$failures[] = 'Admin readiness is not separated from product runtime readiness.';
 }
 if ( ! str_contains( $suite, 'Requirements::admin_ready()' ) ) {
 	$failures[] = 'Core Admin page registration is not gated by admin readiness.';
