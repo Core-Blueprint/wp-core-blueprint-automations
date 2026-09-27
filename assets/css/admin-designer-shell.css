@@ -8,11 +8,6 @@
 	max-width: none;
 }
 
-.cb-automations-design-shell__identity {
-	flex-wrap: wrap;
-}
-
-.cb-automations-design-shell__identity span,
 .cb-automations-builder-status {
 	color: var(--cb-text-muted);
 	font-size: var(--cb-fs-sm);
