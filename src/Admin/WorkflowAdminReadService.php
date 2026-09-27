@@ -52,6 +52,39 @@ final class WorkflowAdminReadService {
 		];
 	}
 
+	/**
+	 * Return the complete lightweight workflow list for Designer context switching.
+	 *
+	 * @return array<int,array{id:int,name:string}>
+	 */
+	public function context_items(): array {
+		$total  = WorkflowRepository::count();
+		$offset = 0;
+		$items  = [];
+
+		while ( $offset < $total ) {
+			$batch = WorkflowRepository::list( 100, $offset );
+			if ( [] === $batch ) {
+				break;
+			}
+
+			foreach ( $batch as $record ) {
+				$items[] = [
+					'id'   => $record->id(),
+					'name' => $record->name(),
+				];
+			}
+
+			$count = count( $batch );
+			$offset += $count;
+			if ( $count < 100 ) {
+				break;
+			}
+		}
+
+		return $items;
+	}
+
 	/** @return array{record:WorkflowRecord,validation:ValidationResult,state:ValidationState}|null */
 	public function detail( int $id ): ?array {
 		$record = WorkflowRepository::find( $id );
