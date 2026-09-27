@@ -6,11 +6,12 @@ const root = new URL('../../', import.meta.url);
 const read = (path) => readFile(new URL(path, root), 'utf8');
 
 test('Automation Builder keeps canonical persistence, shared-shell ownership and save reconciliation intact', async () => {
-	const [inspector, history, save, editor, controller, assets, finishCss, designerCss, template] = await Promise.all([
+	const [inspector, history, save, editor, shell, controller, assets, finishCss, designerCss, template] = await Promise.all([
 		read('assets/js/admin-builder-inspector.js'),
 		read('assets/js/admin-builder-history.js'),
 		read('assets/js/admin-builder-save.js'),
 		read('assets/js/admin-editor.js'),
+		read('assets/js/admin-designer-shell.js'),
 		read('src/Admin/WorkflowController.php'),
 		read('src/Admin/DesignerAssets.php'),
 		read('assets/css/admin-builder-finish.css'),
@@ -23,6 +24,13 @@ test('Automation Builder keeps canonical persistence, shared-shell ownership and
 	assert.ok(template.includes('data-cb-design-exit-url="<?php echo esc_url( \\CB\\Automations\\Admin\\AutomationsPage::url() ); ?>"'));
 	assert.match(assets, /enqueue_designer_mode\( __\( 'Automation Builder'/);
 	assert.doesNotMatch(assets, /admin-builder-bootstrap\.js|admin-builder-layout\.js|admin_body_class|builder_launch_requested/);
+	assert.match(template, /data-cb-design-shell-context/);
+	assert.match(template, /data-cb-automations-workflow-switcher/);
+	assert.doesNotMatch(template, /cb-automations-design-shell__identity/);
+	assert.match(shell, /querySelector\('\[data-cb-automations-workflow-switcher\]'\)/);
+	assert.match(shell, /new URL\(target, window\.location\.href\)/);
+	assert.match(shell, /url\.origin === window\.location\.origin/);
+	assert.match(shell, /window\.location\.assign\(url\.href\)/);
 
 	assert.match(inspector, /dataset\.cbBuilderSelectable/);
 	assert.match(inspector, /Selected step|selectedStep/);
@@ -71,6 +79,7 @@ test('Automation Builder keeps canonical persistence, shared-shell ownership and
 	assert.match(editor, /renderAll\('initial'\)/);
 
 	assert.doesNotMatch(designerCss, /\.cb-automations-design-shell \.cb-core-design-shell__workspace/);
+	assert.doesNotMatch(designerCss, /cb-automations-design-shell__identity|cb-core-design-shell__toolbar-context/);
 	assert.doesNotMatch(finishCss, /is-palette-collapsed|is-sidebar-collapsed/);
 	for (const source of [inspector, history, save, editor]) {
 		assert.doesNotMatch(source, /assets\/js\/design\/|CB_CORE_URL/);
