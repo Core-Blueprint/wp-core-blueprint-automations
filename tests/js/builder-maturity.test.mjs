@@ -6,7 +6,7 @@ const root = new URL('../../', import.meta.url);
 const read = (path) => readFile(new URL(path, root), 'utf8');
 
 test('Automation Builder keeps canonical persistence, shared-shell ownership and save reconciliation intact', async () => {
-	const [inspector, history, save, editor, shell, controller, assets, finishCss, designerCss, template] = await Promise.all([
+	const [inspector, history, save, editor, shell, controller, assets, finishCss, designerCss, adminCss, template] = await Promise.all([
 		read('assets/js/admin-builder-inspector.js'),
 		read('assets/js/admin-builder-history.js'),
 		read('assets/js/admin-builder-save.js'),
@@ -16,6 +16,7 @@ test('Automation Builder keeps canonical persistence, shared-shell ownership and
 		read('src/Admin/DesignerAssets.php'),
 		read('assets/css/admin-builder-finish.css'),
 		read('assets/css/admin-designer-shell.css'),
+		read('assets/css/admin-automations.css'),
 		read('templates/admin/workflow-editor.php'),
 	]);
 
@@ -39,6 +40,11 @@ test('Automation Builder keeps canonical persistence, shared-shell ownership and
 	assert.match(inspector, /key: `state:\$\{value\?\.step_id \|\| index\}`/);
 	assert.match(inspector, /key: `condition:\$\{value\?\.condition_id \|\| index\}`/);
 	assert.match(inspector, /key: `action:\$\{value\?\.step_id \|\| index\}`/);
+	assert.match(inspector, /panelBody = panel\?\.querySelector\('\.cb-core-design-shell__panel-body'\)/);
+	assert.match(inspector, /panelBody\.replaceChildren\(\)/);
+	assert.match(inspector, /cb-core-design-shell__panel-section-description/);
+	assert.match(inspector, /cb-core-design-shell__panel-section-title/);
+	assert.doesNotMatch(inspector, /panel\.replaceChildren\(\)/);
 
 	assert.match(editor, /window\.cbAutomationsEditorSession/);
 	assert.match(editor, /cb-automations:definitionchange/);
@@ -79,6 +85,8 @@ test('Automation Builder keeps canonical persistence, shared-shell ownership and
 	assert.match(editor, /renderAll\('initial'\)/);
 
 	assert.doesNotMatch(designerCss, /\.cb-automations-design-shell \.cb-core-design-shell__workspace/);
+	assert.match(adminCss, /\.cb-automations-stage\s*\{[^}]*margin-bottom:\s*0\s*!important;/s);
+	assert.match(adminCss, /\.cb-automations-stage:not\(:last-child\)::after\s*\{[^}]*height:\s*var\(--cb-space-4\);/s);
 	assert.ok((template.match(/class="cb-core-design-shell__panel-body"/g) || []).length >= 3);
 	assert.match(template, /class="cb-core-design-shell__panel-section"/);
 	assert.match(template, /class="cb-core-design-shell__field"/);
