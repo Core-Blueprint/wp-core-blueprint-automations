@@ -64,8 +64,9 @@ final class AutomationsPage implements Page {
 				$this->template(
 					'workflow-editor.php',
 					[
-						'detail'      => $detail,
-						'editor_data' => WorkflowEditorData::build( $detail['record'], $detail['validation'] ),
+						'detail'            => $detail,
+						'editor_data'       => WorkflowEditorData::build( $detail['record'], $detail['validation'] ),
+						'workflow_contexts' => $reader->context_items(),
 					]
 				);
 				return;
