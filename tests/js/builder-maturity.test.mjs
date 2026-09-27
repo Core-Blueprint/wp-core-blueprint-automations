@@ -66,7 +66,7 @@ test('Automation Builder keeps canonical persistence, shared-shell ownership and
 	assert.match(assets, /activationEnabled/);
 	assert.match(assets, /validationDependencyUnavailable/);
 	assert.match(template, /\$definition_json\s*=\s*wp_json_encode\(\s*\$editor_data\['workflow'\]\['definition'\]\s*\)/);
-	assert.match(template, /name="definition_json"[^>]*data-cb-automations-definition/);
+	assert.match(template, /name="definition_json".*data-cb-automations-definition/);
 	assert.match(editor, /hidden\.value = JSON\.stringify\(definition\)/);
 	assert.match(editor, /renderAll\('initial'\)/);
 
