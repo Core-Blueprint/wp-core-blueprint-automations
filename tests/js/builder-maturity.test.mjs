@@ -24,7 +24,7 @@ test('Automation Builder keeps canonical persistence, shared-shell ownership and
 	assert.match(assets, /enqueue_designer_mode\( __\( 'Automation Builder'/);
 	assert.doesNotMatch(assets, /admin-builder-bootstrap\.js|admin-builder-layout\.js|admin_body_class|builder_launch_requested/);
 
-	assert.match(inspector, /data-cb-builder-selectable/);
+	assert.match(inspector, /dataset\.cbBuilderSelectable/);
 	assert.match(inspector, /Selected step|selectedStep/);
 	assert.match(inspector, /GET DATA/);
 	assert.match(inspector, /ONLY IF/);
