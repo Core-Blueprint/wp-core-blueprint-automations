@@ -39,6 +39,8 @@ namespace CB\Core\Automation {
 
 namespace {
 	$root = dirname( __DIR__, 2 );
+	require $root . '/src/Provider/WordPress/WordPressState.php';
+	require $root . '/src/Provider/WordPress/WordPressAction.php';
 	require $root . '/src/Provider/WordPress/CapabilityRegistrar.php';
 
 	\CB\Automations\Provider\WordPress\CapabilityRegistrar::register();
