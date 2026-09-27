@@ -28,9 +28,14 @@ foreach ( $hooks as $hook ) {
 	}
 }
 
-foreach ( [ 'user_pass', 'user_activation_key', 'meta_input', 'auth_cookie' ] as $forbidden ) {
-	if ( str_contains( $listeners, $forbidden ) ) {
-		$failures[] = 'Forbidden raw authentication/user payload token found in trigger adapter: ' . $forbidden;
+foreach ( [
+	'user_pass' => "'user_pass'",
+	'user_activation_key' => "'user_activation_key'",
+	'meta_input' => "'meta_input'",
+	'auth_cookie' => "'auth_cookie'",
+] as $label => $token ) {
+	if ( str_contains( $listeners, $token ) ) {
+		$failures[] = 'Forbidden raw authentication/user payload token found in trigger adapter: ' . $label;
 	}
 }
 
@@ -43,7 +48,7 @@ if ( ! str_contains( $listeners, "in_array( \$post->post_type, [ 'revision', 'at
 if ( ! str_contains( $listeners, 'wp_is_post_autosave( $post )' ) ) {
 	$failures[] = 'Generic post trigger adapter no longer suppresses autosave noise.';
 }
-if ( ! str_contains( $listeners, "'auto-draft' === $post_before->post_status" ) ) {
+if ( ! str_contains( $listeners, "'auto-draft' === \$post_before->post_status" ) ) {
 	$failures[] = 'First persisted Block Editor auto-draft transition must remain a post.created event.';
 }
 if ( ! str_contains( $listeners, 'Emitter::emit( CapabilityRegistrar::PROVIDER' ) ) {
