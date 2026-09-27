@@ -88,7 +88,7 @@ if ( ! is_string( $definition_json ) ) {
 	$definition_json = '{}';
 }
 ?>
-<div class="wrap cb-core-wrap cb-automations-admin cb-automations-editor-page" data-cb-design-launch-root data-cb-design-launch-mode="direct" data-cb-design-title="<?php echo esc_attr__( 'Automation Builder', 'core-blueprint-automations' ); ?>" data-cb-design-exit-url="<?php echo esc_url( \CB\Automations\Admin\AutomationsPage::url() ); ?>">
+<div class="wrap cb-automations-admin cb-automations-editor-page" data-cb-design-launch-root data-cb-design-launch-mode="direct" data-cb-design-title="<?php echo esc_attr__( 'Automation Builder', 'core-blueprint-automations' ); ?>" data-cb-design-exit-url="<?php echo esc_url( \CB\Automations\Admin\AutomationsPage::url() ); ?>">
 	<p><a href="<?php echo esc_url( \CB\Automations\Admin\AutomationsPage::url() ); ?>">← <?php esc_html_e( 'Back to Automations', 'core-blueprint-automations' ); ?></a></p>
 
 	<div class="cb-automations-editor-heading" data-cb-design-launch-context>
