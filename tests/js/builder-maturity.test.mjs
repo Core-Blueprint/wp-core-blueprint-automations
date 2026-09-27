@@ -79,7 +79,8 @@ test('Automation Builder keeps canonical persistence, shared-shell ownership and
 	assert.match(editor, /renderAll\('initial'\)/);
 
 	assert.doesNotMatch(designerCss, /\.cb-automations-design-shell \.cb-core-design-shell__workspace/);
-	assert.doesNotMatch(designerCss, /cb-automations-design-shell__identity|cb-core-design-shell__toolbar-context/);
+	assert.doesNotMatch(designerCss, /cb-automations-design-shell__identity|cb-core-design-shell__toolbar-context|cb-core-design-shell__brand|cb-core-brand-lockup/);
+	assert.doesNotMatch(shell, /cb-core-design-shell__brand|cb-core-brand-lockup|brand-wordmark|is-identity-condensed/);
 	assert.doesNotMatch(finishCss, /is-palette-collapsed|is-sidebar-collapsed/);
 	for (const source of [inspector, history, save, editor]) {
 		assert.doesNotMatch(source, /assets\/js\/design\/|CB_CORE_URL/);
