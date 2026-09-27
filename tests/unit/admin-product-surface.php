@@ -42,6 +42,7 @@ $expectations = [
 	[ str_contains( $files['editor'], 'data-cb-design-shell-context' ), 'Designer workflow context must use the public Base context selector contract.' ],
 	[ str_contains( $files['editor'], 'data-cb-automations-workflow-switcher' ), 'Designer workflow context must expose the Automations switcher behavior hook.' ],
 	[ ! str_contains( $files['editor'], 'cb-automations-design-shell__identity' ), 'Legacy Automations Designer identity markup must remain removed.' ],
+	[ ! str_contains( $files['editor'], 'cb-core-wrap' ), 'Canonical Designer routes must not depend on the Core Admin wrapper for presentation.' ],
 	[ str_contains( $files['reader'], 'public function context_items(): array' ), 'Designer workflow switching must reuse the canonical admin read service.' ],
 	[ str_contains( $files['reader'], 'WorkflowRepository::list( 100, $offset )' ), 'Designer workflow context must reuse canonical workflow listing persistence.' ],
 	[ str_contains( $files['editor'], 'AutomationsPage::url(' ), 'Designer workflow switching must reuse the canonical workflow route builder.' ],
