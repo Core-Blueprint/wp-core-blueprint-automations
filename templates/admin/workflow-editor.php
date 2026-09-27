@@ -182,42 +182,67 @@ if ( ! is_string( $definition_json ) ) {
 
 				<aside class="cb-core-design-shell__sidebar cb-automations-design-shell__sidebar">
 					<div class="cb-core-design-shell__tabs cb-core-design-shell__sidebar-tabs" role="tablist" aria-label="<?php esc_attr_e( 'Automation details', 'core-blueprint-automations' ); ?>">
-						<button type="button" class="cb-core-design-shell__tab cb-core-design-shell__sidebar-tab" role="tab" aria-selected="false" data-cb-design-shell-tab="inspector" data-cb-design-shell-group="sidebar"><?php esc_html_e( 'Inspector', 'core-blueprint-automations' ); ?></button>
-						<button type="button" class="cb-core-design-shell__tab cb-core-design-shell__sidebar-tab is-active" role="tab" aria-selected="true" data-cb-design-shell-tab="settings" data-cb-design-shell-group="sidebar"><?php esc_html_e( 'Settings', 'core-blueprint-automations' ); ?></button>
+						<button type="button" class="cb-core-design-shell__tab cb-core-design-shell__sidebar-tab" role="tab" aria-selected="false" data-cb-design-shell-tab="inspector" data-cb-design-shell-group="sidebar" data-cb-design-shell-sidebar-role="inspector"><?php esc_html_e( 'Inspector', 'core-blueprint-automations' ); ?></button>
+						<button type="button" class="cb-core-design-shell__tab cb-core-design-shell__sidebar-tab is-active" role="tab" aria-selected="true" data-cb-design-shell-tab="settings" data-cb-design-shell-group="sidebar" data-cb-design-shell-sidebar-role="settings"><?php esc_html_e( 'Settings', 'core-blueprint-automations' ); ?></button>
 						<button type="button" class="cb-core-design-shell__tab cb-core-design-shell__sidebar-tab" role="tab" aria-selected="false" data-cb-design-shell-tab="health" data-cb-design-shell-group="sidebar"><?php esc_html_e( 'Health', 'core-blueprint-automations' ); ?></button>
 					</div>
 
-					<section class="cb-core-design-shell__panel cb-core-design-shell__sidebar-panel" role="tabpanel" data-cb-design-shell-panel="inspector" data-cb-design-shell-group="sidebar" hidden>
-						<div class="cb-automations-panel-heading"><div><span class="cb-automations-panel-eyebrow"><?php esc_html_e( 'Inspector', 'core-blueprint-automations' ); ?></span><h2><?php esc_html_e( 'Inspector', 'core-blueprint-automations' ); ?></h2></div></div>
-						<p class="description"><?php esc_html_e( 'Select a workflow step to inspect its context.', 'core-blueprint-automations' ); ?></p>
+					<section class="cb-core-design-shell__panel cb-core-design-shell__sidebar-panel" role="tabpanel" data-cb-design-shell-panel="inspector" data-cb-design-shell-group="sidebar" data-cb-design-shell-sidebar-role="inspector" hidden>
+						<div class="cb-core-design-shell__panel-body">
+							<section class="cb-core-design-shell__panel-section">
+								<p class="cb-core-design-shell__panel-section-description"><?php esc_html_e( 'Select a workflow step to inspect its context.', 'core-blueprint-automations' ); ?></p>
+							</section>
+						</div>
 					</section>
 
-					<section class="cb-core-design-shell__panel cb-core-design-shell__sidebar-panel" role="tabpanel" data-cb-design-shell-panel="settings" data-cb-design-shell-group="sidebar">
-						<div class="cb-automations-panel-heading"><div><span class="cb-automations-panel-eyebrow"><?php esc_html_e( 'Automation', 'core-blueprint-automations' ); ?></span><h2><?php esc_html_e( 'Workflow settings', 'core-blueprint-automations' ); ?></h2></div></div>
-						<div class="cb-automations-settings-grid">
-							<div><label for="cb-automation-name"><strong><?php esc_html_e( 'Name', 'core-blueprint-automations' ); ?></strong></label><input id="cb-automation-name" name="name" type="text" class="regular-text" maxlength="191" required value="<?php echo esc_attr( $record->name() ); ?>" /></div>
-							<div><label for="cb-automation-activation"><strong><?php esc_html_e( 'Activation', 'core-blueprint-automations' ); ?></strong></label><select id="cb-automation-activation" name="activation_state"><option value="disabled" <?php selected( 'disabled', $record->activation_state()->value ); ?>><?php esc_html_e( 'Disabled', 'core-blueprint-automations' ); ?></option><option value="enabled" <?php selected( 'enabled', $record->activation_state()->value ); ?>><?php esc_html_e( 'Enabled', 'core-blueprint-automations' ); ?></option></select><p class="description"><?php esc_html_e( 'Enabled workflows must be valid and both the execution principal and current operator must hold every provider-required capability.', 'core-blueprint-automations' ); ?></p></div>
-							<div>
-								<strong><?php esc_html_e( 'Execution authority', 'core-blueprint-automations' ); ?></strong>
-								<p data-cb-automations-principal-label><?php echo esc_html( $principal_label ); ?></p>
+					<section class="cb-core-design-shell__panel cb-core-design-shell__sidebar-panel" role="tabpanel" data-cb-design-shell-panel="settings" data-cb-design-shell-group="sidebar" data-cb-design-shell-sidebar-role="settings">
+						<div class="cb-core-design-shell__panel-body">
+							<section class="cb-core-design-shell__panel-section">
+								<h3 class="cb-core-design-shell__panel-section-title"><?php esc_html_e( 'Workflow settings', 'core-blueprint-automations' ); ?></h3>
+								<label class="cb-core-design-shell__field" for="cb-automation-name">
+									<span class="cb-core-design-shell__field-label"><?php esc_html_e( 'Name', 'core-blueprint-automations' ); ?></span>
+									<input id="cb-automation-name" name="name" type="text" maxlength="191" required value="<?php echo esc_attr( $record->name() ); ?>" />
+								</label>
+								<label class="cb-core-design-shell__field" for="cb-automation-activation">
+									<span class="cb-core-design-shell__field-label"><?php esc_html_e( 'Activation', 'core-blueprint-automations' ); ?></span>
+									<select id="cb-automation-activation" name="activation_state">
+										<option value="disabled" <?php selected( 'disabled', $record->activation_state()->value ); ?>><?php esc_html_e( 'Disabled', 'core-blueprint-automations' ); ?></option>
+										<option value="enabled" <?php selected( 'enabled', $record->activation_state()->value ); ?>><?php esc_html_e( 'Enabled', 'core-blueprint-automations' ); ?></option>
+									</select>
+									<span class="cb-core-design-shell__field-hint"><?php esc_html_e( 'Enabled workflows must be valid and both the execution principal and current operator must hold every provider-required capability.', 'core-blueprint-automations' ); ?></span>
+								</label>
+							</section>
+
+							<section class="cb-core-design-shell__panel-section">
+								<h3 class="cb-core-design-shell__panel-section-title"><?php esc_html_e( 'Execution authority', 'core-blueprint-automations' ); ?></h3>
+								<p class="cb-core-design-shell__panel-section-description" data-cb-automations-principal-label><?php echo esc_html( $principal_label ); ?></p>
 								<label><input type="checkbox" name="rebind_execution_principal" value="1" data-cb-automations-rebind-principal /> <?php esc_html_e( 'Use my account as execution principal when saving', 'core-blueprint-automations' ); ?></label>
-								<p class="description"><?php esc_html_e( 'Core Blueprint never accepts an arbitrary Run as user ID from the browser. The server binds your current WordPress account and re-checks its permissions on every execution.', 'core-blueprint-automations' ); ?></p>
-							</div>
+								<p class="cb-core-design-shell__field-hint"><?php esc_html_e( 'Core Blueprint never accepts an arbitrary Run as user ID from the browser. The server binds your current WordPress account and re-checks its permissions on every execution.', 'core-blueprint-automations' ); ?></p>
+							</section>
 						</div>
 					</section>
 
 					<section class="cb-core-design-shell__panel cb-core-design-shell__sidebar-panel cb-automations-validation-panel" role="tabpanel" data-cb-design-shell-panel="health" data-cb-design-shell-group="sidebar" hidden>
-						<div class="cb-automations-panel-heading"><div><span class="cb-automations-panel-eyebrow"><?php esc_html_e( 'Workflow health', 'core-blueprint-automations' ); ?></span><h2><?php echo esc_html( $validation->is_valid() ? __( 'Ready', 'core-blueprint-automations' ) : __( 'Needs attention', 'core-blueprint-automations' ) ); ?></h2></div></div>
-						<?php if ( $validation->is_valid() ) : ?>
-							<p class="description"><?php esc_html_e( 'The current definition is valid against the live capability catalog.', 'core-blueprint-automations' ); ?></p>
-						<?php else : ?>
-							<p class="description"><?php esc_html_e( 'Resolve these items before the automation can be enabled.', 'core-blueprint-automations' ); ?></p>
-							<ul class="cb-automations-validation-list">
-								<?php foreach ( $validation->issues() as $issue ) : ?>
-									<li><strong><?php echo esc_html( \CB\Automations\Admin\ValidationPresenter::message( $issue ) ); ?></strong><code><?php echo esc_html( $issue->path() ); ?></code></li>
-								<?php endforeach; ?>
-							</ul>
-						<?php endif; ?>
+						<div class="cb-core-design-shell__panel-body">
+							<section class="cb-core-design-shell__panel-section">
+								<h3 class="cb-core-design-shell__panel-section-title"><?php echo esc_html( $validation->is_valid() ? __( 'Ready', 'core-blueprint-automations' ) : __( 'Needs attention', 'core-blueprint-automations' ) ); ?></h3>
+								<?php if ( $validation->is_valid() ) : ?>
+									<p class="cb-core-design-shell__panel-section-description"><?php esc_html_e( 'The current definition is valid against the live capability catalog.', 'core-blueprint-automations' ); ?></p>
+								<?php else : ?>
+									<p class="cb-core-design-shell__panel-section-description"><?php esc_html_e( 'Resolve these items before the automation can be enabled.', 'core-blueprint-automations' ); ?></p>
+								<?php endif; ?>
+							</section>
+
+							<?php if ( ! $validation->is_valid() ) : ?>
+								<section class="cb-core-design-shell__panel-section">
+									<ul class="cb-automations-validation-list">
+										<?php foreach ( $validation->issues() as $issue ) : ?>
+											<li><strong><?php echo esc_html( \CB\Automations\Admin\ValidationPresenter::message( $issue ) ); ?></strong><code><?php echo esc_html( $issue->path() ); ?></code></li>
+										<?php endforeach; ?>
+									</ul>
+								</section>
+							<?php endif; ?>
+						</div>
 					</section>
 				</aside>
 			</div>

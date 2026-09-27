@@ -90,46 +90,6 @@
 	outline-offset: 2px;
 }
 
-.cb-automations-design-shell__sidebar {
-	top: 0;
-	height: auto;
-	max-height: none;
-	border: 1px solid var(--cb-border);
-	border-radius: var(--cb-radius-md);
-	background: var(--cb-surface-1);
-}
-
-.cb-automations-design-shell__sidebar .cb-core-design-shell__sidebar-tabs {
-	border-bottom: 1px solid var(--cb-border);
-	background: transparent;
-}
-
-.cb-automations-design-shell__sidebar .cb-core-design-shell__sidebar-tab {
-	padding: var(--cb-space-3) var(--cb-space-2);
-	border-right: 0;
-	border-bottom: 2px solid transparent;
-	background: transparent;
-	color: var(--cb-text-muted);
-}
-
-.cb-automations-design-shell__sidebar .cb-core-design-shell__sidebar-tab.is-active {
-	border-bottom-color: var(--cb-accent);
-	color: var(--cb-text-strong);
-}
-
-.cb-automations-design-shell__sidebar .cb-core-design-shell__sidebar-panel {
-	min-height: 0;
-}
-
-.cb-automations-design-shell__sidebar .cb-automations-panel-heading {
-	margin-bottom: var(--cb-space-3);
-}
-
-.cb-automations-design-shell__sidebar .cb-automations-settings-grid {
-	grid-template-columns: 1fr;
-	gap: var(--cb-space-4);
-}
-
 .cb-automations-design-shell__sidebar .cb-automations-validation-list code {
 	max-width: 100%;
 	overflow-wrap: anywhere;
