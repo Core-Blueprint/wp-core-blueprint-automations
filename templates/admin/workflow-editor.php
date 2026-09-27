@@ -4,6 +4,7 @@
  *
  * @var array{record:\CB\Automations\Persistence\WorkflowRecord,validation:\CB\Automations\Validation\ValidationResult,state:\CB\Automations\Validation\ValidationState} $detail
  * @var array<string,mixed> $editor_data
+ * @var array<int,array{id:int,name:string}> $workflow_contexts
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -114,10 +115,17 @@ if ( ! is_string( $definition_json ) ) {
 
 		<div class="cb-core-design-shell cb-automations-design-shell" data-cb-design-shell data-cb-automations-designer-shell>
 			<div class="cb-core-design-shell__toolbar">
-				<div class="cb-core-design-shell__toolbar-group cb-automations-design-shell__identity">
-					<strong><?php esc_html_e( 'Automation Builder', 'core-blueprint-automations' ); ?></strong>
-					<span><?php esc_html_e( 'Linear workflow', 'core-blueprint-automations' ); ?></span>
-				</div>
+				<label class="cb-core-field" data-cb-design-shell-context hidden aria-hidden="true">
+					<span class="cb-core-field__label"><?php esc_html_e( 'Workflow', 'core-blueprint-automations' ); ?></span>
+					<select data-cb-automations-workflow-switcher aria-label="<?php esc_attr_e( 'Workflow', 'core-blueprint-automations' ); ?>">
+						<?php foreach ( $workflow_contexts as $workflow_context ) : ?>
+							<option
+								value="<?php echo esc_url( \CB\Automations\Admin\AutomationsPage::url( [ 'workflow' => $workflow_context['id'] ] ) ); ?>"
+								<?php selected( $workflow_context['id'], $record->id() ); ?>
+							><?php echo esc_html( $workflow_context['name'] ); ?></option>
+						<?php endforeach; ?>
+					</select>
+				</label>
 				<div class="cb-core-design-shell__toolbar-group cb-automations-builder-history-controls">
 					<span data-cb-design-shell-group-label><?php esc_html_e( 'History', 'core-blueprint-automations' ); ?></span>
 					<button type="button" class="button cb-core-button" data-cb-design-shell-undo disabled><?php esc_html_e( 'Undo', 'core-blueprint-automations' ); ?></button>
