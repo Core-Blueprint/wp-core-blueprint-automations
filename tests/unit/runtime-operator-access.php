@@ -21,7 +21,7 @@ if ( in_array( false, [ $builder, $runs, $view_cap, $recovery_cap, $recovery_con
 if ( ! str_contains( $builder, "public const CAPABILITY = 'manage_options'" ) ) {
 	throw new RuntimeException( 'Builder authoring capability changed from manage_options.' );
 }
-if ( str_contains( $builder, "'runs' === $view" ) || str_contains( $builder, 'render_runs(' ) || str_contains( $builder, "'run-detail.php'" ) || str_contains( $builder, "'runs.php'" ) ) {
+if ( str_contains( $builder, "'runs' === \$view" ) || str_contains( $builder, 'render_runs(' ) || str_contains( $builder, "'run-detail.php'" ) || str_contains( $builder, "'runs.php'" ) ) {
 	throw new RuntimeException( 'Run History is still routed through the Builder page.' );
 }
 if ( ! str_contains( $workflow_controller, 'current_user_can( AutomationsPage::CAPABILITY )' ) ) {
