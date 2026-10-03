@@ -7,9 +7,9 @@ use CB\Automations\Admin\AutomationRunsPage;
 use CB\Automations\Admin\AutomationsPage;
 use CB\Automations\Admin\RunHistoryCapability;
 use CB\Automations\Support\Requirements;
-use CB\Core\Admin\MenuGroup;
-use CB\Core\Admin\MenuGroupRegistry;
-use CB\Core\ExtensionRegistry;
+use CoreBlueprint\Core\Admin\MenuGroup;
+use CoreBlueprint\Core\Admin\MenuGroupRegistry;
+use CoreBlueprint\Core\ExtensionRegistry;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -25,8 +25,8 @@ final class Suite {
 		}
 
 		self::$initialized = true;
-		add_action( 'cb_core_register_extensions', [ self::class, 'register_extension' ] );
-		add_action( 'cb_core_register_pages', [ self::class, 'register_admin_pages' ] );
+		add_action( 'core_blueprint_register_extensions', [ self::class, 'register_extension' ] );
+		add_action( 'core_blueprint_register_pages', [ self::class, 'register_admin_pages' ] );
 	}
 
 	public static function register_extension(): void {
