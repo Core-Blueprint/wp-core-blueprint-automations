@@ -61,15 +61,15 @@ final class Requirements {
 		}
 
 		foreach ( [
-			'\\CB\\Core\\ExtensionRegistry',
-			'\\CB\\Core\\Automation\\TriggerRegistry',
-			'\\CB\\Core\\Automation\\ActionRegistry',
-			'\\CB\\Core\\Automation\\StateRegistry',
-			'\\CB\\Core\\Automation\\Emitter',
-			'\\CB\\Core\\Automation\\TriggerEvent',
-			'\\CB\\Core\\Automation\\InvocationContext',
-			'\\CB\\Core\\Automation\\ActionInvoker',
-			'\\CB\\Core\\Automation\\StateInvoker',
+			'\\CoreBlueprint\\Core\\ExtensionRegistry',
+			'\\CoreBlueprint\\Core\\Automation\\TriggerRegistry',
+			'\\CoreBlueprint\\Core\\Automation\\ActionRegistry',
+			'\\CoreBlueprint\\Core\\Automation\\StateRegistry',
+			'\\CoreBlueprint\\Core\\Automation\\Emitter',
+			'\\CoreBlueprint\\Core\\Automation\\TriggerEvent',
+			'\\CoreBlueprint\\Core\\Automation\\InvocationContext',
+			'\\CoreBlueprint\\Core\\Automation\\ActionInvoker',
+			'\\CoreBlueprint\\Core\\Automation\\StateInvoker',
 		] as $contract ) {
 			if ( ! class_exists( $contract ) && ! interface_exists( $contract ) ) {
 				return [ 'automation-foundation-unavailable' ];
@@ -120,10 +120,10 @@ final class Requirements {
 		}
 
 		foreach ( [
-			'\\CB\\Core\\Admin\\MenuGroup',
-			'\\CB\\Core\\Admin\\MenuGroupRegistry',
-			'\\CB\\Core\\Admin\\Page',
-			'\\CB\\Core\\UI\\Status',
+			'\\CoreBlueprint\\Core\\Admin\\MenuGroup',
+			'\\CoreBlueprint\\Core\\Admin\\MenuGroupRegistry',
+			'\\CoreBlueprint\\Core\\Admin\\Page',
+			'\\CoreBlueprint\\Core\\UI\\Status',
 		] as $contract ) {
 			if ( ! class_exists( $contract ) && ! interface_exists( $contract ) ) {
 				$issues[] = 'core-admin-unavailable';
