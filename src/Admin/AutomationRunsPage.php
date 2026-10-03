@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace CB\Automations\Admin;
 
-use CB\Core\Admin\Page;
+use CoreBlueprint\Core\Admin\Page;
 
 defined( 'ABSPATH' ) || exit;
 
