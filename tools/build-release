@@ -38,6 +38,8 @@ for command in php python3 wp msgfmt node zip unzip sha256sum; do
   command -v "$command" >/dev/null 2>&1 || fail "missing required command: $command"
 done
 
+php "$ROOT/tests/unit/base-v1-contract.php"
+
 "$ROOT/tools/i18n/check"
 
 while IFS= read -r -d '' file; do
