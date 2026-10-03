@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace CB\Automations\Admin;
 
-use CB\Core\Admin\MenuGroupRegistry;
+use CoreBlueprint\Core\Admin\MenuGroupRegistry;
 
 defined( 'ABSPATH' ) || exit;
 
