@@ -14,7 +14,7 @@ final class WordPressProvider {
 		}
 		self::$initialized = true;
 
-		add_action( 'cb_core_register_automation_capabilities', [ CapabilityRegistrar::class, 'register' ] );
+		add_action( 'core_blueprint_register_automation_capabilities', [ CapabilityRegistrar::class, 'register' ] );
 		TriggerListeners::init();
 	}
 }
