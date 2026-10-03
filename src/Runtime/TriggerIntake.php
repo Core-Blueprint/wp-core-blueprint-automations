@@ -6,7 +6,7 @@ namespace CB\Automations\Runtime;
 use CB\Automations\Persistence\EventReceiptRepository;
 use CB\Automations\Persistence\JobRepository;
 use CB\Automations\Support\Requirements;
-use CB\Core\Automation\TriggerEvent;
+use CoreBlueprint\Core\Automation\TriggerEvent;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -21,7 +21,7 @@ final class TriggerIntake {
 			return;
 		}
 		self::$initialized = true;
-		add_action( 'cb_core_automation_trigger_emitted', [ self::class, 'accept' ], 10, 1 );
+		add_action( 'core_blueprint_automation_trigger_emitted', [ self::class, 'accept' ], 10, 1 );
 
 		if ( ! Requirements::execution_ready() ) {
 			return;
