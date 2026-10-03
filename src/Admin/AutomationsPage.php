@@ -8,8 +8,8 @@ use CB\Automations\Runtime\StepStatus;
 use CB\Automations\Template\WorkflowTemplateRegistry;
 use CB\Automations\Validation\ValidationResult;
 use CB\Automations\Validation\ValidationState;
-use CB\Core\Admin\Page;
-use CB\Core\UI\Status;
+use CoreBlueprint\Core\Admin\Page;
+use CoreBlueprint\Core\UI\Status;
 
 defined( 'ABSPATH' ) || exit;
 
