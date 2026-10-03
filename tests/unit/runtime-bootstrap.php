@@ -52,7 +52,7 @@ if ( ! str_contains( $suite, 'Requirements::admin_ready()' ) ) {
 if ( ! str_contains( $bootstrap, 'Requirements::admin_ready()' ) ) {
 	$failures[] = 'Admin notices are not gated by admin readiness.';
 }
-if ( str_contains( $plugin, 'cb_core_automation_trigger_emitted' ) ) {
+if ( str_contains( $plugin, 'core_blueprint_automation_trigger_emitted' ) ) {
 	$failures[] = 'AU2.0A must not subscribe to trigger delivery.';
 }
 
