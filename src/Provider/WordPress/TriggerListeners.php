@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace CB\Automations\Provider\WordPress;
 
-use CB\Core\Automation\Emitter;
+use CoreBlueprint\Core\Automation\Emitter;
 
 defined( 'ABSPATH' ) || exit;
 
