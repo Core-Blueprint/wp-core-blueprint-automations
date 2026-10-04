@@ -5,10 +5,10 @@ namespace CB\Automations\Discovery;
 
 use CB\Automations\Capability\CapabilityKind;
 use CB\Automations\Capability\CapabilityReference;
-use CB\Core\Automation\ActionRegistry;
-use CB\Core\Automation\StateRegistry;
-use CB\Core\Automation\TriggerRegistry;
-use CB\Core\ExtensionRegistry;
+use CoreBlueprint\Core\Automation\ActionRegistry;
+use CoreBlueprint\Core\Automation\StateRegistry;
+use CoreBlueprint\Core\Automation\TriggerRegistry;
+use CoreBlueprint\Core\ExtensionRegistry;
 use RuntimeException;
 use UnexpectedValueException;
 
