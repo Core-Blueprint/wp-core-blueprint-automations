@@ -13,7 +13,7 @@ namespace {
 	}
 }
 
-namespace CB\Core\Automation {
+namespace CoreBlueprint\Core\Automation {
 	final class TriggerRegistry {
 		public static array $items = [];
 		public static function register( array $definition ): bool {
@@ -46,9 +46,9 @@ namespace {
 	\CB\Automations\Provider\WordPress\CapabilityRegistrar::register();
 
 	$failures = [];
-	$triggers = \CB\Core\Automation\TriggerRegistry::$items;
-	$states = \CB\Core\Automation\StateRegistry::$items;
-	$actions = \CB\Core\Automation\ActionRegistry::$items;
+	$triggers = \CoreBlueprint\Core\Automation\TriggerRegistry::$items;
+	$states = \CoreBlueprint\Core\Automation\StateRegistry::$items;
+	$actions = \CoreBlueprint\Core\Automation\ActionRegistry::$items;
 
 	if ( 34 !== count( $triggers ) ) {
 		$failures[] = 'Expected 34 native WordPress triggers, got ' . count( $triggers ) . '.';
