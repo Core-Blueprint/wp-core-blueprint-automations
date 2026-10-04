@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace CB\Automations\Provider\WordPress;
 
-use CB\Core\Automation\ActionRegistry;
-use CB\Core\Automation\StateRegistry;
-use CB\Core\Automation\TriggerRegistry;
+use CoreBlueprint\Core\Automation\ActionRegistry;
+use CoreBlueprint\Core\Automation\StateRegistry;
+use CoreBlueprint\Core\Automation\TriggerRegistry;
 
 defined( 'ABSPATH' ) || exit;
 
