@@ -95,7 +95,7 @@ if ( ! str_contains( $capability, "public const CAPABILITY = 'cb_recover_automat
 if ( str_contains( $capability, 'cb_operator' ) || str_contains( $capability, "get_role(" ) ) {
 	throw new RuntimeException( 'Recovery capability provisioning must not hard-code Base roles.' );
 }
-if ( ! str_contains( $capability, 'cb_core_capability_catalog' ) || ! str_contains( $capability, 'user_has_cap' ) ) {
+if ( ! str_contains( $capability, 'core_blueprint_capability_catalog' ) || ! str_contains( $capability, 'user_has_cap' ) ) {
 	throw new RuntimeException( 'Recovery capability is not integrated through public capability contracts.' );
 }
 if ( ! str_contains( $controller, 'wp_verify_nonce' ) || ! str_contains( $controller, 'current_user_can( RecoveryCapability::CAPABILITY )' ) ) {
