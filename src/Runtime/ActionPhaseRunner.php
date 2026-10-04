@@ -6,8 +6,8 @@ namespace CB\Automations\Runtime;
 use CB\Automations\Persistence\RunContextRepository;
 use CB\Automations\Persistence\RunRepository;
 use CB\Automations\Persistence\RunStepRepository;
-use CB\Core\Automation\ActionInvoker;
-use CB\Core\Automation\InvocationContext;
+use CoreBlueprint\Core\Automation\ActionInvoker;
+use CoreBlueprint\Core\Automation\InvocationContext;
 
 defined( 'ABSPATH' ) || exit;
 
