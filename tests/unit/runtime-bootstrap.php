@@ -30,10 +30,10 @@ if ( str_contains( substr( $plugin, 0, false === $runtime_boot ? strlen( $plugin
 }
 
 foreach ( [
-	'TriggerEvent' => 'CB\\Core\\Automation\\TriggerEvent',
-	'InvocationContext' => 'CB\\Core\\Automation\\InvocationContext',
-	'ActionInvoker' => 'CB\\Core\\Automation\\ActionInvoker',
-	'StateInvoker' => 'CB\\Core\\Automation\\StateInvoker',
+	'TriggerEvent' => 'CoreBlueprint\\Core\\Automation\\TriggerEvent',
+	'InvocationContext' => 'CoreBlueprint\\Core\\Automation\\InvocationContext',
+	'ActionInvoker' => 'CoreBlueprint\\Core\\Automation\\ActionInvoker',
+	'StateInvoker' => 'CoreBlueprint\\Core\\Automation\\StateInvoker',
 ] as $basename => $contract ) {
 	if ( ! str_contains( $requirements, $basename ) ) {
 		$failures[] = 'Missing runtime Base contract requirement: ' . $contract;
