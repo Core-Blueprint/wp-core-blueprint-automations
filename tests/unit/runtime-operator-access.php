@@ -36,7 +36,7 @@ if ( ! str_contains( $view_cap, "public const CAPABILITY = 'cb_view_automation_r
 if ( str_contains( $view_cap, 'cb_operator' ) || str_contains( $runs, 'cb_operator' ) || str_contains( $suite, 'cb_operator' ) ) {
 	throw new RuntimeException( 'Operator access must not use role-name checks.' );
 }
-if ( ! str_contains( $view_cap, 'cb_core_capability_catalog' ) || ! str_contains( $view_cap, 'user_has_cap' ) ) {
+if ( ! str_contains( $view_cap, 'core_blueprint_capability_catalog' ) || ! str_contains( $view_cap, 'user_has_cap' ) ) {
 	throw new RuntimeException( 'Run-history view capability is not integrated through public capability contracts.' );
 }
 if ( ! str_contains( $suite, 'new AutomationsPage()' ) || ! str_contains( $suite, 'new AutomationRunsPage()' ) ) {
