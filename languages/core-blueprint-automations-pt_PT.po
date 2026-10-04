@@ -1,0 +1,1980 @@
+# Copyright (C) 2026 Core Blueprint
+# This file is distributed under the GPL-2.0+.
+msgid ""
+msgstr ""
+"Project-Id-Version: Core Blueprint Automations 1.0.0-rc1\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wp-core-blueprint-automations\n"
+"POT-Creation-Date: 2026-10-04 10:09+0000\n"
+"PO-Revision-Date: 2026-10-04 10:09+0000\n"
+"Last-Translator: Core Blueprint\n"
+"Language-Team: pt_PT\n"
+"Language: pt_PT\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Generated-By: Core Blueprint i18n tooling 1.1.0\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: core-blueprint-automations\n"
+
+#. Plugin Name of the plugin
+#: core-blueprint-automations.php
+#: src/Admin/RecoveryCapability.php:46
+#: src/Admin/RunHistoryCapability.php:46
+msgid "Core Blueprint Automations"
+msgstr "Core Blueprint Automations"
+
+#. Plugin URI of the plugin
+#. Author URI of the plugin
+#: core-blueprint-automations.php
+msgid "https://coreblueprint.io"
+msgstr "https://coreblueprint.io"
+
+#. Description of the plugin
+#: core-blueprint-automations.php
+msgid "Workflow orchestration for Core Blueprint capabilities."
+msgstr "Orquestração de fluxos de trabalho para as capacidades do Core Blueprint."
+
+#. Author of the plugin
+#: core-blueprint-automations.php
+msgid "Core Blueprint"
+msgstr "Core Blueprint"
+
+#: core-blueprint-automations.php:119
+msgid "Core Blueprint Automations:"
+msgstr "Core Blueprint Automations:"
+
+#: src/Admin/AdminAssets.php:66
+msgid "Choose capability"
+msgstr "Escolher capacidade"
+
+#: src/Admin/AdminAssets.php:67
+msgid "Choose automation capability"
+msgstr "Escolher capacidade de automatização"
+
+#: src/Admin/AdminAssets.php:68
+msgid "Search capabilities"
+msgstr "Pesquisar capacidades"
+
+#: src/Admin/AdminAssets.php:69
+msgid "Search by capability, provider or description…"
+msgstr "Pesquisar por capacidade, fornecedor ou descrição…"
+
+#: src/Admin/AdminAssets.php:70
+msgid "Search by capability, provider or description."
+msgstr "Pesquisar por capacidade, fornecedor ou descrição."
+
+#: src/Admin/AdminAssets.php:71
+msgid "Clear selection"
+msgstr "Limpar seleção"
+
+#: src/Admin/AdminAssets.php:72
+msgid "No capabilities match your search."
+msgstr "Nenhuma capacidade corresponde à pesquisa."
+
+#: src/Admin/AdminAssets.php:73
+#: templates/admin/workflow-editor.php:49
+msgid "Unavailable"
+msgstr "Indisponível"
+
+#: src/Admin/AdminAssets.php:74
+msgid "This stored capability is no longer available. Choose a replacement."
+msgstr "Esta capacidade guardada já não está disponível. Escolha uma substituição."
+
+#: src/Admin/AdminAssets.php:83
+msgid "Advanced details"
+msgstr "Detalhes avançados"
+
+#: src/Admin/AdminAssets.php:84
+msgid "Capability ID"
+msgstr "ID da capacidade"
+
+#: src/Admin/AdminAssets.php:85
+msgid "Schema version"
+msgstr "Versão do esquema"
+
+#: src/Admin/AdminAssets.php:86
+msgid "Step ID"
+msgstr "ID do passo"
+
+#: src/Admin/AdminAssets.php:87
+msgid "Condition ID"
+msgstr "ID da condição"
+
+#: src/Admin/AdminAssets.php:88
+msgid "Outputs"
+msgstr "Saídas"
+
+#: src/Admin/AdminAssets.php:89
+#: src/Admin/DesignerAssets.php:67
+#: templates/admin/automations.php:157
+msgid "Condition"
+msgid_plural "Conditions"
+msgstr[0] "Condição"
+msgstr[1] "Condições"
+
+#: src/Admin/AdminAssets.php:90
+msgid "Reads as"
+msgstr "Lê-se como"
+
+#: src/Admin/AdminAssets.php:91
+msgid "Required capability"
+msgstr "Capacidade necessária"
+
+#: src/Admin/AdminAssets.php:100
+#: templates/admin/runs.php:19
+#: templates/admin/workflow-editor.php:119
+#: templates/admin/workflow-editor.php:120
+#: templates/admin/workflow-editor.php:143
+msgid "Workflow"
+msgstr "Fluxo de trabalho"
+
+#: src/Admin/AdminAssets.php:101
+msgid "When · Trigger"
+msgstr "Quando · Acionador"
+
+#: src/Admin/AdminAssets.php:102
+#, php-format
+msgid "Get data · Data lookup %d"
+msgstr "Obter dados · Consulta de dados %d"
+
+#: src/Admin/AdminAssets.php:103
+#, php-format
+msgid "Only if · Condition %d"
+msgstr "Apenas se · Condição %d"
+
+#: src/Admin/AdminAssets.php:104
+msgid "Then · Actions"
+msgstr "Então · Ações"
+
+#: src/Admin/AdminAssets.php:105
+#, php-format
+msgid "Then · Action %d"
+msgstr "Então · Ação %d"
+
+#: src/Admin/AdminAssets.php:106
+msgid "Choose trigger"
+msgstr "Escolher acionador"
+
+#: src/Admin/AdminAssets.php:107
+#: templates/admin/workflow-editor.php:55
+#: templates/admin/workflow-editor.php:178
+msgid "Add action"
+msgstr "Adicionar ação"
+
+#: src/Admin/AdminAssets.php:108
+msgid "Review trigger"
+msgstr "Rever acionador"
+
+#: src/Admin/AdminAssets.php:109
+msgid "Review capability"
+msgstr "Rever capacidade"
+
+#: src/Admin/AdminAssets.php:110
+msgid "Connect input"
+msgstr "Ligar entrada"
+
+#: src/Admin/AdminAssets.php:111
+msgid "Fix input"
+msgstr "Corrigir entrada"
+
+#: src/Admin/AdminAssets.php:112
+msgid "Choose replacement"
+msgstr "Escolher substituição"
+
+#: src/Admin/AdminAssets.php:113
+msgid "Review condition"
+msgstr "Rever condição"
+
+#: src/Admin/AdminAssets.php:114
+msgid "Review issue"
+msgstr "Rever problema"
+
+#: src/Admin/AdminAssets.php:115
+msgid "Technical details"
+msgstr "Detalhes técnicos"
+
+#: src/Admin/AdminAssets.php:116
+msgid "Saved workflow issue"
+msgstr "Problema no fluxo de trabalho guardado"
+
+#: src/Admin/AdminAssets.php:117
+msgid "Changes made. Save the automation to re-check workflow health."
+msgstr "Foram efetuadas alterações. Guarde a automatização para voltar a verificar o estado do fluxo de trabalho."
+
+#: src/Admin/AdminAssets.php:126
+msgid "Only continue if"
+msgstr "Continuar apenas se"
+
+#: src/Admin/AdminAssets.php:127
+msgid "Rule preview"
+msgstr "Pré-visualização da regra"
+
+#: src/Admin/AdminAssets.php:128
+#: templates/admin/workflow-editor.php:67
+msgid "Value"
+msgstr "Valor"
+
+#: src/Admin/AdminAssets.php:129
+msgid "Rule"
+msgstr "Regra"
+
+#: src/Admin/AdminAssets.php:130
+#: templates/admin/workflow-editor.php:69
+msgid "Compare with"
+msgstr "Comparar com"
+
+#: src/Admin/AdminAssets.php:131
+msgid "Choose a value or workflow data…"
+msgstr "Escolher um valor ou dados do fluxo de trabalho…"
+
+#: src/Admin/AdminAssets.php:132
+msgid "Enter a value"
+msgstr "Introduzir um valor"
+
+#: src/Admin/AdminAssets.php:133
+msgid "Workflow data"
+msgstr "Dados do fluxo de trabalho"
+
+#: src/Admin/AdminAssets.php:134
+msgid "Unavailable data"
+msgstr "Dados indisponíveis"
+
+#: src/Admin/AdminAssets.php:135
+msgid "Text"
+msgstr "Texto"
+
+#: src/Admin/AdminAssets.php:136
+msgid "Number"
+msgstr "Número"
+
+#: src/Admin/AdminAssets.php:137
+msgid "True / false"
+msgstr "Verdadeiro / falso"
+
+#: src/Admin/AdminAssets.php:138
+msgid "List"
+msgstr "Lista"
+
+#: src/Admin/AdminAssets.php:139
+msgid "is"
+msgstr "é"
+
+#: src/Admin/AdminAssets.php:140
+msgid "is not"
+msgstr "não é"
+
+#: src/Admin/AdminAssets.php:141
+msgid "contains"
+msgstr "contém"
+
+#: src/Admin/AdminAssets.php:142
+msgid "does not contain"
+msgstr "não contém"
+
+#: src/Admin/AdminAssets.php:143
+msgid "is greater than"
+msgstr "é maior do que"
+
+#: src/Admin/AdminAssets.php:144
+msgid "is at least"
+msgstr "é pelo menos"
+
+#: src/Admin/AdminAssets.php:145
+msgid "is less than"
+msgstr "é menor do que"
+
+#: src/Admin/AdminAssets.php:146
+msgid "is at most"
+msgstr "é no máximo"
+
+#: src/Admin/AdminAssets.php:147
+msgid "is empty"
+msgstr "está vazio"
+
+#: src/Admin/AdminAssets.php:148
+msgid "is not empty"
+msgstr "não está vazio"
+
+#: src/Admin/AdminAssets.php:149
+msgid "has no items"
+msgstr "não tem itens"
+
+#: src/Admin/AdminAssets.php:150
+msgid "has items"
+msgstr "tem itens"
+
+#: src/Admin/AutomationRunsPage.php:18
+#: src/Admin/AutomationRunsPage.php:98
+msgid "Automation Runs"
+msgstr "Execuções de automatização"
+
+#: src/Admin/AutomationRunsPage.php:22
+msgid "Runs"
+msgstr "Execuções"
+
+#: src/Admin/AutomationRunsPage.php:36
+msgid "You do not have permission to view automation runs."
+msgstr "Não tem permissão para ver as execuções de automatização."
+
+#: src/Admin/AutomationRunsPage.php:37
+#: src/Admin/AutomationsPage.php:44
+#: src/Admin/OperatorRecoveryController.php:27
+#: src/Admin/WorkflowActivationController.php:31
+#: src/Admin/WorkflowController.php:156
+msgid "Forbidden"
+msgstr "Proibido"
+
+#: src/Admin/AutomationRunsPage.php:94
+msgid "Automation run not found"
+msgstr "Execução de automatização não encontrada"
+
+#: src/Admin/AutomationRunsPage.php:94
+#: templates/admin/run-detail.php:50
+msgid "Back to Runs"
+msgstr "Voltar a Execuções"
+
+#: src/Admin/AutomationRunsPage.php:98
+msgid "Automation run history is temporarily unavailable. No workflow or run data was changed."
+msgstr "O histórico das execuções de automatização está temporariamente indisponível. Não foram alterados dados do fluxo de trabalho nem da execução."
+
+#: src/Admin/AutomationsPage.php:25
+#: src/Admin/AutomationsPage.php:216
+#: src/Integration/Suite.php:56
+#: src/Integration/Suite.php:57
+#: templates/admin/automations.php:38
+msgid "Automations"
+msgstr "Automations"
+
+#: src/Admin/AutomationsPage.php:29
+#: templates/admin/automations.php:88
+msgid "Workflows"
+msgstr "Fluxos de trabalho"
+
+#: src/Admin/AutomationsPage.php:43
+msgid "You do not have permission to access Automations."
+msgstr "Não tem permissão para aceder a Automations."
+
+#: src/Admin/AutomationsPage.php:122
+#: src/Admin/DesignerAssets.php:92
+msgid "Valid"
+msgstr "Válido"
+
+#: src/Admin/AutomationsPage.php:123
+#: src/Admin/DesignerAssets.php:93
+#: templates/admin/workflow-review.php:31
+msgid "Needs review"
+msgstr "Necessita de revisão"
+
+#: src/Admin/AutomationsPage.php:124
+#: src/Admin/DesignerAssets.php:94
+msgid "Dependency unavailable"
+msgstr "Dependência indisponível"
+
+#: src/Admin/AutomationsPage.php:125
+#: src/Admin/DesignerAssets.php:95
+msgid "Invalid"
+msgstr "Inválido"
+
+#: src/Admin/AutomationsPage.php:133
+#: src/Admin/DesignerAssets.php:90
+#: templates/admin/automations.php:107
+#: templates/admin/automations.php:130
+#: templates/admin/workflow-editor.php:210
+msgid "Enabled"
+msgstr "Ativado"
+
+#: src/Admin/AutomationsPage.php:134
+#: src/Admin/DesignerAssets.php:91
+#: templates/admin/automations.php:107
+#: templates/admin/automations.php:135
+#: templates/admin/workflow-editor.php:209
+msgid "Disabled"
+msgstr "Desativado"
+
+#: src/Admin/AutomationsPage.php:153
+msgid "Queued"
+msgstr "Em fila"
+
+#: src/Admin/AutomationsPage.php:154
+#: src/Admin/AutomationsPage.php:175
+msgid "Running"
+msgstr "Em execução"
+
+#: src/Admin/AutomationsPage.php:155
+msgid "Waiting to retry"
+msgstr "A aguardar nova tentativa"
+
+#: src/Admin/AutomationsPage.php:156
+#: src/Admin/AutomationsPage.php:179
+msgid "Blocked"
+msgstr "Bloqueado"
+
+#: src/Admin/AutomationsPage.php:157
+#: src/Admin/AutomationsPage.php:176
+msgid "Succeeded"
+msgstr "Concluído com êxito"
+
+#: src/Admin/AutomationsPage.php:158
+#: src/Admin/AutomationsPage.php:177
+msgid "Skipped"
+msgstr "Ignorado"
+
+#: src/Admin/AutomationsPage.php:159
+#: src/Admin/AutomationsPage.php:178
+msgid "Failed"
+msgstr "Falhou"
+
+#: src/Admin/AutomationsPage.php:160
+#: src/Admin/AutomationsPage.php:180
+msgid "Cancelled"
+msgstr "Cancelado"
+
+#: src/Admin/AutomationsPage.php:161
+#: src/Admin/AutomationsPage.php:181
+msgid "Outcome unknown"
+msgstr "Resultado desconhecido"
+
+#: src/Admin/AutomationsPage.php:182
+msgid "Interrupted"
+msgstr "Interrompido"
+
+#: src/Admin/AutomationsPage.php:212
+msgid "Automation not found"
+msgstr "Automatização não encontrada"
+
+#: src/Admin/AutomationsPage.php:212
+#: templates/admin/runs.php:12
+#: templates/admin/workflow-editor.php:92
+#: templates/admin/workflow-review.php:15
+msgid "Back to Automations"
+msgstr "Voltar a Automations"
+
+#: src/Admin/AutomationsPage.php:216
+msgid "Automation information is temporarily unavailable. No workflow data was changed."
+msgstr "As informações da automatização estão temporariamente indisponíveis. Não foram alterados dados do fluxo de trabalho."
+
+#: src/Admin/DesignerAssets.php:37
+#: templates/admin/automations.php:46
+#: templates/admin/workflow-editor.php:91
+msgid "Automation Builder"
+msgstr "Automation Builder"
+
+#: src/Admin/DesignerAssets.php:59
+#: templates/admin/workflow-editor.php:185
+msgid "Inspector"
+msgstr "Inspector"
+
+#: src/Admin/DesignerAssets.php:60
+msgid "Properties"
+msgstr "Propriedades"
+
+#: src/Admin/DesignerAssets.php:61
+msgid "Selected step"
+msgstr "Passo selecionado"
+
+#: src/Admin/DesignerAssets.php:62
+#: templates/admin/workflow-editor.php:193
+msgid "Select a workflow step to inspect its context."
+msgstr "Selecione um passo do fluxo de trabalho para inspecionar o respetivo contexto."
+
+#: src/Admin/DesignerAssets.php:63
+msgid "Stage"
+msgstr "Fase"
+
+#: src/Admin/DesignerAssets.php:64
+#: templates/admin/workflow-editor.php:50
+msgid "Provider"
+msgstr "Fornecedor"
+
+#: src/Admin/DesignerAssets.php:65
+#: templates/admin/run-detail.php:76
+msgid "Capability"
+msgstr "Capacidade"
+
+#: src/Admin/DesignerAssets.php:66
+msgid "Identifier"
+msgstr "Identificador"
+
+#: src/Admin/DesignerAssets.php:82
+msgid "Saving automation…"
+msgstr "A guardar automatização…"
+
+#: src/Admin/DesignerAssets.php:83
+msgid "The automation could not be saved."
+msgstr "Não foi possível guardar a automatização."
+
+#: src/Admin/DesignerAssets.php:84
+msgid "Automation saved. Newer edits are not saved yet."
+msgstr "Automatização guardada. As alterações mais recentes ainda não foram guardadas."
+
+#: src/Admin/DesignerAssets.php:85
+#: src/Support/Requirements.php:171
+#: templates/admin/workflow-editor.php:228
+msgid "Ready"
+msgstr "Pronto"
+
+#: src/Admin/DesignerAssets.php:86
+#: templates/admin/automations.php:119
+#: templates/admin/workflow-editor.php:228
+msgid "Needs attention"
+msgstr "Necessita de atenção"
+
+#: src/Admin/DesignerAssets.php:87
+#: templates/admin/workflow-editor.php:230
+msgid "The current definition is valid against the live capability catalog."
+msgstr "A definição atual é válida em relação ao catálogo de capacidades ativo."
+
+#: src/Admin/DesignerAssets.php:88
+#: templates/admin/workflow-editor.php:232
+msgid "Resolve these items before the automation can be enabled."
+msgstr "Resolva estes itens antes de poder ativar a automatização."
+
+#: src/Admin/DesignerAssets.php:89
+msgid "Workflow issue"
+msgstr "Problema do fluxo de trabalho"
+
+#: src/Admin/OperatorRecoveryController.php:26
+msgid "You do not have permission to recover automation runs."
+msgstr "Não tem permissão para recuperar execuções de automatização."
+
+#: src/Admin/OperatorRecoveryController.php:49
+msgid "The recovery request could not be verified. Reload the page and try again."
+msgstr "Não foi possível verificar o pedido de recuperação. Recarregue a página e tente novamente."
+
+#: src/Admin/OperatorRecoveryController.php:50
+#: src/Admin/WorkflowActivationController.php:53
+#: src/Admin/WorkflowController.php:163
+msgid "Invalid request"
+msgstr "Pedido inválido"
+
+#: src/Admin/RecoveryCapability.php:45
+msgid "Recover automation runs"
+msgstr "Recuperar execuções de automatização"
+
+#: src/Admin/RecoveryCapability.php:48
+msgid "Resolve automation runs whose mutating Action outcome cannot be determined safely. Recovery authority follows Core Blueprint permission-governance approval; a stored recovery capability alone is not sufficient."
+msgstr "Resolva as execuções de automatização cujo resultado de uma Ação modificadora não possa ser determinado com segurança. A autoridade de recuperação segue a aprovação da governação de permissões do Core Blueprint; uma capacidade de recuperação guardada, por si só, não é suficiente."
+
+#: src/Admin/RunHistoryCapability.php:45
+msgid "View automation runs"
+msgstr "Ver execuções de automatização"
+
+#: src/Admin/RunHistoryCapability.php:48
+msgid "View metadata-only automation run history and execution timelines. This does not grant workflow authoring or recovery authority."
+msgstr "Veja apenas os metadados do histórico das execuções de automatização e as cronologias de execução. Isto não concede autoridade para criar fluxos de trabalho nem para efetuar recuperações."
+
+#: src/Admin/ValidationPresenter.php:15
+msgid "Choose a trigger before enabling this automation."
+msgstr "Escolha um acionador antes de ativar esta automatização."
+
+#: src/Admin/ValidationPresenter.php:16
+msgid "Add at least one action before enabling this automation."
+msgstr "Adicione pelo menos uma ação antes de ativar esta automatização."
+
+#. translators: %s: provider id.
+#: src/Admin/ValidationPresenter.php:19
+#, php-format
+msgid "Provider %s is installed but inactive."
+msgstr "O fornecedor %s está instalado mas inativo."
+
+#. translators: %s: provider id.
+#: src/Admin/ValidationPresenter.php:24
+#, php-format
+msgid "Provider %s is not compatible with the active Core Blueprint API."
+msgstr "O fornecedor %s não é compatível com a API Core Blueprint ativa."
+
+#. translators: %s: provider id.
+#: src/Admin/ValidationPresenter.php:29
+#, php-format
+msgid "Provider %s is unavailable."
+msgstr "O fornecedor %s está indisponível."
+
+#. translators: 1: provider id, 2: capability id.
+#: src/Admin/ValidationPresenter.php:34
+#, php-format
+msgid "Capability %1$s / %2$s is no longer available."
+msgstr "A capacidade %1$s / %2$s já não está disponível."
+
+#. translators: 1: stored schema version, 2: current schema version.
+#: src/Admin/ValidationPresenter.php:40
+#, php-format
+msgid "Capability schema changed from version %1$s to %2$s. Review this step before enabling it again."
+msgstr "O esquema da capacidade mudou da versão %1$s para %2$s. Reveja este passo antes de o voltar a ativar."
+
+#: src/Admin/ValidationPresenter.php:44
+msgid "A workflow step uses the wrong capability type."
+msgstr "Um passo do fluxo de trabalho usa o tipo de capacidade errado."
+
+#. translators: %s: input field.
+#: src/Admin/ValidationPresenter.php:47
+#, php-format
+msgid "Required input “%s” is not connected."
+msgstr "A entrada obrigatória “%s” não está ligada."
+
+#. translators: %s: input field.
+#: src/Admin/ValidationPresenter.php:52
+#, php-format
+msgid "Input “%s” is no longer declared by this capability."
+msgstr "A entrada “%s” já não é declarada por esta capacidade."
+
+#: src/Admin/ValidationPresenter.php:55
+msgid "A binding points to a workflow step that no longer exists."
+msgstr "Uma ligação aponta para um passo do fluxo de trabalho que já não existe."
+
+#: src/Admin/ValidationPresenter.php:56
+msgid "A binding points to a step that runs later in the workflow."
+msgstr "Uma ligação aponta para um passo executado mais tarde no fluxo de trabalho."
+
+#: src/Admin/ValidationPresenter.php:57
+msgid "A binding points to an output field that no longer exists."
+msgstr "Uma ligação aponta para um campo de saída que já não existe."
+
+#: src/Admin/ValidationPresenter.php:58
+msgid "A binding value does not match the declared input type."
+msgstr "Um valor de ligação não corresponde ao tipo de entrada declarado."
+
+#: src/Admin/ValidationPresenter.php:59
+msgid "Triggers cannot declare input bindings."
+msgstr "Os acionadores não podem declarar ligações de entrada."
+
+#: src/Admin/ValidationPresenter.php:60
+msgid "A condition uses an unsupported operator."
+msgstr "Uma condição usa um operador não suportado."
+
+#: src/Admin/ValidationPresenter.php:61
+msgid "A condition has the wrong number of operands for its operator."
+msgstr "Uma condição tem o número errado de operandos para o respetivo operador."
+
+#: src/Admin/ValidationPresenter.php:62
+msgid "A condition compares incompatible value types."
+msgstr "Uma condição compara tipos de valores incompatíveis."
+
+#: src/Admin/ValidationPresenter.php:63
+msgid "Sensitive inputs cannot contain persisted literal values. Connect them to a prior workflow output instead."
+msgstr "As entradas sensíveis não podem conter valores literais persistidos. Ligue-as, em vez disso, a uma saída anterior do fluxo de trabalho."
+
+#: src/Admin/ValidationPresenter.php:64
+msgid "This workflow contains a validation issue that requires review."
+msgstr "Este fluxo de trabalho contém um problema de validação que requer revisão."
+
+#: src/Admin/WorkflowActivationController.php:30
+#: src/Admin/WorkflowController.php:156
+msgid "You do not have permission to manage Automations."
+msgstr "Não tem permissão para gerir Automations."
+
+#: src/Admin/WorkflowActivationController.php:52
+#: src/Admin/WorkflowController.php:163
+msgid "The request could not be verified. Reload the page and try again."
+msgstr "Não foi possível verificar o pedido. Recarregue a página e tente novamente."
+
+#: src/Admin/WorkflowController.php:255
+#: templates/admin/workflow-editor.php:24
+#, php-format
+msgid "Unavailable user #%d"
+msgstr "Utilizador indisponível #%d"
+
+#: src/Admin/WorkflowController.php:256
+#: templates/admin/workflow-editor.php:25
+msgid "No execution principal assigned"
+msgstr "Nenhum principal de execução atribuído"
+
+#: src/Admin/WorkflowController.php:261
+#: templates/admin/workflow-editor.php:30
+msgid "Automation saved."
+msgstr "Automatização guardada."
+
+#: src/Admin/WorkflowController.php:262
+msgid "Changes saved. The automation remains disabled until the workflow is valid."
+msgstr "Alterações guardadas. A automatização permanece desativada até o fluxo de trabalho ser válido."
+
+#: src/Admin/WorkflowController.php:263
+#: templates/admin/workflow-editor.php:32
+msgid "Changes saved. The automation remains disabled because secure runtime encryption is unavailable on this site."
+msgstr "Alterações guardadas. A automatização permanece desativada porque a encriptação segura em tempo de execução não está disponível neste site."
+
+#: src/Admin/WorkflowController.php:264
+#: templates/admin/workflow-editor.php:33
+msgid "Changes saved. Assign your account as execution authority before enabling this automation."
+msgstr "Alterações guardadas. Atribua a sua conta como autoridade de execução antes de ativar esta automatização."
+
+#: src/Admin/WorkflowController.php:265
+#: templates/admin/workflow-editor.php:34
+msgid "Changes saved. The stored execution authority is no longer a valid WordPress user."
+msgstr "Alterações guardadas. A autoridade de execução guardada já não é um utilizador WordPress válido."
+
+#: src/Admin/WorkflowController.php:266
+#: templates/admin/workflow-editor.php:35
+msgid "Changes saved. The execution principal no longer has all permissions required by this workflow."
+msgstr "Alterações guardadas. O principal de execução já não tem todas as permissões exigidas por este fluxo de trabalho."
+
+#: src/Admin/WorkflowController.php:267
+#: templates/admin/workflow-editor.php:36
+msgid "Changes saved. Your account does not have all permissions required to enable this workflow."
+msgstr "Alterações guardadas. A sua conta não tem todas as permissões necessárias para ativar este fluxo de trabalho."
+
+#: src/Admin/WorkflowController.php:268
+#: templates/admin/workflow-editor.php:37
+msgid "Changes saved. Execution authority could not be verified against the current capability contracts."
+msgstr "Alterações guardadas. Não foi possível verificar a autoridade de execução em relação aos contratos de capacidades atuais."
+
+#: src/Admin/WorkflowController.php:269
+msgid "The automation was not saved because a sensitive input contains a literal value."
+msgstr "A automatização não foi guardada porque uma entrada sensível contém um valor literal."
+
+#: src/Admin/WorkflowController.php:270
+#: templates/admin/workflow-editor.php:39
+msgid "This automation changed in another request. Reload the page before saving again."
+msgstr "Esta automatização foi alterada noutro pedido. Recarregue a página antes de a guardar novamente."
+
+#: src/Admin/WorkflowController.php:271
+#: templates/admin/automations.php:32
+#: templates/admin/workflow-editor.php:40
+msgid "Enter an automation name between 1 and 191 characters."
+msgstr "Introduza um nome de automatização com 1 a 191 carateres."
+
+#: src/Admin/WorkflowController.php:272
+#: templates/admin/workflow-editor.php:41
+msgid "The submitted workflow could not be decoded safely. No changes were saved."
+msgstr "Não foi possível descodificar com segurança o fluxo de trabalho enviado. Não foram guardadas alterações."
+
+#: src/Admin/WorkflowController.php:273
+msgid "The automation could not be saved because workflow storage is unavailable."
+msgstr "Não foi possível guardar a automatização porque o armazenamento dos fluxos de trabalho está indisponível."
+
+#: src/Admin/WorkflowController.php:274
+#: templates/admin/workflow-editor.php:43
+msgid "The automation could not be saved. Reload the page before trying again."
+msgstr "Não foi possível guardar a automatização. Recarregue a página antes de tentar novamente."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:49
+msgid "User registered"
+msgstr "Utilizador registado"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:49
+msgid "A WordPress user account was created."
+msgstr "Foi criada uma conta de utilizador WordPress."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:50
+msgid "User updated"
+msgstr "Utilizador atualizado"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:50
+msgid "A WordPress user account was updated."
+msgstr "Foi atualizada uma conta de utilizador WordPress."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:51
+msgid "User deleted"
+msgstr "Utilizador eliminado"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:51
+msgid "A WordPress user account was deleted."
+msgstr "Foi eliminada uma conta de utilizador WordPress."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:55
+msgid "User role changed"
+msgstr "Função do utilizador alterada"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:55
+msgid "The primary WordPress role for a user changed."
+msgstr "A função principal do WordPress de um utilizador foi alterada."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:60
+msgid "User role added"
+msgstr "Função do utilizador adicionada"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:60
+msgid "A WordPress role was added to a user."
+msgstr "Foi adicionada uma função do WordPress a um utilizador."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:64
+msgid "User role removed"
+msgstr "Função do utilizador removida"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:64
+msgid "A WordPress role was removed from a user."
+msgstr "Foi removida uma função do WordPress de um utilizador."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:68
+msgid "User logged in"
+msgstr "Utilizador com sessão iniciada"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:68
+msgid "A WordPress user successfully logged in."
+msgstr "Um utilizador WordPress iniciou sessão com êxito."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:69
+msgid "User logged out"
+msgstr "Utilizador terminou sessão"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:69
+msgid "A WordPress user logged out."
+msgstr "Um utilizador WordPress terminou sessão."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:72
+msgid "User login failed"
+msgstr "Falha no início de sessão do utilizador"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:72
+msgid "A WordPress login attempt failed."
+msgstr "Falhou uma tentativa de início de sessão no WordPress."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:76
+msgid "User password reset"
+msgstr "Palavra-passe do utilizador reposta"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:76
+msgid "A WordPress user password was reset. Password values are never exposed."
+msgstr "A palavra-passe de um utilizador WordPress foi reposta. Os valores das palavras-passe nunca são expostos."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:80
+msgid "Post created"
+msgstr "Artigo criado"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:80
+msgid "A post, page or custom post type record was created."
+msgstr "Foi criado um artigo, página ou registo de um tipo de conteúdo personalizado."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:81
+msgid "Post updated"
+msgstr "Artigo atualizado"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:81
+msgid "A post, page or custom post type record was updated."
+msgstr "Foi atualizado um artigo, página ou registo de um tipo de conteúdo personalizado."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:82
+msgid "Post status changed"
+msgstr "Estado do artigo alterado"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:82
+msgid "A post status changed."
+msgstr "O estado de um artigo foi alterado."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:86
+msgid "Post published"
+msgstr "Artigo publicado"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:86
+msgid "A post entered the publish status."
+msgstr "Um artigo passou para o estado publicado."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:87
+msgid "Post trashed"
+msgstr "Artigo enviado para o lixo"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:87
+msgid "A post was moved to Trash."
+msgstr "Um artigo foi movido para o lixo."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:90
+msgid "Post restored"
+msgstr "Artigo restaurado"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:90
+msgid "A post was restored from Trash."
+msgstr "Um artigo foi restaurado do lixo."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:93
+msgid "Post deleted"
+msgstr "Artigo eliminado"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:93
+msgid "A post was permanently deleted."
+msgstr "Um artigo foi eliminado permanentemente."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:95
+msgid "Comment created"
+msgstr "Comentário criado"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:95
+msgid "A WordPress comment was created."
+msgstr "Foi criado um comentário do WordPress."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:96
+msgid "Comment updated"
+msgstr "Comentário atualizado"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:96
+msgid "A WordPress comment was updated."
+msgstr "Foi atualizado um comentário do WordPress."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:97
+msgid "Comment status changed"
+msgstr "Estado do comentário alterado"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:97
+msgid "A WordPress comment status changed."
+msgstr "O estado de um comentário do WordPress foi alterado."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:101
+msgid "Comment trashed"
+msgstr "Comentário enviado para o lixo"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:101
+msgid "A WordPress comment was moved to Trash."
+msgstr "Um comentário do WordPress foi movido para o lixo."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:102
+msgid "Comment restored"
+msgstr "Comentário restaurado"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:102
+msgid "A WordPress comment was restored from Trash."
+msgstr "Um comentário do WordPress foi restaurado do lixo."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:103
+msgid "Comment deleted"
+msgstr "Comentário eliminado"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:103
+msgid "A WordPress comment was permanently deleted."
+msgstr "Um comentário do WordPress foi eliminado permanentemente."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:105
+msgid "Media uploaded"
+msgstr "Multimédia carregada"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:105
+msgid "A WordPress attachment was created."
+msgstr "Foi criado um anexo do WordPress."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:106
+msgid "Media updated"
+msgstr "Multimédia atualizada"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:106
+msgid "A WordPress attachment was updated."
+msgstr "Foi atualizado um anexo do WordPress."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:107
+msgid "Media deleted"
+msgstr "Multimédia eliminada"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:107
+msgid "A WordPress attachment was deleted."
+msgstr "Foi eliminado um anexo do WordPress."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:109
+msgid "Term created"
+msgstr "Termo criado"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:109
+msgid "A taxonomy term was created."
+msgstr "Foi criado um termo de taxonomia."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:110
+msgid "Term updated"
+msgstr "Termo atualizado"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:110
+msgid "A taxonomy term was updated."
+msgstr "Foi atualizado um termo de taxonomia."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:111
+msgid "Term deleted"
+msgstr "Termo eliminado"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:111
+msgid "A taxonomy term was deleted."
+msgstr "Foi eliminado um termo de taxonomia."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:112
+msgid "Object terms changed"
+msgstr "Termos do objeto alterados"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:112
+msgid "Taxonomy terms assigned to an object changed."
+msgstr "Os termos de taxonomia atribuídos a um objeto foram alterados."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:120
+msgid "Plugin activated"
+msgstr "Plugin ativado"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:120
+msgid "A WordPress plugin was activated."
+msgstr "Foi ativado um plugin do WordPress."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:124
+msgid "Plugin deactivated"
+msgstr "Plugin desativado"
+#: src/Provider/WordPress/CapabilityRegistrar.php:124
+msgid "A WordPress plugin was deactivated."
+msgstr "Foi desativado um plugin do WordPress."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:128
+msgid "Theme switched"
+msgstr "Tema alterado"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:128
+msgid "The active WordPress theme changed."
+msgstr "O tema ativo do WordPress foi alterado."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:132
+msgid "WordPress update completed"
+msgstr "Atualização do WordPress concluída"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:132
+msgid "A WordPress upgrader process completed."
+msgstr "Foi concluído um processo de atualização do WordPress."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:143
+msgid "Current user"
+msgstr "Utilizador atual"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:143
+msgid "Reads bounded current facts for one WordPress user."
+msgstr "Lê dados atuais limitados de um utilizador WordPress."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:149
+msgid "Current post"
+msgstr "Artigo atual"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:149
+msgid "Reads bounded current facts for one post, page or custom post type record."
+msgstr "Lê dados atuais limitados de um artigo, página ou registo de um tipo de conteúdo personalizado."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:156
+msgid "Current comment"
+msgstr "Comentário atual"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:156
+msgid "Reads bounded current facts for one WordPress comment."
+msgstr "Lê dados atuais limitados de um comentário WordPress."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:159
+msgid "Current media item"
+msgstr "Item multimédia atual"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:159
+msgid "Reads bounded current facts for one WordPress attachment."
+msgstr "Lê dados atuais limitados de um anexo do WordPress."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:162
+msgid "Current term"
+msgstr "Termo atual"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:162
+msgid "Reads bounded current facts for one taxonomy term."
+msgstr "Lê dados atuais limitados de um termo de taxonomia."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:175
+msgid "Create user"
+msgstr "Criar utilizador"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:175
+msgid "Creates a WordPress user with a generated strong password and optional role."
+msgstr "Cria um utilizador WordPress com uma palavra-passe forte gerada e uma função opcional."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:184
+msgid "Update user"
+msgstr "Atualizar utilizador"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:184
+msgid "Updates selected safe WordPress user fields."
+msgstr "Atualiza campos seguros selecionados de um utilizador WordPress."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:193
+msgid "Add user role"
+msgstr "Adicionar função de utilizador"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:193
+msgid "Adds an existing WordPress role to a user."
+msgstr "Adiciona uma função existente do WordPress a um utilizador."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:197
+msgid "Remove user role"
+msgstr "Remover função de utilizador"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:197
+msgid "Removes a WordPress role from a user."
+msgstr "Remove uma função do WordPress de um utilizador."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:202
+msgid "Create post"
+msgstr "Criar artigo"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:202
+msgid "Creates a post, page or custom post type record."
+msgstr "Cria um artigo, página ou registo de um tipo de conteúdo personalizado."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:211
+msgid "Update post"
+msgstr "Atualizar artigo"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:211
+msgid "Updates selected fields on an existing WordPress post."
+msgstr "Atualiza campos selecionados de um artigo WordPress existente."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:217
+msgid "Change post status"
+msgstr "Alterar estado do artigo"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:217
+msgid "Changes the status of an existing WordPress post."
+msgstr "Altera o estado de um artigo WordPress existente."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:221
+msgid "Trash post"
+msgstr "Enviar artigo para o lixo"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:221
+msgid "Moves an existing WordPress post to Trash."
+msgstr "Move um artigo WordPress existente para o lixo."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:224
+msgid "Restore post"
+msgstr "Restaurar artigo"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:224
+msgid "Restores a WordPress post from Trash."
+msgstr "Restaura um artigo WordPress do lixo."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:227
+msgid "Delete post permanently"
+msgstr "Eliminar artigo permanentemente"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:227
+msgid "Permanently deletes an existing WordPress post."
+msgstr "Elimina permanentemente um artigo WordPress existente."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:231
+msgid "Change comment status"
+msgstr "Alterar estado do comentário"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:231
+msgid "Changes a WordPress comment status."
+msgstr "Altera o estado de um comentário WordPress."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:235
+msgid "Trash comment"
+msgstr "Enviar comentário para o lixo"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:235
+msgid "Moves a WordPress comment to Trash."
+msgstr "Move um comentário WordPress para o lixo."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:238
+msgid "Restore comment"
+msgstr "Restaurar comentário"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:238
+msgid "Restores a WordPress comment from Trash."
+msgstr "Restaura um comentário WordPress do lixo."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:241
+msgid "Delete comment permanently"
+msgstr "Eliminar comentário permanentemente"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:241
+msgid "Permanently deletes a WordPress comment."
+msgstr "Elimina permanentemente um comentário WordPress."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:245
+msgid "Create term"
+msgstr "Criar termo"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:245
+msgid "Creates a taxonomy term."
+msgstr "Cria um termo de taxonomia."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:253
+msgid "Update term"
+msgstr "Atualizar termo"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:253
+msgid "Updates a taxonomy term."
+msgstr "Atualiza um termo de taxonomia."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:260
+msgid "Delete term"
+msgstr "Eliminar termo"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:260
+msgid "Deletes a taxonomy term."
+msgstr "Elimina um termo de taxonomia."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:264
+msgid "Set post terms"
+msgstr "Definir termos do artigo"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:264
+msgid "Sets taxonomy terms on a WordPress post."
+msgstr "Define termos de taxonomia num artigo WordPress."
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:271
+msgid "Send email"
+msgstr "Enviar email"
+
+#: src/Provider/WordPress/CapabilityRegistrar.php:271
+msgid "Sends an email through the WordPress mail boundary."
+msgstr "Envia um email através do limite de correio do WordPress."
+
+#: src/Support/Requirements.php:159
+#, php-format
+msgid "PHP %1$s or newer is required. This server runs PHP %2$s."
+msgstr "É necessário PHP %1$s ou mais recente. Este servidor utiliza PHP %2$s."
+
+#: src/Support/Requirements.php:163
+msgid "Core Blueprint must be installed and active."
+msgstr "O Core Blueprint tem de estar instalado e ativo."
+
+#: src/Support/Requirements.php:165
+#, php-format
+msgid "Core API %1$s or a newer compatible minor version is required. Available Core API: %2$s."
+msgstr "É necessária a Core API %1$s ou uma versão minor compatível mais recente. Core API disponível: %2$s."
+
+#: src/Support/Requirements.php:167
+msgid "none"
+msgstr "nenhuma"
+
+#: src/Support/Requirements.php:170
+msgid "Required Core Blueprint Base contracts are unavailable."
+msgstr "Os contratos Core Blueprint Base necessários não estão disponíveis."
+
+#: src/Template/StarterTemplates.php:28
+msgid "Welcome new users"
+msgstr "Dar as boas-vindas a novos utilizadores"
+
+#: src/Template/StarterTemplates.php:29
+msgid "Send a welcome email when a new WordPress user account is created."
+msgstr "Enviar um email de boas-vindas quando é criada uma nova conta de utilizador WordPress."
+
+#: src/Template/StarterTemplates.php:39
+msgid "Welcome to our website"
+msgstr "Bem-vindo ao nosso site"
+
+#: src/Template/StarterTemplates.php:40
+msgid "Welcome! Your WordPress account is ready."
+msgstr "Bem-vindo! A sua conta WordPress está pronta."
+
+#: src/Template/StarterTemplates.php:50
+msgid "Notify author when a post is published"
+msgstr "Notificar o autor quando um artigo for publicado"
+
+#: src/Template/StarterTemplates.php:51
+msgid "Look up the post author and email them when their post is published."
+msgstr "Procurar o autor do artigo e enviar-lhe um email quando o artigo for publicado."
+
+#: src/Template/StarterTemplates.php:65
+msgid "Your post has been published"
+msgstr "O seu artigo foi publicado"
+
+#: src/Template/StarterTemplates.php:66
+msgid "Your post is now published."
+msgstr "O seu artigo está agora publicado."
+
+#: src/Template/StarterTemplates.php:76
+msgid "Acknowledge new comments"
+msgstr "Confirmar novos comentários"
+
+#: src/Template/StarterTemplates.php:77
+msgid "Email a commenter after a new comment is created, but only when an email address is available."
+msgstr "Enviar um email ao autor de um comentário depois de ser criado um novo comentário, mas apenas quando estiver disponível um endereço de email."
+
+#: src/Template/StarterTemplates.php:94
+msgid "Thanks for your comment"
+msgstr "Obrigado pelo seu comentário"
+
+#: src/Template/StarterTemplates.php:95
+msgid "Thanks for taking the time to leave a comment."
+msgstr "Obrigado por ter dedicado tempo a deixar um comentário."
+
+#: templates/admin/automations.php:16
+msgid "Automation draft created."
+msgstr "Rascunho de automatização criado."
+
+#: templates/admin/automations.php:17
+msgid "Automation created from template. Review it, assign execution authority and enable it when ready."
+msgstr "Automatização criada a partir de um modelo. Reveja-a, atribua autoridade de execução e ative-a quando estiver pronta."
+
+#: templates/admin/automations.php:18
+msgid "That workflow template is no longer available. No automation was created."
+msgstr "Esse modelo de fluxo de trabalho já não está disponível. Não foi criada nenhuma automatização."
+
+#: templates/admin/automations.php:19
+msgid "Automation enabled."
+msgstr "Automatização ativada."
+
+#: templates/admin/automations.php:20
+msgid "Automation disabled."
+msgstr "Automatização desativada."
+
+#: templates/admin/automations.php:21
+msgid "The automation remains disabled because the workflow is not valid yet."
+msgstr "A automatização permanece desativada porque o fluxo de trabalho ainda não é válido."
+
+#: templates/admin/automations.php:22
+msgid "The automation remains disabled because secure runtime encryption is unavailable on this site."
+msgstr "A automatização permanece desativada porque a encriptação segura em tempo de execução não está disponível neste site."
+
+#: templates/admin/automations.php:23
+msgid "The automation remains disabled. Open the builder and assign your account as execution authority first."
+msgstr "A automatização permanece desativada. Abra o builder e atribua primeiro a sua conta como autoridade de execução."
+
+#: templates/admin/automations.php:24
+msgid "The automation remains disabled because its stored execution authority is no longer a valid WordPress user."
+msgstr "A automatização permanece desativada porque a autoridade de execução guardada já não é um utilizador WordPress válido."
+
+#: templates/admin/automations.php:25
+msgid "The automation remains disabled because its execution principal no longer has all required permissions."
+msgstr "A automatização permanece desativada porque o principal de execução já não tem todas as permissões necessárias."
+
+#: templates/admin/automations.php:26
+msgid "The automation remains disabled because your account does not have all permissions required to enable it."
+msgstr "A automatização permanece desativada porque a sua conta não tem todas as permissões necessárias para a ativar."
+
+#: templates/admin/automations.php:27
+msgid "The automation remains disabled because execution authority could not be verified against the current capability contracts."
+msgstr "A automatização permanece desativada porque não foi possível verificar a autoridade de execução em relação aos contratos de capacidades atuais."
+
+#: templates/admin/automations.php:28
+msgid "The automation state was not changed because the stored workflow contains data that cannot be persisted safely."
+msgstr "O estado da automatização não foi alterado porque o fluxo de trabalho guardado contém dados que não podem ser persistidos com segurança."
+
+#: templates/admin/automations.php:29
+msgid "This automation changed in another request. Reload the page before changing its state."
+msgstr "Esta automatização foi alterada noutro pedido. Recarregue a página antes de alterar o respetivo estado."
+
+#: templates/admin/automations.php:30
+msgid "The automation could not be found. No state was changed."
+msgstr "Não foi possível encontrar a automatização. Nenhum estado foi alterado."
+
+#: templates/admin/automations.php:31
+msgid "The requested automation state was invalid. No state was changed."
+msgstr "O estado de automatização solicitado era inválido. Nenhum estado foi alterado."
+
+#: templates/admin/automations.php:33
+msgid "The automation could not be saved because workflow storage is unavailable. No workflow state was changed."
+msgstr "Não foi possível guardar a automatização porque o armazenamento dos fluxos de trabalho está indisponível. Nenhum estado do fluxo de trabalho foi alterado."
+
+#: templates/admin/automations.php:34
+msgid "The automation could not be updated. Reload the page before trying again."
+msgstr "Não foi possível atualizar a automatização. Recarregue a página antes de tentar novamente."
+
+#: templates/admin/automations.php:39
+msgid "Build linear workflows from capabilities registered by Core Blueprint extensions."
+msgstr "Crie fluxos de trabalho lineares a partir de capacidades registadas por extensões do Core Blueprint."
+
+#: templates/admin/automations.php:47
+#: templates/admin/automations.php:54
+msgid "Create automation"
+msgstr "Criar automatização"
+
+#: templates/admin/automations.php:48
+msgid "Start with a name, then build a clear When → Get data → Only if → Then workflow."
+msgstr "Comece com um nome e depois crie um fluxo de trabalho claro Quando → Obter dados → Apenas se → Então."
+
+#: templates/admin/automations.php:52
+#: templates/admin/automations.php:53
+msgid "Automation name"
+msgstr "Nome da automatização"
+
+#: templates/admin/automations.php:60
+msgid "Starter workflows"
+msgstr "Fluxos de trabalho iniciais"
+
+#: templates/admin/automations.php:61
+msgid "Start from a template"
+msgstr "Começar a partir de um modelo"
+
+#: templates/admin/automations.php:62
+msgid "Create a normal editable workflow from a provider template. The new workflow is yours and is not kept linked to the template."
+msgstr "Crie um fluxo de trabalho normal e editável a partir de um modelo do fornecedor. O novo fluxo de trabalho é seu e não fica ligado ao modelo."
+
+#: templates/admin/automations.php:76
+msgid "Use template"
+msgstr "Usar modelo"
+
+#: templates/admin/automations.php:87
+msgid "Workflow library"
+msgstr "Biblioteca de fluxos de trabalho"
+
+#: templates/admin/automations.php:91
+#, php-format
+msgid "%d workflow"
+msgid_plural "%d workflows"
+msgstr[0] "%d fluxo de trabalho"
+msgstr[1] "%d fluxos de trabalho"
+
+#: templates/admin/automations.php:96
+msgid "No automations have been created yet."
+msgstr "Ainda não foram criadas automatizações."
+
+#: templates/admin/automations.php:114
+msgid "Disable"
+msgstr "Desativar"
+
+#: templates/admin/automations.php:114
+msgid "Enable"
+msgstr "Ativar"
+
+#. translators: 1: activation state, 2: validation state, 3: issue count.
+#: templates/admin/automations.php:122
+#, php-format
+msgid "%1$s · %2$s · %3$s"
+msgstr "%1$s · %2$s · %3$s"
+
+#: templates/admin/automations.php:125
+#, php-format
+msgid "%d issue"
+msgid_plural "%d issues"
+msgstr[0] "%d problema"
+msgstr[1] "%d problemas"
+
+#: templates/admin/automations.php:131
+msgid "Valid · ready to run"
+msgstr "Válido · pronto a executar"
+
+#: templates/admin/automations.php:136
+msgid "Valid · will not run"
+msgstr "Válido · não será executado"
+
+#: templates/admin/automations.php:143
+msgid "Automation"
+msgstr "Automatização"
+
+#: templates/admin/automations.php:154
+msgid "Workflow structure"
+msgstr "Estrutura do fluxo de trabalho"
+
+#: templates/admin/automations.php:155
+#: templates/admin/workflow-editor.php:145
+#: templates/admin/workflow-editor.php:155
+msgid "Trigger"
+msgstr "Acionador"
+
+#: templates/admin/automations.php:156
+msgid "Data lookup"
+msgid_plural "Data lookups"
+msgstr[0] "Consulta de dados"
+msgstr[1] "Consultas de dados"
+
+#: templates/admin/automations.php:158
+#: templates/admin/run-detail.php:95
+msgid "Action"
+msgid_plural "Actions"
+msgstr[0] "Ação"
+msgstr[1] "Ações"
+
+#: templates/admin/automations.php:162
+#, php-format
+msgid "Updated %s"
+msgstr "Atualizado %s"
+
+#: templates/admin/automations.php:164
+msgid "Open builder"
+msgstr "Abrir builder"
+
+#: templates/admin/automations.php:188
+msgid "‹ Previous"
+msgstr "‹ Anterior"
+
+#: templates/admin/automations.php:189
+msgid "Next ›"
+msgstr "Seguinte ›"
+
+#: templates/admin/run-detail.php:14
+msgid "Recovery recorded: the Action was confirmed successful."
+msgstr "Recuperação registada: foi confirmado que a Ação foi concluída com êxito."
+
+#: templates/admin/run-detail.php:15
+msgid "Recovery recorded: the Action was confirmed not to have occurred and was safely queued as a new attempt."
+msgstr "Recuperação registada: foi confirmado que a Ação não ocorreu e foi colocada em fila com segurança como nova tentativa."
+
+#: templates/admin/run-detail.php:16
+msgid "Recovery recorded: the unresolved run was cancelled without replaying the Action."
+msgstr "Recuperação registada: a execução não resolvida foi cancelada sem repetir a Ação."
+
+#: templates/admin/run-detail.php:17
+msgid "This run cannot continue after a confirmed success because a later Action requires output that was not durably recorded. The run remains unresolved."
+msgstr "Esta execução não pode continuar após um sucesso confirmado porque uma Ação posterior requer uma saída que não foi registada de forma persistente. A execução permanece não resolvida."
+
+#: templates/admin/run-detail.php:18
+msgid "Recovery is temporarily unavailable because the run worker still owns the durable job. Reload the run after the worker settles."
+msgstr "A recuperação está temporariamente indisponível porque o worker da execução ainda detém o trabalho persistente. Recarregue a execução quando o worker terminar."
+
+#: templates/admin/run-detail.php:19
+msgid "This recovery request is stale because the run was already resolved or changed. Reload the run history."
+msgstr "Este pedido de recuperação está desatualizado porque a execução já foi resolvida ou alterada. Recarregue o histórico de execuções."
+
+#: templates/admin/run-detail.php:20
+msgid "Recovery could not be recorded because storage is unavailable. No recovery decision was committed."
+msgstr "Não foi possível registar a recuperação porque o armazenamento está indisponível. Não foi registada nenhuma decisão de recuperação."
+
+#: templates/admin/run-detail.php:21
+msgid "The recovery request was incomplete. No changes were made."
+msgstr "O pedido de recuperação estava incompleto. Não foram efetuadas alterações."
+
+#: templates/admin/run-detail.php:22
+msgid "The recovery request could not be completed. Reload the run before trying again."
+msgstr "Não foi possível concluir o pedido de recuperação. Recarregue a execução antes de tentar novamente."
+
+#: templates/admin/run-detail.php:42
+msgid "Confirmed succeeded"
+msgstr "Sucesso confirmado"
+
+#: templates/admin/run-detail.php:43
+msgid "Confirmed did not occur"
+msgstr "Confirmado que não ocorreu"
+
+#: templates/admin/run-detail.php:44
+msgid "Abandoned unresolved"
+msgstr "Abandonada sem resolução"
+
+#: templates/admin/run-detail.php:49
+#, php-format
+msgid "Automation run #%d"
+msgstr "Execução de automatização #%d"
+
+#: templates/admin/run-detail.php:50
+msgid "Open workflow"
+msgstr "Abrir fluxo de trabalho"
+
+#: templates/admin/run-detail.php:57
+msgid "Action outcome unknown."
+msgstr "Resultado da Ação desconhecido."
+
+#: templates/admin/run-detail.php:57
+msgid "Execution stopped after a mutating action began but before Core Blueprint could safely record its outcome. The action was not retried automatically."
+msgstr "A execução parou depois de uma ação modificadora ter começado, mas antes de o Core Blueprint poder registar o respetivo resultado com segurança. A ação não foi repetida automaticamente."
+
+#: templates/admin/run-detail.php:62
+#: templates/admin/run-detail.php:76
+#: templates/admin/runs.php:19
+msgid "Status"
+msgstr "Estado"
+
+#: templates/admin/run-detail.php:63
+msgid "Workflow snapshot"
+msgstr "Instantâneo do fluxo de trabalho"
+
+#: templates/admin/run-detail.php:64
+msgid "Execution principal"
+msgstr "Principal de execução"
+
+#: templates/admin/run-detail.php:65
+msgid "Run UUID"
+msgstr "UUID da execução"
+
+#: templates/admin/run-detail.php:66
+msgid "Correlation ID"
+msgstr "ID de correlação"
+
+#: templates/admin/run-detail.php:67
+#: templates/admin/runs.php:19
+msgid "Created"
+msgstr "Criado"
+
+#: templates/admin/run-detail.php:68
+#: templates/admin/run-detail.php:76
+msgid "Started"
+msgstr "Iniciado"
+
+#: templates/admin/run-detail.php:69
+#: templates/admin/run-detail.php:76
+#: templates/admin/runs.php:19
+msgid "Finished"
+msgstr "Concluído"
+
+#: templates/admin/run-detail.php:70
+msgid "Machine code"
+msgstr "Código de máquina"
+
+#: templates/admin/run-detail.php:74
+msgid "Execution timeline"
+msgstr "Cronologia de execução"
+
+#: templates/admin/run-detail.php:76
+msgid "Step"
+msgstr "Passo"
+
+#: templates/admin/run-detail.php:76
+#: templates/admin/run-detail.php:95
+msgid "Attempt"
+msgstr "Tentativa"
+
+#: templates/admin/run-detail.php:76
+msgid "Code"
+msgstr "Código"
+
+#: templates/admin/run-detail.php:78
+msgid "No execution steps were recorded."
+msgstr "Não foram registados passos de execução."
+
+#: templates/admin/run-detail.php:93
+msgid "Recovery history"
+msgstr "Histórico de recuperação"
+
+#: templates/admin/run-detail.php:95
+msgid "Decision"
+msgstr "Decisão"
+
+#: templates/admin/run-detail.php:95
+#: templates/admin/workflow-editor.php:68
+msgid "Operator"
+msgstr "Operador"
+
+#: templates/admin/run-detail.php:95
+msgid "Result"
+msgstr "Resultado"
+
+#: templates/admin/run-detail.php:95
+msgid "Recorded"
+msgstr "Registado"
+
+#: templates/admin/run-detail.php:112
+msgid "Operator recovery"
+msgstr "Recuperação pelo operador"
+
+#: templates/admin/run-detail.php:114
+msgid "Your account may review this run but does not have recovery authority."
+msgstr "A sua conta pode rever esta execução, mas não tem autoridade de recuperação."
+
+#: templates/admin/run-detail.php:116
+msgid "The unresolved Action attempt could not be identified from safe run metadata. Recovery is unavailable."
+msgstr "Não foi possível identificar a tentativa de Ação não resolvida a partir de metadados seguros da execução. A recuperação não está disponível."
+
+#: templates/admin/run-detail.php:118
+msgid "Choose a resolution only after independently verifying what happened. Core Blueprint will never replay an unknown mutation automatically."
+msgstr "Escolha uma resolução apenas depois de verificar de forma independente o que aconteceu. O Core Blueprint nunca repetirá automaticamente uma mutação de resultado desconhecido."
+
+#: templates/admin/run-detail.php:136
+msgid "Confirm succeeded"
+msgstr "Confirmar sucesso"
+
+#: templates/admin/run-detail.php:137
+msgid "I verified that this mutation completed successfully. Do not execute it again."
+msgstr "Verifiquei que esta mutação foi concluída com êxito. Não a execute novamente."
+
+#: templates/admin/run-detail.php:141
+msgid "Confirm did not occur"
+msgstr "Confirmar que não ocorreu"
+
+#: templates/admin/run-detail.php:142
+msgid "I verified that this mutation did not occur. A new Action attempt may be executed."
+msgstr "Verifiquei que esta mutação não ocorreu. Pode ser executada uma nova tentativa de Ação."
+
+#: templates/admin/run-detail.php:146
+msgid "Abandon unresolved run"
+msgstr "Abandonar execução não resolvida"
+
+#: templates/admin/run-detail.php:147
+msgid "I cannot safely determine the mutation outcome and want to cancel this run without replaying it."
+msgstr "Não consigo determinar com segurança o resultado da mutação e quero cancelar esta execução sem a repetir."
+
+#: templates/admin/run-detail.php:154
+msgid "Runtime values are intentionally excluded from run history."
+msgstr "Os valores de tempo de execução são intencionalmente excluídos do histórico de execuções."
+
+#: templates/admin/runs.php:10
+msgid "Automation runs"
+msgstr "Execuções de automatização"
+
+#: templates/admin/runs.php:11
+msgid "Operational history shows execution metadata only. Runtime inputs and outputs are never displayed here."
+msgstr "O histórico operacional mostra apenas metadados de execução. As entradas e saídas de tempo de execução nunca são apresentadas aqui."
+
+#: templates/admin/runs.php:15
+#, php-format
+msgid "Filtered to workflow #%d."
+msgstr "Filtrado pelo fluxo de trabalho #%d."
+
+#: templates/admin/runs.php:15
+msgid "Clear filter"
+msgstr "Limpar filtro"
+
+#: templates/admin/runs.php:19
+msgid "Run"
+msgstr "Execução"
+
+#: templates/admin/runs.php:19
+msgid "Principal"
+msgstr "Principal"
+
+#: templates/admin/runs.php:22
+msgid "No automation runs have been recorded yet."
+msgstr "Ainda não foram registadas execuções de automatização."
+
+#: templates/admin/runs.php:38
+msgid "Previous"
+msgstr "Anterior"
+
+#: templates/admin/runs.php:39
+#, php-format
+msgid "Page %1$d of %2$d"
+msgstr "Página %1$d de %2$d"
+
+#: templates/admin/runs.php:40
+msgid "Next"
+msgstr "Seguinte"
+
+#: templates/admin/workflow-editor.php:28
+msgid "Automation draft created. Configure the workflow below."
+msgstr "Rascunho de automatização criado. Configure o fluxo de trabalho abaixo."
+
+#: templates/admin/workflow-editor.php:29
+msgid "Automation created from a starter template. Review the workflow, assign execution authority and enable it when ready."
+msgstr "Automatização criada a partir de um modelo inicial. Reveja o fluxo de trabalho, atribua autoridade de execução e ative-o quando estiver pronto."
+
+#: templates/admin/workflow-editor.php:31
+msgid "Your changes were saved, but the automation remains disabled because the current workflow is not valid yet."
+msgstr "As suas alterações foram guardadas, mas a automatização permanece desativada porque o fluxo de trabalho atual ainda não é válido."
+
+#: templates/admin/workflow-editor.php:38
+msgid "The automation was not saved because a sensitive input contains a literal value. Connect sensitive inputs to a prior workflow output instead."
+msgstr "A automatização não foi guardada porque uma entrada sensível contém um valor literal. Ligue, em vez disso, as entradas sensíveis a uma saída anterior do fluxo de trabalho."
+
+#: templates/admin/workflow-editor.php:42
+msgid "The automation could not be saved because workflow storage is unavailable. No changes were saved."
+msgstr "Não foi possível guardar a automatização porque o armazenamento dos fluxos de trabalho está indisponível. Não foram guardadas alterações."
+
+#: templates/admin/workflow-editor.php:47
+msgid "Choose a capability…"
+msgstr "Escolher uma capacidade…"
+
+#: templates/admin/workflow-editor.php:48
+msgid "Choose a source…"
+msgstr "Escolher uma origem…"
+
+#: templates/admin/workflow-editor.php:51
+msgid "Inputs"
+msgstr "Entradas"
+
+#: templates/admin/workflow-editor.php:52
+msgid "No inputs required."
+msgstr "Não são necessárias entradas."
+
+#: templates/admin/workflow-editor.php:53
+#: templates/admin/workflow-editor.php:164
+msgid "Add data lookup"
+msgstr "Adicionar consulta de dados"
+
+#: templates/admin/workflow-editor.php:54
+#: templates/admin/workflow-editor.php:171
+msgid "Add condition"
+msgstr "Adicionar condição"
+
+#: templates/admin/workflow-editor.php:56
+msgid "Remove"
+msgstr "Remover"
+
+#: templates/admin/workflow-editor.php:57
+msgid "Move up"
+msgstr "Mover para cima"
+
+#: templates/admin/workflow-editor.php:58
+msgid "Move down"
+msgstr "Mover para baixo"
+
+#: templates/admin/workflow-editor.php:59
+msgid "Literal value"
+msgstr "Valor literal"
+
+#: templates/admin/workflow-editor.php:60
+msgid "True"
+msgstr "Verdadeiro"
+
+#: templates/admin/workflow-editor.php:61
+msgid "False"
+msgstr "Falso"
+
+#: templates/admin/workflow-editor.php:62
+msgid "Leave empty for an empty list; otherwise use one value per line."
+msgstr "Deixe vazio para uma lista vazia; caso contrário, use um valor por linha."
+
+#: templates/admin/workflow-editor.php:63
+msgid "Stored source is unavailable"
+msgstr "A origem guardada está indisponível"
+
+#: templates/admin/workflow-editor.php:64
+#: templates/admin/workflow-editor.php:155
+#: templates/admin/workflow-editor.php:175
+msgid "Required"
+msgstr "Obrigatório"
+
+#: templates/admin/workflow-editor.php:65
+#: templates/admin/workflow-editor.php:161
+#: templates/admin/workflow-editor.php:168
+msgid "Optional"
+msgstr "Opcional"
+
+#: templates/admin/workflow-editor.php:66
+msgid "Sensitive"
+msgstr "Sensível"
+
+#: templates/admin/workflow-editor.php:73
+msgid "Equals"
+msgstr "É igual a"
+
+#: templates/admin/workflow-editor.php:74
+msgid "Does not equal"
+msgstr "Não é igual a"
+
+#: templates/admin/workflow-editor.php:75
+msgid "Contains"
+msgstr "Contém"
+
+#: templates/admin/workflow-editor.php:76
+msgid "Does not contain"
+msgstr "Não contém"
+
+#: templates/admin/workflow-editor.php:77
+msgid "Greater than"
+msgstr "Maior do que"
+
+#: templates/admin/workflow-editor.php:78
+msgid "Greater than or equal"
+msgstr "Maior ou igual a"
+
+#: templates/admin/workflow-editor.php:79
+msgid "Less than"
+msgstr "Menor do que"
+
+#: templates/admin/workflow-editor.php:80
+msgid "Less than or equal"
+msgstr "Menor ou igual a"
+
+#: templates/admin/workflow-editor.php:81
+msgid "Is empty"
+msgstr "Está vazio"
+
+#: templates/admin/workflow-editor.php:82
+msgid "Is not empty"
+msgstr "Não está vazio"
+
+#: templates/admin/workflow-editor.php:97
+msgid "Build a clear WHEN → GET DATA → ONLY IF → THEN workflow without leaving the automation context."
+msgstr "Crie um fluxo de trabalho claro QUANDO → OBTER DADOS → APENAS SE → ENTÃO sem sair do contexto da automatização."
+
+#: templates/admin/workflow-editor.php:130
+msgid "History"
+msgstr "Histórico"
+
+#: templates/admin/workflow-editor.php:131
+msgid "Undo"
+msgstr "Anular"
+
+#: templates/admin/workflow-editor.php:132
+msgid "Redo"
+msgstr "Refazer"
+
+#: templates/admin/workflow-editor.php:135
+msgid "Open focus mode"
+msgstr "Abrir modo de foco"
+
+#: templates/admin/workflow-editor.php:135
+msgid "Exit focus mode"
+msgstr "Sair do modo de foco"
+
+#: templates/admin/workflow-editor.php:137
+#: templates/admin/workflow-editor.php:251
+msgid "Save automation"
+msgstr "Guardar automatização"
+
+#: templates/admin/workflow-editor.php:142
+msgid "Workflow stages"
+msgstr "Fases do fluxo de trabalho"
+
+#: templates/admin/workflow-editor.php:145
+#: templates/admin/workflow-editor.php:155
+msgid "WHEN"
+msgstr "QUANDO"
+
+#: templates/admin/workflow-editor.php:146
+#: templates/admin/workflow-editor.php:161
+msgid "GET DATA"
+msgstr "OBTER DADOS"
+
+#: templates/admin/workflow-editor.php:146
+#: templates/admin/workflow-editor.php:161
+msgid "Live state"
+msgstr "Estado em tempo real"
+
+#: templates/admin/workflow-editor.php:147
+#: templates/admin/workflow-editor.php:168
+msgid "ONLY IF"
+msgstr "APENAS SE"
+
+#: templates/admin/workflow-editor.php:147
+#: templates/admin/workflow-editor.php:168
+msgid "Conditions"
+msgstr "Condições"
+
+#: templates/admin/workflow-editor.php:148
+#: templates/admin/workflow-editor.php:175
+msgid "THEN"
+msgstr "ENTÃO"
+
+#: templates/admin/workflow-editor.php:148
+#: templates/admin/workflow-editor.php:175
+msgid "Actions"
+msgstr "Ações"
+
+#: templates/admin/workflow-editor.php:156
+msgid "Choose the event that starts this automation."
+msgstr "Escolha o evento que inicia esta automatização."
+
+#: templates/admin/workflow-editor.php:162
+msgid "Look up additional live data and make typed values available to later steps."
+msgstr "Consulte dados adicionais em tempo real e disponibilize valores tipados para passos posteriores."
+
+#: templates/admin/workflow-editor.php:169
+msgid "Add rules that must match before any actions are allowed to continue."
+msgstr "Adicione regras que tenham de corresponder antes de as ações poderem continuar."
+
+#: templates/admin/workflow-editor.php:176
+msgid "Choose what Core Blueprint should do after the workflow passes its conditions."
+msgstr "Escolha o que o Core Blueprint deve fazer depois de o fluxo de trabalho cumprir as respetivas condições."
+
+#: templates/admin/workflow-editor.php:184
+msgid "Automation details"
+msgstr "Detalhes da automatização"
+
+#: templates/admin/workflow-editor.php:186
+msgid "Settings"
+msgstr "Definições"
+
+#: templates/admin/workflow-editor.php:187
+msgid "Health"
+msgstr "Estado"
+
+#: templates/admin/workflow-editor.php:201
+msgid "Workflow settings"
+msgstr "Definições do fluxo de trabalho"
+
+#: templates/admin/workflow-editor.php:203
+msgid "Name"
+msgstr "Nome"
+
+#: templates/admin/workflow-editor.php:207
+msgid "Activation"
+msgstr "Ativação"
+
+#: templates/admin/workflow-editor.php:212
+msgid "Enabled workflows must be valid and both the execution principal and current operator must hold every provider-required capability."
+msgstr "Os fluxos de trabalho ativados têm de ser válidos, e tanto o principal de execução como o operador atual têm de dispor de todas as capacidades exigidas pelo fornecedor."
+
+#: templates/admin/workflow-editor.php:217
+msgid "Execution authority"
+msgstr "Autoridade de execução"
+
+#: templates/admin/workflow-editor.php:219
+msgid "Use my account as execution principal when saving"
+msgstr "Usar a minha conta como principal de execução ao guardar"
+
+#: templates/admin/workflow-editor.php:220
+msgid "Core Blueprint never accepts an arbitrary Run as user ID from the browser. The server binds your current WordPress account and re-checks its permissions on every execution."
+msgstr "O Core Blueprint nunca aceita a partir do navegador uma execução arbitrária como ID de utilizador. O servidor associa a sua conta WordPress atual e volta a verificar as respetivas permissões em cada execução."
+
+#: templates/admin/workflow-editor.php:254
+msgid "The visual workflow editor requires JavaScript. Name, activation and execution-authority intent can still be submitted using the currently stored definition."
+msgstr "O editor visual de fluxos de trabalho requer JavaScript. O nome, a ativação e a intenção de autoridade de execução podem continuar a ser enviados usando a definição atualmente guardada."
+
+#: templates/admin/workflow-review.php:20
+msgid "Editing is paused because one or more stored capability contracts cannot be verified safely."
+msgstr "A edição está em pausa porque um ou mais contratos de capacidades guardados não podem ser verificados com segurança."
+
+#: templates/admin/workflow-review.php:28
+msgid "The stored workflow definition has been preserved unchanged. Restore or update the relevant provider first; Automations will re-evaluate the workflow automatically on the next page load."
+msgstr "A definição do fluxo de trabalho guardada foi preservada sem alterações. Restaure ou atualize primeiro o fornecedor relevante; o Automations voltará a avaliar automaticamente o fluxo de trabalho no próximo carregamento da página."
