@@ -15,7 +15,7 @@ final class RunHistoryCapability {
 		}
 		self::$initialized = true;
 		add_filter( 'user_has_cap', [ self::class, 'filter_user_has_cap' ], 20, 4 );
-		add_filter( 'cb_core_capability_catalog', [ self::class, 'register_catalog' ] );
+		add_filter( 'core_blueprint_capability_catalog', [ self::class, 'register_catalog' ] );
 	}
 
 	/**

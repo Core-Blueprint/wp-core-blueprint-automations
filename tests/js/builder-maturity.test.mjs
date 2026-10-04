@@ -6,15 +6,17 @@ const root = new URL('../../', import.meta.url);
 const read = (path) => readFile(new URL(path, root), 'utf8');
 
 test('Automation Builder keeps canonical persistence, shared-shell ownership and save reconciliation intact', async () => {
-	const [inspector, history, save, editor, controller, assets, finishCss, designerCss, template] = await Promise.all([
+	const [inspector, history, save, editor, shell, controller, assets, finishCss, designerCss, adminCss, template] = await Promise.all([
 		read('assets/js/admin-builder-inspector.js'),
 		read('assets/js/admin-builder-history.js'),
 		read('assets/js/admin-builder-save.js'),
 		read('assets/js/admin-editor.js'),
+		read('assets/js/admin-designer-shell.js'),
 		read('src/Admin/WorkflowController.php'),
 		read('src/Admin/DesignerAssets.php'),
 		read('assets/css/admin-builder-finish.css'),
 		read('assets/css/admin-designer-shell.css'),
+		read('assets/css/admin-automations.css'),
 		read('templates/admin/workflow-editor.php'),
 	]);
 
@@ -23,14 +25,26 @@ test('Automation Builder keeps canonical persistence, shared-shell ownership and
 	assert.ok(template.includes('data-cb-design-exit-url="<?php echo esc_url( \\CB\\Automations\\Admin\\AutomationsPage::url() ); ?>"'));
 	assert.match(assets, /enqueue_designer_mode\( __\( 'Automation Builder'/);
 	assert.doesNotMatch(assets, /admin-builder-bootstrap\.js|admin-builder-layout\.js|admin_body_class|builder_launch_requested/);
+	assert.match(template, /data-cb-design-shell-context/);
+	assert.match(template, /data-cb-automations-workflow-switcher/);
+	assert.doesNotMatch(template, /cb-automations-design-shell__identity/);
+	assert.match(shell, /querySelector\('\[data-cb-automations-workflow-switcher\]'\)/);
+	assert.match(shell, /new URL\(target, window\.location\.href\)/);
+	assert.match(shell, /url\.origin === window\.location\.origin/);
+	assert.match(shell, /window\.location\.assign\(url\.href\)/);
 
-	assert.match(inspector, /data-cb-builder-selectable/);
+	assert.match(inspector, /dataset\.cbBuilderSelectable/);
 	assert.match(inspector, /Selected step|selectedStep/);
 	assert.match(inspector, /GET DATA/);
 	assert.match(inspector, /ONLY IF/);
 	assert.match(inspector, /key: `state:\$\{value\?\.step_id \|\| index\}`/);
 	assert.match(inspector, /key: `condition:\$\{value\?\.condition_id \|\| index\}`/);
 	assert.match(inspector, /key: `action:\$\{value\?\.step_id \|\| index\}`/);
+	assert.match(inspector, /panelBody = panel\?\.querySelector\('\.cb-core-design-shell__panel-body'\)/);
+	assert.match(inspector, /panelBody\.replaceChildren\(\)/);
+	assert.match(inspector, /cb-core-design-shell__panel-section-description/);
+	assert.match(inspector, /cb-core-design-shell__panel-section-title/);
+	assert.doesNotMatch(inspector, /panel\.replaceChildren\(\)/);
 
 	assert.match(editor, /window\.cbAutomationsEditorSession/);
 	assert.match(editor, /cb-automations:definitionchange/);
@@ -66,11 +80,22 @@ test('Automation Builder keeps canonical persistence, shared-shell ownership and
 	assert.match(assets, /activationEnabled/);
 	assert.match(assets, /validationDependencyUnavailable/);
 	assert.match(template, /\$definition_json\s*=\s*wp_json_encode\(\s*\$editor_data\['workflow'\]\['definition'\]\s*\)/);
-	assert.match(template, /name="definition_json"[^>]*data-cb-automations-definition/);
+	assert.match(template, /name="definition_json".*data-cb-automations-definition/);
 	assert.match(editor, /hidden\.value = JSON\.stringify\(definition\)/);
 	assert.match(editor, /renderAll\('initial'\)/);
 
 	assert.doesNotMatch(designerCss, /\.cb-automations-design-shell \.cb-core-design-shell__workspace/);
+	assert.match(adminCss, /\.cb-automations-stage\s*\{[^}]*margin-bottom:\s*0\s*!important;/s);
+	assert.match(adminCss, /\.cb-automations-stage:not\(:last-child\)::after\s*\{[^}]*height:\s*var\(--cb-space-4\);/s);
+	assert.ok((template.match(/class="cb-core-design-shell__panel-body"/g) || []).length >= 3);
+	assert.match(template, /class="cb-core-design-shell__panel-section"/);
+	assert.match(template, /class="cb-core-design-shell__field"/);
+	assert.match(template, /data-cb-design-shell-sidebar-role="inspector"/);
+	assert.match(template, /data-cb-design-shell-sidebar-role="settings"/);
+	assert.doesNotMatch(designerCss, /\.cb-automations-design-shell__sidebar\s*\{/);
+	assert.doesNotMatch(designerCss, /\.cb-automations-design-shell__sidebar \.cb-core-design-shell__sidebar-(?:tabs|tab|panel)/);
+	assert.doesNotMatch(designerCss, /cb-automations-design-shell__identity|cb-core-design-shell__toolbar-context|cb-core-design-shell__brand|cb-core-brand-lockup/);
+	assert.doesNotMatch(shell, /cb-core-design-shell__brand|cb-core-brand-lockup|brand-wordmark|is-identity-condensed/);
 	assert.doesNotMatch(finishCss, /is-palette-collapsed|is-sidebar-collapsed/);
 	for (const source of [inspector, history, save, editor]) {
 		assert.doesNotMatch(source, /assets\/js\/design\/|CB_CORE_URL/);

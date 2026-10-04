@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace CB\Automations\Persistence;
 
-use CB\Core\Automation\TriggerEvent;
+use CoreBlueprint\Core\Automation\TriggerEvent;
 use CB\Automations\Runtime\JobSubjectType;
 use CB\Automations\Runtime\Vault;
 

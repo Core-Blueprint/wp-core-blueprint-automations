@@ -8,15 +8,15 @@ declare(strict_types=1);
  * Requires PHP: 8.4
  */
 
-use CB\Core\Automation\ActionRegistry;
-use CB\Core\Automation\StateRegistry;
-use CB\Core\Automation\TriggerRegistry;
-use CB\Core\ExtensionRegistry;
+use CoreBlueprint\Core\Automation\ActionRegistry;
+use CoreBlueprint\Core\Automation\StateRegistry;
+use CoreBlueprint\Core\Automation\TriggerRegistry;
+use CoreBlueprint\Core\ExtensionRegistry;
 
 defined( 'ABSPATH' ) || exit;
 
 add_action(
-	'cb_core_register_extensions',
+	'core_blueprint_register_extensions',
 	static function (): void {
 		if ( ! class_exists( ExtensionRegistry::class ) ) {
 			return;
@@ -36,7 +36,7 @@ add_action(
 );
 
 add_action(
-	'cb_core_register_automation_capabilities',
+	'core_blueprint_register_automation_capabilities',
 	static function (): void {
 		if (
 			! class_exists( TriggerRegistry::class )

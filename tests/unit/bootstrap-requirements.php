@@ -8,7 +8,7 @@ define( 'CB_CORE_API_VERSION', '1.0' );
 $base_autoload_attempts = 0;
 spl_autoload_register(
 	static function ( string $class ) use ( &$base_autoload_attempts ): void {
-		if ( str_starts_with( $class, 'CB\\Core\\' ) ) {
+		if ( str_starts_with( $class, 'CoreBlueprint\\Core\\' ) ) {
 			++$base_autoload_attempts;
 		}
 	}

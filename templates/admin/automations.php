@@ -3,6 +3,7 @@
  * Automations admin index.
  *
  * @var array{items:array,total:int,page:int,per_page:int,pages:int} $listing
+ * @var \CB\Automations\Template\WorkflowTemplate[] $templates
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -13,6 +14,8 @@ $notice = isset( $_GET['notice'] ) && is_string( $_GET['notice'] )
 
 $notices = [
 	'created'                                => [ 'success', __( 'Automation draft created.', 'core-blueprint-automations' ) ],
+	'created_template'                       => [ 'success', __( 'Automation created from template. Review it, assign execution authority and enable it when ready.', 'core-blueprint-automations' ) ],
+	'template_unavailable'                   => [ 'error', __( 'That workflow template is no longer available. No automation was created.', 'core-blueprint-automations' ) ],
 	'enabled'                                => [ 'success', __( 'Automation enabled.', 'core-blueprint-automations' ) ],
 	'disabled'                               => [ 'success', __( 'Automation disabled.', 'core-blueprint-automations' ) ],
 	'saved_disabled'                         => [ 'warning', __( 'The automation remains disabled because the workflow is not valid yet.', 'core-blueprint-automations' ) ],
@@ -51,6 +54,32 @@ $notices = [
 			<button type="submit" class="button button-primary cb-core-button cb-core-button--primary"><?php esc_html_e( 'Create automation', 'core-blueprint-automations' ); ?></button>
 		</form>
 	</section>
+
+	<?php if ( ! empty( $templates ) ) : ?>
+		<section class="cb-core-panel cb-automations-templates-panel">
+			<span class="cb-automations-panel-eyebrow"><?php esc_html_e( 'Starter workflows', 'core-blueprint-automations' ); ?></span>
+			<h2><?php esc_html_e( 'Start from a template', 'core-blueprint-automations' ); ?></h2>
+			<p class="description"><?php esc_html_e( 'Create a normal editable workflow from a provider template. The new workflow is yours and is not kept linked to the template.', 'core-blueprint-automations' ); ?></p>
+			<div class="cb-automations-template-grid">
+				<?php foreach ( $templates as $workflow_template ) : ?>
+					<article class="cb-automations-template-card">
+						<div>
+							<span class="cb-automations-template-card__category"><?php echo esc_html( $workflow_template->category() ); ?></span>
+							<h3><?php echo esc_html( $workflow_template->title() ); ?></h3>
+							<p><?php echo esc_html( $workflow_template->description() ); ?></p>
+						</div>
+						<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+							<input type="hidden" name="action" value="cb_automations_create_from_template" />
+							<input type="hidden" name="template_provider" value="<?php echo esc_attr( $workflow_template->provider() ); ?>" />
+							<input type="hidden" name="template_id" value="<?php echo esc_attr( $workflow_template->id() ); ?>" />
+							<?php wp_nonce_field( 'cb_automations_create_from_template', '_cb_automations_nonce' ); ?>
+							<button type="submit" class="button cb-core-button cb-core-button--secondary"><?php esc_html_e( 'Use template', 'core-blueprint-automations' ); ?></button>
+						</form>
+					</article>
+				<?php endforeach; ?>
+			</div>
+		</section>
+	<?php endif; ?>
 
 	<section class="cb-core-panel cb-automations-workflows-panel">
 		<div class="cb-automations-overview-heading">

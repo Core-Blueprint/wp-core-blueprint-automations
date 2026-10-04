@@ -9,14 +9,14 @@ $scan_roots = [
 ];
 
 $forbidden = [
-	'CB\\Core\\Automation\\Internal' => 'Private Base Automation Foundation internals must never be consumed.',
+	'CoreBlueprint\\Core\\Automation\\Internal' => 'Private Base Automation Foundation internals must never be consumed.',
 	'CapabilityRegistry::executor' => 'Automations must never bypass the public action invocation boundary.',
 	'CapabilityRegistry::state_resolver' => 'Automations must never bypass the public state invocation boundary.',
 	'wp_set_current_user' => 'Workflow execution must never impersonate the configuring user.',
 	'wp_schedule_event' => 'Runtime worker wake-ups must not become a recurring WP-Cron scheduler.',
 	'as_enqueue_async_action' => 'Automations must not introduce an Action Scheduler dependency.',
 	'as_schedule_single_action' => 'Automations must not introduce an Action Scheduler dependency.',
-	'CB\\Core\\Admin\\PageBase' => 'Extensions implement the public Page interface directly; PageBase is internal.',
+	'CoreBlueprint\\Core\\Admin\\PageBase' => 'Extensions implement the public Page interface directly; PageBase is internal.',
 ];
 
 $forbidden_dirs = [ 'Execution', 'Queue', 'Runner', 'Retry', 'Scheduler' ];

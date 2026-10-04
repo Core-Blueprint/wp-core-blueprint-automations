@@ -21,7 +21,7 @@ if ( in_array( false, [ $builder, $runs, $view_cap, $recovery_cap, $recovery_con
 if ( ! str_contains( $builder, "public const CAPABILITY = 'manage_options'" ) ) {
 	throw new RuntimeException( 'Builder authoring capability changed from manage_options.' );
 }
-if ( str_contains( $builder, "'runs' === $view" ) || str_contains( $builder, 'render_runs(' ) || str_contains( $builder, "'run-detail.php'" ) || str_contains( $builder, "'runs.php'" ) ) {
+if ( str_contains( $builder, "'runs' === \$view" ) || str_contains( $builder, 'render_runs(' ) || str_contains( $builder, "'run-detail.php'" ) || str_contains( $builder, "'runs.php'" ) ) {
 	throw new RuntimeException( 'Run History is still routed through the Builder page.' );
 }
 if ( ! str_contains( $workflow_controller, 'current_user_can( AutomationsPage::CAPABILITY )' ) ) {
@@ -36,7 +36,7 @@ if ( ! str_contains( $view_cap, "public const CAPABILITY = 'cb_view_automation_r
 if ( str_contains( $view_cap, 'cb_operator' ) || str_contains( $runs, 'cb_operator' ) || str_contains( $suite, 'cb_operator' ) ) {
 	throw new RuntimeException( 'Operator access must not use role-name checks.' );
 }
-if ( ! str_contains( $view_cap, 'cb_core_capability_catalog' ) || ! str_contains( $view_cap, 'user_has_cap' ) ) {
+if ( ! str_contains( $view_cap, 'core_blueprint_capability_catalog' ) || ! str_contains( $view_cap, 'user_has_cap' ) ) {
 	throw new RuntimeException( 'Run-history view capability is not integrated through public capability contracts.' );
 }
 if ( ! str_contains( $suite, 'new AutomationsPage()' ) || ! str_contains( $suite, 'new AutomationRunsPage()' ) ) {

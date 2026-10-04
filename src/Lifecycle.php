@@ -11,9 +11,7 @@ defined( 'ABSPATH' ) || exit;
 final class Lifecycle {
 	public static function activate(): void {
 		if ( ! Requirements::runtime_ready() ) {
-			self::fail_activation(
-				'Core Blueprint Automations requires PHP 8.4 and an active, Core API 1.x compatible Core Blueprint Base installation.'
-			);
+			self::fail_activation( Requirements::activation_message() );
 		}
 
 		try {
@@ -37,7 +35,7 @@ final class Lifecycle {
 
 		wp_die(
 			esc_html( $message ),
-			esc_html( 'Core Blueprint dependency required' ),
+			esc_html( 'Core Blueprint requirements not met' ),
 			[
 				'link_url'  => admin_url( 'plugins.php' ),
 				'link_text' => 'Plugins',

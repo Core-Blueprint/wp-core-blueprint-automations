@@ -18,8 +18,9 @@
 	const hidden = document.querySelector('[data-cb-automations-definition]');
 	const dataNode = document.getElementById('cb-automations-editor-data');
 	const panel = shell?.querySelector('[data-cb-design-shell-panel="inspector"]');
+	const panelBody = panel?.querySelector('.cb-core-design-shell__panel-body');
 	const tab = shell?.querySelector('[data-cb-design-shell-tab="inspector"]');
-	if (!root || !shell || !hidden || !dataNode || !panel || !tab) return;
+	if (!root || !shell || !hidden || !dataNode || !panel || !panelBody || !tab) return;
 
 	let editorData = {};
 	try {
@@ -87,26 +88,23 @@
 	};
 
 	const renderInspector = (record) => {
-		panel.replaceChildren();
-		const heading = document.createElement('div');
-		heading.className = 'cb-automations-panel-heading';
-		const headingCopy = document.createElement('div');
-		const eyebrow = document.createElement('span');
-		eyebrow.className = 'cb-automations-panel-eyebrow';
-		eyebrow.textContent = strings.inspector;
-		const title = document.createElement('h2');
-		title.textContent = record ? strings.selectedStep : strings.inspector;
-		headingCopy.append(eyebrow, title);
-		heading.append(headingCopy);
-		panel.append(heading);
+		panelBody.replaceChildren();
+		const section = document.createElement('section');
+		section.className = 'cb-core-design-shell__panel-section';
 
 		if (!record) {
 			const empty = document.createElement('p');
-			empty.className = 'description';
+			empty.className = 'cb-core-design-shell__panel-section-description';
 			empty.textContent = strings.selectStep;
-			panel.append(empty);
+			section.append(empty);
+			panelBody.append(section);
 			return;
 		}
+
+		const title = document.createElement('h3');
+		title.className = 'cb-core-design-shell__panel-section-title';
+		title.textContent = strings.selectedStep;
+		section.append(title);
 
 		const value = record.value || {};
 		const capability = capabilityFor(value.capability);
@@ -117,7 +115,8 @@
 		addRow(list, strings.provider, capability?.provider?.name || value.capability?.provider || '');
 		addRow(list, strings.capability, capability?.label || value.capability?.id || '');
 		if (record.kind === 'Condition') addRow(list, strings.condition, value.operator || '');
-		panel.append(list);
+		section.append(list);
+		panelBody.append(section);
 	};
 
 	const selectCard = (card, { open = true } = {}) => {

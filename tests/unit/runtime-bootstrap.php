@@ -14,7 +14,7 @@ if ( false === $plugin || false === $requirements || false === $suite || false =
 
 $failures = [];
 
-$runtime_gate = strpos( $plugin, 'Requirements::runtime_ready()' );
+$runtime_gate = strpos( $plugin, 'Requirements::product_ready()' );
 $runtime_boot = strpos( $plugin, 'self::$runtime_booted = true;' );
 $admin_gate = strpos( $plugin, "if ( ! is_admin() || ! Requirements::admin_ready() )" );
 $admin_init = strpos( $plugin, 'WorkflowController::init();' );
@@ -30,18 +30,21 @@ if ( str_contains( substr( $plugin, 0, false === $runtime_boot ? strlen( $plugin
 }
 
 foreach ( [
-	'TriggerEvent' => 'CB\\Core\\Automation\\TriggerEvent',
-	'InvocationContext' => 'CB\\Core\\Automation\\InvocationContext',
-	'ActionInvoker' => 'CB\\Core\\Automation\\ActionInvoker',
-	'StateInvoker' => 'CB\\Core\\Automation\\StateInvoker',
+	'TriggerEvent' => 'CoreBlueprint\\Core\\Automation\\TriggerEvent',
+	'InvocationContext' => 'CoreBlueprint\\Core\\Automation\\InvocationContext',
+	'ActionInvoker' => 'CoreBlueprint\\Core\\Automation\\ActionInvoker',
+	'StateInvoker' => 'CoreBlueprint\\Core\\Automation\\StateInvoker',
 ] as $basename => $contract ) {
 	if ( ! str_contains( $requirements, $basename ) ) {
 		$failures[] = 'Missing runtime Base contract requirement: ' . $contract;
 	}
 }
 
+if ( ! str_contains( $requirements, 'public static function product_ready(): bool' ) ) {
+	$failures[] = 'Product runtime readiness is not separated from Bootstrap readiness.';
+}
 if ( ! str_contains( $requirements, 'public static function admin_ready(): bool' ) ) {
-	$failures[] = 'Admin readiness is not separated from runtime readiness.';
+	$failures[] = 'Admin readiness is not separated from product runtime readiness.';
 }
 if ( ! str_contains( $suite, 'Requirements::admin_ready()' ) ) {
 	$failures[] = 'Core Admin page registration is not gated by admin readiness.';
@@ -49,7 +52,7 @@ if ( ! str_contains( $suite, 'Requirements::admin_ready()' ) ) {
 if ( ! str_contains( $bootstrap, 'Requirements::admin_ready()' ) ) {
 	$failures[] = 'Admin notices are not gated by admin readiness.';
 }
-if ( str_contains( $plugin, 'cb_core_automation_trigger_emitted' ) ) {
+if ( str_contains( $plugin, 'core_blueprint_automation_trigger_emitted' ) ) {
 	$failures[] = 'AU2.0A must not subscribe to trigger delivery.';
 }
 

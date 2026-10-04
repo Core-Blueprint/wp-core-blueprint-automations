@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace CB\Automations\Admin;
 
-use CB\Core\Admin\MenuGroupRegistry;
-use CB\Core\Design\Editor\Assets as DesignEditorAssets;
+use CoreBlueprint\Core\Admin\MenuGroupRegistry;
+use CoreBlueprint\Core\Design\Editor\Assets as DesignEditorAssets;
 
 defined( 'ABSPATH' ) || exit;
 

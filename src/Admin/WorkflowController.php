@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace CB\Automations\Admin;
 
 use CB\Automations\Persistence\PersistenceFailure;
+use CB\Automations\Template\WorkflowTemplateRegistry;
 use CB\Automations\Validation\ValidationState;
 use CB\Automations\Workflow\ActivationState;
 use CB\Automations\Workflow\Definition;
@@ -30,6 +31,7 @@ final class WorkflowController {
 		self::$initialized = true;
 
 		add_action( 'admin_post_cb_automations_create_workflow', [ self::class, 'create' ] );
+		add_action( 'admin_post_cb_automations_create_from_template', [ self::class, 'create_from_template' ] );
 		add_action( 'admin_post_cb_automations_save_workflow', [ self::class, 'save' ] );
 	}
 
@@ -55,6 +57,37 @@ final class WorkflowController {
 			self::redirect( [ 'notice' => 'storage_failed' ] );
 		} catch ( \Throwable $error ) {
 			error_log( '[Core Blueprint Automations] Workflow create failed: ' . $error->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- bounded diagnostic without workflow data.
+			self::redirect( [ 'notice' => 'failed' ] );
+		}
+	}
+
+	public static function create_from_template(): void {
+		self::guard( 'cb_automations_create_from_template' );
+
+		$provider = isset( $_POST['template_provider'] ) && is_scalar( $_POST['template_provider'] )
+			? sanitize_key( wp_unslash( (string) $_POST['template_provider'] ) )
+			: '';
+		$template_id = isset( $_POST['template_id'] ) && is_scalar( $_POST['template_id'] )
+			? sanitize_text_field( wp_unslash( (string) $_POST['template_id'] ) )
+			: '';
+
+		$template = WorkflowTemplateRegistry::get( $provider, $template_id );
+		if ( null === $template ) {
+			self::redirect( [ 'notice' => 'template_unavailable' ] );
+		}
+
+		try {
+			$id = ( new WorkflowService() )->create(
+				$template->title(),
+				$template->definition(),
+				get_current_user_id()
+			);
+			self::redirect( [ 'workflow' => $id, 'notice' => 'created_template' ] );
+		} catch ( PersistenceFailure $error ) {
+			error_log( '[Core Blueprint Automations] Template workflow create persistence failure: ' . $error->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- bounded diagnostic without workflow data.
+			self::redirect( [ 'notice' => 'storage_failed' ] );
+		} catch ( \Throwable $error ) {
+			error_log( '[Core Blueprint Automations] Template workflow create failed: ' . $error->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- bounded diagnostic without workflow data.
 			self::redirect( [ 'notice' => 'failed' ] );
 		}
 	}

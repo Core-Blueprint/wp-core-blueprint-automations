@@ -1,0 +1,121 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+SLUG="core-blueprint-automations"
+ENTRY="$ROOT/core-blueprint-automations.php"
+DIST="$ROOT/dist"
+STAGE="$(mktemp -d)"
+LOCALES=(nl_NL de_DE fr_FR es_ES it_IT pt_PT)
+trap 'rm -rf "$STAGE"' EXIT
+
+fail() {
+  printf 'Automations release build failed: %s\n' "$*" >&2
+  exit 1
+}
+
+header_value() {
+  local file="$1" label="$2"
+  sed -n "s/^[[:space:]]*\\*[[:space:]]*${label}:[[:space:]]*//p" "$file" | head -n 1 | tr -d '\r'
+}
+
+define_value() {
+  local file="$1" name="$2"
+  sed -n "s/.*define([[:space:]]*['\"]${name}['\"][[:space:]]*,[[:space:]]*['\"]\\([^'\"]*\\)['\"].*/\\1/p" "$file" | head -n 1
+}
+
+[[ -f "$ENTRY" ]] || fail "plugin entrypoint is missing"
+VERSION="$(header_value "$ENTRY" 'Version')"
+REQUIRES_PHP="$(header_value "$ENTRY" 'Requires PHP')"
+CONSTANT_VERSION="$(define_value "$ENTRY" 'CB_AUTOMATIONS_VERSION')"
+REQUIRED_API="$(define_value "$ENTRY" 'CB_AUTOMATIONS_REQUIRED_API')"
+[[ -n "$VERSION" ]] || fail "plugin Version header is missing"
+[[ "$CONSTANT_VERSION" == "$VERSION" ]] || fail "Version header and CB_AUTOMATIONS_VERSION differ"
+[[ "$REQUIRES_PHP" == '8.4' ]] || fail "Requires PHP must be 8.4, found ${REQUIRES_PHP:-missing}"
+[[ "$REQUIRED_API" == '1.0' ]] || fail "CB_AUTOMATIONS_REQUIRED_API must be 1.0, found ${REQUIRED_API:-missing}"
+
+for command in php python3 wp msgfmt node zip unzip sha256sum; do
+  command -v "$command" >/dev/null 2>&1 || fail "missing required command: $command"
+done
+
+php "$ROOT/tests/unit/base-v1-contract.php"
+
+"$ROOT/tools/i18n/check"
+
+while IFS= read -r -d '' file; do
+  php -l "$file" >/dev/null || fail "PHP lint failed: $file"
+done < <(find "$ROOT" -type f -name '*.php' -not -path '*/.git/*' -not -path '*/dist/*' -not -path '*/build/*' -print0)
+while IFS= read -r -d '' file; do
+  node --check "$file" >/dev/null || fail "JavaScript syntax failed: $file"
+done < <(find "$ROOT/assets" -type f -name '*.js' -print0)
+
+# Product behavior/unit authority remains .github/workflows/ci.yml. Packaging
+# intentionally does not duplicate that large evolving test selection.
+PACKAGE_ROOT="$STAGE/$SLUG"
+ZIP="$DIST/$SLUG-$VERSION.zip"
+CHECKSUM="$ZIP.sha256"
+mkdir -p "$DIST" "$PACKAGE_ROOT"
+rm -f "$ZIP" "$CHECKSUM"
+
+for path in core-blueprint-automations.php uninstall.php; do
+  [[ -f "$ROOT/$path" ]] || fail "required release file is missing: $path"
+  cp "$ROOT/$path" "$PACKAGE_ROOT/"
+done
+for path in src assets templates languages; do
+  [[ -d "$ROOT/$path" ]] || fail "required release directory is missing: $path"
+  cp -R "$ROOT/$path" "$PACKAGE_ROOT/"
+done
+
+POT="$PACKAGE_ROOT/languages/core-blueprint-automations.pot"
+[[ -s "$POT" ]] || fail "canonical POT is missing from release staging"
+rm -f "$PACKAGE_ROOT/languages/"*.mo
+for locale in "${LOCALES[@]}"; do
+  po="$PACKAGE_ROOT/languages/core-blueprint-automations-${locale}.po"
+  mo="$PACKAGE_ROOT/languages/core-blueprint-automations-${locale}.mo"
+  [[ -s "$po" ]] || fail "reviewed PO is missing for $locale"
+  msgfmt --check-format --check-header -o "$mo" "$po"
+  [[ -s "$mo" ]] || fail "compiled MO is missing for $locale"
+done
+
+while IFS= read -r -d '' file; do
+  php -l "$file" >/dev/null || fail "staged PHP lint failed: $file"
+done < <(find "$PACKAGE_ROOT" -type f -name '*.php' -print0)
+while IFS= read -r -d '' file; do
+  node --check "$file" >/dev/null || fail "staged JavaScript syntax failed: $file"
+done < <(find "$PACKAGE_ROOT/assets" -type f -name '*.js' -print0)
+
+find "$PACKAGE_ROOT" -exec touch -t 198001010000 {} +
+(
+  cd "$STAGE"
+  zip -X -q "$ZIP" "$SLUG/"
+  find "$SLUG" -type f -print | LC_ALL=C sort | zip -X -q "$ZIP" -@
+)
+
+unzip -tqq "$ZIP"
+ZIP_ENTRIES="$(unzip -Z1 "$ZIP")"
+FIRST_ENTRY="${ZIP_ENTRIES%%$'\n'*}"
+[[ "$FIRST_ENTRY" == "$SLUG/" ]] || fail "release ZIP root is not $SLUG/"
+if grep -Eq '(^|/)(\.git|\.github|tests|tools|docs|dist|build|node_modules|vendor)(/|$)' <<<"$ZIP_ENTRIES"; then
+  fail "development-only files leaked into the release ZIP"
+fi
+for required in "$SLUG/core-blueprint-automations.php" "$SLUG/uninstall.php" "$SLUG/languages/core-blueprint-automations.pot"; do
+  grep -Fxq "$required" <<<"$ZIP_ENTRIES" || fail "required release file missing from ZIP: $required"
+done
+for locale in "${LOCALES[@]}"; do
+  for ext in po mo; do
+    required="$SLUG/languages/core-blueprint-automations-${locale}.${ext}"
+    grep -Fxq "$required" <<<"$ZIP_ENTRIES" || fail "required catalog missing from ZIP: $required"
+  done
+done
+
+PACKAGED_ENTRY="$PACKAGE_ROOT/core-blueprint-automations.php"
+PACKAGED_VERSION="$(header_value "$PACKAGED_ENTRY" 'Version')"
+PACKAGED_CONSTANT="$(define_value "$PACKAGED_ENTRY" 'CB_AUTOMATIONS_VERSION')"
+[[ "$PACKAGED_VERSION" == "$VERSION" && "$PACKAGED_CONSTANT" == "$VERSION" ]] || fail "packaged version identity does not match source"
+
+(
+  cd "$DIST"
+  sha256sum "$(basename "$ZIP")" > "$(basename "$CHECKSUM")"
+)
+SHA256="$(awk '{print $1}' "$CHECKSUM")"
+printf 'Automations release build: PASS\nPackage: %s\nCanonical root: %s/\nSHA-256: %s\n' "$ZIP" "$SLUG" "$SHA256"
