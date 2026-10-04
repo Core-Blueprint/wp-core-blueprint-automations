@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace CB\Automations\Template;
 
 use CB\Automations\Workflow\DefinitionCodec;
-use CB\Core\ExtensionRegistry;
+use CoreBlueprint\Core\ExtensionRegistry;
 
 defined( 'ABSPATH' ) || exit;
 
