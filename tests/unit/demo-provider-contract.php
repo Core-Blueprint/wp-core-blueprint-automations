@@ -14,7 +14,7 @@ namespace CB\Core {
 	}
 }
 
-namespace CB\Core\Automation {
+namespace CoreBlueprint\Core\Automation {
 	final class TriggerRegistry {
 		/** @var array<int,array<string,mixed>> */
 		public static array $definitions = [];
@@ -50,10 +50,10 @@ namespace CB\Core\Automation {
 }
 
 namespace {
-	use CB\Core\Automation\ActionRegistry;
-	use CB\Core\Automation\StateRegistry;
-	use CB\Core\Automation\TriggerRegistry;
-	use CB\Core\ExtensionRegistry;
+	use CoreBlueprint\Core\Automation\ActionRegistry;
+	use CoreBlueprint\Core\Automation\StateRegistry;
+	use CoreBlueprint\Core\Automation\TriggerRegistry;
+	use CoreBlueprint\Core\ExtensionRegistry;
 
 	define( 'ABSPATH', __DIR__ . '/' );
 
@@ -78,10 +78,10 @@ namespace {
 
 	require dirname( __DIR__ ) . '/fixtures/core-blueprint-automations-demo-provider.php';
 
-	foreach ( $demo_hooks['cb_core_register_extensions'] ?? [] as $callback ) {
+	foreach ( $demo_hooks['core_blueprint_register_extensions'] ?? [] as $callback ) {
 		$callback();
 	}
-	foreach ( $demo_hooks['cb_core_register_automation_capabilities'] ?? [] as $callback ) {
+	foreach ( $demo_hooks['core_blueprint_register_automation_capabilities'] ?? [] as $callback ) {
 		$callback();
 	}
 
