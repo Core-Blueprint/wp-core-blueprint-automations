@@ -27,7 +27,7 @@ foreach ( $files as $name => $path ) {
 
 $failures = [];
 
-if ( ! str_contains( $sources['intake'], "cb_core_automation_trigger_emitted" ) ) {
+if ( ! str_contains( $sources['intake'], "core_blueprint_automation_trigger_emitted" ) ) {
 	$failures[] = 'Runtime intake is not subscribed to Base trigger delivery.';
 }
 if ( str_contains( $sources['intake'], 'START TRANSACTION' ) || str_contains( $sources['intake'], 'COMMIT' ) ) {
