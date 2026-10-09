@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace CB\Core {
+namespace CoreBlueprint\Core {
 	final class ExtensionRegistry {
 		/** @var array<int,array<string,mixed>> */
 		public static array $definitions = [];
