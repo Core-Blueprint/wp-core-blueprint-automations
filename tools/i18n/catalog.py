@@ -11,8 +11,16 @@ import shutil
 import subprocess
 import tempfile
 
-I18N_TOOLING_VERSION = "1.1.0"
+I18N_TOOLING_VERSION = "1.1.1"
 LOCALES = ("nl_NL", "de_DE", "fr_FR", "es_ES", "it_IT", "pt_PT")
+
+PLUGIN_METADATA_IDENTITY_COMMENTS = {
+    "Plugin Name of the plugin",
+    "Plugin URI of the plugin",
+    "Author of the plugin",
+    "Author URI of the plugin",
+    "Version of the plugin",
+}
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 ROOT = SCRIPT_DIR.parents[1]
@@ -287,6 +295,37 @@ def replace_singular_translation(block: str, translation: str) -> str:
     fail("shared translation target has no msgstr")
 
 
+def apply_plugin_metadata_identity_defaults(po_path: Path) -> None:
+    current = blocks(po_path)
+    changed = False
+
+    for index, block in enumerate(current):
+        lines = block.splitlines()
+        msgid = directive(lines, "msgid")
+        if not msgid:
+            continue
+        if directive(lines, "msgctxt") is not None or directive(lines, "msgid_plural") is not None:
+            continue
+
+        comments = {
+            line[3:].strip()
+            for line in lines
+            if line.startswith("#. ")
+        }
+        if not comments.intersection(PLUGIN_METADATA_IDENTITY_COMMENTS):
+            continue
+
+        values = translation_values(block)
+        if values and values[0].strip():
+            continue
+
+        current[index] = replace_singular_translation(block, msgid)
+        changed = True
+
+    if changed:
+        po_path.write_text("\n\n".join(current).rstrip() + "\n", encoding="utf-8")
+
+
 def apply_shared_translations(po_path: Path, locale: str, pot_keys: set[str]) -> None:
     current = blocks(po_path)
     by_msgid: dict[str, int] = {}
@@ -408,56 +447,73 @@ def do_update(args: argparse.Namespace, cfg: dict) -> None:
     stamp = source_stamp(cfg, git_bin)
     lang = ROOT / "languages"
     lang.mkdir(parents=True, exist_ok=True)
-    pot = lang / f"{cfg['domain']}.pot"
 
-    generate_pot(cfg, pot, wp, version)
-    rewrite_header(
-        pot,
-        {
-            "Project-Id-Version": f"{cfg['product']} {version}",
-            "POT-Creation-Date": stamp,
-        },
-    )
-    pot_keys = key_set(pot)
-    if not pot_keys:
-        fail("generated POT contains no translatable messages")
+    with tempfile.TemporaryDirectory(prefix=".cb-i18n-update-", dir=lang) as tmpdir:
+        staged = Path(tmpdir)
+        pot = staged / f"{cfg['domain']}.pot"
 
-    for locale in LOCALES:
-        po = lang / f"{cfg['domain']}-{locale}.po"
-        if not po.is_file():
-            fail(f"missing reviewed translation source: {po.relative_to(ROOT)}")
-
-        run(
-            [
-                msgmerge,
-                "--update",
-                "--backup=none",
-                "--no-fuzzy-matching",
-                str(po),
-                str(pot),
-            ]
+        generate_pot(cfg, pot, wp, version)
+        rewrite_header(
+            pot,
+            {
+                "Project-Id-Version": f"{cfg['product']} {version}",
+                "POT-Creation-Date": stamp,
+            },
         )
-        tmp = po.with_suffix(".po.tmp")
-        run([msgattrib, "--no-obsolete", "-o", str(tmp), str(po)])
-        tmp.replace(po)
+        pot_keys = key_set(pot)
+        if not pot_keys:
+            fail("generated POT contains no translatable messages")
 
-        apply_shared_translations(po, locale, pot_keys)
-        normalize_po_headers(po, cfg, version, stamp, locale)
+        artifacts: list[tuple[Path, Path]] = [
+            (pot, lang / pot.name),
+        ]
 
-        mo_output = lang / f"{cfg['domain']}-{locale}.mo" if cfg["commit_mo"] else None
-        validate_po(po, pot_keys, msgfmt, mo_output)
+        for locale in LOCALES:
+            source_po = lang / f"{cfg['domain']}-{locale}.po"
+            if not source_po.is_file():
+                fail(f"missing reviewed translation source: {source_po.relative_to(ROOT)}")
 
-        if cfg["commit_l10n_php"]:
-            expected_name = f"{cfg['domain']}-{locale}.l10n.php"
-            with tempfile.TemporaryDirectory(prefix="cb-i18n-php-") as tmpdir:
-                generated = generate_l10n_php(wp, po, Path(tmpdir), expected_name)
-                shutil.copyfile(generated, lang / expected_name)
+            po = staged / source_po.name
+            shutil.copyfile(source_po, po)
+
+            run(
+                [
+                    msgmerge,
+                    "--update",
+                    "--backup=none",
+                    "--no-fuzzy-matching",
+                    str(po),
+                    str(pot),
+                ]
+            )
+            tmp = po.with_suffix(".po.tmp")
+            run([msgattrib, "--no-obsolete", "-o", str(tmp), str(po)])
+            tmp.replace(po)
+
+            apply_shared_translations(po, locale, pot_keys)
+            apply_plugin_metadata_identity_defaults(po)
+            normalize_po_headers(po, cfg, version, stamp, locale)
+
+            mo_output = staged / f"{cfg['domain']}-{locale}.mo" if cfg["commit_mo"] else None
+            validate_po(po, pot_keys, msgfmt, mo_output)
+
+            artifacts.append((po, source_po))
+            if mo_output is not None:
+                artifacts.append((mo_output, lang / mo_output.name))
+
+            if cfg["commit_l10n_php"]:
+                expected_name = f"{cfg['domain']}-{locale}.l10n.php"
+                php_dir = staged / f"php-{locale}"
+                generated = generate_l10n_php(wp, po, php_dir, expected_name)
+                artifacts.append((generated, lang / expected_name))
+
+        for staged_path, destination in artifacts:
+            shutil.copyfile(staged_path, destination)
 
     print(
         f"PASS: {cfg['product']} catalogs updated from source; "
         f"locales={len(LOCALES)} tooling={I18N_TOOLING_VERSION}"
     )
-
 
 def do_check(args: argparse.Namespace, cfg: dict) -> None:
     wp = command(args.wp_bin)

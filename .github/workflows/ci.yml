@@ -58,6 +58,9 @@ jobs:
       - name: Admin product surface regression
         run: php tests/unit/admin-product-surface.php
 
+      - name: Public Base admin page requirements regression
+        run: php tests/unit/base-public-admin-pages.php
+
       - name: AU2 runtime bootstrap boundary
         run: php tests/unit/runtime-bootstrap.php
 

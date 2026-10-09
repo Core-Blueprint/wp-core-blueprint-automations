@@ -31,7 +31,7 @@ $expectations = [
 	[ str_contains( $files['suite'], 'MenuGroupRegistry::register(' ), 'Automations must register its product area through Base MenuGroupRegistry.' ],
 	[ ! str_contains( $files['suite'], "'design-editor'" ), 'The overview page must not load the Designer foundation unconditionally.' ],
 	[ ! str_contains( $files['suite'], 'PageRegistry::register(' ), 'Automations must not keep the old Core Blueprint submenu registration path.' ],
-	[ str_contains( $files['requirements'], "'\\\\CB\\\\Core\\\\Admin\\\\MenuGroupRegistry'" ), 'Admin requirements must fail closed when the canonical Base menu-group contract is unavailable.' ],
+	[ str_contains( $files['requirements'], "'\\\\CoreBlueprint\\\\Core\\\\Admin\\\\MenuGroupRegistry'" ), 'Admin requirements must fail closed when the canonical Base menu-group contract is unavailable.' ],
 	[ str_contains( $files['admin_assets'], 'MenuGroupRegistry::is_page_hook' ), 'Admin assets must honor the canonical landing and child page hooks.' ],
 	[ str_contains( $files['admin_assets'], 'AutomationsPage::requested_workflow_id()' ), 'Overview and editor assets must be route-scoped.' ],
 	[ str_contains( $files['designer'], 'MenuGroupRegistry::is_page_hook' ), 'Designer assets must honor the canonical landing and child page hooks.' ],

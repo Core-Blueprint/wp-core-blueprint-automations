@@ -63,7 +63,7 @@ final class Suite {
 			[
 				AutomationsPage::SLUG => [
 					'components' => [
-						'actions',
+						'buttons',
 						'empty-state',
 						'fields',
 						'form-controls',
@@ -74,7 +74,7 @@ final class Suite {
 				],
 				AutomationRunsPage::SLUG => [
 					'components' => [
-						'actions',
+						'buttons',
 						'notices',
 						'status',
 					],

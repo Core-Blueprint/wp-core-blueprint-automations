@@ -11,7 +11,7 @@ tools/i18n/check
 
 `tools/i18n/check` is the mandatory read-only release gate. Automations does not commit MO files; `tools/build-release` compiles fresh MO catalogs from reviewed PO source inside the staged customer package.
 
-Automations is currently on a localization content hold: the release POT and six reviewed PO catalogs are not yet established. The release builder therefore intentionally fails closed until the canonical gate can pass. Do not bypass this with placeholder or machine-generated release translations.
+The repository contains a POT and all six locale PO catalogs (NL, DE, FR, ES, IT, PT). The shared first-party i18n toolchain is pinned to version **1.1.1**; this does not by itself establish release readiness. Verify source/POT/PO alignment with `tools/i18n/check` on the candidate HEAD before building. Any newly introduced messages require checked, meaningful locale translations. Do not bypass a failing check with placeholders.
 
 ## Release build
 
@@ -21,7 +21,7 @@ Run:
 bash tools/build-release
 ```
 
-The builder requires PHP, Node.js, Python 3, WP-CLI with `wp i18n`, GNU gettext `msgfmt`, `rsync`, `zip` and `unzip`.
+The builder requires PHP, Node.js, Python 3, WP-CLI with `wp i18n`, GNU gettext `msgfmt`, `zip`, `unzip` and `sha256sum`.
 
 Release preflight requires canonical localization plus PHP and JavaScript syntax validation. Product unit/regression authority remains in `.github/workflows/ci.yml`; the packaging script does not duplicate that full matrix.
 
