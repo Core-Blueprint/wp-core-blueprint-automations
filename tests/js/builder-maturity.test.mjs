@@ -58,7 +58,9 @@ test('Automation Builder keeps canonical persistence, shared-shell ownership and
 	assert.match(editor, /window\.cbAutomationsEditorSession/);
 	assert.match(editor, /cb-automations:definitionchange/);
 	assert.match(editor, /window\.cbCore\?\.designEditor\?\.motion\?\.animateLayoutChange/);
-	assert.match(history, /import \{[^}]*CommandHistory[^}]*EditorState[^}]*ProjectState[^}]*animateLayoutChange[^}]*\} from '@cb-core\/design-editor'/);
+	assert.match(history, /createDesignerStateHistory/);
+	assert.doesNotMatch(history, /\b(?:CommandHistory|EditorState|ProjectState)\b/);
+	assert.match(history, /resetForContext/);
 	assert.match(history, /history\.undo\(\)/);
 	assert.match(history, /history\.redo\(\)/);
 	assert.match(history, /event\.detail\?\.baselineDefinition/);
