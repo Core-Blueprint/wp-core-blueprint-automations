@@ -215,6 +215,14 @@
 	const observer = new MutationObserver(() => decorate());
 	observer.observe(root, { childList: true, subtree: true });
 	root.addEventListener('cb-automations:definitionchange', () => queueMicrotask(restoreSelection));
+	shell.addEventListener('cb-automations:contextloaded', () => {
+		selected = null;
+		root.querySelectorAll('.is-builder-selected').forEach((card) => {
+			card.classList.remove('is-builder-selected');
+			card.removeAttribute('aria-current');
+		});
+		renderInspector(null);
+	});
 	return true;
 	};
 	if (!initialize()) window.addEventListener('cb:design-editor:ready', initialize, { once: true });

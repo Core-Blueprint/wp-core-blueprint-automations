@@ -320,6 +320,7 @@
 		});
 	}
 
+	root.addEventListener('cb-automations:definitionchange', scheduleEnhance);
 	root.addEventListener('change', scheduleEnhance);
 	root.addEventListener('input', scheduleEnhance);
 	root.addEventListener('click', scheduleEnhance);

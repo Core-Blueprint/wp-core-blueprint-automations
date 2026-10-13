@@ -269,6 +269,7 @@
 		});
 	}
 
+	root.addEventListener('cb-automations:definitionchange', schedulePolish);
 	root.addEventListener('change', schedulePolish);
 	root.addEventListener('input', schedulePolish);
 	root.addEventListener('click', schedulePolish);

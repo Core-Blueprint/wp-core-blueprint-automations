@@ -357,7 +357,7 @@
 
 	root.addEventListener('cb-automations:definitionchange', (event) => {
 		const source = String(event.detail?.source || '');
-		if (source !== 'initial' && source !== 'submit') queueMicrotask(markStale);
+		if (source !== 'initial' && source !== 'submit' && source !== 'context') queueMicrotask(markStale);
 	});
 	root.addEventListener('change', (event) => {
 		if (!isPresentationOnlyEvent(event)) queueMicrotask(markStale);

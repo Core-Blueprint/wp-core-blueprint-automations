@@ -27,15 +27,110 @@ if (root) {
 			|| Boolean(authority?.checked) !== baseline.rebind
 		);
 
-		let confirmedNavigation = false;
 		window.addEventListener('beforeunload', (event) => {
-			if (!confirmedNavigation && isDirty()) {
-				event.preventDefault();
-				event.returnValue = '';
-			}
+			if (!isDirty()) return;
+			event.preventDefault();
+			event.returnValue = '';
 		});
 
 		const launchRoot = root.closest('[data-cb-design-launch-root]');
+		const contextDataNode = document.getElementById('cb-automations-editor-data');
+		const contextError = (key, fallback) => new Error(
+			String(window.cbAutomationsInspectorStrings?.[key] || fallback)
+		);
+		const switchContext = async (url) => {
+			if (shell.hasAttribute('aria-busy')) throw contextError('saveInProgress', 'Wait for the current save to finish.');
+			const session = window.cbAutomationsEditorSession;
+			const history = window.cbAutomationsBuilderHistory;
+			if (!session?.replace || !history?.resetForContext || !contextDataNode) {
+				throw contextError('contextUnavailable', 'Workflow switching is not available. Reload the editor.');
+			}
+			const id = Number(url.searchParams.get('workflow'));
+			if (!Number.isSafeInteger(id) || id < 1 || url.searchParams.get('page') !== 'core-blueprint-automations-workflows') {
+				throw contextError('contextUnavailable', 'Invalid workflow selection.');
+			}
+			const response = await fetch(url.href, { credentials: 'same-origin' });
+			if (!response.ok) throw contextError('loadFailed', 'Could not load the selected workflow.');
+			const nextDocument = new DOMParser().parseFromString(await response.text(), 'text/html');
+			const nextDataNode = nextDocument.getElementById('cb-automations-editor-data');
+			const nextForm = nextDocument.querySelector('[data-cb-automations-editor-form]');
+			if (!nextDataNode || !nextForm) throw contextError('contextUnavailable', 'The selected workflow cannot be edited in Designer Mode.');
+			let nextData;
+			let existingData;
+			try {
+				nextData = JSON.parse(nextDataNode.textContent || '{}');
+				existingData = JSON.parse(contextDataNode.textContent || '{}');
+			} catch {
+				throw contextError('loadFailed', 'The selected workflow data could not be read.');
+			}
+			const nextWorkflow = nextData.workflow;
+			const nextDefinition = nextWorkflow?.definition;
+			if (Number(nextWorkflow?.id) !== id || !nextDefinition || typeof nextDefinition !== 'object' || Array.isArray(nextDefinition)) {
+				throw contextError('loadFailed', 'The selected workflow data is invalid.');
+			}
+			// Editor/picker condition registries are session-scoped; fail closed if
+			// provider contracts have changed since initialization.
+			if (JSON.stringify(nextData.capabilities) !== JSON.stringify(existingData.capabilities)
+				|| JSON.stringify(nextData.operators) !== JSON.stringify(existingData.operators)) {
+				throw contextError('catalogChanged', 'Available capabilities changed. Reload Designer before switching workflows.');
+			}
+			const nextId = nextForm.querySelector('[name="workflow_id"]');
+			const nextRevision = nextForm.querySelector('[name="revision"]');
+			const currentId = form?.querySelector('[name="workflow_id"]');
+			const currentRevision = form?.querySelector('[name="revision"]');
+			const incomingName = nextForm.querySelector('[name="name"]');
+			const incomingActivation = nextForm.querySelector('[name="activation_state"]');
+			const incomingPrincipal = nextForm.querySelector('[data-cb-automations-principal-label]');
+			if (!nextId || !nextRevision || !currentId || !currentRevision || !incomingName || !incomingActivation) {
+				throw contextError('loadFailed', 'The selected workflow form is incomplete.');
+			}
+			if (String(nextId.value) !== String(id)) throw contextError('loadFailed', 'Workflow identifiers do not match.');
+			// Validation recovery owns status cards; its issue shape is the saved
+			// validation contract with messages from the server-rendered view.
+			const messages = Array.from(nextDocument.querySelectorAll('.cb-automations-validation-list > li strong'))
+				.map((node) => node.textContent?.trim() || '');
+			const issues = Array.isArray(nextData.validation) ? nextData.validation.map((issue, index) => ({
+				...issue,
+				message: messages[index] || '',
+			})) : [];
+			session.replace(nextDefinition, { source: 'context' });
+			currentId.value = String(id);
+			currentRevision.value = nextRevision.value;
+			if (name) name.value = incomingName.value;
+			if (activation) activation.value = incomingActivation.value;
+			if (authority) authority.checked = false;
+			const principalLabel = form?.querySelector('[data-cb-automations-principal-label]');
+			if (principalLabel && incomingPrincipal) principalLabel.textContent = incomingPrincipal.textContent;
+			const heading = document.querySelector('.cb-automations-editor-heading .cb-core-title');
+			if (heading) heading.textContent = incomingName.value;
+			const oldStatuses = document.querySelectorAll('.cb-automations-editor-statuses .cb-core-status');
+			const newStatuses = nextDocument.querySelectorAll('.cb-automations-editor-statuses .cb-core-status');
+			oldStatuses.forEach((node, index) => {
+				const next = newStatuses.item(index);
+				if (!next) return;
+				node.className = next.className;
+				node.replaceChildren(...Array.from(next.childNodes).map((child) => document.importNode(child, true)));
+			});
+			contextDataNode.textContent = nextDataNode.textContent;
+			history.resetForContext(nextDefinition);
+			shell.dispatchEvent(new CustomEvent('cb-automations:validation-saved', {
+				bubbles: true,
+				detail: Object.freeze({ valid: issues.length === 0, issues }),
+			}));
+			shell.dispatchEvent(new CustomEvent('cb-automations:contextloaded', {
+				bubbles: true,
+				detail: Object.freeze({ workflowId: id, definition: nextDefinition }),
+			}));
+			baseline = {
+				definition: normalized(JSON.stringify(nextDefinition)),
+				name: incomingName.value,
+				activation: incomingActivation.value,
+				rebind: false,
+			};
+			window.history.replaceState(window.history.state, '', url.href);
+			return Object.freeze({ workflowId: id });
+		};
+
 		launchRoot?.addEventListener('cb:design-shell:contextrequest', (event) => {
 			if (event.detail?.control !== workflowSwitcher) return;
 			const target = String(event.detail.value || '').trim();
@@ -43,12 +138,11 @@ if (root) {
 			try { url = new URL(target, window.location.href); }
 			catch { return; }
 			if (!target || url.origin !== window.location.origin) return;
-			if (isDirty() && !window.confirm(
-				String(window.cbAutomationsInspectorStrings?.unsavedChanges || 'This workflow has unsaved changes. Switch workflows and discard those changes?')
-			)) return;
-			confirmedNavigation = true;
-			event.detail.respondWith(Promise.resolve({ route: url.href }));
-			window.location.assign(url.href);
+			if (isDirty() && !window.confirm(String(
+				window.cbAutomationsInspectorStrings?.unsavedChanges
+				|| 'This workflow has unsaved changes. Switch workflows and discard those changes?'
+			))) return;
+			event.detail.respondWith(switchContext(url));
 		});
 
 		root.addEventListener('cb:design-shell:savechange', (event) => {
@@ -133,6 +227,11 @@ if (root) {
 		root.addEventListener('cb-automations:definitionchange', (event) => {
 			currentDefinition = event.detail?.definition || currentDefinition;
 			navigation.update(itemsFor(currentDefinition), { activeId: activeStage });
+		});
+		root.addEventListener('cb-automations:contextloaded', () => {
+			activeStage = 'trigger';
+			canvas.scrollTop = 0;
+			navigation.setActive(activeStage);
 		});
 		syncStage();
 	}
