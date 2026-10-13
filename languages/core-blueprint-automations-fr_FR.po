@@ -2237,3 +2237,27 @@ msgstr "Référence de la fonctionnalité et identifiants du flux"
 #: templates/admin/workflow-editor.php
 msgid "Workflow health"
 msgstr "État du flux de travail"
+
+#: src/Admin/DesignerAssets.php
+msgid "Wait for the current save to finish."
+msgstr "Attendez la fin de l’enregistrement en cours."
+
+#: src/Admin/DesignerAssets.php
+msgid "Workflow switching is not available. Reload the editor."
+msgstr "Le changement de flux n’est pas disponible. Rechargez l’éditeur."
+
+#: src/Admin/DesignerAssets.php
+msgid "Could not load the selected workflow."
+msgstr "Impossible de charger le flux sélectionné."
+
+#: src/Admin/DesignerAssets.php
+msgid "Available capabilities changed. Reload Designer before switching workflows."
+msgstr "Les fonctionnalités disponibles ont changé. Rechargez le concepteur avant de changer de flux."
+
+#: src/Admin/DesignerAssets.php
+msgid "Configure trigger"
+msgstr "Configurer le déclencheur"
+
+#: templates/admin/workflow-editor.php
+msgid "Conditions become available when earlier steps provide output data."
+msgstr "Les conditions deviennent disponibles lorsque les étapes précédentes fournissent des données de sortie."
