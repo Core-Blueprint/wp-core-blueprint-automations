@@ -2150,10 +2150,6 @@ msgstr "Detalles de automatización"
 msgid "Settings"
 msgstr "Ajustes"
 
-#: templates/admin/workflow-editor.php:187
-msgid "Health"
-msgstr "Estado"
-
 #: templates/admin/workflow-editor.php:201
 msgid "Workflow settings"
 msgstr "Ajustes del flujo de trabajo"
@@ -2221,3 +2217,28 @@ msgstr ""
 "Restaura o actualiza primero el proveedor correspondiente; Automations "
 "volverá a evaluar automáticamente el flujo de trabajo en la siguiente carga "
 "de página."
+
+
+#: src/Admin/DesignerAssets.php
+msgid "This workflow has unsaved changes. Switch workflows and discard those changes?"
+msgstr "Este flujo de trabajo tiene cambios sin guardar. ¿Cambiar de flujo y descartar los cambios?"
+
+#: src/Admin/DesignerAssets.php
+msgid "No workflow step selected"
+msgstr "Ningún paso del flujo seleccionado"
+
+#: src/Admin/DesignerAssets.php
+msgid "Edit this step on the workflow canvas."
+msgstr "Edita este paso en el lienzo del flujo de trabajo."
+
+#: src/Admin/DesignerAssets.php
+msgid "This capability is unavailable. Choose a replacement on the canvas."
+msgstr "Esta capacidad no está disponible. Elige un reemplazo en el lienzo."
+
+#: src/Admin/DesignerAssets.php
+msgid "Capability reference and workflow identifiers"
+msgstr "Referencia de la capacidad e identificadores del flujo"
+
+#: templates/admin/workflow-editor.php
+msgid "Workflow health"
+msgstr "Estado del flujo de trabajo"

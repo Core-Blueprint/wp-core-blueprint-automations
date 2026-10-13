@@ -1933,10 +1933,6 @@ msgstr ""
 msgid "Settings"
 msgstr ""
 
-#: templates/admin/workflow-editor.php:187
-msgid "Health"
-msgstr ""
-
 #: templates/admin/workflow-editor.php:201
 msgid "Workflow settings"
 msgstr ""
@@ -1975,4 +1971,29 @@ msgstr ""
 
 #: templates/admin/workflow-review.php:28
 msgid "The stored workflow definition has been preserved unchanged. Restore or update the relevant provider first; Automations will re-evaluate the workflow automatically on the next page load."
+msgstr ""
+
+
+#: src/Admin/DesignerAssets.php
+msgid "This workflow has unsaved changes. Switch workflows and discard those changes?"
+msgstr ""
+
+#: src/Admin/DesignerAssets.php
+msgid "No workflow step selected"
+msgstr ""
+
+#: src/Admin/DesignerAssets.php
+msgid "Edit this step on the workflow canvas."
+msgstr ""
+
+#: src/Admin/DesignerAssets.php
+msgid "This capability is unavailable. Choose a replacement on the canvas."
+msgstr ""
+
+#: src/Admin/DesignerAssets.php
+msgid "Capability reference and workflow identifiers"
+msgstr ""
+
+#: templates/admin/workflow-editor.php
+msgid "Workflow health"
 msgstr ""

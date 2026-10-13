@@ -2131,10 +2131,6 @@ msgstr "Automatiseringsdetails"
 msgid "Settings"
 msgstr "Instellingen"
 
-#: templates/admin/workflow-editor.php:187
-msgid "Health"
-msgstr "Status"
-
 #: templates/admin/workflow-editor.php:201
 msgid "Workflow settings"
 msgstr "Workflowinstellingen"
@@ -2201,3 +2197,28 @@ msgstr ""
 "De opgeslagen workflowdefinitie is ongewijzigd bewaard. Herstel of werk "
 "eerst de relevante provider bij; Automations beoordeelt de workflow "
 "automatisch opnieuw bij de volgende paginalaad."
+
+
+#: src/Admin/DesignerAssets.php
+msgid "This workflow has unsaved changes. Switch workflows and discard those changes?"
+msgstr "Deze workflow bevat niet-opgeslagen wijzigingen. Wil je van workflow wisselen en de wijzigingen verwijderen?"
+
+#: src/Admin/DesignerAssets.php
+msgid "No workflow step selected"
+msgstr "Geen workflowstap geselecteerd"
+
+#: src/Admin/DesignerAssets.php
+msgid "Edit this step on the workflow canvas."
+msgstr "Bewerk deze stap op het workflowcanvas."
+
+#: src/Admin/DesignerAssets.php
+msgid "This capability is unavailable. Choose a replacement on the canvas."
+msgstr "Deze mogelijkheid is niet beschikbaar. Kies een vervanging op het canvas."
+
+#: src/Admin/DesignerAssets.php
+msgid "Capability reference and workflow identifiers"
+msgstr "Mogelijkheidsreferentie en workflow-identificaties"
+
+#: templates/admin/workflow-editor.php
+msgid "Workflow health"
+msgstr "Workflowcontrole"

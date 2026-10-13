@@ -2147,10 +2147,6 @@ msgstr "Automatisierungsdetails"
 msgid "Settings"
 msgstr "Einstellungen"
 
-#: templates/admin/workflow-editor.php:187
-msgid "Health"
-msgstr "Zustand"
-
 #: templates/admin/workflow-editor.php:201
 msgid "Workflow settings"
 msgstr "Workflow-Einstellungen"
@@ -2217,3 +2213,28 @@ msgstr ""
 "Die gespeicherte Workflow-Definition wurde unverändert beibehalten. Stelle "
 "zuerst den relevanten Anbieter wieder her oder aktualisiere ihn; Automations "
 "bewertet den Workflow beim nächsten Laden der Seite automatisch erneut."
+
+
+#: src/Admin/DesignerAssets.php
+msgid "This workflow has unsaved changes. Switch workflows and discard those changes?"
+msgstr "Dieser Workflow enthält ungespeicherte Änderungen. Workflow wechseln und Änderungen verwerfen?"
+
+#: src/Admin/DesignerAssets.php
+msgid "No workflow step selected"
+msgstr "Kein Workflow-Schritt ausgewählt"
+
+#: src/Admin/DesignerAssets.php
+msgid "Edit this step on the workflow canvas."
+msgstr "Bearbeite diesen Schritt auf der Workflow-Arbeitsfläche."
+
+#: src/Admin/DesignerAssets.php
+msgid "This capability is unavailable. Choose a replacement on the canvas."
+msgstr "Diese Funktion ist nicht verfügbar. Wähle auf der Arbeitsfläche einen Ersatz."
+
+#: src/Admin/DesignerAssets.php
+msgid "Capability reference and workflow identifiers"
+msgstr "Funktionsreferenz und Workflow-Kennungen"
+
+#: templates/admin/workflow-editor.php
+msgid "Workflow health"
+msgstr "Workflow-Status"
