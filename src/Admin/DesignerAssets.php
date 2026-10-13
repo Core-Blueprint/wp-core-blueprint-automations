@@ -59,6 +59,10 @@ final class DesignerAssets {
 				'inspector'    => __( 'Inspector', 'core-blueprint-automations' ),
 				'properties'   => __( 'Properties', 'core-blueprint-automations' ),
 				'unsavedChanges' => __( 'This workflow has unsaved changes. Switch workflows and discard those changes?', 'core-blueprint-automations' ),
+				'saveInProgress' => __( 'Wait for the current save to finish.', 'core-blueprint-automations' ),
+				'contextUnavailable' => __( 'Workflow switching is not available. Reload the editor.', 'core-blueprint-automations' ),
+				'loadFailed' => __( 'Could not load the selected workflow.', 'core-blueprint-automations' ),
+				'catalogChanged' => __( 'Available capabilities changed. Reload Designer before switching workflows.', 'core-blueprint-automations' ),
 				'navigation'    => [
 					'ariaLabel'             => __( 'Workflow stages', 'core-blueprint-automations' ),
 					'trigger'               => __( 'WHEN', 'core-blueprint-automations' ),
@@ -78,6 +82,7 @@ final class DesignerAssets {
 				'technicalDetails' => __( 'Technical details', 'core-blueprint-automations' ),
 				'detailsSummary' => __( 'Capability reference and workflow identifiers', 'core-blueprint-automations' ),
 				'selectStep'   => __( 'Select a workflow step to inspect its context.', 'core-blueprint-automations' ),
+				'selectTrigger' => __( 'Configure trigger', 'core-blueprint-automations' ),
 				'stage'        => __( 'Stage', 'core-blueprint-automations' ),
 				'provider'     => __( 'Provider', 'core-blueprint-automations' ),
 				'capability'   => __( 'Capability', 'core-blueprint-automations' ),

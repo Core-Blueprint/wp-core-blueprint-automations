@@ -164,6 +164,7 @@ if ( ! is_string( $definition_json ) ) {
 							<p class="cb-automations-stage-description"><?php esc_html_e( 'Add rules that must match before any actions are allowed to continue.', 'core-blueprint-automations' ); ?></p>
 							<div data-cb-automations-conditions></div>
 							<div class="cb-core-actions cb-automations-stage-actions"><button type="button" class="button cb-core-button cb-core-button--secondary" data-cb-add-condition><?php esc_html_e( 'Add condition', 'core-blueprint-automations' ); ?></button></div>
+							<p class="cb-core-design-shell__panel-section-description" data-cb-automations-condition-hint hidden><?php esc_html_e( 'Conditions become available when earlier steps provide output data.', 'core-blueprint-automations' ); ?></p>
 						</section>
 
 						<section id="cb-automations-stage-actions" class="cb-core-panel cb-automations-stage" data-stage="actions" tabindex="-1">
