@@ -1997,3 +1997,27 @@ msgstr ""
 #: templates/admin/workflow-editor.php
 msgid "Workflow health"
 msgstr ""
+
+#: src/Admin/DesignerAssets.php
+msgid "Wait for the current save to finish."
+msgstr ""
+
+#: src/Admin/DesignerAssets.php
+msgid "Workflow switching is not available. Reload the editor."
+msgstr ""
+
+#: src/Admin/DesignerAssets.php
+msgid "Could not load the selected workflow."
+msgstr ""
+
+#: src/Admin/DesignerAssets.php
+msgid "Available capabilities changed. Reload Designer before switching workflows."
+msgstr ""
+
+#: src/Admin/DesignerAssets.php
+msgid "Configure trigger"
+msgstr ""
+
+#: templates/admin/workflow-editor.php
+msgid "Conditions become available when earlier steps provide output data."
+msgstr ""
