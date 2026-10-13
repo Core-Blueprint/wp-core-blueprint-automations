@@ -30,6 +30,7 @@ test('Automation Builder keeps canonical persistence, shared-shell ownership and
 	assert.doesNotMatch(template, /cb-automations-design-shell__identity/);
 	assert.match(shell, /querySelector\('\[data-cb-automations-workflow-switcher\]'\)/);
 	assert.match(shell, /cb:design-shell:contextrequest/);
+	assert.match(shell, /launchRoot\?\.addEventListener\('cb:design-shell:contextrequest'/);
 	assert.match(shell, /event\.detail\.respondWith/);
 	assert.match(shell, /isDirty\(\)/);
 	assert.match(shell, /cb:design-shell:savechange/);

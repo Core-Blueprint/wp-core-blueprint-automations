@@ -35,7 +35,8 @@ if (root) {
 			}
 		});
 
-		root.addEventListener('cb:design-shell:contextrequest', (event) => {
+		const launchRoot = root.closest('[data-cb-design-launch-root]');
+		launchRoot?.addEventListener('cb:design-shell:contextrequest', (event) => {
 			if (event.detail?.control !== workflowSwitcher) return;
 			const target = String(event.detail.value || '').trim();
 			let url;
