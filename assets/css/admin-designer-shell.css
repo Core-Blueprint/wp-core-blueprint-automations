@@ -125,3 +125,8 @@
 		grid-template-columns: 1fr;
 	}
 }
+
+/* Workflow Health is a domain section inside canonical Settings. */
+.cb-automations-validation-panel > .cb-core-design-shell__panel-body {
+	padding: 0;
+}

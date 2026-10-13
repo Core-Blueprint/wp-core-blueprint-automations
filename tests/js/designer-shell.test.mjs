@@ -38,12 +38,13 @@ test('Automations consumes the public Base Designer Shell without owning shared 
 	assert.match(template, /data-cb-design-shell-primary-action/);
 	assert.match(template, /data-cb-design-shell-panel="inspector"/);
 	assert.match(template, /data-cb-design-shell-panel="settings"/);
-	assert.match(template, /data-cb-design-shell-panel="health"/);
 	assert.match(template, /cb-automations-validation-panel/);
+	assert.doesNotMatch(template, /data-cb-design-shell-tab="health"/);
+	assert.ok(template.indexOf('cb-automations-validation-panel') > template.indexOf('data-cb-design-shell-panel="settings"'));
+	assert.match(moduleSource, /configureDesignerSidebar\(root/);
+	assert.match(moduleSource, /defaultPanel:\s*'settings'/);
 
-	assert.match(moduleSource, /import\s*\{\s*createDesignerShell\s*\}\s*from\s*['"]@cb-core\/design-editor['"]/);
 	assert.match(moduleSource, /createDesignerShell\(root,\s*\{/);
-	assert.match(moduleSource, /sidebar:\s*['"]settings['"]/);
 	assert.match(moduleSource, /cb-automations-panel-eyebrow/);
 	assert.match(moduleSource, /cbDesignShellPanelTitle/);
 	assert.match(moduleSource, /data-cb-design-shell-panel-heading/);

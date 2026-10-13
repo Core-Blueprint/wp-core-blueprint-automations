@@ -182,12 +182,11 @@ if ( ! is_string( $definition_json ) ) {
 
 				<aside class="cb-core-design-shell__sidebar cb-automations-design-shell__sidebar">
 					<div class="cb-core-design-shell__tabs cb-core-design-shell__sidebar-tabs" role="tablist" aria-label="<?php esc_attr_e( 'Automation details', 'core-blueprint-automations' ); ?>">
-						<button type="button" class="cb-core-design-shell__tab cb-core-design-shell__sidebar-tab" role="tab" aria-selected="false" data-cb-design-shell-tab="inspector" data-cb-design-shell-group="sidebar" data-cb-design-shell-sidebar-role="inspector"><?php esc_html_e( 'Inspector', 'core-blueprint-automations' ); ?></button>
-						<button type="button" class="cb-core-design-shell__tab cb-core-design-shell__sidebar-tab is-active" role="tab" aria-selected="true" data-cb-design-shell-tab="settings" data-cb-design-shell-group="sidebar" data-cb-design-shell-sidebar-role="settings"><?php esc_html_e( 'Settings', 'core-blueprint-automations' ); ?></button>
-						<button type="button" class="cb-core-design-shell__tab cb-core-design-shell__sidebar-tab" role="tab" aria-selected="false" data-cb-design-shell-tab="health" data-cb-design-shell-group="sidebar"><?php esc_html_e( 'Health', 'core-blueprint-automations' ); ?></button>
+						<button type="button" class="cb-core-design-shell__tab cb-core-design-shell__sidebar-tab" role="tab" aria-selected="false" data-cb-design-shell-tab="inspector" data-cb-design-shell-sidebar-role="inspector"><?php esc_html_e( 'Inspector', 'core-blueprint-automations' ); ?></button>
+						<button type="button" class="cb-core-design-shell__tab cb-core-design-shell__sidebar-tab is-active" role="tab" aria-selected="true" data-cb-design-shell-tab="settings" data-cb-design-shell-sidebar-role="settings"><?php esc_html_e( 'Settings', 'core-blueprint-automations' ); ?></button>
 					</div>
 
-					<section class="cb-core-design-shell__panel cb-core-design-shell__sidebar-panel" role="tabpanel" data-cb-design-shell-panel="inspector" data-cb-design-shell-group="sidebar" data-cb-design-shell-sidebar-role="inspector" hidden>
+					<section class="cb-core-design-shell__panel cb-core-design-shell__sidebar-panel" role="tabpanel" data-cb-design-shell-panel="inspector" data-cb-design-shell-sidebar-role="inspector" hidden>
 						<div class="cb-core-design-shell__panel-body">
 							<section class="cb-core-design-shell__panel-section">
 								<p class="cb-core-design-shell__panel-section-description"><?php esc_html_e( 'Select a workflow step to inspect its context.', 'core-blueprint-automations' ); ?></p>
@@ -195,7 +194,7 @@ if ( ! is_string( $definition_json ) ) {
 						</div>
 					</section>
 
-					<section class="cb-core-design-shell__panel cb-core-design-shell__sidebar-panel" role="tabpanel" data-cb-design-shell-panel="settings" data-cb-design-shell-group="sidebar" data-cb-design-shell-sidebar-role="settings">
+					<section class="cb-core-design-shell__panel cb-core-design-shell__sidebar-panel" role="tabpanel" data-cb-design-shell-panel="settings" data-cb-design-shell-sidebar-role="settings">
 						<div class="cb-core-design-shell__panel-body">
 							<section class="cb-core-design-shell__panel-section">
 								<h3 class="cb-core-design-shell__panel-section-title"><?php esc_html_e( 'Workflow settings', 'core-blueprint-automations' ); ?></h3>
@@ -219,10 +218,7 @@ if ( ! is_string( $definition_json ) ) {
 								<label><input type="checkbox" name="rebind_execution_principal" value="1" data-cb-automations-rebind-principal /> <?php esc_html_e( 'Use my account as execution principal when saving', 'core-blueprint-automations' ); ?></label>
 								<p class="cb-core-design-shell__field-hint"><?php esc_html_e( 'Core Blueprint never accepts an arbitrary Run as user ID from the browser. The server binds your current WordPress account and re-checks its permissions on every execution.', 'core-blueprint-automations' ); ?></p>
 							</section>
-						</div>
-					</section>
-
-					<section class="cb-core-design-shell__panel cb-core-design-shell__sidebar-panel cb-automations-validation-panel" role="tabpanel" data-cb-design-shell-panel="health" data-cb-design-shell-group="sidebar" hidden>
+							<section class="cb-automations-validation-panel" aria-label="<?php esc_attr_e( 'Workflow health', 'core-blueprint-automations' ); ?>">
 						<div class="cb-core-design-shell__panel-body">
 							<section class="cb-core-design-shell__panel-section">
 								<h3 class="cb-core-design-shell__panel-section-title"><?php echo esc_html( $validation->is_valid() ? __( 'Ready', 'core-blueprint-automations' ) : __( 'Needs attention', 'core-blueprint-automations' ) ); ?></h3>
@@ -243,7 +239,11 @@ if ( ! is_string( $definition_json ) ) {
 								</section>
 							<?php endif; ?>
 						</div>
+							</section>
+						</div>
 					</section>
+
+
 				</aside>
 			</div>
 		</div>

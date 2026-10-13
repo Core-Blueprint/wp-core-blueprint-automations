@@ -1,4 +1,4 @@
-import { createDesignerShell } from '@cb-core/design-editor';
+import { createDesignerShell, configureDesignerSidebar } from '@cb-core/design-editor';
 
 const root = document.querySelector('[data-cb-automations-designer-shell]');
 
@@ -70,9 +70,9 @@ if (root) {
 	applyPanelTitle(propertiesSidebar, propertiesLabel);
 	if (workflowTitle) workflowTitle.remove();
 
-	createDesignerShell(root, {
-		defaultPanels: {
-			sidebar: 'settings',
-		},
+	createDesignerShell(root, { defaultPanel: 'settings' });
+	configureDesignerSidebar(root, {
+		roles: { inspector: 'inspector', settings: 'settings' },
+		activeRole: 'settings',
 	});
 }
