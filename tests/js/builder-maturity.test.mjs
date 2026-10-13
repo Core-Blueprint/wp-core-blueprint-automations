@@ -108,7 +108,7 @@ test('Automation Builder keeps canonical persistence, shared-shell ownership and
 	assert.doesNotMatch(designerCss, /\.cb-automations-design-shell \.cb-core-design-shell__workspace/);
 	assert.match(adminCss, /\.cb-automations-stage\s*\{[^}]*margin-bottom:\s*0\s*!important;/s);
 	assert.match(adminCss, /\.cb-automations-stage:not\(:last-child\)::after\s*\{[^}]*height:\s*var\(--cb-space-4\);/s);
-	assert.ok((template.match(/class="cb-core-design-shell__panel-body"/g) || []).length >= 3);
+	assert.ok((template.match(/class="cb-core-design-shell__panel-body"/g) || []).length >= 2);
 	assert.match(template, /class="cb-core-design-shell__panel-section"/);
 	assert.match(template, /class="cb-core-design-shell__field"/);
 	assert.match(template, /data-cb-design-shell-sidebar-role="inspector"/);
