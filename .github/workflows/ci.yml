@@ -52,6 +52,9 @@ jobs:
       - name: Automation Builder maturity regression
         run: node tests/js/builder-maturity.test.mjs
 
+      - name: Workflow Designer Golden integration contracts
+        run: node tests/js/designer-golden-contract.test.mjs
+
       - name: Bootstrap requirements regression
         run: php tests/unit/bootstrap-requirements.php
 

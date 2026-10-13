@@ -34,7 +34,7 @@ test('Automation Builder keeps canonical persistence, shared-shell ownership and
 	assert.match(shell, /isDirty\(\)/);
 	assert.match(shell, /cb:design-shell:savechange/);
 	assert.match(shell, /new URL\(target, window\.location\.href\)/);
-	assert.match(shell, /url\.origin === window\.location\.origin/);
+	assert.match(shell, /url\.origin !== window\.location\.origin/);
 	assert.match(shell, /window\.location\.assign\(url\.href\)/);
 
 	assert.match(inspector, /dataset\.cbBuilderSelectable/);
