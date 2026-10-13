@@ -141,12 +141,7 @@ if ( ! is_string( $definition_json ) ) {
 			<div class="cb-core-design-shell__workspace">
 				<aside class="cb-core-design-shell__palette cb-automations-stage-nav" aria-label="<?php esc_attr_e( 'Workflow stages', 'core-blueprint-automations' ); ?>">
 					<span class="cb-automations-panel-eyebrow"><?php esc_html_e( 'Workflow', 'core-blueprint-automations' ); ?></span>
-					<nav>
-						<a href="#cb-automations-stage-trigger"><span>1</span><strong><?php esc_html_e( 'WHEN', 'core-blueprint-automations' ); ?></strong><small><?php esc_html_e( 'Trigger', 'core-blueprint-automations' ); ?></small></a>
-						<a href="#cb-automations-stage-states"><span>2</span><strong><?php esc_html_e( 'GET DATA', 'core-blueprint-automations' ); ?></strong><small><?php esc_html_e( 'Live state', 'core-blueprint-automations' ); ?></small></a>
-						<a href="#cb-automations-stage-conditions"><span>3</span><strong><?php esc_html_e( 'ONLY IF', 'core-blueprint-automations' ); ?></strong><small><?php esc_html_e( 'Conditions', 'core-blueprint-automations' ); ?></small></a>
-						<a href="#cb-automations-stage-actions"><span>4</span><strong><?php esc_html_e( 'THEN', 'core-blueprint-automations' ); ?></strong><small><?php esc_html_e( 'Actions', 'core-blueprint-automations' ); ?></small></a>
-					</nav>
+					<div data-cb-automations-stage-navigation></div>
 				</aside>
 
 				<main class="cb-core-design-shell__canvas cb-automations-design-shell__canvas">

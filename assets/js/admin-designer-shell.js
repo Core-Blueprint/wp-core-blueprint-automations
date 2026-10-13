@@ -1,4 +1,4 @@
-import { createDesignerShell, configureDesignerSidebar } from '@cb-core/design-editor';
+import { createDesignerShell, configureDesignerSidebar, createDesignerNavigation } from '@cb-core/design-editor';
 
 const root = document.querySelector('[data-cb-automations-designer-shell]');
 
@@ -75,4 +75,56 @@ if (root) {
 		roles: { inspector: 'inspector', settings: 'settings' },
 		activeRole: 'settings',
 	});
+	const stageHost = root.querySelector('[data-cb-automations-stage-navigation]');
+	const canvas = root.querySelector('.cb-core-design-shell__canvas');
+	const stages = [
+		{ id: 'trigger', step: '1', label: 'WHEN', description: 'Trigger', targetId: 'cb-automations-stage-trigger' },
+		{ id: 'states', step: '2', label: 'GET DATA', description: 'Live state', targetId: 'cb-automations-stage-states' },
+		{ id: 'conditions', step: '3', label: 'ONLY IF', description: 'Conditions', targetId: 'cb-automations-stage-conditions' },
+		{ id: 'actions', step: '4', label: 'THEN', description: 'Actions', targetId: 'cb-automations-stage-actions' },
+	];
+	const stageLabels = window.cbAutomationsInspectorStrings?.navigation || {};
+	stages.forEach((stage) => {
+		stage.label = String(stageLabels[stage.id] || stage.label);
+		stage.description = String(stageLabels[stage.id + 'Description'] || stage.description);
+	});
+	const definitionControl = root.closest('form')?.querySelector('[data-cb-automations-definition]');
+	const parseDefinition = (value) => {
+		try { return JSON.parse(String(value || '{}')); }
+		catch { return {}; }
+	};
+	let currentDefinition = parseDefinition(definitionControl?.value);
+	let activeStage = 'trigger';
+	const itemsFor = (definition) => stages.map((stage) => ({
+		...stage,
+		status: (stage.id === 'trigger' && !definition?.trigger)
+			|| (stage.id === 'actions' && (!Array.isArray(definition?.actions) || definition.actions.length === 0))
+			? { label: String(stageLabels.required || 'Required'), tone: 'warning' }
+			: null,
+	}));
+	if (stageHost instanceof HTMLElement && canvas instanceof HTMLElement) {
+		const navigation = createDesignerNavigation({
+			root,
+			ariaLabel: String(stageLabels.ariaLabel || 'Workflow stages'),
+			activeId: activeStage,
+			items: itemsFor(currentDefinition),
+		});
+		stageHost.append(navigation.element);
+		const syncStage = () => {
+			const anchor = canvas.getBoundingClientRect().top + 64;
+			for (const stage of stages) {
+				const section = root.querySelector('#' + stage.targetId);
+				if (section && section.getBoundingClientRect().top <= anchor) activeStage = stage.id;
+			}
+			navigation.setActive(activeStage);
+		};
+		canvas.addEventListener('scroll', syncStage, { passive: true });
+		window.addEventListener('resize', syncStage);
+		root.addEventListener('cb-automations:definitionchange', (event) => {
+			currentDefinition = event.detail?.definition || currentDefinition;
+			navigation.update(itemsFor(currentDefinition), { activeId: activeStage });
+		});
+		syncStage();
+	}
+
 }

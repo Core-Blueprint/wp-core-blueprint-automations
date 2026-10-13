@@ -13,61 +13,6 @@
 	font-size: var(--cb-fs-sm);
 }
 
-.cb-automations-stage-nav nav {
-	display: grid;
-	gap: var(--cb-space-1);
-	margin-top: var(--cb-space-3);
-}
-
-.cb-automations-stage-nav a {
-	display: grid;
-	grid-template-columns: 28px minmax(0, 1fr);
-	grid-template-rows: auto auto;
-	column-gap: var(--cb-space-2);
-	padding: var(--cb-space-2);
-	border-radius: var(--cb-radius-md);
-	color: var(--cb-text);
-	text-decoration: none;
-}
-
-.cb-automations-stage-nav a:hover,
-.cb-automations-stage-nav a:focus-visible {
-	background: var(--cb-surface-2);
-	color: inherit;
-}
-
-.cb-automations-stage-nav a:focus-visible {
-	outline: 2px solid var(--cb-accent);
-	outline-offset: 2px;
-}
-
-.cb-automations-stage-nav a > span {
-	grid-row: 1 / 3;
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	width: 28px;
-	height: 28px;
-	border: 1px solid color-mix(in srgb, var(--cb-accent) 38%, var(--cb-border));
-	border-radius: var(--cb-radius-pill);
-	background: var(--cb-tint-accent);
-	color: var(--cb-accent);
-	font-size: var(--cb-fs-2xs);
-	font-weight: var(--cb-fw-bold);
-}
-
-.cb-automations-stage-nav a strong {
-	align-self: end;
-	font-size: var(--cb-fs-2xs);
-	letter-spacing: .06em;
-}
-
-.cb-automations-stage-nav a small {
-	align-self: start;
-	color: var(--cb-text-muted);
-	font-size: var(--cb-fs-2xs);
-}
-
 .cb-automations-design-shell__canvas {
 	padding: var(--cb-space-3);
 	overflow: auto;
@@ -106,27 +51,4 @@
 
 .cb-automations-save-actions {
 	padding-right: var(--cb-space-1);
-}
-
-@media (max-width: 1280px) {
-	.cb-automations-stage-nav nav {
-		gap: 2px;
-	}
-}
-
-@media (max-width: 900px) {
-	.cb-automations-stage-nav nav {
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-	}
-}
-
-@media (max-width: 600px) {
-	.cb-automations-stage-nav nav {
-		grid-template-columns: 1fr;
-	}
-}
-
-/* Workflow Health is a domain section inside canonical Settings. */
-.cb-automations-validation-panel > .cb-core-design-shell__panel-body {
-	padding: 0;
 }
