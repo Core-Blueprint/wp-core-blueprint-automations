@@ -11,6 +11,7 @@
 		inspector: 'Inspector',
 		selectedStep: 'Selected step',
 		selectStep: 'Select a workflow step to inspect its context.',
+		selectTrigger: 'Configure trigger',
 		stage: 'Stage',
 		provider: 'Provider',
 		capability: 'Capability',
@@ -117,11 +118,11 @@
 		const value = record.value || {};
 		const capability = capabilityFor(value.capability);
 		const displayLabel = capability?.label || value.capability?.id
-			|| (record.kind === 'Condition' ? strings.condition : record.kind);
+			|| (record.kind === 'Trigger' ? strings.selectTrigger : record.kind === 'Condition' ? strings.condition : record.kind);
 		const identity = inspectorApi.createIdentity({
 			label: String(displayLabel),
 			eyebrow: record.stage,
-			context: record.kind,
+			context: String(displayLabel) === String(record.kind) ? '' : record.kind,
 			compact: true,
 			documentRef: document,
 		});

@@ -54,6 +54,11 @@ test('Context switching respects the public Base event and unsaved editor data',
 		read('assets/js/admin-builder-save.js'),
 	]);
 	assert.match(shell, /cb:design-shell:contextrequest/);
+	assert.match(shell, /switchContext\(url\)/);
+	assert.match(shell, /new DOMParser\(\)/);
+	assert.match(shell, /history\.resetForContext\(nextDefinition\)/);
+	assert.match(shell, /cb-automations:contextloaded/);
+	assert.doesNotMatch(shell, /window\.location\.assign\(/);
 	assert.match(shell, /launchRoot\?\.addEventListener\('cb:design-shell:contextrequest'/);
 	assert.match(shell, /event\.detail\.respondWith/);
 	assert.match(shell, /isDirty\(\)/);

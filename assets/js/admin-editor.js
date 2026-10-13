@@ -538,6 +538,8 @@
 		conditionsRoot.replaceChildren();
 		state.conditions.forEach((condition, index) => conditionsRoot.append(renderCondition(condition, index)));
 		addCondition.disabled = outputEntries('condition').length === 0;
+		const hint = root.querySelector('[data-cb-automations-condition-hint]');
+		if (hint) hint.hidden = !addCondition.disabled;
 	}
 
 	function sync(source = 'editor') {
