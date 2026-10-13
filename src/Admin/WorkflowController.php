@@ -202,6 +202,7 @@ final class WorkflowController {
 		$issues = [];
 		foreach ( $result->validation()->issues() as $issue ) {
 			$issues[] = [
+				'code'    => $issue->code(),
 				'path'    => $issue->path(),
 				'message' => ValidationPresenter::message( $issue ),
 			];

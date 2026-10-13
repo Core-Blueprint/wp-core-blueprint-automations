@@ -50,6 +50,7 @@ $expectations = [
 	[ str_contains( $files['editor'], 'data-cb-design-shell-redo' ), 'Redo must be declared in the server-rendered Designer toolbar.' ],
 	[ str_contains( $files['editor'], 'data-cb-design-shell-status' ), 'Save status must be declared in the server-rendered Designer toolbar.' ],
 	[ str_contains( $files['editor'], 'data-cb-design-shell-panel="inspector"' ), 'Inspector must be declared server-side before its behavior attaches.' ],
+	[ str_contains( file_get_contents( $root . '/src/Admin/WorkflowController.php' ), "'code'    => \$issue->code()" ), 'Save issues must preserve machine-readable issue codes for recovery.' ],
 	[ str_contains( $files['editor'], 'data-cb-design-shell-primary-action' ), 'Primary Save must be declared server-side for Base header composition.' ],
 	[ substr_count( $files['editor'], 'class="cb-core-design-shell__panel-body"' ) >= 3, 'Every Automations sidebar tab panel must delegate inset and scroll presentation to the canonical Base panel body.' ],
 	[ str_contains( $files['editor'], 'class="cb-core-design-shell__panel-section"' ), 'Designer sidebar content must use the canonical Base panel-section grammar.' ],

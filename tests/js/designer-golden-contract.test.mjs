@@ -39,6 +39,12 @@ test('Async saves reconcile workflow validation and both save entrypoints', asyn
 	assert.match(recovery, /applyInlineIssues\(\)/);
 	assert.match(recovery, /clearInlineIssues\(\)/);
 	assert.match(recovery, /cb-automations:definitionchange/);
+	assert.match(recovery, /renderSavedValidation/);
+	const controller = await read('src/Admin/WorkflowController.php');
+	assert.match(controller, /'code'\s*=>\s*\$issue->code\(\)/);
+	assert.doesNotMatch(controller.slice(controller.indexOf('foreach ( $result->validation()->issues()')), /'context'\s*=>\s*\$issue->context\(\)/);
+	const assets = await read('src/Admin/AdminAssets.php');
+	for (const key of ['ready', 'needs_attention', 'valid_description', 'invalid_description']) assert.match(assets, new RegExp("'" + key + "'\\s*=>"));
 	assert.doesNotMatch(save, /health\.append\(/);
 });
 

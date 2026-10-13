@@ -115,6 +115,10 @@ final class AdminAssets {
 				'technical_details'  => __( 'Technical details', 'core-blueprint-automations' ),
 				'saved_issue'        => __( 'Saved workflow issue', 'core-blueprint-automations' ),
 				'save_recheck'       => __( 'Changes made. Save the automation to re-check workflow health.', 'core-blueprint-automations' ),
+				'ready'              => __( 'Ready', 'core-blueprint-automations' ),
+				'needs_attention'    => __( 'Needs attention', 'core-blueprint-automations' ),
+				'valid_description'  => __( 'The current definition is valid against the live capability catalog.', 'core-blueprint-automations' ),
+				'invalid_description'=> __( 'Resolve these items before the automation can be enabled.', 'core-blueprint-automations' ),
 			]
 		);
 
