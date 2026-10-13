@@ -1,6 +1,12 @@
 (() => {
 	'use strict';
 
+	const initialize = () => {
+		const inspectorApi = window.cbCore?.designEditor?.shell?.inspector;
+		if (typeof inspectorApi?.createIdentity !== 'function'
+			|| typeof inspectorApi?.createControls !== 'function'
+			|| typeof inspectorApi?.createSection !== 'function') return false;
+
 	const strings = {
 		inspector: 'Inspector',
 		selectedStep: 'Selected step',
@@ -10,6 +16,11 @@
 		capability: 'Capability',
 		identifier: 'Identifier',
 		condition: 'Condition',
+		unavailable: 'This capability is unavailable. Choose a replacement on the canvas.',
+		noSelection: 'No workflow step selected',
+		editCanvas: 'Edit this step on the workflow canvas.',
+		technicalDetails: 'Technical details',
+		detailsSummary: 'Capability reference and workflow identifiers',
 		...(window.cbAutomationsInspectorStrings || {}),
 	};
 
@@ -87,43 +98,80 @@
 		list.append(row);
 	};
 
+	const sectionStates = new Map(); // UI-only, never persisted with workflow definitions.
 	const renderInspector = (record) => {
 		panelBody.replaceChildren();
-		const section = document.createElement('section');
-		section.className = 'cb-core-design-shell__panel-section';
-
 		if (!record) {
-			const empty = document.createElement('p');
-			empty.className = 'cb-core-design-shell__panel-section-description';
-			empty.textContent = strings.selectStep;
-			section.append(empty);
-			panelBody.append(section);
+			const identity = inspectorApi.createIdentity({
+				label: strings.noSelection,
+				compact: true,
+				documentRef: document,
+			});
+			const guidance = document.createElement('p');
+			guidance.className = 'cb-core-design-shell__panel-section-description';
+			guidance.textContent = strings.selectStep;
+			panelBody.append(identity.element, guidance);
 			return;
 		}
 
-		const title = document.createElement('h3');
-		title.className = 'cb-core-design-shell__panel-section-title';
-		title.textContent = strings.selectedStep;
-		section.append(title);
-
 		const value = record.value || {};
 		const capability = capabilityFor(value.capability);
+		const displayLabel = capability?.label || value.capability?.id
+			|| (record.kind === 'Condition' ? strings.condition : record.kind);
+		const identity = inspectorApi.createIdentity({
+			label: String(displayLabel),
+			eyebrow: record.stage,
+			context: record.kind,
+			compact: true,
+			documentRef: document,
+		});
+		const controls = inspectorApi.createControls({ documentRef: document });
+		const description = document.createElement('p');
+		description.className = 'cb-core-design-shell__panel-section-description';
+		description.textContent = strings.editCanvas;
+		controls.append(description);
+		if (value.capability && !capability) {
+			const warning = document.createElement('p');
+			warning.className = 'cb-automations-inspector__warning';
+			warning.setAttribute('role', 'status');
+			warning.textContent = strings.unavailable;
+			controls.append(warning);
+		}
+		if (record.kind === 'Condition' && value.operator) {
+			const primary = document.createElement('section');
+			primary.className = 'cb-core-design-shell__panel-section';
+			const title = document.createElement('h3');
+			title.className = 'cb-core-design-shell__panel-section-title';
+			title.textContent = strings.condition;
+			primary.append(title);
+			addRow(primary, strings.condition, String(value.operator));
+			controls.append(primary);
+		}
+
+		const technical = inspectorApi.createSection({
+			title: strings.technicalDetails,
+			summary: strings.detailsSummary,
+			expanded: sectionStates.get(record.key) === true,
+			onToggle: (opened) => sectionStates.set(record.key, opened),
+			documentRef: document,
+		});
 		const list = document.createElement('div');
 		list.className = 'cb-automations-inspector__details';
-		addRow(list, strings.stage, `${record.stage} · ${record.kind}`);
+		addRow(list, strings.stage, record.stage);
 		addRow(list, strings.identifier, value.step_id || value.condition_id || '');
 		addRow(list, strings.provider, capability?.provider?.name || value.capability?.provider || '');
 		addRow(list, strings.capability, capability?.label || value.capability?.id || '');
-		if (record.kind === 'Condition') addRow(list, strings.condition, value.operator || '');
-		section.append(list);
-		panelBody.append(section);
+		technical.body.append(list);
+		controls.append(technical.element);
+		panelBody.append(identity.element, controls);
 	};
 
 	const selectCard = (card, { open = true } = {}) => {
 		const record = cardRecord(card);
 		if (!record) return;
-		root.querySelectorAll('.cb-automations-step.is-builder-selected, .cb-automations-condition.is-builder-selected').forEach((item) => item.classList.remove('is-builder-selected'));
+		root.querySelectorAll('.cb-automations-step.is-builder-selected, .cb-automations-condition.is-builder-selected').forEach((item) => (item.classList.remove('is-builder-selected'), item.removeAttribute('aria-current')));
 		card.classList.add('is-builder-selected');
+		card.setAttribute('aria-current', 'true');
 		selected = record.key;
 		renderInspector(record);
 		if (open) tab.click();
@@ -146,6 +194,7 @@
 		root.querySelectorAll('.cb-automations-step, .cb-automations-condition').forEach((card) => {
 			if (!(card instanceof HTMLElement) || card.dataset.cbBuilderSelectable === '1') return;
 			card.dataset.cbBuilderSelectable = '1';
+			card.setAttribute('aria-label', String(card.querySelector('.cb-automations-step-head, .cb-automations-condition-head')?.textContent || strings.selectedStep).trim());
 			card.tabIndex = card.tabIndex >= 0 ? card.tabIndex : 0;
 			card.addEventListener('click', (event) => {
 				if (interactive(event.target)) return;
@@ -164,4 +213,8 @@
 	decorate();
 	const observer = new MutationObserver(() => decorate());
 	observer.observe(root, { childList: true, subtree: true });
+	root.addEventListener('cb-automations:definitionchange', () => queueMicrotask(restoreSelection));
+	return true;
+	};
+	if (!initialize()) window.addEventListener('cb:design-editor:ready', initialize, { once: true });
 })();

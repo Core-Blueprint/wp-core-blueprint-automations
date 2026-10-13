@@ -46,6 +46,10 @@ test('Automation Builder keeps canonical persistence, shared-shell ownership and
 	assert.match(inspector, /key: `action:\$\{value\?\.step_id \|\| index\}`/);
 	assert.match(inspector, /panelBody = panel\?\.querySelector\('\.cb-core-design-shell__panel-body'\)/);
 	assert.match(inspector, /panelBody\.replaceChildren\(\)/);
+	assert.match(inspector, /inspectorApi\.createIdentity\(/);
+	assert.match(inspector, /inspectorApi\.createControls\(/);
+	assert.match(inspector, /inspectorApi\.createSection\(/);
+	assert.match(inspector, /sectionStates\.get\(record\.key\)/);
 	assert.match(inspector, /cb-core-design-shell__panel-section-description/);
 	assert.match(inspector, /cb-core-design-shell__panel-section-title/);
 	assert.doesNotMatch(inspector, /panel\.replaceChildren\(\)/);
