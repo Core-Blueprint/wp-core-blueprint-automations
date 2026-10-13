@@ -27,6 +27,14 @@ if (root) {
 			|| Boolean(authority?.checked) !== baseline.rebind
 		);
 
+		let confirmedNavigation = false;
+		window.addEventListener('beforeunload', (event) => {
+			if (!confirmedNavigation && isDirty()) {
+				event.preventDefault();
+				event.returnValue = '';
+			}
+		});
+
 		root.addEventListener('cb:design-shell:contextrequest', (event) => {
 			if (event.detail?.control !== workflowSwitcher) return;
 			const target = String(event.detail.value || '').trim();
@@ -37,6 +45,7 @@ if (root) {
 			if (isDirty() && !window.confirm(
 				String(window.cbAutomationsInspectorStrings?.unsavedChanges || 'This workflow has unsaved changes. Switch workflows and discard those changes?')
 			)) return;
+			confirmedNavigation = true;
 			event.detail.respondWith(Promise.resolve({ route: url.href }));
 			window.location.assign(url.href);
 		});

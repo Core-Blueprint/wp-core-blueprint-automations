@@ -355,6 +355,10 @@
 		focusIssue(Number(button.getAttribute('data-cb-validation-jump')));
 	});
 
+	root.addEventListener('cb-automations:definitionchange', (event) => {
+		const source = String(event.detail?.source || '');
+		if (source !== 'initial' && source !== 'submit') queueMicrotask(markStale);
+	});
 	root.addEventListener('change', (event) => {
 		if (!isPresentationOnlyEvent(event)) queueMicrotask(markStale);
 	});

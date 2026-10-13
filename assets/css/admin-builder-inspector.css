@@ -44,3 +44,11 @@
 .cb-automations-inspector__row strong {
 	overflow-wrap: anywhere;
 }
+
+.cb-automations-inspector__warning {
+	color: var(--cb-text);
+	background: var(--cb-tint-warning, var(--cb-surface-2));
+	border-inline-start: 3px solid var(--cb-warning, var(--cb-border));
+	padding: var(--cb-space-3);
+	border-radius: var(--cb-radius-sm);
+}

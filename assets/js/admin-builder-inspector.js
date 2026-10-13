@@ -194,6 +194,7 @@
 		root.querySelectorAll('.cb-automations-step, .cb-automations-condition').forEach((card) => {
 			if (!(card instanceof HTMLElement) || card.dataset.cbBuilderSelectable === '1') return;
 			card.dataset.cbBuilderSelectable = '1';
+			card.setAttribute('role', 'group');
 			card.setAttribute('aria-label', String(card.querySelector('.cb-automations-step-head, .cb-automations-condition-head')?.textContent || strings.selectedStep).trim());
 			card.tabIndex = card.tabIndex >= 0 ? card.tabIndex : 0;
 			card.addEventListener('click', (event) => {
