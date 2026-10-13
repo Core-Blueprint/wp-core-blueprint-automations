@@ -30,6 +30,7 @@
 	const principalLabel = form?.querySelector('[data-cb-automations-principal-label]');
 	const rebindPrincipal = form?.querySelector('[data-cb-automations-rebind-principal]');
 	const health = shell?.querySelector('.cb-automations-validation-panel');
+	const aliases = Array.from(form?.querySelectorAll('[data-cb-automations-save-alias]') || []);
 	const headingTitle = document.querySelector('.cb-automations-editor-heading .cb-core-title');
 	const headingStatuses = document.querySelectorAll('.cb-automations-editor-statuses .cb-core-status');
 	const activationStatus = headingStatuses.item(0);
@@ -95,30 +96,13 @@
 	};
 	const updateHealth = (payload) => {
 		if (!health || typeof payload?.data?.valid !== 'boolean') return;
-		const valid = payload.data.valid;
-		const heading = health.querySelector('.cb-automations-panel-heading h2');
-		if (heading) heading.textContent = valid ? strings.ready : strings.needsAttention;
-		Array.from(health.children).forEach((child) => {
-			if (!child.classList?.contains('cb-automations-panel-heading')) child.remove();
-		});
-		const description = document.createElement('p');
-		description.className = 'description';
-		description.textContent = valid ? strings.validDescription : strings.invalidDescription;
-		health.append(description);
-		if (valid) return;
-		const issues = Array.isArray(payload.data.issues) ? payload.data.issues : [];
-		const list = document.createElement('ul');
-		list.className = 'cb-automations-validation-list';
-		issues.forEach((issue) => {
-			const item = document.createElement('li');
-			const message = document.createElement('strong');
-			message.textContent = String(issue?.message || strings.workflowIssue);
-			const path = document.createElement('code');
-			path.textContent = String(issue?.path || '');
-			item.append(message, path);
-			list.append(item);
-		});
-		health.append(list);
+		shell.dispatchEvent(new CustomEvent('cb-automations:validation-saved', {
+			bubbles: true,
+			detail: Object.freeze({
+				valid: payload.data.valid,
+				issues: Array.isArray(payload.data.issues) ? payload.data.issues : [],
+			}),
+		}));
 	};
 	const cleanLocation = () => {
 		try {
@@ -136,12 +120,13 @@
 	};
 
 	form.addEventListener('submit', async (event) => {
-		if (event.submitter !== save) return;
+		if (event.submitter !== save && !aliases.includes(event.submitter)) return;
 		event.preventDefault();
 		if (saving) return;
 
 		saving = true;
 		save.disabled = true;
+		aliases.forEach((button) => { button.disabled = true; });
 		const submittedDefinitionJson = definition instanceof HTMLInputElement ? definition.value : '';
 		const submittedDefinition = parseDefinition(submittedDefinitionJson);
 		const submittedName = name instanceof HTMLInputElement ? name.value : null;
@@ -209,6 +194,7 @@
 		} finally {
 			saving = false;
 			save.disabled = false;
+			aliases.forEach((button) => { button.disabled = false; });
 		}
 	});
 })();

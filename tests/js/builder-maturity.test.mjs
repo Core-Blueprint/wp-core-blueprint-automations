@@ -57,6 +57,10 @@ test('Automation Builder keeps canonical persistence, shared-shell ownership and
 	assert.match(save, /new FormData\(form\)/);
 	assert.match(save, /payload\.set\(ASYNC_FIELD, '1'\)/);
 	assert.match(save, /window\.fetch\(endpoint/);
+	assert.match(save, /cb-automations:validation-saved/);
+	assert.match(save, /aliases\.includes\(event\.submitter\)/);
+	assert.match(template, /data-cb-automations-save-alias/);
+	assert.doesNotMatch(save, /health\.append\(|health\.querySelector\('\.cb-automations-panel-heading/);
 	assert.match(save, /let saving = false/);
 	assert.match(save, /updatePersistedStatuses\(result, !definitionDirty\)/);
 	assert.match(save, /headingTitle\.textContent = result\.data\.name/);

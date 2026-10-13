@@ -248,7 +248,7 @@ if ( ! is_string( $definition_json ) ) {
 			</div>
 		</div>
 
-		<p class="submit cb-core-actions cb-automations-save-actions"><button type="submit" class="button button-primary cb-core-button cb-core-button--primary"><?php esc_html_e( 'Save automation', 'core-blueprint-automations' ); ?></button></p>
+		<p class="submit cb-core-actions cb-automations-save-actions"><button type="submit" class="button button-primary cb-core-button cb-core-button--primary" data-cb-automations-save-alias><?php esc_html_e( 'Save automation', 'core-blueprint-automations' ); ?></button></p>
 	</form>
 
 	<noscript><div class="notice notice-warning"><p><?php esc_html_e( 'The visual workflow editor requires JavaScript. Name, activation and execution-authority intent can still be submitted using the currently stored definition.', 'core-blueprint-automations' ); ?></p></div></noscript>

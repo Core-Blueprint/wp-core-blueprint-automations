@@ -105,8 +105,9 @@
 	const root = document.querySelector('[data-cb-automations-editor]');
 	const dataNode = document.getElementById('cb-automations-editor-data');
 	const panel = document.querySelector('.cb-automations-validation-panel');
-	const list = panel?.querySelector('.cb-automations-validation-list');
-	if (!root || !dataNode || !panel || !list) return;
+	let list = panel?.querySelector('.cb-automations-validation-list') || null;
+	const shell = panel?.closest('[data-cb-automations-designer-shell]');
+	if (!root || !dataNode || !panel || !shell) return;
 
 	let data;
 	try {
@@ -115,8 +116,7 @@
 		return;
 	}
 
-	const issues = Array.isArray(data.validation) ? data.validation : [];
-	if (issues.length === 0) return;
+	let issues = Array.isArray(data.validation) ? data.validation : [];
 
 	const catalog = Array.isArray(data.capabilities) ? data.capabilities : [];
 	const byRef = new Map(catalog.map((capability) => {
@@ -142,10 +142,14 @@
 		technical_details: 'Technical details',
 		saved_issue: 'Saved workflow issue',
 		save_recheck: 'Changes made. Save the automation to re-check workflow health.',
+		ready: 'Ready',
+		needs_attention: 'Needs attention',
+		valid_description: 'The current definition is valid against the live capability catalog.',
+		invalid_description: 'Resolve these items before the automation can be enabled.',
 		...(window.cbAutomationsValidationRecoveryStrings || {}),
 	};
 
-	const summaryItems = Array.from(list.children).filter((item) => item instanceof HTMLElement);
+	let summaryItems = Array.from(list?.children || []).filter((item) => item instanceof HTMLElement);
 	let stale = false;
 
 	function el(tag, attrs = {}, text = null) {
@@ -338,14 +342,14 @@
 			class: 'cb-automations-validation-stale',
 			role: 'status',
 		}, strings.save_recheck);
-		panel.querySelector('.cb-automations-panel-heading')?.insertAdjacentElement('afterend', staleStatus);
+		panel.querySelector('.cb-core-design-shell__panel-body')?.prepend(staleStatus);
 	}
 
 	function isPresentationOnlyEvent(event) {
 		return event.target instanceof Element && Boolean(event.target.closest('.cb-automations-capability-picker__search'));
 	}
 
-	list.addEventListener('click', (event) => {
+	panel.addEventListener('click', (event) => {
 		const button = event.target.closest('[data-cb-validation-jump]');
 		if (!button || button.disabled) return;
 		focusIssue(Number(button.getAttribute('data-cb-validation-jump')));
@@ -361,6 +365,44 @@
 		if (event.target.closest('[data-cb-add-state], [data-cb-add-condition], [data-cb-add-action], .button-link-delete')) {
 			queueMicrotask(markStale);
 		}
+	});
+
+	const renderSavedValidation = (payload) => {
+		if (!payload || typeof payload.valid !== 'boolean') return;
+		const body = panel.querySelector('.cb-core-design-shell__panel-body');
+		if (!body) return;
+		issues = Array.isArray(payload.issues) ? payload.issues : [];
+		stale = false;
+		panel.classList.remove('is-stale');
+		clearInlineIssues();
+		const intro = el('section', { class: 'cb-core-design-shell__panel-section' });
+		intro.append(el('h3', { class: 'cb-core-design-shell__panel-section-title' },
+			payload.valid ? strings.ready : strings.needs_attention));
+		intro.append(el('p', { class: 'cb-core-design-shell__panel-section-description' },
+			payload.valid ? strings.valid_description : strings.invalid_description));
+		body.replaceChildren(intro);
+		list = null;
+		if (issues.length > 0) {
+			const section = el('section', { class: 'cb-core-design-shell__panel-section' });
+			list = el('ul', { class: 'cb-automations-validation-list' });
+			issues.forEach((issue) => {
+				const item = el('li');
+				item.append(
+					el('strong', {}, String(issue?.message || strings.saved_issue)),
+					el('code', {}, String(issue?.path || ''))
+				);
+				list.append(item);
+			});
+			section.append(list);
+			body.append(section);
+		}
+		summaryItems = Array.from(list?.children || []).filter((item) => item instanceof HTMLElement);
+		enhanceSummary();
+		applyInlineIssues();
+	};
+
+	shell.addEventListener('cb-automations:validation-saved', (event) => {
+		renderSavedValidation(event.detail);
 	});
 
 	enhanceSummary();
