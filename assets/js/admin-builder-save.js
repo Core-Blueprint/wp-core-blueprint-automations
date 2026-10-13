@@ -186,6 +186,8 @@
 				currentDirty ? strings.savedWithChanges : responseMessage(result, save.textContent?.trim() || ''),
 				{
 					baselineDefinition: submittedDefinition,
+					baselineName: submittedName,
+					baselineActivation: String(result.data?.activation_state || submittedActivation || ''),
 					currentDirty: definitionDirty,
 				}
 			);

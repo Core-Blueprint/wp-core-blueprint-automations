@@ -58,6 +58,7 @@ final class DesignerAssets {
 			[
 				'inspector'    => __( 'Inspector', 'core-blueprint-automations' ),
 				'properties'   => __( 'Properties', 'core-blueprint-automations' ),
+				'unsavedChanges' => __( 'This workflow has unsaved changes. Switch workflows and discard those changes?', 'core-blueprint-automations' ),
 				'selectedStep' => __( 'Selected step', 'core-blueprint-automations' ),
 				'selectStep'   => __( 'Select a workflow step to inspect its context.', 'core-blueprint-automations' ),
 				'stage'        => __( 'Stage', 'core-blueprint-automations' ),

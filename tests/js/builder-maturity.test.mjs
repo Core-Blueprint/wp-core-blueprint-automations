@@ -29,6 +29,10 @@ test('Automation Builder keeps canonical persistence, shared-shell ownership and
 	assert.match(template, /data-cb-automations-workflow-switcher/);
 	assert.doesNotMatch(template, /cb-automations-design-shell__identity/);
 	assert.match(shell, /querySelector\('\[data-cb-automations-workflow-switcher\]'\)/);
+	assert.match(shell, /cb:design-shell:contextrequest/);
+	assert.match(shell, /event\.detail\.respondWith/);
+	assert.match(shell, /isDirty\(\)/);
+	assert.match(shell, /cb:design-shell:savechange/);
 	assert.match(shell, /new URL\(target, window\.location\.href\)/);
 	assert.match(shell, /url\.origin === window\.location\.origin/);
 	assert.match(shell, /window\.location\.assign\(url\.href\)/);
@@ -69,6 +73,7 @@ test('Automation Builder keeps canonical persistence, shared-shell ownership and
 	assert.match(save, /cb-core-status__dot--danger/);
 	assert.match(save, /cb-core-status__dot--muted/);
 	assert.match(save, /baselineDefinition: submittedDefinition/);
+	assert.match(save, /baselineName: submittedName/);
 	assert.match(save, /currentDirty: definitionDirty/);
 	assert.match(save, /cb:design-shell:savechange/);
 
