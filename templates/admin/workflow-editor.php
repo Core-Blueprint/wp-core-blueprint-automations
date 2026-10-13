@@ -141,11 +141,11 @@ if ( ! is_string( $definition_json ) ) {
 			<div class="cb-core-design-shell__workspace">
 				<aside class="cb-core-design-shell__palette cb-automations-stage-nav" aria-label="<?php esc_attr_e( 'Workflow stages', 'core-blueprint-automations' ); ?>">
 					<span class="cb-automations-panel-eyebrow"><?php esc_html_e( 'Workflow', 'core-blueprint-automations' ); ?></span>
-					<div data-cb-automations-stage-navigation></div>
+					
 				</aside>
 
-				<main class="cb-core-design-shell__canvas cb-automations-design-shell__canvas">
-					<div class="cb-automations-linear-editor" data-cb-automations-editor>
+				<main class="cb-core-design-shell__canvas cb-core-design-shell__canvas--composed cb-automations-design-shell__canvas">
+					<div class="cb-core-design-shell__canvas-workarea"><div class="cb-automations-linear-editor" data-cb-automations-editor>
 						<section id="cb-automations-stage-trigger" class="cb-core-panel cb-automations-stage" data-stage="trigger" tabindex="-1">
 							<div class="cb-automations-stage-heading"><div class="cb-automations-stage-heading__main"><span class="cb-automations-stage-kicker"><?php esc_html_e( 'WHEN', 'core-blueprint-automations' ); ?></span><h2><?php esc_html_e( 'Trigger', 'core-blueprint-automations' ); ?></h2></div><span class="cb-automations-stage-requirement is-required"><?php esc_html_e( 'Required', 'core-blueprint-automations' ); ?></span></div>
 							<p class="cb-automations-stage-description"><?php esc_html_e( 'Choose the event that starts this automation.', 'core-blueprint-automations' ); ?></p>
@@ -172,7 +172,7 @@ if ( ! is_string( $definition_json ) ) {
 							<div data-cb-automations-actions></div>
 							<div class="cb-core-actions cb-automations-stage-actions"><button type="button" class="button cb-core-button cb-core-button--secondary" data-cb-add-action><?php esc_html_e( 'Add action', 'core-blueprint-automations' ); ?></button></div>
 						</section>
-					</div>
+					</div></div>
 				</main>
 
 				<aside class="cb-core-design-shell__sidebar cb-automations-design-shell__sidebar">
@@ -213,8 +213,7 @@ if ( ! is_string( $definition_json ) ) {
 								<label><input type="checkbox" name="rebind_execution_principal" value="1" data-cb-automations-rebind-principal /> <?php esc_html_e( 'Use my account as execution principal when saving', 'core-blueprint-automations' ); ?></label>
 								<p class="cb-core-design-shell__field-hint"><?php esc_html_e( 'Core Blueprint never accepts an arbitrary Run as user ID from the browser. The server binds your current WordPress account and re-checks its permissions on every execution.', 'core-blueprint-automations' ); ?></p>
 							</section>
-							<section class="cb-automations-validation-panel" aria-label="<?php esc_attr_e( 'Workflow health', 'core-blueprint-automations' ); ?>">
-						<div class="cb-core-design-shell__panel-body">
+							<section class="cb-core-design-shell__panel-section cb-automations-validation-panel" aria-label="<?php esc_attr_e( 'Workflow health', 'core-blueprint-automations' ); ?>">
 							<section class="cb-core-design-shell__panel-section">
 								<h3 class="cb-core-design-shell__panel-section-title"><?php echo esc_html( $validation->is_valid() ? __( 'Ready', 'core-blueprint-automations' ) : __( 'Needs attention', 'core-blueprint-automations' ) ); ?></h3>
 								<?php if ( $validation->is_valid() ) : ?>
@@ -233,7 +232,6 @@ if ( ! is_string( $definition_json ) ) {
 									</ul>
 								</section>
 							<?php endif; ?>
-						</div>
 							</section>
 						</div>
 					</section>

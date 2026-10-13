@@ -85,8 +85,8 @@ if (root) {
 		roles: { inspector: 'inspector', settings: 'settings' },
 		activeRole: 'settings',
 	});
-	const stageHost = root.querySelector('[data-cb-automations-stage-navigation]');
-	const canvas = root.querySelector('.cb-core-design-shell__canvas');
+	const stageHost = root.querySelector('.cb-core-design-shell__palette');
+	const canvas = root.querySelector('.cb-core-design-shell__canvas-workarea');
 	const stages = [
 		{ id: 'trigger', step: '1', label: 'WHEN', description: 'Trigger', targetId: 'cb-automations-stage-trigger' },
 		{ id: 'states', step: '2', label: 'GET DATA', description: 'Live state', targetId: 'cb-automations-stage-states' },

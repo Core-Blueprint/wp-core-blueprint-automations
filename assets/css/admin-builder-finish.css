@@ -2,9 +2,3 @@
 	height: calc(var(--cb-space-4) + 2px);
 	bottom: calc(-1 * var(--cb-space-4) - 1px);
 }
-
-.cb-automations-design-shell.is-fullscreen .cb-core-design-shell__palette,
-.cb-automations-design-shell.is-fullscreen .cb-core-design-shell__sidebar {
-	min-height: 0;
-	overflow: auto;
-}

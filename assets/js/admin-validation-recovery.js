@@ -342,7 +342,7 @@
 			class: 'cb-automations-validation-stale',
 			role: 'status',
 		}, strings.save_recheck);
-		panel.querySelector('.cb-core-design-shell__panel-body')?.prepend(staleStatus);
+		panel.prepend(staleStatus);
 	}
 
 	function isPresentationOnlyEvent(event) {
@@ -373,7 +373,7 @@
 
 	const renderSavedValidation = (payload) => {
 		if (!payload || typeof payload.valid !== 'boolean') return;
-		const body = panel.querySelector('.cb-core-design-shell__panel-body');
+		const body = panel;
 		if (!body) return;
 		issues = Array.isArray(payload.issues) ? payload.issues : [];
 		stale = false;

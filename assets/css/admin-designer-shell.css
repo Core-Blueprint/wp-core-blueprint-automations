@@ -13,11 +13,6 @@
 	font-size: var(--cb-fs-sm);
 }
 
-.cb-automations-design-shell__canvas {
-	padding: var(--cb-space-3);
-	overflow: auto;
-}
-
 .cb-automations-design-shell__canvas .cb-automations-linear-editor {
 	margin-top: 0;
 }
@@ -38,11 +33,6 @@
 .cb-automations-design-shell__sidebar .cb-automations-validation-list code {
 	max-width: 100%;
 	overflow-wrap: anywhere;
-}
-
-.cb-automations-design-shell.is-fullscreen .cb-core-design-shell__canvas {
-	min-height: 0;
-	overflow: auto;
 }
 
 .cb-automations-design-shell.is-fullscreen .cb-automations-linear-editor {

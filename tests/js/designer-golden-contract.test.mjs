@@ -17,6 +17,10 @@ test('Designer Golden uses Base sidebar roles and retains Settings health conten
 	assert.ok(template.indexOf('cb-automations-validation-panel') > template.indexOf('data-cb-design-shell-panel="settings"'));
 	assert.match(shell, /configureDesignerSidebar\(root/);
 	assert.match(shell, /createDesignerNavigation\(/);
+	assert.match(shell, /stageHost\.append\(navigation\.element\)/);
+	assert.doesNotMatch(template, /data-cb-automations-stage-navigation/);
+	assert.match(template, /cb-core-design-shell__canvas-workarea/);
+	assert.doesNotMatch(template, /cb-automations-validation-panel[^>]*>\s*<div class="cb-core-design-shell__panel-body"/);
 	assert.match(shell, /cb-automations:definitionchange/);
 	assert.doesNotMatch(shell, /\.cb-core-design-shell__workspace\.append/);
 });

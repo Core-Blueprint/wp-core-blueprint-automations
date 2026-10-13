@@ -31,7 +31,9 @@ test('Automations consumes the public Base Designer Shell without owning shared 
 	assert.match(template, /data-cb-design-shell/);
 	assert.match(template, /cb-core-design-shell__workspace/);
 	assert.match(template, /cb-core-design-shell__palette/);
-	assert.match(template, /data-cb-automations-stage-navigation/);
+	assert.doesNotMatch(template, /data-cb-automations-stage-navigation/);
+	assert.match(template, /cb-core-design-shell__canvas-workarea/);
+	assert.match(moduleSource, /stageHost\.append\(navigation\.element\)/);
 	assert.match(moduleSource, /createDesignerNavigation/);
 	assert.match(moduleSource, /navigation\.update\(/);
 	assert.match(moduleSource, /cb-automations:definitionchange/);
