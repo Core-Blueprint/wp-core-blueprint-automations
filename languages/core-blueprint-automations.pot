@@ -1973,11 +1973,6 @@ msgstr ""
 msgid "The stored workflow definition has been preserved unchanged. Restore or update the relevant provider first; Automations will re-evaluate the workflow automatically on the next page load."
 msgstr ""
 
-
-#: src/Admin/DesignerAssets.php
-msgid "This workflow has unsaved changes. Switch workflows and discard those changes?"
-msgstr ""
-
 #: src/Admin/DesignerAssets.php
 msgid "No workflow step selected"
 msgstr ""
@@ -2020,4 +2015,32 @@ msgstr ""
 
 #: templates/admin/workflow-editor.php
 msgid "Conditions become available when earlier steps provide output data."
+msgstr ""
+
+#: src/Admin/DesignerAssets.php
+msgid "Unsaved changes"
+msgstr ""
+
+#: src/Admin/DesignerAssets.php
+msgid "This workflow has unsaved changes. Save or discard them before switching."
+msgstr ""
+
+#: src/Admin/DesignerAssets.php
+msgid "What should happen to your changes?"
+msgstr ""
+
+#: src/Admin/DesignerAssets.php
+msgid "Save changes"
+msgstr ""
+
+#: src/Admin/DesignerAssets.php
+msgid "Discard changes"
+msgstr ""
+
+#: src/Admin/DesignerAssets.php
+msgid "Switch workflow"
+msgstr ""
+
+#: src/Admin/DesignerAssets.php
+msgid "Cancel"
 msgstr ""

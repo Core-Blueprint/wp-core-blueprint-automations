@@ -42,3 +42,36 @@
 .cb-automations-save-actions {
 	padding-right: var(--cb-space-1);
 }
+
+/* Base owns modal chrome; Automations styles only its radio choices. */
+.cb-automations-switch-options {
+	margin: var(--cb-space-4, 16px) 0 0;
+	padding: 0;
+	border: 0;
+}
+.cb-automations-switch-options legend {
+	margin-bottom: var(--cb-space-2, 8px);
+	font-weight: 600;
+}
+.cb-automations-switch-option {
+	display: flex;
+	align-items: center;
+	gap: var(--cb-space-2, 8px);
+	margin-top: var(--cb-space-2, 8px);
+	padding: var(--cb-space-3, 12px);
+	border: 1px solid var(--cb-border, #50575e);
+	border-radius: var(--cb-radius-md, 8px);
+	cursor: pointer;
+}
+.cb-automations-switch-option:has(input:checked) {
+	border-color: var(--cb-accent, #2271b1);
+	background: var(--cb-surface-2, transparent);
+}
+.cb-automations-switch-option:focus-within {
+	outline: 2px solid var(--cb-accent, #2271b1);
+	outline-offset: 2px;
+}
+.cb-automations-switch-error:not([hidden]) {
+	color: var(--cb-danger, #b32d2e);
+	margin-top: var(--cb-space-3, 12px);
+}

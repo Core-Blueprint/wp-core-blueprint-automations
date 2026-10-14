@@ -2213,11 +2213,6 @@ msgstr ""
 "Restaurez ou mettez d’abord à jour le fournisseur concerné ; Automations "
 "réévaluera automatiquement le workflow au prochain chargement de la page."
 
-
-#: src/Admin/DesignerAssets.php
-msgid "This workflow has unsaved changes. Switch workflows and discard those changes?"
-msgstr "Ce flux de travail contient des modifications non enregistrées. Changer de flux et abandonner ces modifications ?"
-
 #: src/Admin/DesignerAssets.php
 msgid "No workflow step selected"
 msgstr "Aucune étape du flux sélectionnée"
@@ -2261,3 +2256,31 @@ msgstr "Configurer le déclencheur"
 #: templates/admin/workflow-editor.php
 msgid "Conditions become available when earlier steps provide output data."
 msgstr "Les conditions deviennent disponibles lorsque les étapes précédentes fournissent des données de sortie."
+
+#: src/Admin/DesignerAssets.php
+msgid "Unsaved changes"
+msgstr "Modifications non enregistrées"
+
+#: src/Admin/DesignerAssets.php
+msgid "This workflow has unsaved changes. Save or discard them before switching."
+msgstr "Ce workflow comporte des modifications non enregistrées. Enregistrez-les ou ignorez-les avant de changer de workflow."
+
+#: src/Admin/DesignerAssets.php
+msgid "What should happen to your changes?"
+msgstr "Que souhaitez-vous faire de vos modifications ?"
+
+#: src/Admin/DesignerAssets.php
+msgid "Save changes"
+msgstr "Enregistrer les modifications"
+
+#: src/Admin/DesignerAssets.php
+msgid "Discard changes"
+msgstr "Ignorer les modifications"
+
+#: src/Admin/DesignerAssets.php
+msgid "Switch workflow"
+msgstr "Changer de workflow"
+
+#: src/Admin/DesignerAssets.php
+msgid "Cancel"
+msgstr "Annuler"

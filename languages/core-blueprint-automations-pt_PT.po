@@ -2214,11 +2214,6 @@ msgstr ""
 "a avaliar automaticamente o fluxo de trabalho no próximo carregamento da "
 "página."
 
-
-#: src/Admin/DesignerAssets.php
-msgid "This workflow has unsaved changes. Switch workflows and discard those changes?"
-msgstr "Este fluxo de trabalho tem alterações por guardar. Pretende mudar de fluxo e descartar as alterações?"
-
 #: src/Admin/DesignerAssets.php
 msgid "No workflow step selected"
 msgstr "Nenhum passo do fluxo selecionado"
@@ -2262,3 +2257,31 @@ msgstr "Configurar acionador"
 #: templates/admin/workflow-editor.php
 msgid "Conditions become available when earlier steps provide output data."
 msgstr "As condições ficam disponíveis quando os passos anteriores fornecem dados de saída."
+
+#: src/Admin/DesignerAssets.php
+msgid "Unsaved changes"
+msgstr "Alterações não guardadas"
+
+#: src/Admin/DesignerAssets.php
+msgid "This workflow has unsaved changes. Save or discard them before switching."
+msgstr "Este fluxo de trabalho tem alterações não guardadas. Guarde-as ou descarte-as antes de mudar de fluxo de trabalho."
+
+#: src/Admin/DesignerAssets.php
+msgid "What should happen to your changes?"
+msgstr "O que pretende fazer às alterações?"
+
+#: src/Admin/DesignerAssets.php
+msgid "Save changes"
+msgstr "Guardar alterações"
+
+#: src/Admin/DesignerAssets.php
+msgid "Discard changes"
+msgstr "Descartar alterações"
+
+#: src/Admin/DesignerAssets.php
+msgid "Switch workflow"
+msgstr "Mudar de fluxo de trabalho"
+
+#: src/Admin/DesignerAssets.php
+msgid "Cancel"
+msgstr "Cancelar"

@@ -33,6 +33,14 @@ test('Automation Builder keeps canonical persistence, shared-shell ownership and
 	assert.match(shell, /launchRoot\?\.addEventListener\('cb:design-shell:contextrequest'/);
 	assert.match(shell, /event\.detail\.respondWith/);
 	assert.match(shell, /isDirty\(\)/);
+	assert.match(shell, /showModal\(\{/);
+	assert.match(shell, /chooseSwitchAction/);
+	assert.match(shell, /saveBeforeSwitch/);
+	assert.match(shell, /form\.requestSubmit\(saveButton\)/);
+	assert.match(shell, /workflowSwitcher\.dispatchEvent\(new Event\('change'/);
+	assert.match(shell, /approvedSwitchUrl === url\.href/);
+	assert.match(save, /cbAutomationsAsyncSaveReady = true/);
+	assert.doesNotMatch(shell, /window\.confirm\(/);
 	assert.match(shell, /cb:design-shell:savechange/);
 	assert.match(shell, /new URL\(target, window\.location\.href\)/);
 	assert.match(shell, /url\.origin !== window\.location\.origin/);

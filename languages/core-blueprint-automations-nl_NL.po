@@ -2198,11 +2198,6 @@ msgstr ""
 "eerst de relevante provider bij; Automations beoordeelt de workflow "
 "automatisch opnieuw bij de volgende paginalaad."
 
-
-#: src/Admin/DesignerAssets.php
-msgid "This workflow has unsaved changes. Switch workflows and discard those changes?"
-msgstr "Deze workflow bevat niet-opgeslagen wijzigingen. Wil je van workflow wisselen en de wijzigingen verwijderen?"
-
 #: src/Admin/DesignerAssets.php
 msgid "No workflow step selected"
 msgstr "Geen workflowstap geselecteerd"
@@ -2246,3 +2241,31 @@ msgstr "Trigger configureren"
 #: templates/admin/workflow-editor.php
 msgid "Conditions become available when earlier steps provide output data."
 msgstr "Voorwaarden worden beschikbaar zodra eerdere stappen uitvoergegevens leveren."
+
+#: src/Admin/DesignerAssets.php
+msgid "Unsaved changes"
+msgstr "Niet-opgeslagen wijzigingen"
+
+#: src/Admin/DesignerAssets.php
+msgid "This workflow has unsaved changes. Save or discard them before switching."
+msgstr "Deze workflow bevat niet-opgeslagen wijzigingen. Sla ze op of verwerp ze voordat je van workflow wisselt."
+
+#: src/Admin/DesignerAssets.php
+msgid "What should happen to your changes?"
+msgstr "Wat wil je met je wijzigingen doen?"
+
+#: src/Admin/DesignerAssets.php
+msgid "Save changes"
+msgstr "Wijzigingen opslaan"
+
+#: src/Admin/DesignerAssets.php
+msgid "Discard changes"
+msgstr "Wijzigingen verwerpen"
+
+#: src/Admin/DesignerAssets.php
+msgid "Switch workflow"
+msgstr "Van workflow wisselen"
+
+#: src/Admin/DesignerAssets.php
+msgid "Cancel"
+msgstr "Annuleren"

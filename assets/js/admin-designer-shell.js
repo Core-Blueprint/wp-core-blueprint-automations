@@ -1,4 +1,5 @@
 import { createDesignerShell, configureDesignerSidebar, createDesignerNavigation } from '@cb-core/design-editor';
+import { show as showModal } from '@cb-core/modal';
 
 const root = document.querySelector('[data-cb-automations-designer-shell]');
 
@@ -131,6 +132,104 @@ if (root) {
 			return Object.freeze({ workflowId: id });
 		};
 
+
+		// Base requires respondWith() synchronously. On dirty changes let Base
+		// restore the previous selection; replay it only after modal approval.
+		let awaitingChoice = false;
+		let approvedSwitchUrl = '';
+		const saveBeforeSwitch = () => new Promise((resolve, reject) => {
+			const saveButton = root.querySelector('[data-cb-design-shell-primary-action]');
+			if (!(form instanceof HTMLFormElement) || !(saveButton instanceof HTMLButtonElement)
+				|| window.cbAutomationsAsyncSaveReady !== true) {
+				reject(contextError('contextUnavailable', 'Workflow saving is unavailable. Reload the editor.'));
+				return;
+			}
+			if (root.hasAttribute('aria-busy') || saveButton.disabled) {
+				reject(contextError('saveInProgress', 'Wait for the current save to finish.'));
+				return;
+			}
+			const onSaveChange = (event) => {
+				const state = String(event.detail?.state || '');
+				if (state !== 'saved' && state !== 'error') return;
+				root.removeEventListener('cb:design-shell:savechange', onSaveChange);
+				if (state === 'error') {
+					reject(new Error(String(event.detail?.message || window.cbAutomationsSaveStrings?.failed || 'The automation could not be saved.')));
+				} else if (isDirty()) {
+					reject(new Error(String(window.cbAutomationsSaveStrings?.savedWithChanges || 'Automation saved. Newer edits are not saved yet.')));
+				} else {
+					resolve();
+				}
+			};
+			root.addEventListener('cb:design-shell:savechange', onSaveChange);
+			try {
+				form.requestSubmit(saveButton);
+			} catch (error) {
+				root.removeEventListener('cb:design-shell:savechange', onSaveChange);
+				reject(error);
+			}
+		});
+		const chooseSwitchAction = async () => {
+			const labels = window.cbAutomationsInspectorStrings || {};
+			const body = document.createElement('div');
+			const description = document.createElement('p');
+			description.textContent = String(labels.unsavedChanges || 'This workflow has unsaved changes. Save or discard them before switching.');
+			body.append(description);
+			const options = document.createElement('fieldset');
+			options.className = 'cb-automations-switch-options';
+			const legend = document.createElement('legend');
+			legend.textContent = String(labels.unsavedChoice || 'What should happen to your changes?');
+			options.append(legend);
+			const radios = [];
+			for (const [value, caption] of [
+				['save', labels.optionSave || 'Save changes'],
+				['discard', labels.optionDiscard || 'Discard changes'],
+			]) {
+				const option = document.createElement('label');
+				option.className = 'cb-automations-switch-option';
+				const radio = document.createElement('input');
+				radio.type = 'radio';
+				radio.name = 'cb-automations-switch-action';
+				radio.value = value;
+				radio.checked = value === 'save';
+				option.append(radio, document.createTextNode(String(caption)));
+				options.append(option);
+				radios.push(radio);
+			}
+			body.append(options);
+			const errorMessage = document.createElement('p');
+			errorMessage.className = 'cb-automations-switch-error';
+			errorMessage.setAttribute('role', 'alert');
+			errorMessage.hidden = true;
+			body.append(errorMessage);
+			let action = null;
+			const accepted = await showModal({
+				title: String(labels.unsavedTitle || 'Unsaved changes'),
+				body,
+				confirmLabel: String(labels.switchWorkflow || 'Switch workflow'),
+				cancelLabel: String(labels.cancel || 'Cancel'),
+				onConfirm: async () => {
+					const selected = radios.find((radio) => radio.checked)?.value;
+					if (!selected) return false;
+					errorMessage.hidden = true;
+					if (selected === 'save') {
+						radios.forEach((radio) => { radio.disabled = true; });
+						try {
+							await saveBeforeSwitch();
+						} catch (error) {
+							errorMessage.textContent = error instanceof Error ? error.message : String(window.cbAutomationsSaveStrings?.failed || 'The automation could not be saved.');
+							errorMessage.hidden = false;
+							return false;
+						} finally {
+							radios.forEach((radio) => { radio.disabled = false; });
+						}
+					}
+					action = selected;
+					return true;
+				},
+			});
+			return accepted ? action : null;
+		};
+
 		launchRoot?.addEventListener('cb:design-shell:contextrequest', (event) => {
 			if (event.detail?.control !== workflowSwitcher) return;
 			const target = String(event.detail.value || '').trim();
@@ -138,10 +237,32 @@ if (root) {
 			try { url = new URL(target, window.location.href); }
 			catch { return; }
 			if (!target || url.origin !== window.location.origin) return;
-			if (isDirty() && !window.confirm(String(
-				window.cbAutomationsInspectorStrings?.unsavedChanges
-				|| 'This workflow has unsaved changes. Switch workflows and discard those changes?'
-			))) return;
+			if (approvedSwitchUrl === url.href) {
+				approvedSwitchUrl = '';
+				event.detail.respondWith(switchContext(url));
+				return;
+			}
+			if (awaitingChoice) return;
+			if (isDirty()) {
+				awaitingChoice = true;
+				workflowSwitcher.disabled = true;
+				let handedOff = false;
+				Promise.resolve().then(chooseSwitchAction).then((action) => {
+					if (!action) return;
+					approvedSwitchUrl = url.href;
+					workflowSwitcher.value = target;
+					workflowSwitcher.dispatchEvent(new Event('change', { bubbles: true }));
+					handedOff = approvedSwitchUrl === '';
+					approvedSwitchUrl = '';
+				}).catch((error) => {
+					const status = root.querySelector('[data-cb-design-shell-status]');
+					if (status) status.textContent = error instanceof Error ? error.message : String(error);
+				}).finally(() => {
+					awaitingChoice = false;
+					if (!handedOff) workflowSwitcher.disabled = false;
+				});
+				return;
+			}
 			event.detail.respondWith(switchContext(url));
 		});
 

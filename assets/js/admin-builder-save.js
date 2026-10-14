@@ -199,4 +199,5 @@
 			aliases.forEach((button) => { button.disabled = false; });
 		}
 	});
+	window.cbAutomationsAsyncSaveReady = true;
 })();

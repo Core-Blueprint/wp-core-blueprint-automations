@@ -20,6 +20,9 @@ test('Automations consumes the public Base Designer Shell without owning shared 
 	assert.match(plugin, /DesignerAssets::init\(\)/);
 	assert.match(assets, /wp_enqueue_script_module\(/);
 	assert.match(assets, /['"]@cb-core\/design-editor['"]/);
+	assert.match(assets, /UIAssets::enqueue_modals\( 'core' \)/);
+	assert.match(assets, /['"]@cb-core\/modal['"]/);
+	assert.match(moduleSource, /import \{ show as showModal \} from '@cb-core\/modal'/);
 	assert.match(assets, /is_callable\( \[ DesignEditorAssets::class, ['"]enqueue_designer_mode['"] \] \)/);
 	assert.match(assets, /enqueue_designer_mode\( __\( 'Automation Builder'/);
 	assert.match(assets, /'properties'\s*=>\s*__\( 'Properties'/);

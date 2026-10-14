@@ -5,6 +5,7 @@ namespace CB\Automations\Admin;
 
 use CoreBlueprint\Core\Admin\MenuGroupRegistry;
 use CoreBlueprint\Core\Design\Editor\Assets as DesignEditorAssets;
+use CoreBlueprint\Core\UI\Assets as UIAssets;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -35,6 +36,7 @@ final class DesignerAssets {
 		}
 
 		DesignEditorAssets::enqueue_designer_mode( __( 'Automation Builder', 'core-blueprint-automations' ) );
+		UIAssets::enqueue_modals( 'core' );
 
 		$css            = CB_AUTOMATIONS_DIR . 'assets/css/admin-designer-shell.css';
 		$inspector_css  = CB_AUTOMATIONS_DIR . 'assets/css/admin-builder-inspector.css';
@@ -58,7 +60,13 @@ final class DesignerAssets {
 			[
 				'inspector'    => __( 'Inspector', 'core-blueprint-automations' ),
 				'properties'   => __( 'Properties', 'core-blueprint-automations' ),
-				'unsavedChanges' => __( 'This workflow has unsaved changes. Switch workflows and discard those changes?', 'core-blueprint-automations' ),
+				'unsavedTitle' => __( 'Unsaved changes', 'core-blueprint-automations' ),
+			'unsavedChanges' => __( 'This workflow has unsaved changes. Save or discard them before switching.', 'core-blueprint-automations' ),
+			'unsavedChoice' => __( 'What should happen to your changes?', 'core-blueprint-automations' ),
+			'optionSave' => __( 'Save changes', 'core-blueprint-automations' ),
+			'optionDiscard' => __( 'Discard changes', 'core-blueprint-automations' ),
+			'switchWorkflow' => __( 'Switch workflow', 'core-blueprint-automations' ),
+			'cancel' => __( 'Cancel', 'core-blueprint-automations' ),
 				'saveInProgress' => __( 'Wait for the current save to finish.', 'core-blueprint-automations' ),
 				'contextUnavailable' => __( 'Workflow switching is not available. Reload the editor.', 'core-blueprint-automations' ),
 				'loadFailed' => __( 'Could not load the selected workflow.', 'core-blueprint-automations' ),
@@ -124,7 +132,7 @@ final class DesignerAssets {
 		wp_enqueue_style( 'cb-automations-admin-builder-authoring', CB_AUTOMATIONS_URL . 'assets/css/admin-builder-authoring.css', [ 'cb-automations-admin-builder-inspector' ], is_file( $authoring_css ) ? (string) filemtime( $authoring_css ) : CB_AUTOMATIONS_VERSION );
 		wp_enqueue_style( 'cb-automations-admin-builder-finish', CB_AUTOMATIONS_URL . 'assets/css/admin-builder-finish.css', [ 'cb-automations-admin-builder-authoring' ], is_file( $finish_css ) ? (string) filemtime( $finish_css ) : CB_AUTOMATIONS_VERSION );
 
-		wp_enqueue_script_module( 'cb-automations-admin-designer-shell', CB_AUTOMATIONS_URL . 'assets/js/admin-designer-shell.js', [ '@cb-core/design-editor' ], is_file( $js ) ? (string) filemtime( $js ) : CB_AUTOMATIONS_VERSION );
+		wp_enqueue_script_module( 'cb-automations-admin-designer-shell', CB_AUTOMATIONS_URL . 'assets/js/admin-designer-shell.js', [ '@cb-core/design-editor', '@cb-core/modal' ], is_file( $js ) ? (string) filemtime( $js ) : CB_AUTOMATIONS_VERSION );
 		wp_enqueue_script_module( self::HISTORY_MODULE, CB_AUTOMATIONS_URL . 'assets/js/admin-builder-history.js', [ '@cb-core/design-editor', 'cb-automations-admin-designer-shell' ], is_file( $history ) ? (string) filemtime( $history ) : CB_AUTOMATIONS_VERSION );
 	}
 
