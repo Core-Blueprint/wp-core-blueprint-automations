@@ -48,3 +48,25 @@ assert.equal(
 );
 
 console.log('editor-binding-compatibility: PASS');
+
+const statuses = [
+	{ value: 'draft', label: 'Draft' },
+	{ value: 'publish', label: 'Published' },
+	{ value: 'pending', label: 'Pending review' },
+	{ value: 'future', label: 'Scheduled' },
+	{ value: 'private', label: 'Private' },
+	{ value: 'acme_review', label: 'Awaiting review' },
+];
+assert.equal(helpers.postStatusChoices({ type: 'integer', semantic_type: 'wp.post_status' }, statuses), null);
+assert.equal(helpers.postStatusChoices({ type: 'string', semantic_type: 'wp.post_type' }, statuses), null);
+assert.deepEqual(
+	helpers.postStatusChoices({ type: 'string', semantic_type: 'wp.post_status' }, statuses).map((s) => s.value),
+	['draft', 'publish', 'pending', 'future', 'private', 'acme_review'],
+	'Only typed WordPress post-status literal inputs use the site-registered picker.'
+);
+assert.deepEqual(
+	helpers.postStatusChoices({ type: 'string', semantic_type: 'wp.post_status' }, statuses, 'legacy_custom').at(-1),
+	{ value: 'legacy_custom', label: 'legacy_custom' },
+	'Previously saved/custom status values remain visible even if no longer registered.'
+);
+assert.equal(helpers.postStatusChoices({ type: 'string', semantic_type: 'wp.post_status' }, [...statuses, { value: 'draft', label: 'Duplicate' }]).length, statuses.length, 'Duplicate statuses must be removed.');

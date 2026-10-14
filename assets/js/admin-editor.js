@@ -22,11 +22,30 @@
 		return source.type === 'integer' && target.type === 'number';
 	}
 
+	/** @return Array<{value:string,label:string}>|null */
+	function postStatusChoices(schema, registered, selected = '') {
+		if (schema?.type !== 'string' || semanticType(schema) !== 'wp.post_status') return null;
+		const options = [];
+		const seen = new Set();
+		for (const status of (Array.isArray(registered) ? registered : [])) {
+			if (!status || typeof status.value !== 'string' || !/^[a-z][a-z0-9_-]{0,31}$/.test(status.value) || seen.has(status.value)) continue;
+			const label = typeof status.label === 'string' && status.label.trim() ? status.label.trim() : status.value;
+			options.push({ value: status.value, label });
+			seen.add(status.value);
+		}
+		if (typeof selected === 'string' && selected && !seen.has(selected)) {
+			// A removed custom status must stay visible during editing, never lost.
+			options.push({ value: selected, label: selected });
+		}
+		return options;
+	}
+
 	if (typeof document === 'undefined') {
 		globalThis.cbAutomationsEditorHelpers = {
 			semanticType,
 			semanticsCompatible,
 			typeCompatible,
+			postStatusChoices,
 		};
 		return;
 	}
@@ -46,6 +65,7 @@
 
 	const strings = data.strings || {};
 	const operatorLabels = data.operator_labels || {};
+	const postStatuses = Array.isArray(data.post_status_options) ? data.post_status_options : [];
 	const operatorCatalog = data.operators || {};
 	const catalog = Array.isArray(data.capabilities) ? data.capabilities : [];
 	const state = JSON.parse(JSON.stringify(data.workflow?.definition || {
@@ -218,6 +238,19 @@
 	function literalControl(binding, schema, onChange) {
 		const wrap = el('div', { class: 'cb-automations-literal' });
 		const type = schema?.type || literalSchema(binding.value)?.type || 'string';
+		const statusOptions = postStatusChoices(schema, postStatuses, binding.value);
+		if (statusOptions && statusOptions.length) {
+			const select = el('select', { class: 'cb-automations-post-status-picker' });
+			select.append(el('option', { value: '' }, '—'));
+			for (const status of statusOptions) {
+				select.append(el('option', { value: status.value }, status.label));
+			}
+			select.value = typeof binding.value === 'string' ? binding.value : '';
+			select.addEventListener('change', () => onChange(select.value));
+			wrap.append(select);
+			return wrap;
+		}
+
 		if (type === 'boolean') {
 			const select = el('select');
 			select.append(el('option', { value: 'false' }, strings.false || 'False'));

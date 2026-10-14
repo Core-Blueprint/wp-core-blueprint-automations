@@ -39,6 +39,7 @@ final class WorkflowEditorData {
 				'definition'       => $projection['definition'],
 			],
 			'capabilities'                => $capabilities,
+			'post_status_options'        => self::post_status_options(),
 			'operators'                   => OperatorCatalog::definitions(),
 			'validation'                  => $validation->to_array(),
 			'redacted_sensitive_literals' => $projection['redacted'],
@@ -63,6 +64,25 @@ final class WorkflowEditorData {
 				'available' => $provider->is_available(),
 			],
 		];
+	}
+
+	/**
+	 * @return list<array{value:string,label:string}>
+	 * Registered non-internal WordPress status options for semantic post-status
+	 * literal inputs. This remains a UX hint, not an execution authorization.
+	 */
+	private static function post_status_options(): array {
+		$statuses = get_post_stati( [ 'internal' => false ], 'objects' );
+		$options = [];
+		foreach ( $statuses as $name => $status ) {
+			if ( ! is_string( $name ) || ! preg_match( '/^[a-z][a-z0-9_-]{0,31}$/D', $name )
+				|| ! is_object( $status ) ) {
+				continue;
+			}
+			$label = trim( wp_strip_all_tags( (string) ( $status->label ?? $name ) ) );
+			$options[] = [ 'value' => $name, 'label' => '' !== $label ? $label : $name ];
+		}
+		return $options;
 	}
 
 	private static function identity_key( string $kind, string $provider, string $id ): string {
