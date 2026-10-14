@@ -1338,21 +1338,6 @@ msgstr "Bedankt dat je de tijd hebt genomen om een reactie achter te laten."
 msgid "Automation draft created."
 msgstr "Automatiseringsconcept aangemaakt."
 
-#: templates/admin/automations.php:17
-msgid ""
-"Automation created from template. Review it, assign execution authority and "
-"enable it when ready."
-msgstr ""
-"Automatisering aangemaakt vanuit sjabloon. Controleer deze, wijs "
-"uitvoeringsbevoegdheid toe en schakel hem in wanneer hij gereed is."
-
-#: templates/admin/automations.php:18
-msgid ""
-"That workflow template is no longer available. No automation was created."
-msgstr ""
-"Dat workflowsjabloon is niet langer beschikbaar. Er is geen automatisering "
-"aangemaakt."
-
 #: templates/admin/automations.php:19
 msgid "Automation enabled."
 msgstr "Automatisering ingeschakeld."
@@ -1361,104 +1346,9 @@ msgstr "Automatisering ingeschakeld."
 msgid "Automation disabled."
 msgstr "Automatisering uitgeschakeld."
 
-#: templates/admin/automations.php:22
-msgid ""
-"The automation remains disabled because secure runtime encryption is "
-"unavailable on this site."
-msgstr ""
-"De automatisering blijft uitgeschakeld omdat beveiligde runtimeversleuteling "
-"niet beschikbaar is op deze site."
-
-#: templates/admin/automations.php:23
-msgid ""
-"The automation remains disabled. Open the builder and assign your account as "
-"execution authority first."
-msgstr ""
-"De automatisering blijft uitgeschakeld. Open de builder en wijs eerst je "
-"account toe als uitvoeringsbevoegdheid."
-
-#: templates/admin/automations.php:24
-msgid ""
-"The automation remains disabled because its stored execution authority is no "
-"longer a valid WordPress user."
-msgstr ""
-"De automatisering blijft uitgeschakeld omdat de opgeslagen "
-"uitvoeringsbevoegdheid niet langer een geldige WordPress-gebruiker is."
-
-#: templates/admin/automations.php:25
-msgid ""
-"The automation remains disabled because its execution principal no longer "
-"has all required permissions."
-msgstr ""
-"De automatisering blijft uitgeschakeld omdat de uitvoeringsprincipal niet "
-"langer alle vereiste rechten heeft."
-
-#: templates/admin/automations.php:26
-msgid ""
-"The automation remains disabled because your account does not have all "
-"permissions required to enable it."
-msgstr ""
-"De automatisering blijft uitgeschakeld omdat je account niet alle rechten "
-"heeft die nodig zijn om hem in te schakelen."
-
-#: templates/admin/automations.php:27
-msgid ""
-"The automation remains disabled because execution authority could not be "
-"verified against the current capability contracts."
-msgstr ""
-"De automatisering blijft uitgeschakeld omdat de uitvoeringsbevoegdheid niet "
-"kon worden geverifieerd aan de hand van de huidige mogelijkheidscontracten."
-
-#: templates/admin/automations.php:28
-msgid ""
-"The automation state was not changed because the stored workflow contains "
-"data that cannot be persisted safely."
-msgstr ""
-"De automatiseringsstatus is niet gewijzigd omdat de opgeslagen workflow "
-"gegevens bevat die niet veilig kunnen worden opgeslagen."
-
-#: templates/admin/automations.php:29
-msgid ""
-"This automation changed in another request. Reload the page before changing "
-"its state."
-msgstr ""
-"Deze automatisering is in een ander verzoek gewijzigd. Herlaad de pagina "
-"voordat je de status wijzigt."
-
-#: templates/admin/automations.php:33
-msgid ""
-"The automation could not be saved because workflow storage is unavailable. "
-"No workflow state was changed."
-msgstr ""
-"De automatisering kon niet worden opgeslagen omdat workflowopslag niet "
-"beschikbaar is. Er is geen workflowstatus gewijzigd."
-
-#: templates/admin/automations.php:34
-msgid ""
-"The automation could not be updated. Reload the page before trying again."
-msgstr ""
-"De automatisering kon niet worden bijgewerkt. Herlaad de pagina voordat je "
-"het opnieuw probeert."
-
-#: templates/admin/automations.php:39
-msgid ""
-"Build linear workflows from capabilities registered by Core Blueprint "
-"extensions."
-msgstr ""
-"Bouw lineaire workflows met mogelijkheden die door Core Blueprint-extensies "
-"zijn geregistreerd."
-
 #: templates/admin/automations.php:47 templates/admin/automations.php:54
 msgid "Create automation"
 msgstr "Automatisering aanmaken"
-
-#: templates/admin/automations.php:48
-msgid ""
-"Start with a name, then build a clear When → Get data → Only if → Then "
-"workflow."
-msgstr ""
-"Begin met een naam en bouw daarna een duidelijke Wanneer → Gegevens ophalen "
-"→ Alleen als → Dan-workflow."
 
 #: templates/admin/automations.php:52 templates/admin/automations.php:53
 msgid "Automation name"
@@ -1467,14 +1357,6 @@ msgstr "Naam automatisering"
 #: templates/admin/automations.php:61
 msgid "Start from a template"
 msgstr "Begin met een sjabloon"
-
-#: templates/admin/automations.php:62
-msgid ""
-"Create a normal editable workflow from a provider template. The new workflow "
-"is yours and is not kept linked to the template."
-msgstr ""
-"Maak een normale bewerkbare workflow vanuit een providersjabloon. De nieuwe "
-"workflow is van jou en blijft niet gekoppeld aan het sjabloon."
 
 #: templates/admin/automations.php:76
 msgid "Use template"

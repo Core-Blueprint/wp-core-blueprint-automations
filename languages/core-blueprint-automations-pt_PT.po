@@ -1343,21 +1343,6 @@ msgstr "Obrigado por ter dedicado tempo a deixar um comentário."
 msgid "Automation draft created."
 msgstr "Rascunho de automatização criado."
 
-#: templates/admin/automations.php:17
-msgid ""
-"Automation created from template. Review it, assign execution authority and "
-"enable it when ready."
-msgstr ""
-"Automatização criada a partir de um modelo. Reveja-a, atribua autoridade de "
-"execução e ative-a quando estiver pronta."
-
-#: templates/admin/automations.php:18
-msgid ""
-"That workflow template is no longer available. No automation was created."
-msgstr ""
-"Esse modelo de fluxo de trabalho já não está disponível. Não foi criada "
-"nenhuma automatização."
-
 #: templates/admin/automations.php:19
 msgid "Automation enabled."
 msgstr "Automatização ativada."
@@ -1366,105 +1351,9 @@ msgstr "Automatização ativada."
 msgid "Automation disabled."
 msgstr "Automatização desativada."
 
-#: templates/admin/automations.php:22
-msgid ""
-"The automation remains disabled because secure runtime encryption is "
-"unavailable on this site."
-msgstr ""
-"A automatização permanece desativada porque a encriptação segura em tempo de "
-"execução não está disponível neste site."
-
-#: templates/admin/automations.php:23
-msgid ""
-"The automation remains disabled. Open the builder and assign your account as "
-"execution authority first."
-msgstr ""
-"A automatização permanece desativada. Abra o builder e atribua primeiro a "
-"sua conta como autoridade de execução."
-
-#: templates/admin/automations.php:24
-msgid ""
-"The automation remains disabled because its stored execution authority is no "
-"longer a valid WordPress user."
-msgstr ""
-"A automatização permanece desativada porque a autoridade de execução "
-"guardada já não é um utilizador WordPress válido."
-
-#: templates/admin/automations.php:25
-msgid ""
-"The automation remains disabled because its execution principal no longer "
-"has all required permissions."
-msgstr ""
-"A automatização permanece desativada porque o principal de execução já não "
-"tem todas as permissões necessárias."
-
-#: templates/admin/automations.php:26
-msgid ""
-"The automation remains disabled because your account does not have all "
-"permissions required to enable it."
-msgstr ""
-"A automatização permanece desativada porque a sua conta não tem todas as "
-"permissões necessárias para a ativar."
-
-#: templates/admin/automations.php:27
-msgid ""
-"The automation remains disabled because execution authority could not be "
-"verified against the current capability contracts."
-msgstr ""
-"A automatização permanece desativada porque não foi possível verificar a "
-"autoridade de execução em relação aos contratos de capacidades atuais."
-
-#: templates/admin/automations.php:28
-msgid ""
-"The automation state was not changed because the stored workflow contains "
-"data that cannot be persisted safely."
-msgstr ""
-"O estado da automatização não foi alterado porque o fluxo de trabalho "
-"guardado contém dados que não podem ser persistidos com segurança."
-
-#: templates/admin/automations.php:29
-msgid ""
-"This automation changed in another request. Reload the page before changing "
-"its state."
-msgstr ""
-"Esta automatização foi alterada noutro pedido. Recarregue a página antes de "
-"alterar o respetivo estado."
-
-#: templates/admin/automations.php:33
-msgid ""
-"The automation could not be saved because workflow storage is unavailable. "
-"No workflow state was changed."
-msgstr ""
-"Não foi possível guardar a automatização porque o armazenamento dos fluxos "
-"de trabalho está indisponível. Nenhum estado do fluxo de trabalho foi "
-"alterado."
-
-#: templates/admin/automations.php:34
-msgid ""
-"The automation could not be updated. Reload the page before trying again."
-msgstr ""
-"Não foi possível atualizar a automatização. Recarregue a página antes de "
-"tentar novamente."
-
-#: templates/admin/automations.php:39
-msgid ""
-"Build linear workflows from capabilities registered by Core Blueprint "
-"extensions."
-msgstr ""
-"Crie fluxos de trabalho lineares a partir de capacidades registadas por "
-"extensões do Core Blueprint."
-
 #: templates/admin/automations.php:47 templates/admin/automations.php:54
 msgid "Create automation"
 msgstr "Criar automatização"
-
-#: templates/admin/automations.php:48
-msgid ""
-"Start with a name, then build a clear When → Get data → Only if → Then "
-"workflow."
-msgstr ""
-"Comece com um nome e depois crie um fluxo de trabalho claro Quando → Obter "
-"dados → Apenas se → Então."
 
 #: templates/admin/automations.php:52 templates/admin/automations.php:53
 msgid "Automation name"
@@ -1473,14 +1362,6 @@ msgstr "Nome da automatização"
 #: templates/admin/automations.php:61
 msgid "Start from a template"
 msgstr "Começar a partir de um modelo"
-
-#: templates/admin/automations.php:62
-msgid ""
-"Create a normal editable workflow from a provider template. The new workflow "
-"is yours and is not kept linked to the template."
-msgstr ""
-"Crie um fluxo de trabalho normal e editável a partir de um modelo do "
-"fornecedor. O novo fluxo de trabalho é seu e não fica ligado ao modelo."
 
 #: templates/admin/automations.php:76
 msgid "Use template"
