@@ -3,7 +3,7 @@
  * Plugin Name:       Core Blueprint Automations
  * Plugin URI:        https://coreblueprint.io
  * Description:       Workflow orchestration for Core Blueprint capabilities.
- * Version:           1.0.0-rc1
+ * Version:           1.0.0-rc2
  * Author:            Core Blueprint
  * Author URI:        https://coreblueprint.io
  * License:           GPL-2.0+
@@ -25,7 +25,7 @@ if ( defined( 'CB_AUTOMATIONS_FILE' ) ) {
 	return;
 }
 
-define( 'CB_AUTOMATIONS_VERSION', '1.0.0-rc1' );
+define( 'CB_AUTOMATIONS_VERSION', '1.0.0-rc2' );
 define( 'CB_AUTOMATIONS_DB_VERSION', '2' );
 define( 'CB_AUTOMATIONS_REQUIRED_API', '1.0' );
 define( 'CB_AUTOMATIONS_FILE', __FILE__ );

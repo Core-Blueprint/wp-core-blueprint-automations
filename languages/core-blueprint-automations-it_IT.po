@@ -2,7 +2,7 @@
 # This file is distributed under the GPL-2.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: Core Blueprint Automations 1.0.0-rc1\n"
+"Project-Id-Version: Core Blueprint Automations 1.0.0-rc2\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wp-core-blueprint-"
 "automations\n"
 "POT-Creation-Date: 2026-10-14 18:46+0000\n"
