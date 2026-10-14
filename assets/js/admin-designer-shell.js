@@ -40,7 +40,7 @@ if (root) {
 			String(window.cbAutomationsInspectorStrings?.[key] || fallback)
 		);
 		const switchContext = async (url) => {
-			if (shell.hasAttribute('aria-busy')) throw contextError('saveInProgress', 'Wait for the current save to finish.');
+			if (root.hasAttribute('aria-busy')) throw contextError('saveInProgress', 'Wait for the current save to finish.');
 			const session = window.cbAutomationsEditorSession;
 			const history = window.cbAutomationsBuilderHistory;
 			if (!session?.replace || !history?.resetForContext || !contextDataNode) {
@@ -114,11 +114,11 @@ if (root) {
 			});
 			contextDataNode.textContent = nextDataNode.textContent;
 			history.resetForContext(nextDefinition);
-			shell.dispatchEvent(new CustomEvent('cb-automations:validation-saved', {
+			root.dispatchEvent(new CustomEvent('cb-automations:validation-saved', {
 				bubbles: true,
 				detail: Object.freeze({ valid: issues.length === 0, issues }),
 			}));
-			shell.dispatchEvent(new CustomEvent('cb-automations:contextloaded', {
+			root.dispatchEvent(new CustomEvent('cb-automations:contextloaded', {
 				bubbles: true,
 				detail: Object.freeze({ workflowId: id, definition: nextDefinition }),
 			}));
@@ -180,6 +180,8 @@ if (root) {
 			legend.textContent = String(labels.unsavedChoice || 'What should happen to your changes?');
 			options.append(legend);
 			const radios = [];
+			const choices = document.createElement('div');
+			choices.className = 'cb-automations-switch-choices';
 			for (const [value, caption] of [
 				['save', labels.optionSave || 'Save changes'],
 				['discard', labels.optionDiscard || 'Discard changes'],
@@ -192,9 +194,10 @@ if (root) {
 				radio.value = value;
 				radio.checked = value === 'save';
 				option.append(radio, document.createTextNode(String(caption)));
-				options.append(option);
+				choices.append(option);
 				radios.push(radio);
 			}
+			options.append(choices);
 			body.append(options);
 			const errorMessage = document.createElement('p');
 			errorMessage.className = 'cb-automations-switch-error';
