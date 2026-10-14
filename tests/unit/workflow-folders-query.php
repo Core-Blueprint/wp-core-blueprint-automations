@@ -27,7 +27,7 @@ namespace {
 			}
 			return str_replace( [ '%s', '%d' ], '?', $sql );
 		}
-		public function get_var( string $sql ): int { return 0; }
+		public function get_var( string $sql ): int { $this->sql = $sql; return 0; }
 		public function get_results( string $sql, string $type ): array { return []; }
 	}
 	$GLOBALS['wpdb'] = new FolderIndexFakeWpdb();

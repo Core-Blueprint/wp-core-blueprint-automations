@@ -24,11 +24,6 @@ $plugin = $read( 'src/Plugin.php' );
 $wakeup = $read( 'src/Runtime/WorkerWakeup.php' );
 
 foreach ( [
-	[ $folder, "private const VERSION_OPTION" ], // covered by named OPTION below
-] as $unused ) {
-	// intentionally empty; assertions are grouped below
-}
-foreach ( [
 	[ $folder, "private const OPTION = 'cb_automations_folders_schema_version'" ],
 	[ $folder, 'dbDelta(' ],
 	[ $folder, 'self::folders_table()' ],

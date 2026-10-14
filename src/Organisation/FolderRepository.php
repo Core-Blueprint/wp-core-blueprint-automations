@@ -66,8 +66,11 @@ final class FolderRepository {
 	}
 	public static function create( string $name ): int {
 		global $wpdb;
+		$table = self::folders_table();
+		$count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- trusted table.
+		if ( $count >= 1000 ) { throw new \RuntimeException( 'Maximum number of folders reached.' ); }
 		$now = current_time( 'mysql', true );
-		$result = $wpdb->insert( self::folders_table(), [
+		$result = $wpdb->insert( $table, [
 			'name' => self::normalize_name( $name ), 'created_at' => $now, 'updated_at' => $now,
 		], [ '%s', '%s', '%s' ] );
 		if ( 1 !== $result || (int) $wpdb->insert_id < 1 ) { throw new \RuntimeException( 'Folder could not be created.' ); }

@@ -24,8 +24,9 @@ final class WorkflowFolderController {
 		}
 	}
 	private static function field_int( string $field ): int {
-		return isset( $_POST[ $field ] ) && is_scalar( $_POST[ $field ] )
-			? absint( wp_unslash( (string) $_POST[ $field ] ) ) : 0;
+		$raw = isset( $_POST[ $field ] ) && is_scalar( $_POST[ $field ] )
+			? wp_unslash( (string) $_POST[ $field ] ) : '';
+		return ctype_digit( $raw ) ? (int) $raw : -1;
 	}
 	private static function field_name(): string {
 		return isset( $_POST['folder_name'] ) && is_string( $_POST['folder_name'] )
