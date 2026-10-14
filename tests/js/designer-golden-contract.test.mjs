@@ -87,3 +87,11 @@ test('Inspector composes Base helpers without a second authoring surface', async
 	assert.doesNotMatch(inspector, /assets\/js\/design\//);
 	assert.match(assets, /'technicalDetails'/);
 });
+
+test('Settings health recovery stacks validation messages and actions in the narrow sidebar', async () => {
+	const css = await read('assets/css/admin-validation-recovery.css');
+	assert.match(css, /\\.cb-automations-validation-list li\\[data-cb-validation-enhanced="1"\\]\\s*\\{[^}]*grid-template-columns:\\s*minmax\\(0,\\s*1fr\\);/s);
+	assert.doesNotMatch(css, /grid-template-columns:\\s*minmax\\(0,\\s*1fr\\)\\s+auto;/);
+	assert.match(css, /\\.cb-automations-validation-item__controls\\s*\\{[^}]*flex-direction:\\s*column;/s);
+	assert.match(css, /\\.cb-automations-validation-item__controls\\s*\\{[^}]*align-items:\\s*flex-start;/s);
+});

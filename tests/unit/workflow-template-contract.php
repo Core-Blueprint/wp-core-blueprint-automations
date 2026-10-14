@@ -23,7 +23,7 @@ if ( ! str_contains( $registry, "do_action( 'cb_automations_register_workflow_te
 if ( ! str_contains( $registry, 'DefinitionCodec::decode' ) ) {
 	$failures[] = 'Template definitions are not decoded through the canonical workflow codec.';
 }
-foreach ( [ 'wordpress.welcome_user', 'wordpress.notify_post_author', 'wordpress.acknowledge_comment' ] as $template_id ) {
+foreach ( [ 'wordpress.welcome.user', 'wordpress.notify.post.author', 'wordpress.acknowledge.comment' ] as $template_id ) {
 	if ( ! str_contains( $starters, "'{$template_id}'" ) ) {
 		$failures[] = 'Missing WordPress starter template: ' . $template_id;
 	}

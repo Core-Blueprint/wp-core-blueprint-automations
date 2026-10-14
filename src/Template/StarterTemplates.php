@@ -23,7 +23,7 @@ final class StarterTemplates {
 
 		WorkflowTemplateRegistry::register( [
 			'provider' => $provider,
-			'id' => 'wordpress.welcome_user',
+			'id' => 'wordpress.welcome.user',
 			'version' => '1',
 			'title' => __( 'Welcome new users', 'core-blueprint-automations' ),
 			'description' => __( 'Send a welcome email when a new WordPress user account is created.', 'core-blueprint-automations' ),
@@ -45,7 +45,7 @@ final class StarterTemplates {
 
 		WorkflowTemplateRegistry::register( [
 			'provider' => $provider,
-			'id' => 'wordpress.notify_post_author',
+			'id' => 'wordpress.notify.post.author',
 			'version' => '1',
 			'title' => __( 'Notify author when a post is published', 'core-blueprint-automations' ),
 			'description' => __( 'Look up the post author and email them when their post is published.', 'core-blueprint-automations' ),
@@ -71,7 +71,7 @@ final class StarterTemplates {
 
 		WorkflowTemplateRegistry::register( [
 			'provider' => $provider,
-			'id' => 'wordpress.acknowledge_comment',
+			'id' => 'wordpress.acknowledge.comment',
 			'version' => '1',
 			'title' => __( 'Acknowledge new comments', 'core-blueprint-automations' ),
 			'description' => __( 'Email a commenter after a new comment is created, but only when an email address is available.', 'core-blueprint-automations' ),
