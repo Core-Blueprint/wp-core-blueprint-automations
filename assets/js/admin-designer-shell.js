@@ -4,6 +4,7 @@ import { show as showModal } from '@cb-core/modal';
 const root = document.querySelector('[data-cb-automations-designer-shell]');
 
 if (root) {
+	let designerController = null;
 	const workflowSwitcher = root.querySelector('[data-cb-automations-workflow-switcher]');
 	if (workflowSwitcher instanceof HTMLSelectElement) {
 		const form = document.querySelector('[data-cb-automations-editor-form]');
@@ -252,8 +253,7 @@ if (root) {
 			return approved ? 'close' : null;
 		};
 		let exitPending = false;
-		let approvedCloseClick = false;
-		const requestExit = () => {
+		const requestExit = async () => {
 			if (exitPending || allowConfirmedExit) return;
 			if (root.hasAttribute('aria-busy')) {
 				const status = root.querySelector('[data-cb-design-shell-status]');
@@ -261,34 +261,29 @@ if (root) {
 				return;
 			}
 			exitPending = true;
-			Promise.resolve().then(chooseExitAction).then((action) => {
+			try {
+				const action = await chooseExitAction();
 				if (!action) return;
-				const close = root.querySelector('[data-cb-design-shell-close]');
-				const fullscreen = root.querySelector('[data-cb-design-shell-fullscreen]');
-				if (!(close instanceof HTMLButtonElement) || !(fullscreen instanceof HTMLButtonElement)
-					|| fullscreen.getAttribute('aria-pressed') !== 'true') {
+				// In direct Designer Mode Base removes the fullscreen button from
+				// the rendered toolbar. The public shell controller remains valid.
+				if (!designerController?.isFullscreen?.() || typeof designerController.exitFullscreen !== 'function') {
 					throw contextError('contextUnavailable', 'The Designer close control is unavailable.');
 				}
-				// Discard was explicitly approved. Otherwise beforeunload would
-				// produce a second browser warning after the modal confirmation.
 				allowConfirmedExit = true;
-				approvedCloseClick = true;
-				try {
-					close.click();
-				} finally {
-					approvedCloseClick = false;
-					if (fullscreen.getAttribute('aria-pressed') === 'true') allowConfirmedExit = false;
+				if (designerController.exitFullscreen() !== true) {
+					throw contextError('contextUnavailable', 'The Designer could not be closed.');
 				}
-			}).catch((error) => {
+			} catch (error) {
+				allowConfirmedExit = false;
 				const status = root.querySelector('[data-cb-design-shell-status]');
 				if (status) status.textContent = error instanceof Error ? error.message : String(error);
-			}).finally(() => {
+			} finally {
 				exitPending = false;
-			});
+			}
 		};
 		launchRoot?.addEventListener('click', (event) => {
 			const close = event.target?.closest?.('[data-cb-design-shell-close]');
-			if (!close || !root.contains(close) || approvedCloseClick) return;
+			if (!close || !root.contains(close)) return;
 			event.preventDefault();
 			event.stopImmediatePropagation();
 			requestExit();
@@ -375,7 +370,7 @@ if (root) {
 	applyPanelTitle(propertiesSidebar, propertiesLabel);
 	if (workflowTitle) workflowTitle.remove();
 
-	createDesignerShell(root, { defaultPanel: 'settings' });
+	designerController = createDesignerShell(root, { defaultPanel: 'settings' });
 	configureDesignerSidebar(root, {
 		roles: { inspector: 'inspector', settings: 'settings' },
 		activeRole: 'settings',

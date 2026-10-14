@@ -232,6 +232,51 @@ test('Designer close confirmation is required with or without changes', async ()
 	assert.match(source, /window\.addEventListener\('keydown',[\s\S]*?requestExit\(\)/);
 	assert.match(source, /if \(allowConfirmedExit \|\| !isDirty\(\)\) return;/);
 	assert.match(source, /allowConfirmedExit = true;/);
-	assert.match(source, /approvedCloseClick = true;/);
+	assert.match(source, /designerController = createDesignerShell\(root, \{ defaultPanel: 'settings' \}\)/);
+	assert.match(source, /designerController\.exitFullscreen\(\)/);
+	assert.doesNotMatch(source, /approvedCloseClick/);
+	assert.doesNotMatch(source, /root\.querySelector\('\[data-cb-design-shell-fullscreen\]'\)/);
 	assert.match(source, /if \(root\.hasAttribute\('aria-busy'\)\) \{[\s\S]*?saveInProgress/);
+});
+
+test('Designer close invokes Base shell controller even when fullscreen button is detached', async () => {
+	const source = await read('assets/js/admin-designer-shell.js');
+	const match = source.match(/const requestExit = async \(\) => \{[\s\S]*?\n\t\t\};/);
+	assert.ok(match, 'the guarded exit function remains separately testable');
+	const { runInNewContext } = await import('node:vm');
+	const runCase = async ({ selection = 'close', saving = false, fullscreen = true, exitResult = true } = {}) => {
+		const status = { textContent: '' };
+		let exits = 0;
+		let prompts = 0;
+		const state = {
+			root: {
+				hasAttribute: (name) => name === 'aria-busy' && saving,
+				querySelector: () => status,
+			},
+			window: { cbAutomationsInspectorStrings: {} },
+			designerController: {
+				isFullscreen: () => fullscreen,
+				exitFullscreen: () => { exits += 1; return exitResult; },
+			},
+			chooseExitAction: async () => { prompts += 1; return selection; },
+			contextError: (_key, message) => new Error(message),
+			exitPending: false,
+			allowConfirmedExit: false,
+		};
+		const requestExit = runInNewContext(match[0] + '\nrequestExit;', state);
+		await requestExit();
+		return { status, exits, prompts, state };
+	};
+	const confirmed = await runCase({ selection: 'discard' });
+	assert.equal(confirmed.exits, 1, 'the Base controller is called for confirmed discard');
+	assert.equal(confirmed.state.allowConfirmedExit, true, 'beforeunload is bypassed only after approval');
+	assert.equal((await runCase({ selection: null })).exits, 0, 'Cancel never exits');
+	assert.equal((await runCase({ saving: true })).prompts, 0, 'saving blocks the confirmation');
+	const unavailable = await runCase({ fullscreen: false });
+	assert.equal(unavailable.exits, 0, 'fullscreen inactive fails closed');
+	assert.match(unavailable.status.textContent, /unavailable/i);
+	const rejected = await runCase({ exitResult: false });
+	assert.equal(rejected.exits, 1);
+	assert.equal(rejected.state.allowConfirmedExit, false, 'failed close restores unload protection');
+	assert.match(rejected.status.textContent, /could not be closed/i);
 });
