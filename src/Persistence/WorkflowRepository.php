@@ -108,6 +108,75 @@ final class WorkflowRepository {
 		return self::hydrate_rows( $rows );
 	}
 
+
+	/**
+	 * Safe database-backed search, filtered before pagination. Only allowlisted
+	 * statuses and ORDER BY clauses can enter SQL; input never becomes SQL.
+	 *
+	 * @return WorkflowRecord[]
+	 */
+	public static function query_index( int $limit, int $offset, string $search = '', string $status = 'all', string $sort = 'updated_desc' ): array {
+		global $wpdb;
+		$limit = max( 1, min( 100, $limit ) );
+		$offset = max( 0, $offset );
+		$args = [];
+		$where = self::index_where( $search, $status, $args );
+		$order = self::index_order( $sort );
+		$table = Schema::table();
+		$args[] = $limit;
+		$args[] = $offset;
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT id, name, activation_state, definition_version, definition_json, revision, execution_principal_user_id, trigger_key, created_by, updated_by, created_at, updated_at
+				 FROM {$table} {$where} ORDER BY {$order} LIMIT %d OFFSET %d",
+				...$args
+			),
+			ARRAY_A
+		);
+		if ( ! is_array( $rows ) || ( [] === $rows && '' !== (string) $wpdb->last_error ) ) {
+			throw PersistenceFailure::database( 'query workflow workspace' );
+		}
+		return self::hydrate_rows( $rows );
+	}
+
+	public static function count_index( string $search = '', string $status = 'all' ): int {
+		global $wpdb;
+		$args = [];
+		$where = self::index_where( $search, $status, $args );
+		$table = Schema::table();
+		$sql = "SELECT COUNT(*) FROM {$table} {$where}";
+		$count = [] === $args ? $wpdb->get_var( $sql ) : $wpdb->get_var( $wpdb->prepare( $sql, ...$args ) );
+		if ( null === $count && '' !== (string) $wpdb->last_error ) {
+			throw PersistenceFailure::database( 'count filtered workflows' );
+		}
+		return max( 0, (int) $count );
+	}
+
+	/** @param list<string> $args */
+	private static function index_where( string $search, string $status, array &$args ): string {
+		global $wpdb;
+		$clauses = [];
+		if ( in_array( $status, [ 'enabled', 'disabled' ], true ) ) {
+			$clauses[] = 'activation_state = %s';
+			$args[] = $status;
+		}
+		$search = trim( $search );
+		if ( '' !== $search ) {
+			$clauses[] = 'name LIKE %s';
+			$args[] = '%' . $wpdb->esc_like( substr( $search, 0, 100 ) ) . '%';
+		}
+		return [] === $clauses ? '' : 'WHERE ' . implode( ' AND ', $clauses );
+	}
+
+	private static function index_order( string $sort ): string {
+		return match ( $sort ) {
+			'updated_asc' => 'updated_at ASC, id ASC',
+			'name_asc' => 'name ASC, id ASC',
+			'name_desc' => 'name DESC, id DESC',
+			default => 'updated_at DESC, id DESC',
+		};
+	}
+
 	/** @return WorkflowRecord[] */
 	public static function list_enabled_for_trigger( string $trigger_key, int $limit = 100, int $offset = 0 ): array {
 		global $wpdb;

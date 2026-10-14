@@ -72,14 +72,34 @@ final class AutomationsPage implements Page {
 				return;
 			}
 
+			// Read-only workspace filters are never used as executable SQL fragments.
 			$page = isset( $_GET['paged'] ) && is_scalar( $_GET['paged'] )
 				? max( 1, absint( wp_unslash( (string) $_GET['paged'] ) ) )
 				: 1; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only pagination.
+			$view = isset( $_GET['view'] ) && is_scalar( $_GET['view'] )
+				? sanitize_key( wp_unslash( (string) $_GET['view'] ) )
+				: 'workflows';
+			if ( ! in_array( $view, [ 'workflows', 'templates', 'create' ], true ) ) {
+				$view = 'workflows';
+			}
+			$search = isset( $_GET['s'] ) && is_scalar( $_GET['s'] )
+				? substr( sanitize_text_field( wp_unslash( (string) $_GET['s'] ) ), 0, 100 )
+				: '';
+			$status = isset( $_GET['status'] ) && is_scalar( $_GET['status'] )
+				? sanitize_key( wp_unslash( (string) $_GET['status'] ) ) : 'all';
+			$sort = isset( $_GET['sort'] ) && is_scalar( $_GET['sort'] )
+				? sanitize_key( wp_unslash( (string) $_GET['sort'] ) ) : 'updated_desc';
+			$status = in_array( $status, [ 'all', 'enabled', 'disabled' ], true ) ? $status : 'all';
+			$sort = in_array( $sort, [ 'updated_desc', 'updated_asc', 'name_asc', 'name_desc' ], true ) ? $sort : 'updated_desc';
 			$this->template(
 				'automations.php',
 				[
-					'listing'   => $reader->index( $page ),
-					'templates' => WorkflowTemplateRegistry::all(),
+					'view'      => $view,
+					'search'    => $search,
+					'status'    => $status,
+					'sort'      => $sort,
+					'listing'   => 'workflows' === $view ? $reader->index( $page, 25, $search, $status, $sort ) : null,
+					'templates' => 'templates' === $view ? WorkflowTemplateRegistry::all() : [],
 				]
 			);
 		} catch ( \Throwable $error ) {

@@ -317,3 +317,40 @@
 		justify-content: flex-start;
 	}
 }
+
+
+/* Workflows Workspace Golden: dense and accessible admin listing. */
+.cb-automations-workspace { max-width: 1600px; }
+.cb-automations-workspace__header { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--cb-space-4); margin: var(--cb-space-3) 0 var(--cb-space-5); }
+.cb-automations-workspace__header .cb-core-intro { margin-bottom: 0; }
+.cb-automations-workspace__tabs { display: flex; flex-wrap: wrap; gap: var(--cb-space-4); border-bottom: 1px solid var(--cb-border); margin-bottom: var(--cb-space-5); }
+.cb-automations-workspace__tabs a { display: inline-block; padding: var(--cb-space-3) var(--cb-space-2); color: var(--cb-text-muted); border-bottom: 2px solid transparent; text-decoration: none; font-weight: var(--cb-fw-semibold); }
+.cb-automations-workspace__tabs a.is-current { color: var(--cb-accent); border-color: var(--cb-accent); }
+.cb-automations-workspace__tabs a:focus-visible { outline: 2px solid var(--cb-accent); outline-offset: 2px; }
+.cb-automations-workspace__panel { padding: var(--cb-space-5) !important; }
+.cb-automations-workspace__panel-heading { display: flex; justify-content: space-between; margin-bottom: var(--cb-space-4); }
+.cb-automations-workspace__panel-heading h2 { margin: 0 0 var(--cb-space-1); }
+.cb-automations-workspace__filters { display: flex; gap: var(--cb-space-2); align-items: center; flex-wrap: wrap; margin-bottom: var(--cb-space-4); }
+.cb-automations-workspace__filters label { font-size: var(--cb-fs-xs); font-weight: var(--cb-fw-semibold); }
+.cb-automations-workspace__filters input[type=search] { flex: 1 1 180px; min-width: 160px; }
+.cb-automations-workspace__filters select { min-width: 125px; max-width: 220px; }
+.cb-automations-workspace__table-scroll { width: 100%; overflow-x: auto; }
+.cb-automations-workspace__table { width: 100%; min-width: 740px; background: var(--cb-surface-1); border-color: var(--cb-border); color: var(--cb-text); }
+.cb-automations-workspace__table th { padding: var(--cb-space-3); color: var(--cb-text-muted); }
+.cb-automations-workspace__table td { padding: var(--cb-space-3); vertical-align: middle; color: var(--cb-text); }
+.cb-automations-workspace__table td:first-child { width: 31%; }
+.cb-automations-workspace__table .description { display: block; margin-top: 2px; }
+.cb-automations-workspace__name { font-weight: var(--cb-fw-semibold); }
+.cb-automations-workspace__state,.cb-automations-workspace__health { display: inline-flex; align-items: center; gap: var(--cb-space-2); white-space: nowrap; font-size: var(--cb-fs-xs); }
+.cb-automations-workspace__state::before,.cb-automations-workspace__health::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--cb-text-muted); }
+.cb-automations-workspace__state.is-enabled::before,.cb-automations-workspace__health.is-ready::before { background: var(--cb-success); }
+.cb-automations-workspace__health.has-issues::before { background: var(--cb-danger); }
+.cb-automations-workspace__actions { display: flex; gap: var(--cb-space-2); align-items: center; flex-wrap: nowrap; }
+.cb-automations-workspace__actions form { margin: 0; }
+.cb-automations-workspace__empty { padding: var(--cb-space-5); color: var(--cb-text-muted); text-align: center; }
+@media (max-width: 782px) {
+ .cb-automations-workspace__header { align-items: flex-start; }
+ .cb-automations-workspace__panel { padding: var(--cb-space-3) !important; }
+ .cb-automations-workspace__filters { display: grid; grid-template-columns: 1fr; }
+ .cb-automations-workspace__filters input[type=search],.cb-automations-workspace__filters select { width: 100%; max-width: 100%; }
+}

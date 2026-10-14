@@ -25,16 +25,16 @@ final class WorkflowAdminReadService {
 	 *   total:int,page:int,per_page:int,pages:int
 	 * }
 	 */
-	public function index( int $page = 1, int $per_page = 25 ): array {
+	public function index( int $page = 1, int $per_page = 25, string $search = '', string $status = 'all', string $sort = 'updated_desc' ): array {
 		$page     = max( 1, $page );
 		$per_page = max( 1, min( 100, $per_page ) );
-		$total    = WorkflowRepository::count();
+		$total    = WorkflowRepository::count_index( $search, $status );
 		$pages    = max( 1, (int) ceil( $total / $per_page ) );
 		$page     = min( $page, $pages );
 		$offset   = ( $page - 1 ) * $per_page;
 
 		$items = [];
-		foreach ( WorkflowRepository::list( $per_page, $offset ) as $record ) {
+		foreach ( WorkflowRepository::query_index( $per_page, $offset, $search, $status, $sort ) as $record ) {
 			$validation = $this->validator->validate( $record->definition() );
 			$items[]    = [
 				'record'     => $record,
