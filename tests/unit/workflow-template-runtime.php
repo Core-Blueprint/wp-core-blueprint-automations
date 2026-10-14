@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 // Exercise the real StarterTemplates + WorkflowTemplateRegistry lifecycle
 // without WordPress boot. This catches silent template-ID rejection.
-namespace CoreBlueprint\\Core {
+namespace CoreBlueprint\Core {
 	final class ExtensionRegistry {
 		public static function is_valid_id( string $id ): bool {
 			return 1 === preg_match( '/^[a-z][a-z0-9]*(?:-[a-z0-9]+)+$/D', $id );
@@ -39,17 +39,17 @@ namespace {
 		}
 	}
 	spl_autoload_register( static function ( string $class ): void {
-		$prefix = 'CB\\\\Automations\\\\';
+		$prefix = 'CB\\Automations\\';
 		if ( ! str_starts_with( $class, $prefix ) ) {
 			return;
 		}
-		$path = dirname( __DIR__, 2 ) . '/src/' . str_replace( '\\\\', '/', substr( $class, strlen( $prefix ) ) ) . '.php';
+		$path = dirname( __DIR__, 2 ) . '/src/' . str_replace( '\\', '/', substr( $class, strlen( $prefix ) ) ) . '.php';
 		if ( is_file( $path ) ) {
 			require_once $path;
 		}
 	} );
-	\\CB\\Automations\\Template\\StarterTemplates::init();
-	$templates = \\CB\\Automations\\Template\\WorkflowTemplateRegistry::all();
+	\CB\Automations\Template\StarterTemplates::init();
+	$templates = \CB\Automations\Template\WorkflowTemplateRegistry::all();
 	$actual = array_map( static fn ( $template ): string => $template->id(), $templates );
 	$expected = [ 'wordpress.welcome.user', 'wordpress.notify.post.author', 'wordpress.acknowledge.comment' ];
 	sort( $actual );
@@ -64,7 +64,7 @@ namespace {
 			fwrite( STDERR, 'Invalid starter template workflow: ' . $template->id() . PHP_EOL );
 			exit( 1 );
 		}
-		$lookup = \\CB\\Automations\\Template\\WorkflowTemplateRegistry::get( $template->provider(), $template->id() );
+		$lookup = \CB\Automations\Template\WorkflowTemplateRegistry::get( $template->provider(), $template->id() );
 		if ( $lookup !== $template ) {
 			fwrite( STDERR, 'Starter template not retrievable: ' . $template->id() . PHP_EOL );
 			exit( 1 );
