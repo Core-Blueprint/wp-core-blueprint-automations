@@ -37,7 +37,7 @@ final class WorkflowTransferCodec {
 				|| ! is_string( $document['name'] ) || ! is_array( $document['definition'] ) ) {
 				throw new UnexpectedValueException( 'Incompatible workflow transfer format.' );
 			}
-			$name = trim( $document['name'] );
+			$name = trim( strip_tags( $document['name'] ) );
 			$encoded = $document['definition'];
 		} else {
 			// Already shared standalone DefinitionCodec JSON test workflows.
@@ -70,7 +70,7 @@ final class WorkflowTransferCodec {
 
 	private static function fallback_name( string $filename ): string {
 		$name = pathinfo( basename( str_replace( '\\', '/', $filename ) ), PATHINFO_FILENAME );
-		$name = trim( preg_replace( '/[\x00-\x1f\x7f]/', '', $name ) ?? '' );
+		$name = trim( strip_tags( preg_replace( '/[\x00-\x1f\x7f]/', '', $name ) ?? '' ) );
 		return '' !== $name ? substr( $name, 0, 191 ) : 'Imported workflow';
 	}
 

@@ -19,7 +19,7 @@ foreach ( [
 	[ $repository, "'enabled', 'disabled'" ],
 	[ $reader, 'WorkflowRepository::count_index(' ],
 	[ $reader, 'WorkflowRepository::query_index(' ],
-	[ $page, "'workflows', 'templates', 'create'" ],
+	[ $page, "'workflows', 'templates', 'create', 'import'" ],
 	[ $view, 'name="s"' ],
 	[ $view, 'name="sort"' ],
 	[ $view, 'name="status"' ],

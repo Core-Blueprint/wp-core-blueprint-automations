@@ -25,6 +25,7 @@ final class WorkflowTransferController {
 		add_action( 'admin_post_cb_automations_import_preview', [ self::class, 'upload' ] );
 		add_action( 'admin_post_cb_automations_import_confirm', [ self::class, 'confirm' ] );
 		add_action( 'admin_post_cb_automations_export_workflow', [ self::class, 'export' ] );
+		add_action( 'cb_automations_import_claim_expire', [ self::class, 'expire_claim' ], 10, 1 );
 	}
 
 	public static function upload(): void {
@@ -92,6 +93,11 @@ final class WorkflowTransferController {
 		if ( ! self::valid_token( $token ) ) { self::redirect( 'import_invalid' ); }
 		$preview = self::preview( $token );
 		if ( null === $preview ) { self::redirect( 'import_expired' ); }
+		// Claim atomically across concurrent requests before creating a record.
+		if ( ! add_option( 'cb_automations_import_claim_' . $token, get_current_user_id(), '', false ) ) {
+			self::redirect( 'import_expired' );
+		}
+		wp_schedule_single_event( time() + self::TTL * 2, 'cb_automations_import_claim_expire', [ $token ] );
 		// Invalidate the preview before creation; replaying this token must not
 		// create another workflow. WorkflowService::create defaults to Disabled
 		// and never inherits the exporting site's execution authority.
@@ -105,6 +111,13 @@ final class WorkflowTransferController {
 		}
 	}
 
+	/** Delete only the one-time claim; the preview expires independently. */
+	public static function expire_claim( string $token ): void {
+		if ( self::valid_token( $token ) ) {
+			delete_option( 'cb_automations_import_claim_' . $token );
+		}
+	}
+
 	public static function export(): void {
 		$id = isset( $_POST['workflow_id'] ) && is_scalar( $_POST['workflow_id'] )
 			? absint( wp_unslash( (string) $_POST['workflow_id'] ) ) : 0;
@@ -113,7 +126,10 @@ final class WorkflowTransferController {
 		try {
 			$service = new WorkflowService();
 			$workflow = $service->find( $id );
-			if ( null === $workflow || ! PersistencePolicy::allows( $service->validate( $workflow->definition() ) ) ) {
+			$validation = null !== $workflow ? $service->validate( $workflow->definition() ) : null;
+			// Fail closed if a provider disappeared: older stored fields could
+			// otherwise reveal literals whose current sensitivity is unknown.
+			if ( null === $workflow || null === $validation || ! $validation->is_valid() || ! PersistencePolicy::allows( $validation ) ) {
 				self::redirect( 'export_unavailable' );
 			}
 			$body = WorkflowTransferCodec::export_json( $workflow );
@@ -152,7 +168,7 @@ final class WorkflowTransferController {
 	}
 
 	private static function redirect( string $notice ): never {
-		wp_safe_redirect( AutomationsPage::url( [ 'view' => 'import', 'notice' => sanitize_key( $notice ) ] ) );
+		wp_safe_redirect( AutomationsPage::url( [ 'view' => str_starts_with( $notice, 'export_' ) ? 'workflows' : 'import', 'notice' => sanitize_key( $notice ) ] ) );
 		exit;
 	}
 }

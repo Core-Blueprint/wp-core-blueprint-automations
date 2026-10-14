@@ -40,6 +40,15 @@ foreach ( $invalid as $file ) {
 	throw new \RuntimeException( 'Hostile or incompatible transfer format was accepted.' );
 }
 
+$record = new \CB\Automations\Persistence\WorkflowRecord(
+	1, 'Demo workflow', \CB\Automations\Workflow\ActivationState::Disabled, $definition, 1, 17,
+	str_repeat( 'a', 64 ), 17, 17, '2026-10-14', '2026-10-14'
+);
+$export = WorkflowTransferCodec::export_json( $record );
+$export_data = json_decode( $export, true, 64, JSON_THROW_ON_ERROR );
+assert_true( [ 'format', 'format_version', 'name', 'definition' ] === array_keys( $export_data ), 'Exports must not serialize execution authority, Run metadata or hidden fields.' );
+assert_true( 'Demo workflow' === WorkflowTransferCodec::import_json( $export )['name'], 'Exported JSON must round-trip back through the importer.' );
+
 $root = dirname( __DIR__, 2 );
 $controller = file_get_contents( $root . '/src/Admin/WorkflowTransferController.php' );
 $plugin = file_get_contents( $root . '/src/Plugin.php' );
@@ -54,6 +63,9 @@ foreach ( [
 	[ $controller, 'current_user_can(' ],
 	[ $controller, 'wp_verify_nonce(' ],
 	[ $controller, 'delete_transient(' ],
+	[ $controller, 'add_option(' ],
+	[ $controller, 'expire_claim(' ],
+	[ $controller, '! $validation->is_valid()' ],
 	[ $controller, "WorkflowTransferCodec::export_json" ],
 	[ $controller, "cb_automations_import_confirm" ],
 	[ $plugin, 'WorkflowTransferController::init();' ],
