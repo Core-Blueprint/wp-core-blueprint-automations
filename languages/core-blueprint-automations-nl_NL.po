@@ -2201,3 +2201,47 @@ msgstr ""
 "De opgeslagen workflowdefinitie is ongewijzigd bewaard. Herstel of werk "
 "eerst de relevante provider bij; Automations beoordeelt de workflow "
 "automatisch opnieuw bij de volgende paginalaad."
+
+#: templates/admin/automations.php
+msgid "Browse templates"
+msgstr "Sjablonen bekijken"
+
+#: src/Admin/TemplateManagementPage.php
+msgid "Delete template"
+msgstr "Sjabloon verwijderen"
+
+#: src/Admin/TemplateManagementPage.php
+msgid "Duplicate template"
+msgstr "Sjabloon dupliceren"
+
+#: src/Admin/TemplateManagementPage.php
+msgid "Export JSON"
+msgstr "JSON exporteren"
+
+#: src/Template/TemplateSourceAdapter.php
+msgid "Manage template"
+msgstr "Sjabloon beheren"
+
+#: templates/admin/workflow-editor.php
+msgid "Personal"
+msgstr "Persoonlijk"
+
+#: src/Template/TemplateSourceAdapter.php
+msgid "Preview template"
+msgstr "Sjabloon bekijken"
+
+#: src/Admin/TemplateManagementPage.php
+msgid "Rename"
+msgstr "Hernoemen"
+
+#: templates/admin/workflow-editor.php
+msgid "Save as template"
+msgstr "Opslaan als sjabloon"
+
+#: templates/admin/workflow-editor.php
+msgid "Site"
+msgstr "Site"
+
+#: templates/admin/workflow-editor.php
+msgid "Templates"
+msgstr "Sjablonen"

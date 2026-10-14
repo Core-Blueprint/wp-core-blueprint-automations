@@ -2209,3 +2209,47 @@ msgstr ""
 "La definizione del workflow salvata è stata conservata invariata. Ripristina "
 "o aggiorna prima il provider pertinente; Automations rivaluterà "
 "automaticamente il workflow al successivo caricamento della pagina."
+
+#: templates/admin/automations.php
+msgid "Browse templates"
+msgstr "Sfoglia i modelli"
+
+#: src/Admin/TemplateManagementPage.php
+msgid "Delete template"
+msgstr "Elimina modello"
+
+#: src/Admin/TemplateManagementPage.php
+msgid "Duplicate template"
+msgstr "Duplica modello"
+
+#: src/Admin/TemplateManagementPage.php
+msgid "Export JSON"
+msgstr "Esporta JSON"
+
+#: src/Template/TemplateSourceAdapter.php
+msgid "Manage template"
+msgstr "Gestisci modello"
+
+#: templates/admin/workflow-editor.php
+msgid "Personal"
+msgstr "Personale"
+
+#: src/Template/TemplateSourceAdapter.php
+msgid "Preview template"
+msgstr "Anteprima del modello"
+
+#: src/Admin/TemplateManagementPage.php
+msgid "Rename"
+msgstr "Rinomina"
+
+#: templates/admin/workflow-editor.php
+msgid "Save as template"
+msgstr "Salva come modello"
+
+#: templates/admin/workflow-editor.php
+msgid "Site"
+msgstr "Sito"
+
+#: templates/admin/workflow-editor.php
+msgid "Templates"
+msgstr "Modelli"

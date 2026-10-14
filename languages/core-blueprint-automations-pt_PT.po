@@ -2217,3 +2217,47 @@ msgstr ""
 "Restaure ou atualize primeiro o fornecedor relevante; o Automations voltará "
 "a avaliar automaticamente o fluxo de trabalho no próximo carregamento da "
 "página."
+
+#: templates/admin/automations.php
+msgid "Browse templates"
+msgstr "Explorar modelos"
+
+#: src/Admin/TemplateManagementPage.php
+msgid "Delete template"
+msgstr "Eliminar modelo"
+
+#: src/Admin/TemplateManagementPage.php
+msgid "Duplicate template"
+msgstr "Duplicar modelo"
+
+#: src/Admin/TemplateManagementPage.php
+msgid "Export JSON"
+msgstr "Exportar JSON"
+
+#: src/Template/TemplateSourceAdapter.php
+msgid "Manage template"
+msgstr "Gerir modelo"
+
+#: templates/admin/workflow-editor.php
+msgid "Personal"
+msgstr "Pessoal"
+
+#: src/Template/TemplateSourceAdapter.php
+msgid "Preview template"
+msgstr "Pré-visualizar modelo"
+
+#: src/Admin/TemplateManagementPage.php
+msgid "Rename"
+msgstr "Mudar o nome"
+
+#: templates/admin/workflow-editor.php
+msgid "Save as template"
+msgstr "Guardar como modelo"
+
+#: templates/admin/workflow-editor.php
+msgid "Site"
+msgstr "Site"
+
+#: templates/admin/workflow-editor.php
+msgid "Templates"
+msgstr "Modelos"

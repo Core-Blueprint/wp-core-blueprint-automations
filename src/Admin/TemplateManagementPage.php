@@ -43,7 +43,7 @@ final class TemplateManagementPage {
 			echo '<div class="notice notice-success"><p>' . esc_html__( 'Automation saved.', 'core-blueprint-automations' ) . '</p></div>';
 		}
 		echo '<p>' . esc_html( null !== $post ? $post->post_excerpt : $builtin->description() ) . '</p>';
-		echo '<p>' . esc_html__( 'Automation created from template. Review it, assign execution authority and enable it when ready.', 'core-blueprint-automations' ) . '</p>';
+		echo '<p>' . esc_html__( 'Create a normal editable workflow from a provider template. The new workflow is yours and is not kept linked to the template.', 'core-blueprint-automations' ) . '</p>';
 		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
 		echo '<input type="hidden" name="action" value="cb_automations_create_from_template">';
 		echo '<input type="hidden" name="template_source" value="' . esc_attr( TemplateSourceAdapter::SOURCE_ID ) . '">';
@@ -54,10 +54,10 @@ final class TemplateManagementPage {
 		if ( $can_manage ) {
 			self::form( 'rename', $saved_id, [
 				'template_name' => [ 'type' => 'text', 'value' => $title ],
-			], 'Automation name' );
-			self::form( 'duplicate', $saved_id, [], 'Create automation' );
-			self::form( 'export', $saved_id, [], 'Use template' );
-			self::form( 'delete', $saved_id, [], 'Remove' );
+			], 'Rename' );
+			self::form( 'duplicate', $saved_id, [], 'Duplicate template' );
+			self::form( 'export', $saved_id, [], 'Export JSON' );
+			self::form( 'delete', $saved_id, [], 'Delete template' );
 		}
 		echo '</div>';
 	}
@@ -72,9 +72,14 @@ final class TemplateManagementPage {
 			echo '<label><span class="screen-reader-text">' . esc_html__( 'Automation name', 'core-blueprint-automations' ) . '</span>';
 			echo '<input type="' . esc_attr( $field['type'] ) . '" name="' . esc_attr( $name ) . '" value="' . esc_attr( $field['value'] ) . '" maxlength="191" required></label>';
 		}
-		// Existing strings keep the six first-party locales in sync in this
-		// bounded candidate. Specific translated operation labels are A3 polish.
-		echo '<button type="submit" class="button">' . esc_html__( $button, 'core-blueprint-automations' ) . '</button></form>';
+		// Translators provide first-party labels for every management action.
+		echo '<button type="submit" class="button">' . esc_html( match ( $button ) {
+			'Rename' => __( 'Rename', 'core-blueprint-automations' ),
+			'Duplicate template' => __( 'Duplicate template', 'core-blueprint-automations' ),
+			'Export JSON' => __( 'Export JSON', 'core-blueprint-automations' ),
+			'Delete template' => __( 'Delete template', 'core-blueprint-automations' ),
+			default => '',
+		} ) . '</button></form>';
 	}
 
 	private static function unavailable(): void {

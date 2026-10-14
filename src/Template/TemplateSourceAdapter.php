@@ -49,12 +49,12 @@ final class TemplateSourceAdapter implements TemplateManagementSourceInterface {
 		}
 		$preview = [
 			'url' => \CB\Automations\Admin\AutomationsPage::url( [ 'template_preview' => $item->id ] ),
-			'label' => __( 'Use template', 'core-blueprint-automations' ),
+			'label' => __( 'Preview template', 'core-blueprint-automations' ),
 		];
 		$manage = $this->can_manage( $item->id, $user_id )
 			? [
 				'url' => \CB\Automations\Admin\AutomationsPage::url( [ 'template_manage' => $item->id ] ),
-				'label' => __( 'Edit', 'core-blueprint-automations' ),
+				'label' => __( 'Manage template', 'core-blueprint-automations' ),
 			] : null;
 		return new TemplateNavigation( $preview, $manage );
 	}
@@ -70,7 +70,8 @@ final class TemplateSourceAdapter implements TemplateManagementSourceInterface {
 		}
 
 		$builtins = [];
-		if ( '' === $query->origin || 'built-in' === $query->origin ) {
+		if ( ( '' === $query->origin || 'built-in' === $query->origin )
+			&& ( '' === $query->locale || 'en' === $query->locale ) ) {
 			foreach ( WorkflowTemplateRegistry::all() as $template ) {
 				if ( '' !== $query->search && false === stripos( $template->title() . ' ' . $template->description(), $query->search ) ) {
 					continue;
@@ -109,6 +110,11 @@ final class TemplateSourceAdapter implements TemplateManagementSourceInterface {
 				);
 			}
 			$saved_more = null !== $page['next'];
+		}
+		// If built-in results fill the page, still probe for saved templates.
+		if ( 0 === $remaining && $saved_possible ) {
+			$probe = StoredTemplateRepository::search( $user_id, $query->origin, $query->search, 1, '0' );
+			$saved_more = [] !== $probe['items'];
 		}
 		$next = ( $offset + count( $items ) < $builtin_count || $saved_more )
 			? (string) ( $offset + count( $items ) ) : null;

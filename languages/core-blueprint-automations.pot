@@ -1976,3 +1976,47 @@ msgstr ""
 #: templates/admin/workflow-review.php:28
 msgid "The stored workflow definition has been preserved unchanged. Restore or update the relevant provider first; Automations will re-evaluate the workflow automatically on the next page load."
 msgstr ""
+
+#: templates/admin/automations.php
+msgid "Browse templates"
+msgstr ""
+
+#: src/Admin/TemplateManagementPage.php
+msgid "Delete template"
+msgstr ""
+
+#: src/Admin/TemplateManagementPage.php
+msgid "Duplicate template"
+msgstr ""
+
+#: src/Admin/TemplateManagementPage.php
+msgid "Export JSON"
+msgstr ""
+
+#: src/Template/TemplateSourceAdapter.php
+msgid "Manage template"
+msgstr ""
+
+#: templates/admin/workflow-editor.php
+msgid "Personal"
+msgstr ""
+
+#: src/Template/TemplateSourceAdapter.php
+msgid "Preview template"
+msgstr ""
+
+#: src/Admin/TemplateManagementPage.php
+msgid "Rename"
+msgstr ""
+
+#: templates/admin/workflow-editor.php
+msgid "Save as template"
+msgstr ""
+
+#: templates/admin/workflow-editor.php
+msgid "Site"
+msgstr ""
+
+#: templates/admin/workflow-editor.php
+msgid "Templates"
+msgstr ""

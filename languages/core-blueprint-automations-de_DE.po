@@ -2217,3 +2217,47 @@ msgstr ""
 "Die gespeicherte Workflow-Definition wurde unverändert beibehalten. Stelle "
 "zuerst den relevanten Anbieter wieder her oder aktualisiere ihn; Automations "
 "bewertet den Workflow beim nächsten Laden der Seite automatisch erneut."
+
+#: templates/admin/automations.php
+msgid "Browse templates"
+msgstr "Vorlagen durchsuchen"
+
+#: src/Admin/TemplateManagementPage.php
+msgid "Delete template"
+msgstr "Vorlage löschen"
+
+#: src/Admin/TemplateManagementPage.php
+msgid "Duplicate template"
+msgstr "Vorlage duplizieren"
+
+#: src/Admin/TemplateManagementPage.php
+msgid "Export JSON"
+msgstr "JSON exportieren"
+
+#: src/Template/TemplateSourceAdapter.php
+msgid "Manage template"
+msgstr "Vorlage verwalten"
+
+#: templates/admin/workflow-editor.php
+msgid "Personal"
+msgstr "Persönlich"
+
+#: src/Template/TemplateSourceAdapter.php
+msgid "Preview template"
+msgstr "Vorlage ansehen"
+
+#: src/Admin/TemplateManagementPage.php
+msgid "Rename"
+msgstr "Umbenennen"
+
+#: templates/admin/workflow-editor.php
+msgid "Save as template"
+msgstr "Als Vorlage speichern"
+
+#: templates/admin/workflow-editor.php
+msgid "Site"
+msgstr "Website"
+
+#: templates/admin/workflow-editor.php
+msgid "Templates"
+msgstr "Vorlagen"

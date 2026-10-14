@@ -2221,3 +2221,47 @@ msgstr ""
 "Restaura o actualiza primero el proveedor correspondiente; Automations "
 "volverá a evaluar automáticamente el flujo de trabajo en la siguiente carga "
 "de página."
+
+#: templates/admin/automations.php
+msgid "Browse templates"
+msgstr "Explorar plantillas"
+
+#: src/Admin/TemplateManagementPage.php
+msgid "Delete template"
+msgstr "Eliminar plantilla"
+
+#: src/Admin/TemplateManagementPage.php
+msgid "Duplicate template"
+msgstr "Duplicar plantilla"
+
+#: src/Admin/TemplateManagementPage.php
+msgid "Export JSON"
+msgstr "Exportar JSON"
+
+#: src/Template/TemplateSourceAdapter.php
+msgid "Manage template"
+msgstr "Gestionar plantilla"
+
+#: templates/admin/workflow-editor.php
+msgid "Personal"
+msgstr "Personal"
+
+#: src/Template/TemplateSourceAdapter.php
+msgid "Preview template"
+msgstr "Vista previa de la plantilla"
+
+#: src/Admin/TemplateManagementPage.php
+msgid "Rename"
+msgstr "Cambiar nombre"
+
+#: templates/admin/workflow-editor.php
+msgid "Save as template"
+msgstr "Guardar como plantilla"
+
+#: templates/admin/workflow-editor.php
+msgid "Site"
+msgstr "Sitio"
+
+#: templates/admin/workflow-editor.php
+msgid "Templates"
+msgstr "Plantillas"

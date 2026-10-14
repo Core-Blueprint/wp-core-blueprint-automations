@@ -2216,3 +2216,47 @@ msgstr ""
 "La définition du workflow enregistrée a été conservée sans modification. "
 "Restaurez ou mettez d’abord à jour le fournisseur concerné ; Automations "
 "réévaluera automatiquement le workflow au prochain chargement de la page."
+
+#: templates/admin/automations.php
+msgid "Browse templates"
+msgstr "Parcourir les modèles"
+
+#: src/Admin/TemplateManagementPage.php
+msgid "Delete template"
+msgstr "Supprimer le modèle"
+
+#: src/Admin/TemplateManagementPage.php
+msgid "Duplicate template"
+msgstr "Dupliquer le modèle"
+
+#: src/Admin/TemplateManagementPage.php
+msgid "Export JSON"
+msgstr "Exporter en JSON"
+
+#: src/Template/TemplateSourceAdapter.php
+msgid "Manage template"
+msgstr "Gérer le modèle"
+
+#: templates/admin/workflow-editor.php
+msgid "Personal"
+msgstr "Personnel"
+
+#: src/Template/TemplateSourceAdapter.php
+msgid "Preview template"
+msgstr "Prévisualiser le modèle"
+
+#: src/Admin/TemplateManagementPage.php
+msgid "Rename"
+msgstr "Renommer"
+
+#: templates/admin/workflow-editor.php
+msgid "Save as template"
+msgstr "Enregistrer comme modèle"
+
+#: templates/admin/workflow-editor.php
+msgid "Site"
+msgstr "Site"
+
+#: templates/admin/workflow-editor.php
+msgid "Templates"
+msgstr "Modèles"

@@ -186,7 +186,7 @@ final class StoredTemplateRepository {
 			'post_type' => self::TYPE,
 			'post_status' => 'private',
 			'post_title' => $name,
-			'post_content' => $data,
+			'post_content' => wp_slash( $data ),
 			'post_author' => $actor,
 			'meta_input' => [ self::SCOPE_KEY => $scope ],
 		], true );
