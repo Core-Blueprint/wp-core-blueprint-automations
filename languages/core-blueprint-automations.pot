@@ -106,9 +106,7 @@ msgstr ""
 #: src/Admin/DesignerAssets.php:67
 #: templates/admin/automations.php:157
 msgid "Condition"
-msgid_plural "Conditions"
-msgstr[0] ""
-msgstr[1] ""
+msgstr ""
 
 #: src/Admin/AdminAssets.php:90
 msgid "Reads as"
@@ -1282,14 +1280,6 @@ msgstr ""
 msgid "Automation draft created."
 msgstr ""
 
-#: templates/admin/automations.php:17
-msgid "Automation created from template. Review it, assign execution authority and enable it when ready."
-msgstr ""
-
-#: templates/admin/automations.php:18
-msgid "That workflow template is no longer available. No automation was created."
-msgstr ""
-
 #: templates/admin/automations.php:19
 msgid "Automation enabled."
 msgstr ""
@@ -1298,69 +1288,9 @@ msgstr ""
 msgid "Automation disabled."
 msgstr ""
 
-#: templates/admin/automations.php:21
-msgid "The automation remains disabled because the workflow is not valid yet."
-msgstr ""
-
-#: templates/admin/automations.php:22
-msgid "The automation remains disabled because secure runtime encryption is unavailable on this site."
-msgstr ""
-
-#: templates/admin/automations.php:23
-msgid "The automation remains disabled. Open the builder and assign your account as execution authority first."
-msgstr ""
-
-#: templates/admin/automations.php:24
-msgid "The automation remains disabled because its stored execution authority is no longer a valid WordPress user."
-msgstr ""
-
-#: templates/admin/automations.php:25
-msgid "The automation remains disabled because its execution principal no longer has all required permissions."
-msgstr ""
-
-#: templates/admin/automations.php:26
-msgid "The automation remains disabled because your account does not have all permissions required to enable it."
-msgstr ""
-
-#: templates/admin/automations.php:27
-msgid "The automation remains disabled because execution authority could not be verified against the current capability contracts."
-msgstr ""
-
-#: templates/admin/automations.php:28
-msgid "The automation state was not changed because the stored workflow contains data that cannot be persisted safely."
-msgstr ""
-
-#: templates/admin/automations.php:29
-msgid "This automation changed in another request. Reload the page before changing its state."
-msgstr ""
-
-#: templates/admin/automations.php:30
-msgid "The automation could not be found. No state was changed."
-msgstr ""
-
-#: templates/admin/automations.php:31
-msgid "The requested automation state was invalid. No state was changed."
-msgstr ""
-
-#: templates/admin/automations.php:33
-msgid "The automation could not be saved because workflow storage is unavailable. No workflow state was changed."
-msgstr ""
-
-#: templates/admin/automations.php:34
-msgid "The automation could not be updated. Reload the page before trying again."
-msgstr ""
-
-#: templates/admin/automations.php:39
-msgid "Build linear workflows from capabilities registered by Core Blueprint extensions."
-msgstr ""
-
 #: templates/admin/automations.php:47
 #: templates/admin/automations.php:54
 msgid "Create automation"
-msgstr ""
-
-#: templates/admin/automations.php:48
-msgid "Start with a name, then build a clear When → Get data → Only if → Then workflow."
 msgstr ""
 
 #: templates/admin/automations.php:52
@@ -1368,35 +1298,12 @@ msgstr ""
 msgid "Automation name"
 msgstr ""
 
-#: templates/admin/automations.php:60
-msgid "Starter workflows"
-msgstr ""
-
 #: templates/admin/automations.php:61
 msgid "Start from a template"
 msgstr ""
 
-#: templates/admin/automations.php:62
-msgid "Create a normal editable workflow from a provider template. The new workflow is yours and is not kept linked to the template."
-msgstr ""
-
 #: templates/admin/automations.php:76
 msgid "Use template"
-msgstr ""
-
-#: templates/admin/automations.php:87
-msgid "Workflow library"
-msgstr ""
-
-#: templates/admin/automations.php:91
-#, php-format
-msgid "%d workflow"
-msgid_plural "%d workflows"
-msgstr[0] ""
-msgstr[1] ""
-
-#: templates/admin/automations.php:96
-msgid "No automations have been created yet."
 msgstr ""
 
 #: templates/admin/automations.php:114
@@ -1407,12 +1314,6 @@ msgstr ""
 msgid "Enable"
 msgstr ""
 
-#. translators: 1: activation state, 2: validation state, 3: issue count.
-#: templates/admin/automations.php:122
-#, php-format
-msgid "%1$s · %2$s · %3$s"
-msgstr ""
-
 #: templates/admin/automations.php:125
 #, php-format
 msgid "%d issue"
@@ -1420,20 +1321,8 @@ msgid_plural "%d issues"
 msgstr[0] ""
 msgstr[1] ""
 
-#: templates/admin/automations.php:131
-msgid "Valid · ready to run"
-msgstr ""
-
-#: templates/admin/automations.php:136
-msgid "Valid · will not run"
-msgstr ""
-
 #: templates/admin/automations.php:143
 msgid "Automation"
-msgstr ""
-
-#: templates/admin/automations.php:154
-msgid "Workflow structure"
 msgstr ""
 
 #: templates/admin/automations.php:155
@@ -1442,26 +1331,9 @@ msgstr ""
 msgid "Trigger"
 msgstr ""
 
-#: templates/admin/automations.php:156
-msgid "Data lookup"
-msgid_plural "Data lookups"
-msgstr[0] ""
-msgstr[1] ""
-
 #: templates/admin/automations.php:158
 #: templates/admin/run-detail.php:95
 msgid "Action"
-msgid_plural "Actions"
-msgstr[0] ""
-msgstr[1] ""
-
-#: templates/admin/automations.php:162
-#, php-format
-msgid "Updated %s"
-msgstr ""
-
-#: templates/admin/automations.php:164
-msgid "Open builder"
 msgstr ""
 
 #: templates/admin/automations.php:188
@@ -2059,4 +1931,186 @@ msgstr ""
 
 #: src/Admin/DesignerAssets.php
 msgid "Close Builder"
+msgstr ""
+
+msgid "%d issues to resolve in Builder"
+msgstr ""
+
+msgid "%d matching workflow"
+msgid_plural "%d matching workflows"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "+ New automation"
+msgstr ""
+
+msgid "All statuses"
+msgstr ""
+
+msgid "Apply"
+msgstr ""
+
+msgid "Assign execution authority in the Builder before enabling."
+msgstr ""
+
+msgid "Automation created from template. Review and assign execution authority before enabling."
+msgstr ""
+
+msgid "Automations workspace"
+msgstr ""
+
+msgid "Choose a JSON file smaller than 256 KB."
+msgstr ""
+
+msgid "Create a disabled draft, then configure it securely in the Builder."
+msgstr ""
+
+msgid "Create a normal editable workflow from a provider template. The new workflow is not linked to the original."
+msgstr ""
+
+msgid "Create disabled workflow"
+msgstr ""
+
+msgid "Disabled (always)"
+msgstr ""
+
+msgid "Edit"
+msgstr ""
+
+msgid "Execution principal does not have the required permissions."
+msgstr ""
+
+msgid "Export JSON"
+msgstr ""
+
+msgid "Find, manage and create your WordPress automations."
+msgstr ""
+
+msgid "Health"
+msgstr ""
+
+msgid "Import JSON"
+msgstr ""
+
+msgid "Import an exported workflow or a standalone workflow definition. Nothing is enabled automatically. Execution authority must be assigned after import."
+msgstr ""
+
+msgid "Import automation JSON"
+msgstr ""
+
+msgid "Import blocked: sensitive literal data must not be stored in workflow definitions."
+msgstr ""
+
+msgid "Import is unavailable. No automation was created."
+msgstr ""
+
+msgid "Import preview"
+msgstr ""
+
+msgid "Import preview expired. Upload the file again."
+msgstr ""
+
+msgid "Invalid workflow configuration."
+msgstr ""
+
+msgid "Name A–Z"
+msgstr ""
+
+msgid "Name Z–A"
+msgstr ""
+
+msgid "New automation"
+msgstr ""
+
+msgid "No starter templates available."
+msgstr ""
+
+msgid "No workflows match your filters."
+msgstr ""
+
+msgid "Not assigned"
+msgstr ""
+
+msgid "Oldest updated"
+msgstr ""
+
+msgid "Ready to configure"
+msgstr ""
+
+msgid "Recently updated"
+msgstr ""
+
+msgid "Reset"
+msgstr ""
+
+msgid "Review configuration literals before sharing or activating any imported workflow."
+msgstr ""
+
+msgid "Search by name..."
+msgstr ""
+
+msgid "Search workflows"
+msgstr ""
+
+msgid "Secure runtime encryption is unavailable."
+msgstr ""
+
+msgid "Sort"
+msgstr ""
+
+msgid "Stored execution principal no longer exists."
+msgstr ""
+
+msgid "Templates"
+msgstr ""
+
+msgid "That workflow template is no longer available."
+msgstr ""
+
+msgid "The request could not be verified. Reload and try again."
+msgstr ""
+
+msgid "The workflow changed in another request. Reload and retry."
+msgstr ""
+
+msgid "The workflow contains data that cannot be persisted safely."
+msgstr ""
+
+msgid "The workflow could not be updated."
+msgstr ""
+
+msgid "This workflow cannot be exported safely."
+msgstr ""
+
+msgid "Updated"
+msgstr ""
+
+msgid "Validate and preview"
+msgstr ""
+
+msgid "Validation"
+msgstr ""
+
+msgid "Workflow JSON could not be decoded or is incompatible."
+msgstr ""
+
+msgid "Workflow JSON file"
+msgstr ""
+
+msgid "Workflow capability contracts cannot be verified."
+msgstr ""
+
+msgid "Workflow not found."
+msgstr ""
+
+msgid "Workflow pages"
+msgstr ""
+
+msgid "Workflow storage is unavailable."
+msgstr ""
+
+msgid "Workflow was saved but remains disabled because it is not valid."
+msgstr ""
+
+msgid "Your account does not have the required permissions."
 msgstr ""

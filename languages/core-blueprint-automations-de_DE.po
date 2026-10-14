@@ -108,9 +108,7 @@ msgstr "Ausgaben"
 #: src/Admin/AdminAssets.php:89 src/Admin/DesignerAssets.php:67
 #: templates/admin/automations.php:157
 msgid "Condition"
-msgid_plural "Conditions"
-msgstr[0] "Bedingung"
-msgstr[1] "Bedingungen"
+msgstr "Bedingung"
 
 #: src/Admin/AdminAssets.php:90
 msgid "Reads as"
@@ -1368,12 +1366,6 @@ msgstr "Automatisierung aktiviert."
 msgid "Automation disabled."
 msgstr "Automatisierung deaktiviert."
 
-#: templates/admin/automations.php:21
-msgid "The automation remains disabled because the workflow is not valid yet."
-msgstr ""
-"Die Automatisierung bleibt deaktiviert, weil der Workflow noch nicht gültig "
-"ist."
-
 #: templates/admin/automations.php:22
 msgid ""
 "The automation remains disabled because secure runtime encryption is "
@@ -1438,17 +1430,6 @@ msgstr ""
 "Diese Automatisierung wurde in einer anderen Anfrage geändert. Lade die "
 "Seite neu, bevor du ihren Status änderst."
 
-#: templates/admin/automations.php:30
-msgid "The automation could not be found. No state was changed."
-msgstr ""
-"Die Automatisierung wurde nicht gefunden. Es wurde kein Status geändert."
-
-#: templates/admin/automations.php:31
-msgid "The requested automation state was invalid. No state was changed."
-msgstr ""
-"Der angeforderte Automatisierungsstatus war ungültig. Es wurde kein Status "
-"geändert."
-
 #: templates/admin/automations.php:33
 msgid ""
 "The automation could not be saved because workflow storage is unavailable. "
@@ -1488,10 +1469,6 @@ msgstr ""
 msgid "Automation name"
 msgstr "Name der Automatisierung"
 
-#: templates/admin/automations.php:60
-msgid "Starter workflows"
-msgstr "Starter-Workflows"
-
 #: templates/admin/automations.php:61
 msgid "Start from a template"
 msgstr "Mit einer Vorlage beginnen"
@@ -1508,21 +1485,6 @@ msgstr ""
 msgid "Use template"
 msgstr "Vorlage verwenden"
 
-#: templates/admin/automations.php:87
-msgid "Workflow library"
-msgstr "Workflow-Bibliothek"
-
-#: templates/admin/automations.php:91
-#, php-format
-msgid "%d workflow"
-msgid_plural "%d workflows"
-msgstr[0] "%d Workflow"
-msgstr[1] "%d Workflows"
-
-#: templates/admin/automations.php:96
-msgid "No automations have been created yet."
-msgstr "Es wurden noch keine Automatisierungen erstellt."
-
 #: templates/admin/automations.php:114
 msgid "Disable"
 msgstr "Deaktivieren"
@@ -1531,12 +1493,6 @@ msgstr "Deaktivieren"
 msgid "Enable"
 msgstr "Aktivieren"
 
-#. translators: 1: activation state, 2: validation state, 3: issue count.
-#: templates/admin/automations.php:122
-#, php-format
-msgid "%1$s · %2$s · %3$s"
-msgstr "%1$s · %2$s · %3$s"
-
 #: templates/admin/automations.php:125
 #, php-format
 msgid "%d issue"
@@ -1544,47 +1500,18 @@ msgid_plural "%d issues"
 msgstr[0] "%d Problem"
 msgstr[1] "%d Probleme"
 
-#: templates/admin/automations.php:131
-msgid "Valid · ready to run"
-msgstr "Gültig · bereit zur Ausführung"
-
-#: templates/admin/automations.php:136
-msgid "Valid · will not run"
-msgstr "Gültig · wird nicht ausgeführt"
-
 #: templates/admin/automations.php:143
 msgid "Automation"
 msgstr "Automatisierung"
-
-#: templates/admin/automations.php:154
-msgid "Workflow structure"
-msgstr "Workflow-Struktur"
 
 #: templates/admin/automations.php:155 templates/admin/workflow-editor.php:145
 #: templates/admin/workflow-editor.php:155
 msgid "Trigger"
 msgstr "Trigger"
 
-#: templates/admin/automations.php:156
-msgid "Data lookup"
-msgid_plural "Data lookups"
-msgstr[0] "Datenabfrage"
-msgstr[1] "Datenabfragen"
-
 #: templates/admin/automations.php:158 templates/admin/run-detail.php:95
 msgid "Action"
-msgid_plural "Actions"
-msgstr[0] "Aktion"
-msgstr[1] "Aktionen"
-
-#: templates/admin/automations.php:162
-#, php-format
-msgid "Updated %s"
-msgstr "Aktualisiert %s"
-
-#: templates/admin/automations.php:164
-msgid "Open builder"
-msgstr "Builder öffnen"
+msgstr "Aktion"
 
 #: templates/admin/automations.php:188
 msgid "‹ Previous"
@@ -2301,3 +2228,185 @@ msgstr "Dieser Workflow enthält nicht gespeicherte Änderungen. Speichern oder 
 #: src/Admin/DesignerAssets.php
 msgid "Close Builder"
 msgstr "Builder schließen"
+
+msgid "%d issues to resolve in Builder"
+msgstr "%d Probleme im Builder beheben"
+
+msgid "%d matching workflow"
+msgid_plural "%d matching workflows"
+msgstr[0] "%d passender Workflow"
+msgstr[1] "%d passende Workflows"
+
+msgid "+ New automation"
+msgstr "+ Neue Automatisierung"
+
+msgid "All statuses"
+msgstr "Alle Status"
+
+msgid "Apply"
+msgstr "Anwenden"
+
+msgid "Assign execution authority in the Builder before enabling."
+msgstr "Vor dem Aktivieren im Builder eine Ausführungsberechtigung zuweisen."
+
+msgid "Automation created from template. Review and assign execution authority before enabling."
+msgstr "Automatisierung aus Vorlage erstellt. Vor dem Aktivieren prüfen und eine Ausführungsberechtigung zuweisen."
+
+msgid "Automations workspace"
+msgstr "Arbeitsbereich Automatisierungen"
+
+msgid "Choose a JSON file smaller than 256 KB."
+msgstr "Wähle eine JSON-Datei unter 256 KB."
+
+msgid "Create a disabled draft, then configure it securely in the Builder."
+msgstr "Erstelle einen deaktivierten Entwurf und konfiguriere ihn anschließend sicher im Builder."
+
+msgid "Create a normal editable workflow from a provider template. The new workflow is not linked to the original."
+msgstr "Erstelle einen regulären, bearbeitbaren Workflow aus einer Anbietervorlage. Der neue Workflow bleibt nicht mit dem Original verknüpft."
+
+msgid "Create disabled workflow"
+msgstr "Deaktivierten Workflow erstellen"
+
+msgid "Disabled (always)"
+msgstr "Deaktiviert (immer)"
+
+msgid "Edit"
+msgstr "Bearbeiten"
+
+msgid "Execution principal does not have the required permissions."
+msgstr "Der ausführende Benutzer verfügt nicht über die erforderlichen Berechtigungen."
+
+msgid "Export JSON"
+msgstr "JSON exportieren"
+
+msgid "Find, manage and create your WordPress automations."
+msgstr "WordPress-Automatisierungen finden, verwalten und erstellen."
+
+msgid "Health"
+msgstr "Zustand"
+
+msgid "Import JSON"
+msgstr "JSON importieren"
+
+msgid "Import an exported workflow or a standalone workflow definition. Nothing is enabled automatically. Execution authority must be assigned after import."
+msgstr "Importiere einen exportierten Workflow oder eine eigenständige Workflow-Definition. Nichts wird automatisch aktiviert. Danach muss eine Ausführungsberechtigung zugewiesen werden."
+
+msgid "Import automation JSON"
+msgstr "Automatisierungs-JSON importieren"
+
+msgid "Import blocked: sensitive literal data must not be stored in workflow definitions."
+msgstr "Import blockiert: Sensible Literalwerte dürfen nicht in Workflow-Definitionen gespeichert werden."
+
+msgid "Import is unavailable. No automation was created."
+msgstr "Import nicht verfügbar. Es wurde keine Automatisierung erstellt."
+
+msgid "Import preview"
+msgstr "Importvorschau"
+
+msgid "Import preview expired. Upload the file again."
+msgstr "Importvorschau abgelaufen. Lade die Datei erneut hoch."
+
+msgid "Invalid workflow configuration."
+msgstr "Ungültige Workflow-Konfiguration."
+
+msgid "Name A–Z"
+msgstr "Name A–Z"
+
+msgid "Name Z–A"
+msgstr "Name Z–A"
+
+msgid "New automation"
+msgstr "Neue Automatisierung"
+
+msgid "No starter templates available."
+msgstr "Keine Einstiegsvorlagen verfügbar."
+
+msgid "No workflows match your filters."
+msgstr "Keine Workflows entsprechen deinen Filtern."
+
+msgid "Not assigned"
+msgstr "Nicht zugewiesen"
+
+msgid "Oldest updated"
+msgstr "Älteste Aktualisierung"
+
+msgid "Ready to configure"
+msgstr "Bereit zur Konfiguration"
+
+msgid "Recently updated"
+msgstr "Zuletzt aktualisiert"
+
+msgid "Reset"
+msgstr "Zurücksetzen"
+
+msgid "Review configuration literals before sharing or activating any imported workflow."
+msgstr "Prüfe Konfigurations-Literalwerte, bevor du einen importierten Workflow teilst oder aktivierst."
+
+msgid "Search by name..."
+msgstr "Nach Namen suchen..."
+
+msgid "Search workflows"
+msgstr "Workflows suchen"
+
+msgid "Secure runtime encryption is unavailable."
+msgstr "Sichere Laufzeitverschlüsselung ist nicht verfügbar."
+
+msgid "Sort"
+msgstr "Sortieren"
+
+msgid "Stored execution principal no longer exists."
+msgstr "Der gespeicherte ausführende Benutzer existiert nicht mehr."
+
+msgid "Templates"
+msgstr "Vorlagen"
+
+msgid "That workflow template is no longer available."
+msgstr "Diese Workflow-Vorlage ist nicht mehr verfügbar."
+
+msgid "The request could not be verified. Reload and try again."
+msgstr "Die Anfrage konnte nicht verifiziert werden. Lade die Seite neu und versuche es erneut."
+
+msgid "The workflow changed in another request. Reload and retry."
+msgstr "Der Workflow wurde durch eine andere Anfrage geändert. Lade die Seite neu und versuche es erneut."
+
+msgid "The workflow contains data that cannot be persisted safely."
+msgstr "Der Workflow enthält Daten, die nicht sicher gespeichert werden können."
+
+msgid "The workflow could not be updated."
+msgstr "Der Workflow konnte nicht aktualisiert werden."
+
+msgid "This workflow cannot be exported safely."
+msgstr "Dieser Workflow kann nicht sicher exportiert werden."
+
+msgid "Updated"
+msgstr "Aktualisiert"
+
+msgid "Validate and preview"
+msgstr "Validieren und Vorschau anzeigen"
+
+msgid "Validation"
+msgstr "Validierung"
+
+msgid "Workflow JSON could not be decoded or is incompatible."
+msgstr "Workflow-JSON konnte nicht dekodiert werden oder ist inkompatibel."
+
+msgid "Workflow JSON file"
+msgstr "Workflow-JSON-Datei"
+
+msgid "Workflow capability contracts cannot be verified."
+msgstr "Die Workflow-Funktionsverträge können nicht verifiziert werden."
+
+msgid "Workflow not found."
+msgstr "Workflow nicht gefunden."
+
+msgid "Workflow pages"
+msgstr "Workflow-Seiten"
+
+msgid "Workflow storage is unavailable."
+msgstr "Workflow-Speicher ist nicht verfügbar."
+
+msgid "Workflow was saved but remains disabled because it is not valid."
+msgstr "Der Workflow wurde gespeichert, bleibt aber deaktiviert, da er ungültig ist."
+
+msgid "Your account does not have the required permissions."
+msgstr "Dein Konto verfügt nicht über die erforderlichen Berechtigungen."

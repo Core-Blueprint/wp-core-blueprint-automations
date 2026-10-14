@@ -108,9 +108,7 @@ msgstr "Sorties"
 #: src/Admin/AdminAssets.php:89 src/Admin/DesignerAssets.php:67
 #: templates/admin/automations.php:157
 msgid "Condition"
-msgid_plural "Conditions"
-msgstr[0] "Condition"
-msgstr[1] "Conditions"
+msgstr "Condition"
 
 #: src/Admin/AdminAssets.php:90
 msgid "Reads as"
@@ -1370,11 +1368,6 @@ msgstr "Automatisation activée."
 msgid "Automation disabled."
 msgstr "Automatisation désactivée."
 
-#: templates/admin/automations.php:21
-msgid "The automation remains disabled because the workflow is not valid yet."
-msgstr ""
-"L’automatisation reste désactivée car le workflow n’est pas encore valide."
-
 #: templates/admin/automations.php:22
 msgid ""
 "The automation remains disabled because secure runtime encryption is "
@@ -1439,15 +1432,6 @@ msgstr ""
 "Cette automatisation a été modifiée dans une autre requête. Rechargez la "
 "page avant de modifier son état."
 
-#: templates/admin/automations.php:30
-msgid "The automation could not be found. No state was changed."
-msgstr "L’automatisation est introuvable. Aucun état n’a été modifié."
-
-#: templates/admin/automations.php:31
-msgid "The requested automation state was invalid. No state was changed."
-msgstr ""
-"L’état d’automatisation demandé était invalide. Aucun état n’a été modifié."
-
 #: templates/admin/automations.php:33
 msgid ""
 "The automation could not be saved because workflow storage is unavailable. "
@@ -1487,10 +1471,6 @@ msgstr ""
 msgid "Automation name"
 msgstr "Nom de l’automatisation"
 
-#: templates/admin/automations.php:60
-msgid "Starter workflows"
-msgstr "Workflows de démarrage"
-
 #: templates/admin/automations.php:61
 msgid "Start from a template"
 msgstr "Commencer à partir d’un modèle"
@@ -1507,21 +1487,6 @@ msgstr ""
 msgid "Use template"
 msgstr "Utiliser le modèle"
 
-#: templates/admin/automations.php:87
-msgid "Workflow library"
-msgstr "Bibliothèque de workflows"
-
-#: templates/admin/automations.php:91
-#, php-format
-msgid "%d workflow"
-msgid_plural "%d workflows"
-msgstr[0] "%d workflow"
-msgstr[1] "%d workflows"
-
-#: templates/admin/automations.php:96
-msgid "No automations have been created yet."
-msgstr "Aucune automatisation n’a encore été créée."
-
 #: templates/admin/automations.php:114
 msgid "Disable"
 msgstr "Désactiver"
@@ -1530,12 +1495,6 @@ msgstr "Désactiver"
 msgid "Enable"
 msgstr "Activer"
 
-#. translators: 1: activation state, 2: validation state, 3: issue count.
-#: templates/admin/automations.php:122
-#, php-format
-msgid "%1$s · %2$s · %3$s"
-msgstr "%1$s · %2$s · %3$s"
-
 #: templates/admin/automations.php:125
 #, php-format
 msgid "%d issue"
@@ -1543,47 +1502,18 @@ msgid_plural "%d issues"
 msgstr[0] "%d problème"
 msgstr[1] "%d problèmes"
 
-#: templates/admin/automations.php:131
-msgid "Valid · ready to run"
-msgstr "Valide · prêt à s’exécuter"
-
-#: templates/admin/automations.php:136
-msgid "Valid · will not run"
-msgstr "Valide · ne s’exécutera pas"
-
 #: templates/admin/automations.php:143
 msgid "Automation"
 msgstr "Automatisation"
-
-#: templates/admin/automations.php:154
-msgid "Workflow structure"
-msgstr "Structure du workflow"
 
 #: templates/admin/automations.php:155 templates/admin/workflow-editor.php:145
 #: templates/admin/workflow-editor.php:155
 msgid "Trigger"
 msgstr "Déclencheur"
 
-#: templates/admin/automations.php:156
-msgid "Data lookup"
-msgid_plural "Data lookups"
-msgstr[0] "Recherche de données"
-msgstr[1] "Recherches de données"
-
 #: templates/admin/automations.php:158 templates/admin/run-detail.php:95
 msgid "Action"
-msgid_plural "Actions"
-msgstr[0] "Action"
-msgstr[1] "Actions"
-
-#: templates/admin/automations.php:162
-#, php-format
-msgid "Updated %s"
-msgstr "Mis à jour %s"
-
-#: templates/admin/automations.php:164
-msgid "Open builder"
-msgstr "Ouvrir le builder"
+msgstr "Action"
 
 #: templates/admin/automations.php:188
 msgid "‹ Previous"
@@ -2300,3 +2230,185 @@ msgstr "Ce workflow comporte des modifications non enregistrées. Enregistrez-le
 #: src/Admin/DesignerAssets.php
 msgid "Close Builder"
 msgstr "Fermer le Builder"
+
+msgid "%d issues to resolve in Builder"
+msgstr "%d problèmes à résoudre dans Builder"
+
+msgid "%d matching workflow"
+msgid_plural "%d matching workflows"
+msgstr[0] "%d flux de travail correspondant"
+msgstr[1] "%d flux de travail correspondants"
+
+msgid "+ New automation"
+msgstr "+ Nouvelle automatisation"
+
+msgid "All statuses"
+msgstr "Tous les statuts"
+
+msgid "Apply"
+msgstr "Appliquer"
+
+msgid "Assign execution authority in the Builder before enabling."
+msgstr "Attribuez les autorisations d’exécution dans Builder avant l’activation."
+
+msgid "Automation created from template. Review and assign execution authority before enabling."
+msgstr "Automatisation créée à partir d’un modèle. Vérifiez-la et attribuez les autorisations d’exécution avant l’activation."
+
+msgid "Automations workspace"
+msgstr "Espace de travail des automatisations"
+
+msgid "Choose a JSON file smaller than 256 KB."
+msgstr "Choisissez un fichier JSON de moins de 256 Ko."
+
+msgid "Create a disabled draft, then configure it securely in the Builder."
+msgstr "Créez un brouillon désactivé, puis configurez-le en toute sécurité dans Builder."
+
+msgid "Create a normal editable workflow from a provider template. The new workflow is not linked to the original."
+msgstr "Créez un flux de travail modifiable à partir d’un modèle de fournisseur. Il ne sera pas lié à l’original."
+
+msgid "Create disabled workflow"
+msgstr "Créer un flux de travail désactivé"
+
+msgid "Disabled (always)"
+msgstr "Désactivé (toujours)"
+
+msgid "Edit"
+msgstr "Modifier"
+
+msgid "Execution principal does not have the required permissions."
+msgstr "Le compte d’exécution ne dispose pas des autorisations requises."
+
+msgid "Export JSON"
+msgstr "Exporter le JSON"
+
+msgid "Find, manage and create your WordPress automations."
+msgstr "Recherchez, gérez et créez vos automatisations WordPress."
+
+msgid "Health"
+msgstr "État"
+
+msgid "Import JSON"
+msgstr "Importer du JSON"
+
+msgid "Import an exported workflow or a standalone workflow definition. Nothing is enabled automatically. Execution authority must be assigned after import."
+msgstr "Importez un flux de travail exporté ou une définition autonome. Rien n’est activé automatiquement. Les autorisations d’exécution doivent être attribuées après l’importation."
+
+msgid "Import automation JSON"
+msgstr "Importer le JSON d’une automatisation"
+
+msgid "Import blocked: sensitive literal data must not be stored in workflow definitions."
+msgstr "Importation bloquée : les données sensibles en valeur littérale ne doivent pas être stockées dans les définitions de flux de travail."
+
+msgid "Import is unavailable. No automation was created."
+msgstr "L’importation est indisponible. Aucune automatisation n’a été créée."
+
+msgid "Import preview"
+msgstr "Aperçu de l’importation"
+
+msgid "Import preview expired. Upload the file again."
+msgstr "L’aperçu de l’importation a expiré. Téléversez à nouveau le fichier."
+
+msgid "Invalid workflow configuration."
+msgstr "Configuration du flux de travail invalide."
+
+msgid "Name A–Z"
+msgstr "Nom A–Z"
+
+msgid "Name Z–A"
+msgstr "Nom Z–A"
+
+msgid "New automation"
+msgstr "Nouvelle automatisation"
+
+msgid "No starter templates available."
+msgstr "Aucun modèle de démarrage disponible."
+
+msgid "No workflows match your filters."
+msgstr "Aucun flux de travail ne correspond à vos filtres."
+
+msgid "Not assigned"
+msgstr "Non attribué"
+
+msgid "Oldest updated"
+msgstr "Mise à jour la plus ancienne"
+
+msgid "Ready to configure"
+msgstr "Prêt à configurer"
+
+msgid "Recently updated"
+msgstr "Mis à jour récemment"
+
+msgid "Reset"
+msgstr "Réinitialiser"
+
+msgid "Review configuration literals before sharing or activating any imported workflow."
+msgstr "Vérifiez les valeurs littérales de configuration avant de partager ou d’activer un flux de travail importé."
+
+msgid "Search by name..."
+msgstr "Rechercher par nom..."
+
+msgid "Search workflows"
+msgstr "Rechercher des flux de travail"
+
+msgid "Secure runtime encryption is unavailable."
+msgstr "Le chiffrement sécurisé à l’exécution est indisponible."
+
+msgid "Sort"
+msgstr "Trier"
+
+msgid "Stored execution principal no longer exists."
+msgstr "Le compte d’exécution enregistré n’existe plus."
+
+msgid "Templates"
+msgstr "Modèles"
+
+msgid "That workflow template is no longer available."
+msgstr "Ce modèle de flux de travail n’est plus disponible."
+
+msgid "The request could not be verified. Reload and try again."
+msgstr "La requête n’a pas pu être vérifiée. Rechargez la page et réessayez."
+
+msgid "The workflow changed in another request. Reload and retry."
+msgstr "Le flux de travail a été modifié par une autre requête. Rechargez la page et réessayez."
+
+msgid "The workflow contains data that cannot be persisted safely."
+msgstr "Le flux de travail contient des données qui ne peuvent pas être enregistrées en toute sécurité."
+
+msgid "The workflow could not be updated."
+msgstr "Le flux de travail n’a pas pu être mis à jour."
+
+msgid "This workflow cannot be exported safely."
+msgstr "Ce flux de travail ne peut pas être exporté en toute sécurité."
+
+msgid "Updated"
+msgstr "Mis à jour"
+
+msgid "Validate and preview"
+msgstr "Valider et prévisualiser"
+
+msgid "Validation"
+msgstr "Validation"
+
+msgid "Workflow JSON could not be decoded or is incompatible."
+msgstr "Le JSON du flux de travail n’a pas pu être décodé ou est incompatible."
+
+msgid "Workflow JSON file"
+msgstr "Fichier JSON du flux de travail"
+
+msgid "Workflow capability contracts cannot be verified."
+msgstr "Les contrats de capacités du flux de travail ne peuvent pas être vérifiés."
+
+msgid "Workflow not found."
+msgstr "Flux de travail introuvable."
+
+msgid "Workflow pages"
+msgstr "Pages des flux de travail"
+
+msgid "Workflow storage is unavailable."
+msgstr "Le stockage des flux de travail est indisponible."
+
+msgid "Workflow was saved but remains disabled because it is not valid."
+msgstr "Le flux de travail a été enregistré, mais reste désactivé car il n’est pas valide."
+
+msgid "Your account does not have the required permissions."
+msgstr "Votre compte ne dispose pas des autorisations requises."

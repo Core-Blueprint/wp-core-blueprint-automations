@@ -108,9 +108,7 @@ msgstr "Salidas"
 #: src/Admin/AdminAssets.php:89 src/Admin/DesignerAssets.php:67
 #: templates/admin/automations.php:157
 msgid "Condition"
-msgid_plural "Conditions"
-msgstr[0] "Condición"
-msgstr[1] "Condiciones"
+msgstr "Condición"
 
 #: src/Admin/AdminAssets.php:90
 msgid "Reads as"
@@ -1370,12 +1368,6 @@ msgstr "Automatización activada."
 msgid "Automation disabled."
 msgstr "Automatización desactivada."
 
-#: templates/admin/automations.php:21
-msgid "The automation remains disabled because the workflow is not valid yet."
-msgstr ""
-"La automatización permanece desactivada porque el flujo de trabajo aún no es "
-"válido."
-
 #: templates/admin/automations.php:22
 msgid ""
 "The automation remains disabled because secure runtime encryption is "
@@ -1440,16 +1432,6 @@ msgstr ""
 "Esta automatización cambió en otra solicitud. Recarga la página antes de "
 "cambiar su estado."
 
-#: templates/admin/automations.php:30
-msgid "The automation could not be found. No state was changed."
-msgstr "No se pudo encontrar la automatización. No se cambió ningún estado."
-
-#: templates/admin/automations.php:31
-msgid "The requested automation state was invalid. No state was changed."
-msgstr ""
-"El estado de automatización solicitado no era válido. No se cambió ningún "
-"estado."
-
 #: templates/admin/automations.php:33
 msgid ""
 "The automation could not be saved because workflow storage is unavailable. "
@@ -1489,10 +1471,6 @@ msgstr ""
 msgid "Automation name"
 msgstr "Nombre de automatización"
 
-#: templates/admin/automations.php:60
-msgid "Starter workflows"
-msgstr "Flujos de trabajo iniciales"
-
 #: templates/admin/automations.php:61
 msgid "Start from a template"
 msgstr "Empezar desde una plantilla"
@@ -1510,21 +1488,6 @@ msgstr ""
 msgid "Use template"
 msgstr "Usar plantilla"
 
-#: templates/admin/automations.php:87
-msgid "Workflow library"
-msgstr "Biblioteca de flujos de trabajo"
-
-#: templates/admin/automations.php:91
-#, php-format
-msgid "%d workflow"
-msgid_plural "%d workflows"
-msgstr[0] "%d flujo de trabajo"
-msgstr[1] "%d flujos de trabajo"
-
-#: templates/admin/automations.php:96
-msgid "No automations have been created yet."
-msgstr "Todavía no se han creado automatizaciones."
-
 #: templates/admin/automations.php:114
 msgid "Disable"
 msgstr "Desactivar"
@@ -1533,12 +1496,6 @@ msgstr "Desactivar"
 msgid "Enable"
 msgstr "Activar"
 
-#. translators: 1: activation state, 2: validation state, 3: issue count.
-#: templates/admin/automations.php:122
-#, php-format
-msgid "%1$s · %2$s · %3$s"
-msgstr "%1$s · %2$s · %3$s"
-
 #: templates/admin/automations.php:125
 #, php-format
 msgid "%d issue"
@@ -1546,47 +1503,18 @@ msgid_plural "%d issues"
 msgstr[0] "%d problema"
 msgstr[1] "%d problemas"
 
-#: templates/admin/automations.php:131
-msgid "Valid · ready to run"
-msgstr "Válido · listo para ejecutarse"
-
-#: templates/admin/automations.php:136
-msgid "Valid · will not run"
-msgstr "Válido · no se ejecutará"
-
 #: templates/admin/automations.php:143
 msgid "Automation"
 msgstr "Automatización"
-
-#: templates/admin/automations.php:154
-msgid "Workflow structure"
-msgstr "Estructura del flujo de trabajo"
 
 #: templates/admin/automations.php:155 templates/admin/workflow-editor.php:145
 #: templates/admin/workflow-editor.php:155
 msgid "Trigger"
 msgstr "Disparador"
 
-#: templates/admin/automations.php:156
-msgid "Data lookup"
-msgid_plural "Data lookups"
-msgstr[0] "Consulta de datos"
-msgstr[1] "Consultas de datos"
-
 #: templates/admin/automations.php:158 templates/admin/run-detail.php:95
 msgid "Action"
-msgid_plural "Actions"
-msgstr[0] "Acción"
-msgstr[1] "Acciones"
-
-#: templates/admin/automations.php:162
-#, php-format
-msgid "Updated %s"
-msgstr "Actualizado %s"
-
-#: templates/admin/automations.php:164
-msgid "Open builder"
-msgstr "Abrir builder"
+msgstr "Acción"
 
 #: templates/admin/automations.php:188
 msgid "‹ Previous"
@@ -2305,3 +2233,185 @@ msgstr "Este flujo de trabajo tiene cambios sin guardar. Guárdalos o descártal
 #: src/Admin/DesignerAssets.php
 msgid "Close Builder"
 msgstr "Cerrar Builder"
+
+msgid "%d issues to resolve in Builder"
+msgstr "%d problemas que resolver en Builder"
+
+msgid "%d matching workflow"
+msgid_plural "%d matching workflows"
+msgstr[0] "%d flujo de trabajo coincidente"
+msgstr[1] "%d flujos de trabajo coincidentes"
+
+msgid "+ New automation"
+msgstr "+ Nueva automatización"
+
+msgid "All statuses"
+msgstr "Todos los estados"
+
+msgid "Apply"
+msgstr "Aplicar"
+
+msgid "Assign execution authority in the Builder before enabling."
+msgstr "Asigna los permisos de ejecución en Builder antes de activar."
+
+msgid "Automation created from template. Review and assign execution authority before enabling."
+msgstr "Automatización creada a partir de una plantilla. Revísala y asigna permisos de ejecución antes de activarla."
+
+msgid "Automations workspace"
+msgstr "Espacio de trabajo de automatizaciones"
+
+msgid "Choose a JSON file smaller than 256 KB."
+msgstr "Elige un archivo JSON de menos de 256 KB."
+
+msgid "Create a disabled draft, then configure it securely in the Builder."
+msgstr "Crea un borrador desactivado y configúralo de forma segura en Builder."
+
+msgid "Create a normal editable workflow from a provider template. The new workflow is not linked to the original."
+msgstr "Crea un flujo de trabajo editable a partir de una plantilla del proveedor. No quedará vinculado al original."
+
+msgid "Create disabled workflow"
+msgstr "Crear flujo de trabajo desactivado"
+
+msgid "Disabled (always)"
+msgstr "Desactivado (siempre)"
+
+msgid "Edit"
+msgstr "Editar"
+
+msgid "Execution principal does not have the required permissions."
+msgstr "La cuenta de ejecución no tiene los permisos necesarios."
+
+msgid "Export JSON"
+msgstr "Exportar JSON"
+
+msgid "Find, manage and create your WordPress automations."
+msgstr "Busca, gestiona y crea tus automatizaciones de WordPress."
+
+msgid "Health"
+msgstr "Estado"
+
+msgid "Import JSON"
+msgstr "Importar JSON"
+
+msgid "Import an exported workflow or a standalone workflow definition. Nothing is enabled automatically. Execution authority must be assigned after import."
+msgstr "Importa un flujo de trabajo exportado o una definición independiente. Nada se activa automáticamente. Después de importar hay que asignar permisos de ejecución."
+
+msgid "Import automation JSON"
+msgstr "Importar JSON de automatización"
+
+msgid "Import blocked: sensitive literal data must not be stored in workflow definitions."
+msgstr "Importación bloqueada: los datos sensibles en valores literales no deben almacenarse en las definiciones de flujos de trabajo."
+
+msgid "Import is unavailable. No automation was created."
+msgstr "La importación no está disponible. No se ha creado ninguna automatización."
+
+msgid "Import preview"
+msgstr "Vista previa de importación"
+
+msgid "Import preview expired. Upload the file again."
+msgstr "La vista previa de importación ha caducado. Vuelve a subir el archivo."
+
+msgid "Invalid workflow configuration."
+msgstr "Configuración de flujo de trabajo no válida."
+
+msgid "Name A–Z"
+msgstr "Nombre A–Z"
+
+msgid "Name Z–A"
+msgstr "Nombre Z–A"
+
+msgid "New automation"
+msgstr "Nueva automatización"
+
+msgid "No starter templates available."
+msgstr "No hay plantillas iniciales disponibles."
+
+msgid "No workflows match your filters."
+msgstr "Ningún flujo de trabajo coincide con tus filtros."
+
+msgid "Not assigned"
+msgstr "Sin asignar"
+
+msgid "Oldest updated"
+msgstr "Actualizados hace más tiempo"
+
+msgid "Ready to configure"
+msgstr "Listo para configurar"
+
+msgid "Recently updated"
+msgstr "Actualizados recientemente"
+
+msgid "Reset"
+msgstr "Restablecer"
+
+msgid "Review configuration literals before sharing or activating any imported workflow."
+msgstr "Revisa los valores literales de configuración antes de compartir o activar un flujo de trabajo importado."
+
+msgid "Search by name..."
+msgstr "Buscar por nombre..."
+
+msgid "Search workflows"
+msgstr "Buscar flujos de trabajo"
+
+msgid "Secure runtime encryption is unavailable."
+msgstr "El cifrado seguro durante la ejecución no está disponible."
+
+msgid "Sort"
+msgstr "Ordenar"
+
+msgid "Stored execution principal no longer exists."
+msgstr "La cuenta de ejecución guardada ya no existe."
+
+msgid "Templates"
+msgstr "Plantillas"
+
+msgid "That workflow template is no longer available."
+msgstr "Esta plantilla de flujo de trabajo ya no está disponible."
+
+msgid "The request could not be verified. Reload and try again."
+msgstr "No se pudo verificar la solicitud. Recarga la página e inténtalo de nuevo."
+
+msgid "The workflow changed in another request. Reload and retry."
+msgstr "El flujo de trabajo cambió en otra solicitud. Recarga la página e inténtalo de nuevo."
+
+msgid "The workflow contains data that cannot be persisted safely."
+msgstr "El flujo de trabajo contiene datos que no se pueden guardar de forma segura."
+
+msgid "The workflow could not be updated."
+msgstr "No se pudo actualizar el flujo de trabajo."
+
+msgid "This workflow cannot be exported safely."
+msgstr "Este flujo de trabajo no se puede exportar de forma segura."
+
+msgid "Updated"
+msgstr "Actualizado"
+
+msgid "Validate and preview"
+msgstr "Validar y previsualizar"
+
+msgid "Validation"
+msgstr "Validación"
+
+msgid "Workflow JSON could not be decoded or is incompatible."
+msgstr "No se pudo decodificar el JSON del flujo de trabajo o es incompatible."
+
+msgid "Workflow JSON file"
+msgstr "Archivo JSON del flujo de trabajo"
+
+msgid "Workflow capability contracts cannot be verified."
+msgstr "No se pueden verificar los contratos de capacidades del flujo de trabajo."
+
+msgid "Workflow not found."
+msgstr "No se encontró el flujo de trabajo."
+
+msgid "Workflow pages"
+msgstr "Páginas de flujos de trabajo"
+
+msgid "Workflow storage is unavailable."
+msgstr "El almacenamiento de flujos de trabajo no está disponible."
+
+msgid "Workflow was saved but remains disabled because it is not valid."
+msgstr "El flujo de trabajo se guardó, pero sigue desactivado porque no es válido."
+
+msgid "Your account does not have the required permissions."
+msgstr "Tu cuenta no tiene los permisos necesarios."
