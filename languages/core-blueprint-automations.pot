@@ -2191,3 +2191,72 @@ msgstr ""
 #: templates/admin/workflow-review.php:28
 msgid "The stored workflow definition has been preserved unchanged. Restore or update the relevant provider first; Automations will re-evaluate the workflow automatically on the next page load."
 msgstr ""
+
+msgid "Folder created."
+msgstr ""
+
+msgid "Folder renamed."
+msgstr ""
+
+msgid "Folder deleted. Workflows were moved to Unfiled."
+msgstr ""
+
+msgid "Workflow moved."
+msgstr ""
+
+msgid "Enter a valid folder name."
+msgstr ""
+
+msgid "Folder no longer exists."
+msgstr ""
+
+msgid "Confirm the folder deletion first."
+msgstr ""
+
+msgid "The workflow or folder was not found."
+msgstr ""
+
+msgid "Folder change could not be saved. No workflow execution settings were changed."
+msgstr ""
+
+msgid "Manage folders"
+msgstr ""
+
+msgid "Folders organise workflows only. They never change triggers, execution or permissions."
+msgstr ""
+
+msgid "Folder name"
+msgstr ""
+
+msgid "Add folder"
+msgstr ""
+
+msgid "No folders yet. All existing workflows are Unfiled."
+msgstr ""
+
+msgid "Rename folder"
+msgstr ""
+
+msgid "Rename"
+msgstr ""
+
+msgid "Move workflows to Unfiled"
+msgstr ""
+
+msgid "Delete folder"
+msgstr ""
+
+msgid "Folder"
+msgstr ""
+
+msgid "All folders"
+msgstr ""
+
+msgid "Unfiled"
+msgstr ""
+
+msgid "Move workflow to folder"
+msgstr ""
+
+msgid "Move"
+msgstr ""

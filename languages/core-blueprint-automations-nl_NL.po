@@ -2379,3 +2379,72 @@ msgstr ""
 "De opgeslagen workflowdefinitie is ongewijzigd bewaard. Herstel of werk "
 "eerst de relevante provider bij; Automations beoordeelt de workflow "
 "automatisch opnieuw bij de volgende paginalaad."
+
+msgid "Folder created."
+msgstr "Map aangemaakt."
+
+msgid "Folder renamed."
+msgstr "Map hernoemd."
+
+msgid "Folder deleted. Workflows were moved to Unfiled."
+msgstr "Map verwijderd. Workflows zijn verplaatst naar Niet ingedeeld."
+
+msgid "Workflow moved."
+msgstr "Workflow verplaatst."
+
+msgid "Enter a valid folder name."
+msgstr "Vul een geldige mapnaam in."
+
+msgid "Folder no longer exists."
+msgstr "De map bestaat niet meer."
+
+msgid "Confirm the folder deletion first."
+msgstr "Bevestig eerst dat je de map wilt verwijderen."
+
+msgid "The workflow or folder was not found."
+msgstr "De workflow of map is niet gevonden."
+
+msgid "Folder change could not be saved. No workflow execution settings were changed."
+msgstr "De mapwijziging kon niet worden opgeslagen. Uitvoeringsinstellingen van workflows zijn niet gewijzigd."
+
+msgid "Manage folders"
+msgstr "Mappen beheren"
+
+msgid "Folders organise workflows only. They never change triggers, execution or permissions."
+msgstr "Mappen ordenen alleen workflows. Ze wijzigen nooit triggers, uitvoering of rechten."
+
+msgid "Folder name"
+msgstr "Mapnaam"
+
+msgid "Add folder"
+msgstr "Map toevoegen"
+
+msgid "No folders yet. All existing workflows are Unfiled."
+msgstr "Er zijn nog geen mappen. Alle bestaande workflows zijn Niet ingedeeld."
+
+msgid "Rename folder"
+msgstr "Map hernoemen"
+
+msgid "Rename"
+msgstr "Hernoemen"
+
+msgid "Move workflows to Unfiled"
+msgstr "Workflows verplaatsen naar Niet ingedeeld"
+
+msgid "Delete folder"
+msgstr "Map verwijderen"
+
+msgid "Folder"
+msgstr "Map"
+
+msgid "All folders"
+msgstr "Alle mappen"
+
+msgid "Unfiled"
+msgstr "Niet ingedeeld"
+
+msgid "Move workflow to folder"
+msgstr "Workflow naar map verplaatsen"
+
+msgid "Move"
+msgstr "Verplaatsen"

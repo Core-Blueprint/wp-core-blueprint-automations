@@ -2395,3 +2395,72 @@ msgstr ""
 "La definizione del workflow salvata è stata conservata invariata. Ripristina "
 "o aggiorna prima il provider pertinente; Automations rivaluterà "
 "automaticamente il workflow al successivo caricamento della pagina."
+
+msgid "Folder created."
+msgstr "Cartella creata."
+
+msgid "Folder renamed."
+msgstr "Cartella rinominata."
+
+msgid "Folder deleted. Workflows were moved to Unfiled."
+msgstr "Cartella eliminata. I flussi di lavoro sono stati spostati in Non classificati."
+
+msgid "Workflow moved."
+msgstr "Flusso di lavoro spostato."
+
+msgid "Enter a valid folder name."
+msgstr "Inserisci un nome di cartella valido."
+
+msgid "Folder no longer exists."
+msgstr "La cartella non esiste più."
+
+msgid "Confirm the folder deletion first."
+msgstr "Conferma prima l’eliminazione della cartella."
+
+msgid "The workflow or folder was not found."
+msgstr "Il flusso di lavoro o la cartella non è stato trovato."
+
+msgid "Folder change could not be saved. No workflow execution settings were changed."
+msgstr "La modifica della cartella non è stata salvata. Nessuna impostazione di esecuzione è stata modificata."
+
+msgid "Manage folders"
+msgstr "Gestisci cartelle"
+
+msgid "Folders organise workflows only. They never change triggers, execution or permissions."
+msgstr "Le cartelle servono solo a organizzare i flussi di lavoro. Non modificano trigger, esecuzione o autorizzazioni."
+
+msgid "Folder name"
+msgstr "Nome della cartella"
+
+msgid "Add folder"
+msgstr "Aggiungi cartella"
+
+msgid "No folders yet. All existing workflows are Unfiled."
+msgstr "Non ci sono ancora cartelle. Tutti i flussi esistenti sono Non classificati."
+
+msgid "Rename folder"
+msgstr "Rinomina cartella"
+
+msgid "Rename"
+msgstr "Rinomina"
+
+msgid "Move workflows to Unfiled"
+msgstr "Sposta i flussi in Non classificati"
+
+msgid "Delete folder"
+msgstr "Elimina cartella"
+
+msgid "Folder"
+msgstr "Cartella"
+
+msgid "All folders"
+msgstr "Tutte le cartelle"
+
+msgid "Unfiled"
+msgstr "Non classificati"
+
+msgid "Move workflow to folder"
+msgstr "Sposta il flusso nella cartella"
+
+msgid "Move"
+msgstr "Sposta"

@@ -2398,3 +2398,72 @@ msgstr ""
 "Restaure ou atualize primeiro o fornecedor relevante; o Automations voltará "
 "a avaliar automaticamente o fluxo de trabalho no próximo carregamento da "
 "página."
+
+msgid "Folder created."
+msgstr "Pasta criada."
+
+msgid "Folder renamed."
+msgstr "Pasta renomeada."
+
+msgid "Folder deleted. Workflows were moved to Unfiled."
+msgstr "Pasta eliminada. Os fluxos de trabalho foram movidos para Não classificados."
+
+msgid "Workflow moved."
+msgstr "Fluxo de trabalho movido."
+
+msgid "Enter a valid folder name."
+msgstr "Introduza um nome de pasta válido."
+
+msgid "Folder no longer exists."
+msgstr "A pasta já não existe."
+
+msgid "Confirm the folder deletion first."
+msgstr "Confirme primeiro a eliminação da pasta."
+
+msgid "The workflow or folder was not found."
+msgstr "O fluxo de trabalho ou a pasta não foi encontrado."
+
+msgid "Folder change could not be saved. No workflow execution settings were changed."
+msgstr "Não foi possível guardar a alteração à pasta. Nenhuma definição de execução foi alterada."
+
+msgid "Manage folders"
+msgstr "Gerir pastas"
+
+msgid "Folders organise workflows only. They never change triggers, execution or permissions."
+msgstr "As pastas apenas organizam fluxos de trabalho. Nunca alteram acionadores, execução ou permissões."
+
+msgid "Folder name"
+msgstr "Nome da pasta"
+
+msgid "Add folder"
+msgstr "Adicionar pasta"
+
+msgid "No folders yet. All existing workflows are Unfiled."
+msgstr "Ainda não existem pastas. Todos os fluxos existentes estão Não classificados."
+
+msgid "Rename folder"
+msgstr "Renomear pasta"
+
+msgid "Rename"
+msgstr "Renomear"
+
+msgid "Move workflows to Unfiled"
+msgstr "Mover os fluxos para Não classificados"
+
+msgid "Delete folder"
+msgstr "Eliminar pasta"
+
+msgid "Folder"
+msgstr "Pasta"
+
+msgid "All folders"
+msgstr "Todas as pastas"
+
+msgid "Unfiled"
+msgstr "Não classificados"
+
+msgid "Move workflow to folder"
+msgstr "Mover o fluxo de trabalho para a pasta"
+
+msgid "Move"
+msgstr "Mover"

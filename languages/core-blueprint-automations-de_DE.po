@@ -2397,3 +2397,72 @@ msgstr ""
 "Die gespeicherte Workflow-Definition wurde unverändert beibehalten. Stelle "
 "zuerst den relevanten Anbieter wieder her oder aktualisiere ihn; Automations "
 "bewertet den Workflow beim nächsten Laden der Seite automatisch erneut."
+
+msgid "Folder created."
+msgstr "Ordner erstellt."
+
+msgid "Folder renamed."
+msgstr "Ordner umbenannt."
+
+msgid "Folder deleted. Workflows were moved to Unfiled."
+msgstr "Ordner gelöscht. Workflows wurden nach Nicht zugeordnet verschoben."
+
+msgid "Workflow moved."
+msgstr "Workflow verschoben."
+
+msgid "Enter a valid folder name."
+msgstr "Gib einen gültigen Ordnernamen ein."
+
+msgid "Folder no longer exists."
+msgstr "Der Ordner existiert nicht mehr."
+
+msgid "Confirm the folder deletion first."
+msgstr "Bestätige zuerst das Löschen des Ordners."
+
+msgid "The workflow or folder was not found."
+msgstr "Workflow oder Ordner wurde nicht gefunden."
+
+msgid "Folder change could not be saved. No workflow execution settings were changed."
+msgstr "Die Ordneränderung konnte nicht gespeichert werden. Einstellungen zur Workflow-Ausführung wurden nicht geändert."
+
+msgid "Manage folders"
+msgstr "Ordner verwalten"
+
+msgid "Folders organise workflows only. They never change triggers, execution or permissions."
+msgstr "Ordner organisieren nur Workflows. Sie ändern niemals Trigger, Ausführung oder Berechtigungen."
+
+msgid "Folder name"
+msgstr "Ordnername"
+
+msgid "Add folder"
+msgstr "Ordner hinzufügen"
+
+msgid "No folders yet. All existing workflows are Unfiled."
+msgstr "Noch keine Ordner vorhanden. Alle bestehenden Workflows sind Nicht zugeordnet."
+
+msgid "Rename folder"
+msgstr "Ordner umbenennen"
+
+msgid "Rename"
+msgstr "Umbenennen"
+
+msgid "Move workflows to Unfiled"
+msgstr "Workflows nach Nicht zugeordnet verschieben"
+
+msgid "Delete folder"
+msgstr "Ordner löschen"
+
+msgid "Folder"
+msgstr "Ordner"
+
+msgid "All folders"
+msgstr "Alle Ordner"
+
+msgid "Unfiled"
+msgstr "Nicht zugeordnet"
+
+msgid "Move workflow to folder"
+msgstr "Workflow in Ordner verschieben"
+
+msgid "Move"
+msgstr "Verschieben"

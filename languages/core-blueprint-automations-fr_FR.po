@@ -2400,3 +2400,72 @@ msgstr ""
 "La définition du workflow enregistrée a été conservée sans modification. "
 "Restaurez ou mettez d’abord à jour le fournisseur concerné ; Automations "
 "réévaluera automatiquement le workflow au prochain chargement de la page."
+
+msgid "Folder created."
+msgstr "Dossier créé."
+
+msgid "Folder renamed."
+msgstr "Dossier renommé."
+
+msgid "Folder deleted. Workflows were moved to Unfiled."
+msgstr "Dossier supprimé. Les flux de travail ont été déplacés vers Non classés."
+
+msgid "Workflow moved."
+msgstr "Flux de travail déplacé."
+
+msgid "Enter a valid folder name."
+msgstr "Saisissez un nom de dossier valide."
+
+msgid "Folder no longer exists."
+msgstr "Le dossier n’existe plus."
+
+msgid "Confirm the folder deletion first."
+msgstr "Confirmez d’abord la suppression du dossier."
+
+msgid "The workflow or folder was not found."
+msgstr "Le flux de travail ou le dossier est introuvable."
+
+msgid "Folder change could not be saved. No workflow execution settings were changed."
+msgstr "La modification du dossier n’a pas pu être enregistrée. Aucun paramètre d’exécution des flux de travail n’a changé."
+
+msgid "Manage folders"
+msgstr "Gérer les dossiers"
+
+msgid "Folders organise workflows only. They never change triggers, execution or permissions."
+msgstr "Les dossiers servent uniquement à organiser les flux de travail. Ils ne modifient ni les déclencheurs, ni l’exécution, ni les autorisations."
+
+msgid "Folder name"
+msgstr "Nom du dossier"
+
+msgid "Add folder"
+msgstr "Ajouter un dossier"
+
+msgid "No folders yet. All existing workflows are Unfiled."
+msgstr "Aucun dossier pour le moment. Tous les flux de travail existants sont Non classés."
+
+msgid "Rename folder"
+msgstr "Renommer le dossier"
+
+msgid "Rename"
+msgstr "Renommer"
+
+msgid "Move workflows to Unfiled"
+msgstr "Déplacer les flux de travail vers Non classés"
+
+msgid "Delete folder"
+msgstr "Supprimer le dossier"
+
+msgid "Folder"
+msgstr "Dossier"
+
+msgid "All folders"
+msgstr "Tous les dossiers"
+
+msgid "Unfiled"
+msgstr "Non classés"
+
+msgid "Move workflow to folder"
+msgstr "Déplacer le flux de travail dans un dossier"
+
+msgid "Move"
+msgstr "Déplacer"

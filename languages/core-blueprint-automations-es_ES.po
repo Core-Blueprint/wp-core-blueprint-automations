@@ -2397,3 +2397,72 @@ msgstr ""
 "Restaura o actualiza primero el proveedor correspondiente; Automations "
 "volverá a evaluar automáticamente el flujo de trabajo en la siguiente carga "
 "de página."
+
+msgid "Folder created."
+msgstr "Carpeta creada."
+
+msgid "Folder renamed."
+msgstr "Carpeta renombrada."
+
+msgid "Folder deleted. Workflows were moved to Unfiled."
+msgstr "Carpeta eliminada. Los flujos se han movido a Sin clasificar."
+
+msgid "Workflow moved."
+msgstr "Flujo de trabajo movido."
+
+msgid "Enter a valid folder name."
+msgstr "Introduce un nombre de carpeta válido."
+
+msgid "Folder no longer exists."
+msgstr "La carpeta ya no existe."
+
+msgid "Confirm the folder deletion first."
+msgstr "Confirma primero la eliminación de la carpeta."
+
+msgid "The workflow or folder was not found."
+msgstr "No se encontró el flujo de trabajo o la carpeta."
+
+msgid "Folder change could not be saved. No workflow execution settings were changed."
+msgstr "No se pudo guardar el cambio de carpeta. No se modificó ningún ajuste de ejecución de los flujos."
+
+msgid "Manage folders"
+msgstr "Gestionar carpetas"
+
+msgid "Folders organise workflows only. They never change triggers, execution or permissions."
+msgstr "Las carpetas solo organizan los flujos. Nunca modifican disparadores, ejecuciones ni permisos."
+
+msgid "Folder name"
+msgstr "Nombre de carpeta"
+
+msgid "Add folder"
+msgstr "Añadir carpeta"
+
+msgid "No folders yet. All existing workflows are Unfiled."
+msgstr "Todavía no hay carpetas. Todos los flujos existentes están Sin clasificar."
+
+msgid "Rename folder"
+msgstr "Renombrar carpeta"
+
+msgid "Rename"
+msgstr "Renombrar"
+
+msgid "Move workflows to Unfiled"
+msgstr "Mover los flujos a Sin clasificar"
+
+msgid "Delete folder"
+msgstr "Eliminar carpeta"
+
+msgid "Folder"
+msgstr "Carpeta"
+
+msgid "All folders"
+msgstr "Todas las carpetas"
+
+msgid "Unfiled"
+msgstr "Sin clasificar"
+
+msgid "Move workflow to folder"
+msgstr "Mover flujo de trabajo a carpeta"
+
+msgid "Move"
+msgstr "Mover"
