@@ -79,7 +79,7 @@ final class AutomationsPage implements Page {
 			$view = isset( $_GET['view'] ) && is_scalar( $_GET['view'] )
 				? sanitize_key( wp_unslash( (string) $_GET['view'] ) )
 				: 'workflows';
-			if ( ! in_array( $view, [ 'workflows', 'templates', 'create' ], true ) ) {
+			if ( ! in_array( $view, [ 'workflows', 'templates', 'create', 'import' ], true ) ) {
 				$view = 'workflows';
 			}
 			$search = isset( $_GET['s'] ) && is_scalar( $_GET['s'] )
@@ -100,6 +100,10 @@ final class AutomationsPage implements Page {
 					'sort'      => $sort,
 					'listing'   => 'workflows' === $view ? $reader->index( $page, 25, $search, $status, $sort ) : null,
 					'templates' => 'templates' === $view ? WorkflowTemplateRegistry::all() : [],
+					'import_preview' => 'import' === $view && isset( $_GET['token'] ) && is_scalar( $_GET['token'] )
+						? WorkflowTransferController::preview( sanitize_text_field( wp_unslash( (string) $_GET['token'] ) ) ) : null,
+					'import_token' => 'import' === $view && isset( $_GET['token'] ) && is_scalar( $_GET['token'] )
+						? sanitize_text_field( wp_unslash( (string) $_GET['token'] ) ) : '',
 				]
 			);
 		} catch ( \Throwable $error ) {

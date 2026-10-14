@@ -8,6 +8,8 @@
  * @var string $sort
  * @var array{items:array,total:int,page:int,per_page:int,pages:int}|null $listing
  * @var \CB\Automations\Template\WorkflowTemplate[] $templates
+ * @var array{name:string,definition:\CB\Automations\Workflow\Definition,validation:\CB\Automations\Validation\ValidationResult}|null $import_preview
+ * @var string $import_token
  */
 defined( 'ABSPATH' ) || exit;
 
@@ -34,6 +36,12 @@ $notices = [
 	'invalid_name' => [ 'error', __( 'Enter an automation name between 1 and 191 characters.', 'core-blueprint-automations' ) ],
 	'storage_failed' => [ 'error', __( 'Workflow storage is unavailable.', 'core-blueprint-automations' ) ],
 	'failed' => [ 'error', __( 'The workflow could not be updated.', 'core-blueprint-automations' ) ],
+	'import_invalid_file' => [ 'error', __( 'Choose a JSON file smaller than 256 KB.', 'core-blueprint-automations' ) ],
+	'import_invalid' => [ 'error', __( 'Workflow JSON could not be decoded or is incompatible.', 'core-blueprint-automations' ) ],
+	'import_sensitive' => [ 'error', __( 'Import blocked: sensitive literal data must not be stored in workflow definitions.', 'core-blueprint-automations' ) ],
+	'import_expired' => [ 'error', __( 'Import preview expired. Upload the file again.', 'core-blueprint-automations' ) ],
+	'import_unavailable' => [ 'error', __( 'Import is unavailable. No automation was created.', 'core-blueprint-automations' ) ],
+	'export_unavailable' => [ 'error', __( 'This workflow cannot be exported safely.', 'core-blueprint-automations' ) ],
 ];
 ?>
 <div class="wrap cb-core-wrap cb-automations-admin cb-automations-index-page cb-automations-workspace">
@@ -51,7 +59,7 @@ $notices = [
 	<?php endif; ?>
 
 	<nav class="cb-automations-workspace__tabs" aria-label="<?php esc_attr_e( 'Automations workspace', 'core-blueprint-automations' ); ?>">
-		<?php foreach ( [ 'workflows' => __( 'Workflows', 'core-blueprint-automations' ), 'templates' => __( 'Templates', 'core-blueprint-automations' ), 'create' => __( 'New automation', 'core-blueprint-automations' ) ] as $key => $title ) : ?>
+		<?php foreach ( [ 'workflows' => __( 'Workflows', 'core-blueprint-automations' ), 'templates' => __( 'Templates', 'core-blueprint-automations' ), 'create' => __( 'New automation', 'core-blueprint-automations' ), 'import' => __( 'Import JSON', 'core-blueprint-automations' ) ] as $key => $title ) : ?>
 			<a class="<?php echo $view === $key ? 'is-current' : ''; ?>" <?php if ( $view === $key ) : ?>aria-current="page"<?php endif; ?> href="<?php echo esc_url( \CB\Automations\Admin\AutomationsPage::url( [ 'view' => $key ] ) ); ?>"><?php echo esc_html( $title ); ?></a>
 		<?php endforeach; ?>
 	</nav>
@@ -92,6 +100,42 @@ $notices = [
 							</form>
 						</article>
 					<?php endforeach; ?>
+				</div>
+			<?php endif; ?>
+		</section>
+	<?php elseif ( 'import' === $view ) : ?>
+		<section class="cb-core-panel cb-automations-workspace__panel">
+			<h2><?php esc_html_e( 'Import automation JSON', 'core-blueprint-automations' ); ?></h2>
+			<p class="description"><?php esc_html_e( 'Import an exported workflow or a standalone workflow definition. Nothing is enabled automatically. Execution authority must be assigned after import.', 'core-blueprint-automations' ); ?></p>
+			<?php if ( null === $import_preview ) : ?>
+				<form method="post" enctype="multipart/form-data" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="cb-automations-workspace__import-form">
+					<input type="hidden" name="action" value="cb_automations_import_preview" />
+					<?php wp_nonce_field( 'cb_automations_import_preview', '_cb_automations_nonce' ); ?>
+					<label for="cb-automations-import-file"><?php esc_html_e( 'Workflow JSON file', 'core-blueprint-automations' ); ?></label>
+					<input id="cb-automations-import-file" type="file" name="workflow_file" accept=".json,application/json" required />
+					<button type="submit" class="button button-primary"><?php esc_html_e( 'Validate and preview', 'core-blueprint-automations' ); ?></button>
+				</form>
+			<?php else : ?>
+				<div class="cb-automations-workspace__preview">
+					<h3><?php esc_html_e( 'Import preview', 'core-blueprint-automations' ); ?></h3>
+					<dl>
+						<dt><?php esc_html_e( 'Name', 'core-blueprint-automations' ); ?></dt><dd><?php echo esc_html( $import_preview['name'] ); ?></dd>
+						<dt><?php esc_html_e( 'Trigger', 'core-blueprint-automations' ); ?></dt><dd><?php $trigger = $import_preview['definition']->trigger(); echo null === $trigger ? '&mdash;' : esc_html( $trigger->capability()->id() ); ?></dd>
+						<dt><?php esc_html_e( 'Actions', 'core-blueprint-automations' ); ?></dt><dd><?php echo esc_html( (string) count( $import_preview['definition']->actions() ) ); ?></dd>
+						<dt><?php esc_html_e( 'Validation', 'core-blueprint-automations' ); ?></dt><dd><?php echo esc_html( $import_preview['validation']->is_valid() ? __( 'Ready to configure', 'core-blueprint-automations' ) : sprintf( __( '%d issues to resolve in Builder', 'core-blueprint-automations' ), count( $import_preview['validation']->issues() ) ) ); ?></dd>
+						<dt><?php esc_html_e( 'Activation', 'core-blueprint-automations' ); ?></dt><dd><?php esc_html_e( 'Disabled (always)', 'core-blueprint-automations' ); ?></dd>
+						<dt><?php esc_html_e( 'Execution principal', 'core-blueprint-automations' ); ?></dt><dd><?php esc_html_e( 'Not assigned', 'core-blueprint-automations' ); ?></dd>
+					</dl>
+					<p class="description"><?php esc_html_e( 'Review configuration literals before sharing or activating any imported workflow.', 'core-blueprint-automations' ); ?></p>
+					<div class="cb-automations-workspace__preview-actions">
+						<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+							<input type="hidden" name="action" value="cb_automations_import_confirm" />
+							<input type="hidden" name="token" value="<?php echo esc_attr( $import_token ); ?>" />
+							<?php wp_nonce_field( 'cb_automations_import_confirm', '_cb_automations_nonce' ); ?>
+							<button type="submit" class="button button-primary"><?php esc_html_e( 'Create disabled workflow', 'core-blueprint-automations' ); ?></button>
+						</form>
+						<a class="button" href="<?php echo esc_url( \CB\Automations\Admin\AutomationsPage::url( [ 'view' => 'import' ] ) ); ?>"><?php esc_html_e( 'Cancel', 'core-blueprint-automations' ); ?></a>
+					</div>
 				</div>
 			<?php endif; ?>
 		</section>
@@ -161,6 +205,12 @@ $notices = [
 											<input type="hidden" name="activation_state" value="<?php echo esc_attr( $target ); ?>" />
 											<input type="hidden" name="_cb_automations_nonce" value="<?php echo esc_attr( wp_create_nonce( \CB\Automations\Admin\WorkflowActivationController::nonce_action( $record->id() ) ) ); ?>" />
 											<button type="submit" class="button button-small"><?php echo esc_html( $enabled ? __( 'Disable', 'core-blueprint-automations' ) : __( 'Enable', 'core-blueprint-automations' ) ); ?></button>
+										</form>
+										<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+											<input type="hidden" name="action" value="cb_automations_export_workflow" />
+											<input type="hidden" name="workflow_id" value="<?php echo esc_attr( (string) $record->id() ); ?>" />
+											<?php wp_nonce_field( 'cb_automations_export_workflow_' . $record->id(), '_cb_automations_nonce' ); ?>
+											<button type="submit" class="button button-small"><?php esc_html_e( 'Export JSON', 'core-blueprint-automations' ); ?></button>
 										</form>
 									</div>
 								</td>

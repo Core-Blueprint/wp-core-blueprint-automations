@@ -354,3 +354,13 @@
  .cb-automations-workspace__filters { display: grid; grid-template-columns: 1fr; }
  .cb-automations-workspace__filters input[type=search],.cb-automations-workspace__filters select { width: 100%; max-width: 100%; }
 }
+
+.cb-automations-workspace__import-form { display: grid; align-items: start; gap: var(--cb-space-3); max-width: 520px; margin-top: var(--cb-space-5); }
+.cb-automations-workspace__import-form input[type=file] { width: 100%; max-width: 100%; }
+.cb-automations-workspace__import-form button { justify-self: start; }
+.cb-automations-workspace__preview { padding: var(--cb-space-4); border: 1px solid var(--cb-border); border-radius: var(--cb-radius-md); margin-top: var(--cb-space-4); }
+.cb-automations-workspace__preview dl { display: grid; grid-template-columns: minmax(150px, 200px) 1fr; gap: var(--cb-space-3); }
+.cb-automations-workspace__preview dt { color: var(--cb-text-muted); }
+.cb-automations-workspace__preview dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.cb-automations-workspace__preview-actions { display: flex; flex-wrap: wrap; gap: var(--cb-space-2); margin-top: var(--cb-space-4); }
+@media (max-width:782px){.cb-automations-workspace__preview dl{grid-template-columns:1fr}.cb-automations-workspace__preview dt{margin-bottom:-.5rem}}
