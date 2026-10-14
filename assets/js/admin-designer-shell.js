@@ -15,6 +15,7 @@ if (root) {
 			try { return JSON.stringify(JSON.parse(String(value || '{}'))); }
 			catch { return String(value || ''); }
 		};
+		let allowConfirmedExit = false;
 		let baseline = {
 			definition: normalized(definition?.value),
 			name: String(name?.value || ''),
@@ -29,7 +30,7 @@ if (root) {
 		);
 
 		window.addEventListener('beforeunload', (event) => {
-			if (!isDirty()) return;
+			if (allowConfirmedExit || !isDirty()) return;
 			event.preventDefault();
 			event.returnValue = '';
 		});
@@ -168,11 +169,14 @@ if (root) {
 				reject(error);
 			}
 		});
-		const chooseSwitchAction = async () => {
+		const chooseSwitchAction = async (purpose = 'switch') => {
+			const exiting = purpose === 'exit';
 			const labels = window.cbAutomationsInspectorStrings || {};
 			const body = document.createElement('div');
 			const description = document.createElement('p');
-			description.textContent = String(labels.unsavedChanges || 'This workflow has unsaved changes. Save or discard them before switching.');
+			description.textContent = String(exiting
+				? (labels.closeUnsavedDescription || 'This workflow has unsaved changes. Save or discard them before closing the Builder.')
+				: (labels.unsavedChanges || 'This workflow has unsaved changes. Save or discard them before switching.'));
 			body.append(description);
 			const options = document.createElement('fieldset');
 			options.className = 'cb-automations-switch-options';
@@ -208,7 +212,7 @@ if (root) {
 			const accepted = await showModal({
 				title: String(labels.unsavedTitle || 'Unsaved changes'),
 				body,
-				confirmLabel: String(labels.switchWorkflow || 'Switch workflow'),
+				confirmLabel: String(exiting ? (labels.closeBuilder || 'Close Builder') : (labels.switchWorkflow || 'Switch workflow')),
 				cancelLabel: String(labels.cancel || 'Cancel'),
 				onConfirm: async () => {
 					const selected = radios.find((radio) => radio.checked)?.value;
@@ -232,6 +236,74 @@ if (root) {
 			});
 			return accepted ? action : null;
 		};
+
+		// Direct Designer Mode close belongs to Base. Intercept the close
+		// intent before Base toggles fullscreen, then replay its own control
+		// only after the user approves. Never navigate around Base's lifecycle.
+		const chooseExitAction = async () => {
+			if (isDirty()) return chooseSwitchAction('exit');
+			const labels = window.cbAutomationsInspectorStrings || {};
+			const approved = await showModal({
+				title: String(labels.closeTitle || 'Close Automation Builder?'),
+				body: String(labels.closeDescription || 'Return to Automations?'),
+				confirmLabel: String(labels.closeBuilder || 'Close Builder'),
+				cancelLabel: String(labels.cancel || 'Cancel'),
+			});
+			return approved ? 'close' : null;
+		};
+		let exitPending = false;
+		let approvedCloseClick = false;
+		const requestExit = () => {
+			if (exitPending || allowConfirmedExit) return;
+			exitPending = true;
+			Promise.resolve().then(chooseExitAction).then((action) => {
+				if (!action) return;
+				const close = root.querySelector('[data-cb-design-shell-close]');
+				const fullscreen = root.querySelector('[data-cb-design-shell-fullscreen]');
+				if (!(close instanceof HTMLButtonElement) || !(fullscreen instanceof HTMLButtonElement)
+					|| fullscreen.getAttribute('aria-pressed') !== 'true') {
+					throw contextError('contextUnavailable', 'The Designer close control is unavailable.');
+				}
+				// Discard was explicitly approved. Otherwise beforeunload would
+				// produce a second browser warning after the modal confirmation.
+				allowConfirmedExit = true;
+				approvedCloseClick = true;
+				try {
+					close.click();
+				} finally {
+					approvedCloseClick = false;
+					if (fullscreen.getAttribute('aria-pressed') === 'true') allowConfirmedExit = false;
+				}
+			}).catch((error) => {
+				const status = root.querySelector('[data-cb-design-shell-status]');
+				if (status) status.textContent = error instanceof Error ? error.message : String(error);
+			}).finally(() => {
+				exitPending = false;
+			});
+		};
+		launchRoot?.addEventListener('click', (event) => {
+			const close = event.target?.closest?.('[data-cb-design-shell-close]');
+			if (!close || !root.contains(close) || approvedCloseClick) return;
+			event.preventDefault();
+			event.stopImmediatePropagation();
+			requestExit();
+		}, true);
+		window.addEventListener('keydown', (event) => {
+			if (event.key !== 'Escape' || event.defaultPrevented
+				|| !root.classList.contains('is-fullscreen')) return;
+			const modal = document.querySelector('dialog.cb-core-modal[open]');
+			if (modal) {
+				// Base fullscreen also listens for Escape. Let the open dialog
+				// handle dismissal instead of accidentally exiting the Builder.
+				event.preventDefault();
+				event.stopImmediatePropagation();
+				modal.dispatchEvent(new Event('cancel', { cancelable: true }));
+				return;
+			}
+			event.preventDefault();
+			event.stopImmediatePropagation();
+			requestExit();
+		}, true);
 
 		launchRoot?.addEventListener('cb:design-shell:contextrequest', (event) => {
 			if (event.detail?.control !== workflowSwitcher) return;

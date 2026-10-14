@@ -2289,3 +2289,19 @@ msgstr "Cambiar de flujo de trabajo"
 #: src/Admin/DesignerAssets.php
 msgid "Cancel"
 msgstr "Cancelar"
+
+#: src/Admin/DesignerAssets.php
+msgid "Close Automation Builder?"
+msgstr "¿Cerrar Automation Builder?"
+
+#: src/Admin/DesignerAssets.php
+msgid "Return to Automations?"
+msgstr "¿Volver a Automations?"
+
+#: src/Admin/DesignerAssets.php
+msgid "This workflow has unsaved changes. Save or discard them before closing the Builder."
+msgstr "Este flujo de trabajo tiene cambios sin guardar. Guárdalos o descártalos antes de cerrar el Builder."
+
+#: src/Admin/DesignerAssets.php
+msgid "Close Builder"
+msgstr "Cerrar Builder"

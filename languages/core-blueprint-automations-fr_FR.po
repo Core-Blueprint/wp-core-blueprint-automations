@@ -2284,3 +2284,19 @@ msgstr "Changer de workflow"
 #: src/Admin/DesignerAssets.php
 msgid "Cancel"
 msgstr "Annuler"
+
+#: src/Admin/DesignerAssets.php
+msgid "Close Automation Builder?"
+msgstr "Fermer Automation Builder ?"
+
+#: src/Admin/DesignerAssets.php
+msgid "Return to Automations?"
+msgstr "Revenir à Automations ?"
+
+#: src/Admin/DesignerAssets.php
+msgid "This workflow has unsaved changes. Save or discard them before closing the Builder."
+msgstr "Ce workflow comporte des modifications non enregistrées. Enregistrez-les ou ignorez-les avant de fermer le Builder."
+
+#: src/Admin/DesignerAssets.php
+msgid "Close Builder"
+msgstr "Fermer le Builder"

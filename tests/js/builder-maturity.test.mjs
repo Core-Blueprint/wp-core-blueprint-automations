@@ -196,3 +196,41 @@ test('Context switch uses the live Designer root and dispatches both lifecycle e
 	assert.equal(updated.href, url.href);
 	assert.ok(updated.definition && updated.history, 'editor and history were refreshed');
 });
+
+test('Designer close confirmation is required with or without changes', async () => {
+	const source = await read('assets/js/admin-designer-shell.js');
+	const block = source.match(/const chooseExitAction = async \(\) => \{[\s\S]*?\n\t\t\};/);
+	assert.ok(block, 'exit choice helper is present');
+	const { runInNewContext } = await import('node:vm');
+	let dirty = false;
+	let modalResult = false;
+	let opened = 0;
+	let exitPurpose = null;
+	const select = runInNewContext(block[0] + '\nchooseExitAction;', {
+		isDirty: () => dirty,
+		showModal: async ({ title, confirmLabel, cancelLabel }) => {
+			opened += 1;
+			assert.equal(title, 'Close Automation Builder?');
+			assert.equal(confirmLabel, 'Close Builder');
+			assert.equal(cancelLabel, 'Cancel');
+			return modalResult;
+		},
+		chooseSwitchAction: async (purpose) => {
+			exitPurpose = purpose;
+			return 'discard';
+		},
+		window: { cbAutomationsInspectorStrings: {} },
+	});
+	assert.equal(await select(), null, 'cancel keeps a clean workflow open');
+	modalResult = true;
+	assert.equal(await select(), 'close', 'clean close also requires confirmation');
+	dirty = true;
+	assert.equal(await select(), 'discard', 'dirty close delegates to save/discard choices');
+	assert.equal(exitPurpose, 'exit');
+	assert.equal(opened, 2, 'no double modal when changes exist');
+	assert.match(source, /launchRoot\?\.addEventListener\('click',[\s\S]*?data-cb-design-shell-close/);
+	assert.match(source, /window\.addEventListener\('keydown',[\s\S]*?requestExit\(\)/);
+	assert.match(source, /if \(allowConfirmedExit \|\| !isDirty\(\)\) return;/);
+	assert.match(source, /allowConfirmedExit = true;/);
+	assert.match(source, /approvedCloseClick = true;/);
+});

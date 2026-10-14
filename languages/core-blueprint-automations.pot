@@ -2044,3 +2044,19 @@ msgstr ""
 #: src/Admin/DesignerAssets.php
 msgid "Cancel"
 msgstr ""
+
+#: src/Admin/DesignerAssets.php
+msgid "Close Automation Builder?"
+msgstr ""
+
+#: src/Admin/DesignerAssets.php
+msgid "Return to Automations?"
+msgstr ""
+
+#: src/Admin/DesignerAssets.php
+msgid "This workflow has unsaved changes. Save or discard them before closing the Builder."
+msgstr ""
+
+#: src/Admin/DesignerAssets.php
+msgid "Close Builder"
+msgstr ""
