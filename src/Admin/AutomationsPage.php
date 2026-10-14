@@ -47,6 +47,13 @@ final class AutomationsPage implements Page {
 		}
 
 		try {
+			foreach ( [ 'template_manage' => true, 'template_preview' => false ] as $parameter => $manage ) {
+				if ( isset( $_GET[ $parameter ] ) && is_scalar( $_GET[ $parameter ] ) ) {
+					$identifier = sanitize_text_field( wp_unslash( (string) $_GET[ $parameter ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only navigation.
+					TemplateManagementPage::render( $identifier, $manage );
+					return;
+				}
+			}
 			$workflow_id = self::requested_workflow_id();
 			$reader = new WorkflowAdminReadService();
 			if ( $workflow_id > 0 ) {

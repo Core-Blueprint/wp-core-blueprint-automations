@@ -60,6 +60,13 @@ $notices = [
 			<span class="cb-automations-panel-eyebrow"><?php esc_html_e( 'Starter workflows', 'core-blueprint-automations' ); ?></span>
 			<h2><?php esc_html_e( 'Start from a template', 'core-blueprint-automations' ); ?></h2>
 			<p class="description"><?php esc_html_e( 'Create a normal editable workflow from a provider template. The new workflow is yours and is not kept linked to the template.', 'core-blueprint-automations' ); ?></p>
+			<?php $template_scope = \CB\Automations\Template\TemplateLibraryBridge::scope_token(); ?>
+			<?php if ( null !== $template_scope ) : ?>
+				<p><button type="button" class="button button-primary" data-cb-automations-browse-templates
+					data-cb-template-scope="<?php echo esc_attr( $template_scope ); ?>"
+					data-cb-template-nonce="<?php echo esc_attr( wp_create_nonce( 'cb_automations_create_from_template' ) ); ?>"
+					data-cb-template-action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>"><?php esc_html_e( 'Browse templates', 'core-blueprint-automations' ); ?></button></p>
+			<?php endif; ?>
 			<div class="cb-automations-template-grid">
 				<?php foreach ( $templates as $workflow_template ) : ?>
 					<article class="cb-automations-template-card">

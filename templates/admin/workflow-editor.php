@@ -106,6 +106,31 @@ if ( ! is_string( $definition_json ) ) {
 		<div class="notice notice-<?php echo esc_attr( $notices[ $notice ][0] ); ?> is-dismissible"><p><?php echo esc_html( $notices[ $notice ][1] ); ?></p></div>
 	<?php endif; ?>
 
+	<?php $template_scope = \CB\Automations\Template\TemplateLibraryBridge::scope_token(); ?>
+	<section class="cb-core-panel cb-automations-template-tools" aria-label="<?php echo esc_attr__( 'Start from a template', 'core-blueprint-automations' ); ?>">
+		<?php if ( null !== $template_scope ) : ?>
+			<button type="button" class="button" data-cb-automations-browse-templates
+				data-cb-template-scope="<?php echo esc_attr( $template_scope ); ?>"
+				data-cb-template-nonce="<?php echo esc_attr( wp_create_nonce( 'cb_automations_create_from_template' ) ); ?>"
+				data-cb-template-action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>"><?php esc_html_e( 'Browse templates', 'core-blueprint-automations' ); ?></button>
+		<?php endif; ?>
+		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="cb-automations-template-save-form">
+			<input type="hidden" name="action" value="cb_automations_template_save">
+			<input type="hidden" name="workflow_id" value="<?php echo esc_attr( (string) $record->id() ); ?>">
+			<?php wp_nonce_field( \CB\Automations\Admin\TemplateManagementController::nonce( 'save', $record->id() ), '_cb_automations_nonce' ); ?>
+			<label><?php esc_html_e( 'Automation name', 'core-blueprint-automations' ); ?>
+				<input type="text" name="template_name" maxlength="191" value="<?php echo esc_attr( $record->name() ); ?>" required>
+			</label>
+			<label><?php esc_html_e( 'Templates', 'core-blueprint-automations' ); ?>
+				<select name="template_scope">
+					<option value="personal"><?php esc_html_e( 'Personal', 'core-blueprint-automations' ); ?></option>
+					<option value="site"><?php esc_html_e( 'Site', 'core-blueprint-automations' ); ?></option>
+				</select>
+			</label>
+			<button type="submit" class="button button-secondary"><?php esc_html_e( 'Save as template', 'core-blueprint-automations' ); ?></button>
+		</form>
+	</section>
+
 	<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-cb-automations-editor-form>
 		<input type="hidden" name="action" value="cb_automations_save_workflow" />
 		<input type="hidden" name="workflow_id" value="<?php echo esc_attr( (string) $record->id() ); ?>" />

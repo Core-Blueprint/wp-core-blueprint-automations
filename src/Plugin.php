@@ -17,6 +17,9 @@ use CB\Automations\Runtime\RuntimeWorker;
 use CB\Automations\Runtime\TriggerIntake;
 use CB\Automations\Support\Requirements;
 use CB\Automations\Template\StarterTemplates;
+use CB\Automations\Template\StoredTemplateRepository;
+use CB\Automations\Template\TemplateLibraryBridge;
+use CB\Automations\Admin\TemplateManagementController;
 defined( 'ABSPATH' ) || exit;
 
 final class Plugin {
@@ -41,8 +44,10 @@ final class Plugin {
 		}
 
 		self::$runtime_booted = true;
+		StoredTemplateRepository::register();
 		WordPressProvider::init();
 		StarterTemplates::init();
+		TemplateLibraryBridge::init();
 		RuntimeWorker::init();
 		TriggerIntake::init();
 
@@ -55,6 +60,7 @@ final class Plugin {
 		RecoveryCapability::init();
 		OperatorRecoveryController::init();
 		WorkflowController::init();
+		TemplateManagementController::init();
 		WorkflowActivationController::init();
 		AdminAssets::init();
 		RunsAssets::init();
