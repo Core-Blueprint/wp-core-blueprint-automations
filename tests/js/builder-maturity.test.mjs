@@ -233,4 +233,5 @@ test('Designer close confirmation is required with or without changes', async ()
 	assert.match(source, /if \(allowConfirmedExit \|\| !isDirty\(\)\) return;/);
 	assert.match(source, /allowConfirmedExit = true;/);
 	assert.match(source, /approvedCloseClick = true;/);
+	assert.match(source, /if \(root\.hasAttribute\('aria-busy'\)\) \{[\s\S]*?saveInProgress/);
 });

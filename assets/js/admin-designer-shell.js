@@ -255,6 +255,11 @@ if (root) {
 		let approvedCloseClick = false;
 		const requestExit = () => {
 			if (exitPending || allowConfirmedExit) return;
+			if (root.hasAttribute('aria-busy')) {
+				const status = root.querySelector('[data-cb-design-shell-status]');
+				if (status) status.textContent = String(window.cbAutomationsInspectorStrings?.saveInProgress || 'Wait for the current save to finish.');
+				return;
+			}
 			exitPending = true;
 			Promise.resolve().then(chooseExitAction).then((action) => {
 				if (!action) return;
