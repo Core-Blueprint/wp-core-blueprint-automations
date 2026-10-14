@@ -354,7 +354,18 @@ final class WordPressAction {
 		if ( '' === $to || ! is_email( $to ) || strlen( $to ) > 254 || strlen( $subject ) > 998 || strlen( $message ) > 100000 ) {
 			return self::invalid( 'mail' );
 		}
-		return [ 'sent' => (bool) wp_mail( $to, $subject, $message ) ];
+		$sent = wp_mail( $to, $subject, $message );
+		if ( ! $sent ) {
+			// A false transport result is never a successful Run. Because a mail
+			// adapter may have accepted the message before reporting failure,
+			// return WP_Error to preserve the runtime's indeterminate/no-auto-retry
+			// policy for potentially non-idempotent actions.
+			return new \WP_Error(
+				'cb_automations_wordpress_mail_send_failed',
+				'WordPress could not confirm that the email was sent.'
+			);
+		}
+		return [ 'sent' => true ];
 	}
 
 	private static function can_manage_taxonomy( string $taxonomy, InvocationContext $context ): bool {
