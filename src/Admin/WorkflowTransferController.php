@@ -16,6 +16,7 @@ defined( 'ABSPATH' ) || exit;
  */
 final class WorkflowTransferController {
 	private const TRANSIENT_PREFIX = 'cb_automations_import_';
+	private const CLAIM_PREFIX = 'cb_automations_import_claim_';
 	private const TTL = 600;
 	private static bool $initialized = false;
 
@@ -25,7 +26,9 @@ final class WorkflowTransferController {
 		add_action( 'admin_post_cb_automations_import_preview', [ self::class, 'upload' ] );
 		add_action( 'admin_post_cb_automations_import_confirm', [ self::class, 'confirm' ] );
 		add_action( 'admin_post_cb_automations_export_workflow', [ self::class, 'export' ] );
-		add_action( 'cb_automations_import_claim_expire', [ self::class, 'expire_claim' ], 10, 1 );
+		// Reuse WordPress's existing scheduled maintenance event. Do not schedule
+		// an additional one-shot event outside the runtime WorkerWakeup boundary.
+		add_action( 'wp_scheduled_delete', [ self::class, 'cleanup_expired_claims' ] );
 	}
 
 	public static function upload(): void {
@@ -94,10 +97,9 @@ final class WorkflowTransferController {
 		$preview = self::preview( $token );
 		if ( null === $preview ) { self::redirect( 'import_expired' ); }
 		// Claim atomically across concurrent requests before creating a record.
-		if ( ! add_option( 'cb_automations_import_claim_' . $token, get_current_user_id(), '', false ) ) {
+		if ( ! add_option( self::CLAIM_PREFIX . $token, time() + self::TTL * 2, '', false ) ) {
 			self::redirect( 'import_expired' );
 		}
-		wp_schedule_single_event( time() + self::TTL * 2, 'cb_automations_import_claim_expire', [ $token ] );
 		// Invalidate the preview before creation; replaying this token must not
 		// create another workflow. WorkflowService::create defaults to Disabled
 		// and never inherits the exporting site's execution authority.
@@ -111,10 +113,35 @@ final class WorkflowTransferController {
 		}
 	}
 
-	/** Delete only the one-time claim; the preview expires independently. */
-	public static function expire_claim( string $token ): void {
-		if ( self::valid_token( $token ) ) {
-			delete_option( 'cb_automations_import_claim_' . $token );
+	/**
+	 * Prune expired single-use import claims during WordPress's ordinary
+	 * scheduled maintenance. This deliberately does not create a Cron event.
+	 * Claims are non-autoloaded and contain only an expiry timestamp.
+	 */
+	public static function cleanup_expired_claims(): void {
+		global $wpdb;
+		$now = time();
+		$names = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT option_name FROM {$wpdb->options}
+				 WHERE option_name LIKE %s AND CAST(option_value AS UNSIGNED) <= %d
+				 ORDER BY option_name ASC LIMIT 200",
+				$wpdb->esc_like( self::CLAIM_PREFIX ) . '%',
+				$now
+			)
+		);
+		if ( ! is_array( $names ) ) {
+			return;
+		}
+		foreach ( $names as $name ) {
+			if ( ! is_string( $name )
+				|| 1 !== preg_match( '/^cb_automations_import_claim_[a-f0-9]{32}$/D', $name ) ) {
+				continue;
+			}
+			$expiry = get_option( $name, false );
+			if ( false !== $expiry && ( ! is_numeric( $expiry ) || (int) $expiry <= $now ) ) {
+				delete_option( $name );
+			}
 		}
 	}
 
