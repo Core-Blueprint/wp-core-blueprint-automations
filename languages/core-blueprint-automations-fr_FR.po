@@ -5,8 +5,8 @@ msgstr ""
 "Project-Id-Version: Core Blueprint Automations 1.0.0-rc1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wp-core-blueprint-"
 "automations\n"
-"POT-Creation-Date: 2026-10-04 10:09+0000\n"
-"PO-Revision-Date: 2026-10-04 10:09+0000\n"
+"POT-Creation-Date: 2026-10-14 18:46+0000\n"
+"PO-Revision-Date: 2026-10-14 18:46+0000\n"
 "Last-Translator: Core Blueprint\n"
 "Language-Team: fr_FR\n"
 "Language: fr_FR\n"
@@ -14,7 +14,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"Generated-By: Core Blueprint i18n tooling 1.1.0\n"
+"Generated-By: Core Blueprint i18n tooling 1.1.1\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: core-blueprint-automations\n"
 
@@ -105,8 +105,7 @@ msgstr "ID de condition"
 msgid "Outputs"
 msgstr "Sorties"
 
-#: src/Admin/AdminAssets.php:89 src/Admin/DesignerAssets.php:67
-#: templates/admin/automations.php:157
+#: src/Admin/AdminAssets.php:89 src/Admin/DesignerAssets.php:102
 msgid "Condition"
 msgstr "Condition"
 
@@ -153,7 +152,7 @@ msgid "Choose trigger"
 msgstr "Choisir un déclencheur"
 
 #: src/Admin/AdminAssets.php:107 templates/admin/workflow-editor.php:55
-#: templates/admin/workflow-editor.php:178
+#: templates/admin/workflow-editor.php:174
 msgid "Add action"
 msgstr "Ajouter une action"
 
@@ -185,7 +184,7 @@ msgstr "Vérifier la condition"
 msgid "Review issue"
 msgstr "Vérifier le problème"
 
-#: src/Admin/AdminAssets.php:115
+#: src/Admin/AdminAssets.php:115 src/Admin/DesignerAssets.php:94
 msgid "Technical details"
 msgstr "Détails techniques"
 
@@ -199,103 +198,126 @@ msgstr ""
 "Modifications effectuées. Enregistrez l’automatisation pour revérifier "
 "l’état du workflow."
 
-#: src/Admin/AdminAssets.php:126
+#: src/Admin/AdminAssets.php:118 src/Admin/DesignerAssets.php:120
+#: src/Support/Requirements.php:171 templates/admin/automations.php:197
+#: templates/admin/workflow-editor.php:219
+msgid "Ready"
+msgstr "Prêt"
+
+#: src/Admin/AdminAssets.php:119 src/Admin/DesignerAssets.php:121
+#: templates/admin/workflow-editor.php:219
+msgid "Needs attention"
+msgstr "Nécessite une attention"
+
+#: src/Admin/AdminAssets.php:120 src/Admin/DesignerAssets.php:122
+#: templates/admin/workflow-editor.php:221
+msgid "The current definition is valid against the live capability catalog."
+msgstr ""
+"La définition actuelle est valide par rapport au catalogue de capacités en "
+"direct."
+
+#: src/Admin/AdminAssets.php:121 src/Admin/DesignerAssets.php:123
+#: templates/admin/workflow-editor.php:223
+msgid "Resolve these items before the automation can be enabled."
+msgstr "Résolvez ces éléments avant d’activer l’automatisation."
+
+#: src/Admin/AdminAssets.php:130
 msgid "Only continue if"
 msgstr "Continuer uniquement si"
 
-#: src/Admin/AdminAssets.php:127
+#: src/Admin/AdminAssets.php:131
 msgid "Rule preview"
 msgstr "Aperçu de la règle"
 
-#: src/Admin/AdminAssets.php:128 templates/admin/workflow-editor.php:67
+#: src/Admin/AdminAssets.php:132 templates/admin/workflow-editor.php:67
 msgid "Value"
 msgstr "Valeur"
 
-#: src/Admin/AdminAssets.php:129
+#: src/Admin/AdminAssets.php:133
 msgid "Rule"
 msgstr "Règle"
 
-#: src/Admin/AdminAssets.php:130 templates/admin/workflow-editor.php:69
+#: src/Admin/AdminAssets.php:134 templates/admin/workflow-editor.php:69
 msgid "Compare with"
 msgstr "Comparer avec"
 
-#: src/Admin/AdminAssets.php:131
+#: src/Admin/AdminAssets.php:135
 msgid "Choose a value or workflow data…"
 msgstr "Choisir une valeur ou des données de workflow…"
 
-#: src/Admin/AdminAssets.php:132
+#: src/Admin/AdminAssets.php:136
 msgid "Enter a value"
 msgstr "Saisir une valeur"
 
-#: src/Admin/AdminAssets.php:133
+#: src/Admin/AdminAssets.php:137
 msgid "Workflow data"
 msgstr "Données du workflow"
 
-#: src/Admin/AdminAssets.php:134
+#: src/Admin/AdminAssets.php:138
 msgid "Unavailable data"
 msgstr "Données indisponibles"
 
-#: src/Admin/AdminAssets.php:135
+#: src/Admin/AdminAssets.php:139
 msgid "Text"
 msgstr "Texte"
 
-#: src/Admin/AdminAssets.php:136
+#: src/Admin/AdminAssets.php:140
 msgid "Number"
 msgstr "Nombre"
 
-#: src/Admin/AdminAssets.php:137
+#: src/Admin/AdminAssets.php:141
 msgid "True / false"
 msgstr "Vrai / faux"
 
-#: src/Admin/AdminAssets.php:138
+#: src/Admin/AdminAssets.php:142
 msgid "List"
 msgstr "Liste"
 
-#: src/Admin/AdminAssets.php:139
+#: src/Admin/AdminAssets.php:143
 msgid "is"
 msgstr "est"
 
-#: src/Admin/AdminAssets.php:140
+#: src/Admin/AdminAssets.php:144
 msgid "is not"
 msgstr "n’est pas"
 
-#: src/Admin/AdminAssets.php:141
+#: src/Admin/AdminAssets.php:145
 msgid "contains"
 msgstr "contient"
 
-#: src/Admin/AdminAssets.php:142
+#: src/Admin/AdminAssets.php:146
 msgid "does not contain"
 msgstr "ne contient pas"
 
-#: src/Admin/AdminAssets.php:143
+#: src/Admin/AdminAssets.php:147
 msgid "is greater than"
 msgstr "est supérieur à"
 
-#: src/Admin/AdminAssets.php:144
+#: src/Admin/AdminAssets.php:148
 msgid "is at least"
 msgstr "est au moins"
 
-#: src/Admin/AdminAssets.php:145
+#: src/Admin/AdminAssets.php:149
 msgid "is less than"
 msgstr "est inférieur à"
 
-#: src/Admin/AdminAssets.php:146
+#: src/Admin/AdminAssets.php:150
 msgid "is at most"
 msgstr "est au plus"
 
-#: src/Admin/AdminAssets.php:147
+#: src/Admin/AdminAssets.php:151
 msgid "is empty"
 msgstr "est vide"
 
-#: src/Admin/AdminAssets.php:148
+#: src/Admin/AdminAssets.php:152
 msgid "is not empty"
 msgstr "n’est pas vide"
 
-#: src/Admin/AdminAssets.php:149
+#: src/Admin/AdminAssets.php:153
 msgid "has no items"
 msgstr "ne contient aucun élément"
 
-#: src/Admin/AdminAssets.php:150
+#: src/Admin/AdminAssets.php:154
 msgid "has items"
 msgstr "contient des éléments"
 
@@ -335,13 +357,14 @@ msgstr ""
 "L’historique des exécutions d’automatisation est temporairement "
 "indisponible. Aucune donnée de workflow ou d’exécution n’a été modifiée."
 
-#: src/Admin/AutomationsPage.php:25 src/Admin/AutomationsPage.php:216
+#: src/Admin/AutomationsPage.php:25 src/Admin/AutomationsPage.php:240
 #: src/Integration/Suite.php:56 src/Integration/Suite.php:57
-#: templates/admin/automations.php:38
+#: templates/admin/automations.php:51
 msgid "Automations"
 msgstr "Automations"
 
-#: src/Admin/AutomationsPage.php:29 templates/admin/automations.php:88
+#: src/Admin/AutomationsPage.php:29 templates/admin/automations.php:62
+#: templates/admin/automations.php:146
 msgid "Workflows"
 msgstr "Workflows"
 
@@ -349,86 +372,86 @@ msgstr "Workflows"
 msgid "You do not have permission to access Automations."
 msgstr "Vous n’avez pas l’autorisation d’accéder à Automations."
 
-#: src/Admin/AutomationsPage.php:122 src/Admin/DesignerAssets.php:92
+#: src/Admin/AutomationsPage.php:146 src/Admin/DesignerAssets.php:127
 msgid "Valid"
 msgstr "Valide"
 
-#: src/Admin/AutomationsPage.php:123 src/Admin/DesignerAssets.php:93
+#: src/Admin/AutomationsPage.php:147 src/Admin/DesignerAssets.php:128
 #: templates/admin/workflow-review.php:31
 msgid "Needs review"
 msgstr "À vérifier"
 
-#: src/Admin/AutomationsPage.php:124 src/Admin/DesignerAssets.php:94
+#: src/Admin/AutomationsPage.php:148 src/Admin/DesignerAssets.php:129
 msgid "Dependency unavailable"
 msgstr "Dépendance indisponible"
 
-#: src/Admin/AutomationsPage.php:125 src/Admin/DesignerAssets.php:95
+#: src/Admin/AutomationsPage.php:149 src/Admin/DesignerAssets.php:130
 msgid "Invalid"
 msgstr "Invalide"
 
-#: src/Admin/AutomationsPage.php:133 src/Admin/DesignerAssets.php:90
-#: templates/admin/automations.php:107 templates/admin/automations.php:130
-#: templates/admin/workflow-editor.php:210
+#: src/Admin/AutomationsPage.php:157 src/Admin/DesignerAssets.php:125
+#: templates/admin/automations.php:156 templates/admin/automations.php:196
+#: templates/admin/workflow-editor.php:205
 msgid "Enabled"
 msgstr "Activé"
 
-#: src/Admin/AutomationsPage.php:134 src/Admin/DesignerAssets.php:91
-#: templates/admin/automations.php:107 templates/admin/automations.php:135
-#: templates/admin/workflow-editor.php:209
+#: src/Admin/AutomationsPage.php:158 src/Admin/DesignerAssets.php:126
+#: templates/admin/automations.php:156 templates/admin/automations.php:196
+#: templates/admin/workflow-editor.php:204
 msgid "Disabled"
 msgstr "Désactivé"
 
-#: src/Admin/AutomationsPage.php:153
+#: src/Admin/AutomationsPage.php:177
 msgid "Queued"
 msgstr "En file d’attente"
 
-#: src/Admin/AutomationsPage.php:154 src/Admin/AutomationsPage.php:175
+#: src/Admin/AutomationsPage.php:178 src/Admin/AutomationsPage.php:199
 msgid "Running"
 msgstr "En cours"
 
-#: src/Admin/AutomationsPage.php:155
+#: src/Admin/AutomationsPage.php:179
 msgid "Waiting to retry"
 msgstr "En attente d’une nouvelle tentative"
 
-#: src/Admin/AutomationsPage.php:156 src/Admin/AutomationsPage.php:179
+#: src/Admin/AutomationsPage.php:180 src/Admin/AutomationsPage.php:203
 msgid "Blocked"
 msgstr "Bloqué"
 
-#: src/Admin/AutomationsPage.php:157 src/Admin/AutomationsPage.php:176
+#: src/Admin/AutomationsPage.php:181 src/Admin/AutomationsPage.php:200
 msgid "Succeeded"
 msgstr "Réussi"
 
-#: src/Admin/AutomationsPage.php:158 src/Admin/AutomationsPage.php:177
+#: src/Admin/AutomationsPage.php:182 src/Admin/AutomationsPage.php:201
 msgid "Skipped"
 msgstr "Ignoré"
 
-#: src/Admin/AutomationsPage.php:159 src/Admin/AutomationsPage.php:178
+#: src/Admin/AutomationsPage.php:183 src/Admin/AutomationsPage.php:202
 msgid "Failed"
 msgstr "Échoué"
 
-#: src/Admin/AutomationsPage.php:160 src/Admin/AutomationsPage.php:180
+#: src/Admin/AutomationsPage.php:184 src/Admin/AutomationsPage.php:204
 msgid "Cancelled"
 msgstr "Annulé"
 
-#: src/Admin/AutomationsPage.php:161 src/Admin/AutomationsPage.php:181
+#: src/Admin/AutomationsPage.php:185 src/Admin/AutomationsPage.php:205
 msgid "Outcome unknown"
 msgstr "Résultat inconnu"
 
-#: src/Admin/AutomationsPage.php:182
+#: src/Admin/AutomationsPage.php:206
 msgid "Interrupted"
 msgstr "Interrompu"
 
-#: src/Admin/AutomationsPage.php:212
+#: src/Admin/AutomationsPage.php:236
 msgid "Automation not found"
 msgstr "Automatisation introuvable"
 
-#: src/Admin/AutomationsPage.php:212 templates/admin/runs.php:12
+#: src/Admin/AutomationsPage.php:236 templates/admin/runs.php:12
 #: templates/admin/workflow-editor.php:92
 #: templates/admin/workflow-review.php:15
 msgid "Back to Automations"
 msgstr "Retour à Automations"
 
-#: src/Admin/AutomationsPage.php:216
+#: src/Admin/AutomationsPage.php:240
 msgid ""
 "Automation information is temporarily unavailable. No workflow data was "
 "changed."
@@ -436,78 +459,194 @@ msgstr ""
 "Les informations de l’automatisation sont temporairement indisponibles. "
 "Aucune donnée de workflow n’a été modifiée."
 
-#: src/Admin/DesignerAssets.php:37 templates/admin/automations.php:46
+#: src/Admin/DesignerAssets.php:38 templates/admin/automations.php:50
 #: templates/admin/workflow-editor.php:91
 msgid "Automation Builder"
 msgstr "Automation Builder"
 
-#: src/Admin/DesignerAssets.php:59 templates/admin/workflow-editor.php:185
+#: src/Admin/DesignerAssets.php:61 templates/admin/workflow-editor.php:181
 msgid "Inspector"
 msgstr "Inspector"
 
-#: src/Admin/DesignerAssets.php:60
+#: src/Admin/DesignerAssets.php:62
 msgid "Properties"
 msgstr "Propriétés"
 
-#: src/Admin/DesignerAssets.php:61
+#: src/Admin/DesignerAssets.php:63
+msgid "Unsaved changes"
+msgstr "Modifications non enregistrées"
+
+#: src/Admin/DesignerAssets.php:64
+msgid ""
+"This workflow has unsaved changes. Save or discard them before switching."
+msgstr ""
+"Ce workflow comporte des modifications non enregistrées. Enregistrez-les ou "
+"ignorez-les avant de changer de workflow."
+
+#: src/Admin/DesignerAssets.php:65
+msgid "What should happen to your changes?"
+msgstr "Que souhaitez-vous faire de vos modifications ?"
+
+#: src/Admin/DesignerAssets.php:66
+msgid "Save changes"
+msgstr "Enregistrer les modifications"
+
+#: src/Admin/DesignerAssets.php:67
+msgid "Discard changes"
+msgstr "Ignorer les modifications"
+
+#: src/Admin/DesignerAssets.php:68
+msgid "Switch workflow"
+msgstr "Changer de workflow"
+
+#: src/Admin/DesignerAssets.php:69 templates/admin/automations.php:137
+msgid "Cancel"
+msgstr "Annuler"
+
+#: src/Admin/DesignerAssets.php:70
+msgid "Close Automation Builder?"
+msgstr "Fermer Automation Builder ?"
+
+#: src/Admin/DesignerAssets.php:71
+msgid "Return to Automations?"
+msgstr "Revenir à Automations ?"
+
+#: src/Admin/DesignerAssets.php:72
+msgid ""
+"This workflow has unsaved changes. Save or discard them before closing the "
+"Builder."
+msgstr ""
+"Ce workflow comporte des modifications non enregistrées. Enregistrez-les ou "
+"ignorez-les avant de fermer le Builder."
+
+#: src/Admin/DesignerAssets.php:73
+msgid "Close Builder"
+msgstr "Fermer le Builder"
+
+#: src/Admin/DesignerAssets.php:74
+msgid "Wait for the current save to finish."
+msgstr "Attendez la fin de l’enregistrement en cours."
+
+#: src/Admin/DesignerAssets.php:75
+msgid "Workflow switching is not available. Reload the editor."
+msgstr "Le changement de flux n’est pas disponible. Rechargez l’éditeur."
+
+#: src/Admin/DesignerAssets.php:76
+msgid "Could not load the selected workflow."
+msgstr "Impossible de charger le flux sélectionné."
+
+#: src/Admin/DesignerAssets.php:77
+msgid ""
+"Available capabilities changed. Reload Designer before switching workflows."
+msgstr ""
+"Les fonctionnalités disponibles ont changé. Rechargez le concepteur avant de "
+"changer de flux."
+
+#: src/Admin/DesignerAssets.php:79 templates/admin/workflow-editor.php:142
+msgid "Workflow stages"
+msgstr "Étapes du workflow"
+
+#: src/Admin/DesignerAssets.php:80 templates/admin/workflow-editor.php:150
+msgid "WHEN"
+msgstr "QUAND"
+
+#: src/Admin/DesignerAssets.php:81 templates/admin/automations.php:123
+#: templates/admin/automations.php:176 templates/admin/workflow-editor.php:150
+msgid "Trigger"
+msgstr "Déclencheur"
+
+#: src/Admin/DesignerAssets.php:82 templates/admin/workflow-editor.php:156
+msgid "GET DATA"
+msgstr "OBTENIR DES DONNÉES"
+
+#: src/Admin/DesignerAssets.php:83 templates/admin/workflow-editor.php:156
+msgid "Live state"
+msgstr "État en direct"
+
+#: src/Admin/DesignerAssets.php:84 templates/admin/workflow-editor.php:163
+msgid "ONLY IF"
+msgstr "SEULEMENT SI"
+
+#: src/Admin/DesignerAssets.php:85 templates/admin/workflow-editor.php:163
+msgid "Conditions"
+msgstr "Conditions"
+
+#: src/Admin/DesignerAssets.php:86 templates/admin/workflow-editor.php:171
+msgid "THEN"
+msgstr "ALORS"
+
+#: src/Admin/DesignerAssets.php:87 templates/admin/automations.php:124
+#: templates/admin/automations.php:180 templates/admin/workflow-editor.php:171
+msgid "Actions"
+msgstr "Actions"
+
+#: src/Admin/DesignerAssets.php:88 templates/admin/workflow-editor.php:64
+#: templates/admin/workflow-editor.php:150
+#: templates/admin/workflow-editor.php:171
+msgid "Required"
+msgstr "Requis"
+
+#: src/Admin/DesignerAssets.php:90
 msgid "Selected step"
 msgstr "Étape sélectionnée"
 
-#: src/Admin/DesignerAssets.php:62 templates/admin/workflow-editor.php:193
+#: src/Admin/DesignerAssets.php:91
+msgid "No workflow step selected"
+msgstr "Aucune étape du flux sélectionnée"
+
+#: src/Admin/DesignerAssets.php:92
+msgid "Edit this step on the workflow canvas."
+msgstr "Modifiez cette étape dans la zone de travail du flux."
+
+#: src/Admin/DesignerAssets.php:93
+msgid "This capability is unavailable. Choose a replacement on the canvas."
+msgstr ""
+"Cette fonctionnalité est indisponible. Choisissez une autre option dans la "
+"zone de travail."
+
+#: src/Admin/DesignerAssets.php:95
+msgid "Capability reference and workflow identifiers"
+msgstr "Référence de la fonctionnalité et identifiants du flux"
+
+#: src/Admin/DesignerAssets.php:96 templates/admin/workflow-editor.php:188
 msgid "Select a workflow step to inspect its context."
 msgstr "Sélectionnez une étape du workflow pour examiner son contexte."
 
-#: src/Admin/DesignerAssets.php:63
+#: src/Admin/DesignerAssets.php:97
+msgid "Configure trigger"
+msgstr "Configurer le déclencheur"
+
+#: src/Admin/DesignerAssets.php:98
 msgid "Stage"
 msgstr "Étape"
 
-#: src/Admin/DesignerAssets.php:64 templates/admin/workflow-editor.php:50
+#: src/Admin/DesignerAssets.php:99 templates/admin/workflow-editor.php:50
 msgid "Provider"
 msgstr "Fournisseur"
 
-#: src/Admin/DesignerAssets.php:65 templates/admin/run-detail.php:76
+#: src/Admin/DesignerAssets.php:100 templates/admin/run-detail.php:76
 msgid "Capability"
 msgstr "Capacité"
 
-#: src/Admin/DesignerAssets.php:66
+#: src/Admin/DesignerAssets.php:101
 msgid "Identifier"
 msgstr "Identifiant"
 
-#: src/Admin/DesignerAssets.php:82
+#: src/Admin/DesignerAssets.php:117
 msgid "Saving automation…"
 msgstr "Enregistrement de l’automatisation…"
 
-#: src/Admin/DesignerAssets.php:83
+#: src/Admin/DesignerAssets.php:118
 msgid "The automation could not be saved."
 msgstr "L’automatisation n’a pas pu être enregistrée."
 
-#: src/Admin/DesignerAssets.php:84
+#: src/Admin/DesignerAssets.php:119
 msgid "Automation saved. Newer edits are not saved yet."
 msgstr ""
 "Automatisation enregistrée. Les modifications plus récentes ne sont pas "
 "encore enregistrées."
 
-#: src/Admin/DesignerAssets.php:85 src/Support/Requirements.php:171
-#: templates/admin/workflow-editor.php:228
-msgid "Ready"
-msgstr "Prêt"
-
-#: src/Admin/DesignerAssets.php:86 templates/admin/automations.php:119
-#: templates/admin/workflow-editor.php:228
-msgid "Needs attention"
-msgstr "Nécessite une attention"
-
-#: src/Admin/DesignerAssets.php:87 templates/admin/workflow-editor.php:230
-msgid "The current definition is valid against the live capability catalog."
-msgstr ""
-"La définition actuelle est valide par rapport au catalogue de capacités en "
-"direct."
-
-#: src/Admin/DesignerAssets.php:88 templates/admin/workflow-editor.php:232
-msgid "Resolve these items before the automation can be enabled."
-msgstr "Résolvez ces éléments avant d’activer l’automatisation."
-
-#: src/Admin/DesignerAssets.php:89
+#: src/Admin/DesignerAssets.php:124
 msgid "Workflow issue"
 msgstr "Problème de workflow"
 
@@ -665,6 +804,7 @@ msgstr ""
 
 #: src/Admin/WorkflowActivationController.php:30
 #: src/Admin/WorkflowController.php:156
+#: src/Admin/WorkflowTransferController.php:181
 msgid "You do not have permission to manage Automations."
 msgstr "Vous n’avez pas l’autorisation de gérer Automations."
 
@@ -673,27 +813,27 @@ msgstr "Vous n’avez pas l’autorisation de gérer Automations."
 msgid "The request could not be verified. Reload the page and try again."
 msgstr "La requête n’a pas pu être vérifiée. Rechargez la page et réessayez."
 
-#: src/Admin/WorkflowController.php:255 templates/admin/workflow-editor.php:24
+#: src/Admin/WorkflowController.php:256 templates/admin/workflow-editor.php:24
 #, php-format
 msgid "Unavailable user #%d"
 msgstr "Utilisateur indisponible #%d"
 
-#: src/Admin/WorkflowController.php:256 templates/admin/workflow-editor.php:25
+#: src/Admin/WorkflowController.php:257 templates/admin/workflow-editor.php:25
 msgid "No execution principal assigned"
 msgstr "Aucun principal d’exécution attribué"
 
-#: src/Admin/WorkflowController.php:261 templates/admin/workflow-editor.php:30
+#: src/Admin/WorkflowController.php:262 templates/admin/workflow-editor.php:30
 msgid "Automation saved."
 msgstr "Automatisation enregistrée."
 
-#: src/Admin/WorkflowController.php:262
+#: src/Admin/WorkflowController.php:263
 msgid ""
 "Changes saved. The automation remains disabled until the workflow is valid."
 msgstr ""
 "Modifications enregistrées. L’automatisation reste désactivée jusqu’à ce que "
 "le workflow soit valide."
 
-#: src/Admin/WorkflowController.php:263 templates/admin/workflow-editor.php:32
+#: src/Admin/WorkflowController.php:264 templates/admin/workflow-editor.php:32
 msgid ""
 "Changes saved. The automation remains disabled because secure runtime "
 "encryption is unavailable on this site."
@@ -701,7 +841,7 @@ msgstr ""
 "Modifications enregistrées. L’automatisation reste désactivée car le "
 "chiffrement sécurisé de l’exécution n’est pas disponible sur ce site."
 
-#: src/Admin/WorkflowController.php:264 templates/admin/workflow-editor.php:33
+#: src/Admin/WorkflowController.php:265 templates/admin/workflow-editor.php:33
 msgid ""
 "Changes saved. Assign your account as execution authority before enabling "
 "this automation."
@@ -709,7 +849,7 @@ msgstr ""
 "Modifications enregistrées. Attribuez votre compte comme autorité "
 "d’exécution avant d’activer cette automatisation."
 
-#: src/Admin/WorkflowController.php:265 templates/admin/workflow-editor.php:34
+#: src/Admin/WorkflowController.php:266 templates/admin/workflow-editor.php:34
 msgid ""
 "Changes saved. The stored execution authority is no longer a valid WordPress "
 "user."
@@ -717,7 +857,7 @@ msgstr ""
 "Modifications enregistrées. L’autorité d’exécution enregistrée n’est plus un "
 "utilisateur WordPress valide."
 
-#: src/Admin/WorkflowController.php:266 templates/admin/workflow-editor.php:35
+#: src/Admin/WorkflowController.php:267 templates/admin/workflow-editor.php:35
 msgid ""
 "Changes saved. The execution principal no longer has all permissions "
 "required by this workflow."
@@ -725,7 +865,7 @@ msgstr ""
 "Modifications enregistrées. Le principal d’exécution ne dispose plus de "
 "toutes les autorisations requises par ce workflow."
 
-#: src/Admin/WorkflowController.php:267 templates/admin/workflow-editor.php:36
+#: src/Admin/WorkflowController.php:268 templates/admin/workflow-editor.php:36
 msgid ""
 "Changes saved. Your account does not have all permissions required to enable "
 "this workflow."
@@ -733,7 +873,7 @@ msgstr ""
 "Modifications enregistrées. Votre compte ne dispose pas de toutes les "
 "autorisations nécessaires pour activer ce workflow."
 
-#: src/Admin/WorkflowController.php:268 templates/admin/workflow-editor.php:37
+#: src/Admin/WorkflowController.php:269 templates/admin/workflow-editor.php:37
 msgid ""
 "Changes saved. Execution authority could not be verified against the current "
 "capability contracts."
@@ -741,7 +881,7 @@ msgstr ""
 "Modifications enregistrées. L’autorité d’exécution n’a pas pu être vérifiée "
 "par rapport aux contrats de capacités actuels."
 
-#: src/Admin/WorkflowController.php:269
+#: src/Admin/WorkflowController.php:270
 msgid ""
 "The automation was not saved because a sensitive input contains a literal "
 "value."
@@ -749,7 +889,7 @@ msgstr ""
 "L’automatisation n’a pas été enregistrée car une entrée sensible contient "
 "une valeur littérale."
 
-#: src/Admin/WorkflowController.php:270 templates/admin/workflow-editor.php:39
+#: src/Admin/WorkflowController.php:271 templates/admin/workflow-editor.php:39
 msgid ""
 "This automation changed in another request. Reload the page before saving "
 "again."
@@ -757,30 +897,34 @@ msgstr ""
 "Cette automatisation a été modifiée dans une autre requête. Rechargez la "
 "page avant de l’enregistrer à nouveau."
 
-#: src/Admin/WorkflowController.php:271 templates/admin/automations.php:32
+#: src/Admin/WorkflowController.php:272 templates/admin/automations.php:36
 #: templates/admin/workflow-editor.php:40
 msgid "Enter an automation name between 1 and 191 characters."
 msgstr "Saisissez un nom d’automatisation de 1 à 191 caractères."
 
-#: src/Admin/WorkflowController.php:272 templates/admin/workflow-editor.php:41
+#: src/Admin/WorkflowController.php:273 templates/admin/workflow-editor.php:41
 msgid ""
 "The submitted workflow could not be decoded safely. No changes were saved."
 msgstr ""
 "Le workflow soumis n’a pas pu être décodé en toute sécurité. Aucune "
 "modification n’a été enregistrée."
 
-#: src/Admin/WorkflowController.php:273
+#: src/Admin/WorkflowController.php:274
 msgid ""
 "The automation could not be saved because workflow storage is unavailable."
 msgstr ""
 "L’automatisation n’a pas pu être enregistrée car le stockage des workflows "
 "est indisponible."
 
-#: src/Admin/WorkflowController.php:274 templates/admin/workflow-editor.php:43
+#: src/Admin/WorkflowController.php:275 templates/admin/workflow-editor.php:43
 msgid "The automation could not be saved. Reload the page before trying again."
 msgstr ""
 "L’automatisation n’a pas pu être enregistrée. Rechargez la page avant de "
 "réessayer."
+
+#: src/Admin/WorkflowTransferController.php:186
+msgid "The request could not be verified. Reload and try again."
+msgstr "La requête n’a pas pu être vérifiée. Rechargez la page et réessayez."
 
 #: src/Provider/WordPress/CapabilityRegistrar.php:49
 msgid "User registered"
@@ -1341,67 +1485,347 @@ msgstr "Merci pour votre commentaire"
 msgid "Thanks for taking the time to leave a comment."
 msgstr "Merci d’avoir pris le temps de laisser un commentaire."
 
-#: templates/admin/automations.php:16
+#: templates/admin/automations.php:20
 msgid "Automation draft created."
 msgstr "Brouillon d’automatisation créé."
 
-#: templates/admin/automations.php:19
+#: templates/admin/automations.php:21
+msgid ""
+"Automation created from template. Review and assign execution authority "
+"before enabling."
+msgstr ""
+"Automatisation créée à partir d’un modèle. Vérifiez-la et attribuez les "
+"autorisations d’exécution avant l’activation."
+
+#: templates/admin/automations.php:22
+msgid "That workflow template is no longer available."
+msgstr "Ce modèle de flux de travail n’est plus disponible."
+
+#: templates/admin/automations.php:23
 msgid "Automation enabled."
 msgstr "Automatisation activée."
 
-#: templates/admin/automations.php:20
+#: templates/admin/automations.php:24
 msgid "Automation disabled."
 msgstr "Automatisation désactivée."
 
-#: templates/admin/automations.php:47 templates/admin/automations.php:54
+#: templates/admin/automations.php:25
+msgid "Workflow was saved but remains disabled because it is not valid."
+msgstr ""
+"Le flux de travail a été enregistré, mais reste désactivé car il n’est pas "
+"valide."
+
+#: templates/admin/automations.php:26
+msgid "Secure runtime encryption is unavailable."
+msgstr "Le chiffrement sécurisé à l’exécution est indisponible."
+
+#: templates/admin/automations.php:27
+msgid "Assign execution authority in the Builder before enabling."
+msgstr ""
+"Attribuez les autorisations d’exécution dans Builder avant l’activation."
+
+#: templates/admin/automations.php:28
+msgid "Stored execution principal no longer exists."
+msgstr "Le compte d’exécution enregistré n’existe plus."
+
+#: templates/admin/automations.php:29
+msgid "Execution principal does not have the required permissions."
+msgstr "Le compte d’exécution ne dispose pas des autorisations requises."
+
+#: templates/admin/automations.php:30
+msgid "Your account does not have the required permissions."
+msgstr "Votre compte ne dispose pas des autorisations requises."
+
+#: templates/admin/automations.php:31
+msgid "Workflow capability contracts cannot be verified."
+msgstr ""
+"Les contrats de capacités du flux de travail ne peuvent pas être vérifiés."
+
+#: templates/admin/automations.php:32
+msgid "The workflow contains data that cannot be persisted safely."
+msgstr ""
+"Le flux de travail contient des données qui ne peuvent pas être enregistrées "
+"en toute sécurité."
+
+#: templates/admin/automations.php:33
+msgid "The workflow changed in another request. Reload and retry."
+msgstr ""
+"Le flux de travail a été modifié par une autre requête. Rechargez la page et "
+"réessayez."
+
+#: templates/admin/automations.php:34
+msgid "Workflow not found."
+msgstr "Flux de travail introuvable."
+
+#: templates/admin/automations.php:35
+msgid "Invalid workflow configuration."
+msgstr "Configuration du flux de travail invalide."
+
+#: templates/admin/automations.php:37
+msgid "Workflow storage is unavailable."
+msgstr "Le stockage des flux de travail est indisponible."
+
+#: templates/admin/automations.php:38
+msgid "The workflow could not be updated."
+msgstr "Le flux de travail n’a pas pu être mis à jour."
+
+#: templates/admin/automations.php:39
+msgid "Choose a JSON file smaller than 256 KB."
+msgstr "Choisissez un fichier JSON de moins de 256 Ko."
+
+#: templates/admin/automations.php:40
+msgid "Workflow JSON could not be decoded or is incompatible."
+msgstr "Le JSON du flux de travail n’a pas pu être décodé ou est incompatible."
+
+#: templates/admin/automations.php:41
+msgid ""
+"Import blocked: sensitive literal data must not be stored in workflow "
+"definitions."
+msgstr ""
+"Importation bloquée : les données sensibles en valeur littérale ne doivent "
+"pas être stockées dans les définitions de flux de travail."
+
+#: templates/admin/automations.php:42
+msgid "Import preview expired. Upload the file again."
+msgstr "L’aperçu de l’importation a expiré. Téléversez à nouveau le fichier."
+
+#: templates/admin/automations.php:43
+msgid "Import is unavailable. No automation was created."
+msgstr "L’importation est indisponible. Aucune automatisation n’a été créée."
+
+#: templates/admin/automations.php:44
+msgid "This workflow cannot be exported safely."
+msgstr "Ce flux de travail ne peut pas être exporté en toute sécurité."
+
+#: templates/admin/automations.php:52
+msgid "Find, manage and create your WordPress automations."
+msgstr "Recherchez, gérez et créez vos automatisations WordPress."
+
+#: templates/admin/automations.php:54
+msgid "+ New automation"
+msgstr "+ Nouvelle automatisation"
+
+#: templates/admin/automations.php:61
+msgid "Automations workspace"
+msgstr "Espace de travail des automatisations"
+
+#: templates/admin/automations.php:62
+msgid "Templates"
+msgstr "Modèles"
+
+#: templates/admin/automations.php:62
+msgid "New automation"
+msgstr "Nouvelle automatisation"
+
+#: templates/admin/automations.php:62
+msgid "Import JSON"
+msgstr "Importer du JSON"
+
+#: templates/admin/automations.php:69 templates/admin/automations.php:76
 msgid "Create automation"
 msgstr "Créer une automatisation"
 
-#: templates/admin/automations.php:52 templates/admin/automations.php:53
+#: templates/admin/automations.php:70
+msgid "Create a disabled draft, then configure it securely in the Builder."
+msgstr ""
+"Créez un brouillon désactivé, puis configurez-le en toute sécurité dans "
+"Builder."
+
+#: templates/admin/automations.php:74
 msgid "Automation name"
 msgstr "Nom de l’automatisation"
 
-#: templates/admin/automations.php:61
+#: templates/admin/automations.php:81
 msgid "Start from a template"
 msgstr "Commencer à partir d’un modèle"
 
-#: templates/admin/automations.php:76
+#: templates/admin/automations.php:82
+msgid ""
+"Create a normal editable workflow from a provider template. The new workflow "
+"is not linked to the original."
+msgstr ""
+"Créez un flux de travail modifiable à partir d’un modèle de fournisseur. Il "
+"ne sera pas lié à l’original."
+
+#: templates/admin/automations.php:84
+msgid "No starter templates available."
+msgstr "Aucun modèle de démarrage disponible."
+
+#: templates/admin/automations.php:99
 msgid "Use template"
 msgstr "Utiliser le modèle"
 
-#: templates/admin/automations.php:114
-msgid "Disable"
-msgstr "Désactiver"
+#: templates/admin/automations.php:108
+msgid "Import automation JSON"
+msgstr "Importer le JSON d’une automatisation"
+
+#: templates/admin/automations.php:109
+msgid ""
+"Import an exported workflow or a standalone workflow definition. Nothing is "
+"enabled automatically. Execution authority must be assigned after import."
+msgstr ""
+"Importez un flux de travail exporté ou une définition autonome. Rien n’est "
+"activé automatiquement. Les autorisations d’exécution doivent être "
+"attribuées après l’importation."
 
 #: templates/admin/automations.php:114
-msgid "Enable"
-msgstr "Activer"
+msgid "Workflow JSON file"
+msgstr "Fichier JSON du flux de travail"
+
+#: templates/admin/automations.php:116
+msgid "Validate and preview"
+msgstr "Valider et prévisualiser"
+
+#: templates/admin/automations.php:120
+msgid "Import preview"
+msgstr "Aperçu de l’importation"
+
+#: templates/admin/automations.php:122 templates/admin/workflow-editor.php:198
+msgid "Name"
+msgstr "Nom"
 
 #: templates/admin/automations.php:125
+msgid "Validation"
+msgstr "Validation"
+
+#: templates/admin/automations.php:125
+msgid "Ready to configure"
+msgstr "Prêt à configurer"
+
+#: templates/admin/automations.php:125
+#, php-format
+msgid "%d issues to resolve in Builder"
+msgstr "%d problèmes à résoudre dans Builder"
+
+#: templates/admin/automations.php:126 templates/admin/workflow-editor.php:202
+msgid "Activation"
+msgstr "Activation"
+
+#: templates/admin/automations.php:126
+msgid "Disabled (always)"
+msgstr "Désactivé (toujours)"
+
+#: templates/admin/automations.php:127 templates/admin/run-detail.php:64
+msgid "Execution principal"
+msgstr "Principal d’exécution"
+
+#: templates/admin/automations.php:127
+msgid "Not assigned"
+msgstr "Non attribué"
+
+#: templates/admin/automations.php:129
+msgid ""
+"Review configuration literals before sharing or activating any imported "
+"workflow."
+msgstr ""
+"Vérifiez les valeurs littérales de configuration avant de partager ou "
+"d’activer un flux de travail importé."
+
+#: templates/admin/automations.php:135
+msgid "Create disabled workflow"
+msgstr "Créer un flux de travail désactivé"
+
+#: templates/admin/automations.php:147
+#, php-format
+msgid "%d matching workflow"
+msgid_plural "%d matching workflows"
+msgstr[0] "%d flux de travail correspondant"
+msgstr[1] "%d flux de travail correspondants"
+
+#: templates/admin/automations.php:152
+msgid "Search workflows"
+msgstr "Rechercher des flux de travail"
+
+#: templates/admin/automations.php:153
+msgid "Search by name..."
+msgstr "Rechercher par nom..."
+
+#: templates/admin/automations.php:154 templates/admin/automations.php:177
+#: templates/admin/run-detail.php:62 templates/admin/run-detail.php:76
+#: templates/admin/runs.php:19
+msgid "Status"
+msgstr "Statut"
+
+#: templates/admin/automations.php:156
+msgid "All statuses"
+msgstr "Tous les statuts"
+
+#: templates/admin/automations.php:160
+msgid "Sort"
+msgstr "Trier"
+
+#: templates/admin/automations.php:162
+msgid "Recently updated"
+msgstr "Mis à jour récemment"
+
+#: templates/admin/automations.php:162
+msgid "Oldest updated"
+msgstr "Mise à jour la plus ancienne"
+
+#: templates/admin/automations.php:162
+msgid "Name A–Z"
+msgstr "Nom A–Z"
+
+#: templates/admin/automations.php:162
+msgid "Name Z–A"
+msgstr "Nom Z–A"
+
+#: templates/admin/automations.php:166
+msgid "Apply"
+msgstr "Appliquer"
+
+#: templates/admin/automations.php:167
+msgid "Reset"
+msgstr "Réinitialiser"
+
+#: templates/admin/automations.php:170
+msgid "No workflows match your filters."
+msgstr "Aucun flux de travail ne correspond à vos filtres."
+
+#: templates/admin/automations.php:175
+msgid "Automation"
+msgstr "Automatisation"
+
+#: templates/admin/automations.php:178
+msgid "Health"
+msgstr "État"
+
+#: templates/admin/automations.php:179
+msgid "Updated"
+msgstr "Mis à jour"
+
+#: templates/admin/automations.php:197
 #, php-format
 msgid "%d issue"
 msgid_plural "%d issues"
 msgstr[0] "%d problème"
 msgstr[1] "%d problèmes"
 
-#: templates/admin/automations.php:143
-msgid "Automation"
-msgstr "Automatisation"
+#: templates/admin/automations.php:201
+msgid "Edit"
+msgstr "Modifier"
 
-#: templates/admin/automations.php:155 templates/admin/workflow-editor.php:145
-#: templates/admin/workflow-editor.php:155
-msgid "Trigger"
-msgstr "Déclencheur"
+#: templates/admin/automations.php:207
+msgid "Disable"
+msgstr "Désactiver"
 
-#: templates/admin/automations.php:158 templates/admin/run-detail.php:95
-msgid "Action"
-msgstr "Action"
+#: templates/admin/automations.php:207
+msgid "Enable"
+msgstr "Activer"
 
-#: templates/admin/automations.php:188
+#: templates/admin/automations.php:213
+msgid "Export JSON"
+msgstr "Exporter le JSON"
+
+#: templates/admin/automations.php:223
+msgid "Workflow pages"
+msgstr "Pages des flux de travail"
+
+#: templates/admin/automations.php:228
 msgid "‹ Previous"
 msgstr "‹ Précédent"
 
-#: templates/admin/automations.php:189
+#: templates/admin/automations.php:229
 msgid "Next ›"
 msgstr "Suivant ›"
 
@@ -1507,18 +1931,9 @@ msgstr ""
 "avant que Core Blueprint puisse enregistrer son résultat en toute sécurité. "
 "L’action n’a pas été relancée automatiquement."
 
-#: templates/admin/run-detail.php:62 templates/admin/run-detail.php:76
-#: templates/admin/runs.php:19
-msgid "Status"
-msgstr "Statut"
-
 #: templates/admin/run-detail.php:63
 msgid "Workflow snapshot"
 msgstr "Instantané du workflow"
-
-#: templates/admin/run-detail.php:64
-msgid "Execution principal"
-msgstr "Principal d’exécution"
 
 #: templates/admin/run-detail.php:65
 msgid "Run UUID"
@@ -1568,6 +1983,10 @@ msgstr "Aucune étape d’exécution n’a été enregistrée."
 #: templates/admin/run-detail.php:93
 msgid "Recovery history"
 msgstr "Historique de récupération"
+
+#: templates/admin/run-detail.php:95
+msgid "Action"
+msgstr "Action"
 
 #: templates/admin/run-detail.php:95
 msgid "Decision"
@@ -1754,12 +2173,12 @@ msgid "No inputs required."
 msgstr "Aucune entrée requise."
 
 #: templates/admin/workflow-editor.php:53
-#: templates/admin/workflow-editor.php:164
+#: templates/admin/workflow-editor.php:159
 msgid "Add data lookup"
 msgstr "Ajouter une recherche de données"
 
 #: templates/admin/workflow-editor.php:54
-#: templates/admin/workflow-editor.php:171
+#: templates/admin/workflow-editor.php:166
 msgid "Add condition"
 msgstr "Ajouter une condition"
 
@@ -1796,15 +2215,9 @@ msgstr ""
 msgid "Stored source is unavailable"
 msgstr "La source enregistrée est indisponible"
 
-#: templates/admin/workflow-editor.php:64
-#: templates/admin/workflow-editor.php:155
-#: templates/admin/workflow-editor.php:175
-msgid "Required"
-msgstr "Requis"
-
 #: templates/admin/workflow-editor.php:65
-#: templates/admin/workflow-editor.php:161
-#: templates/admin/workflow-editor.php:168
+#: templates/admin/workflow-editor.php:156
+#: templates/admin/workflow-editor.php:163
 msgid "Optional"
 msgstr "Facultatif"
 
@@ -1881,67 +2294,34 @@ msgid "Exit focus mode"
 msgstr "Quitter le mode focus"
 
 #: templates/admin/workflow-editor.php:137
-#: templates/admin/workflow-editor.php:251
+#: templates/admin/workflow-editor.php:245
 msgid "Save automation"
 msgstr "Enregistrer l’automatisation"
 
-#: templates/admin/workflow-editor.php:142
-msgid "Workflow stages"
-msgstr "Étapes du workflow"
-
-#: templates/admin/workflow-editor.php:145
-#: templates/admin/workflow-editor.php:155
-msgid "WHEN"
-msgstr "QUAND"
-
-#: templates/admin/workflow-editor.php:146
-#: templates/admin/workflow-editor.php:161
-msgid "GET DATA"
-msgstr "OBTENIR DES DONNÉES"
-
-#: templates/admin/workflow-editor.php:146
-#: templates/admin/workflow-editor.php:161
-msgid "Live state"
-msgstr "État en direct"
-
-#: templates/admin/workflow-editor.php:147
-#: templates/admin/workflow-editor.php:168
-msgid "ONLY IF"
-msgstr "SEULEMENT SI"
-
-#: templates/admin/workflow-editor.php:147
-#: templates/admin/workflow-editor.php:168
-msgid "Conditions"
-msgstr "Conditions"
-
-#: templates/admin/workflow-editor.php:148
-#: templates/admin/workflow-editor.php:175
-msgid "THEN"
-msgstr "ALORS"
-
-#: templates/admin/workflow-editor.php:148
-#: templates/admin/workflow-editor.php:175
-msgid "Actions"
-msgstr "Actions"
-
-#: templates/admin/workflow-editor.php:156
+#: templates/admin/workflow-editor.php:151
 msgid "Choose the event that starts this automation."
 msgstr "Choisissez l’événement qui démarre cette automatisation."
 
-#: templates/admin/workflow-editor.php:162
+#: templates/admin/workflow-editor.php:157
 msgid ""
 "Look up additional live data and make typed values available to later steps."
 msgstr ""
 "Recherchez des données en direct supplémentaires et rendez des valeurs "
 "typées disponibles pour les étapes suivantes."
 
-#: templates/admin/workflow-editor.php:169
+#: templates/admin/workflow-editor.php:164
 msgid "Add rules that must match before any actions are allowed to continue."
 msgstr ""
 "Ajoutez des règles qui doivent correspondre avant que les actions puissent "
 "continuer."
 
-#: templates/admin/workflow-editor.php:176
+#: templates/admin/workflow-editor.php:167
+msgid "Conditions become available when earlier steps provide output data."
+msgstr ""
+"Les conditions deviennent disponibles lorsque les étapes précédentes "
+"fournissent des données de sortie."
+
+#: templates/admin/workflow-editor.php:172
 msgid ""
 "Choose what Core Blueprint should do after the workflow passes its "
 "conditions."
@@ -1949,27 +2329,19 @@ msgstr ""
 "Choisissez ce que Core Blueprint doit faire une fois que le workflow "
 "satisfait ses conditions."
 
-#: templates/admin/workflow-editor.php:184
+#: templates/admin/workflow-editor.php:180
 msgid "Automation details"
 msgstr "Détails de l’automatisation"
 
-#: templates/admin/workflow-editor.php:186
+#: templates/admin/workflow-editor.php:182
 msgid "Settings"
 msgstr "Réglages"
 
-#: templates/admin/workflow-editor.php:201
+#: templates/admin/workflow-editor.php:196
 msgid "Workflow settings"
 msgstr "Réglages du workflow"
 
-#: templates/admin/workflow-editor.php:203
-msgid "Name"
-msgstr "Nom"
-
 #: templates/admin/workflow-editor.php:207
-msgid "Activation"
-msgstr "Activation"
-
-#: templates/admin/workflow-editor.php:212
 msgid ""
 "Enabled workflows must be valid and both the execution principal and current "
 "operator must hold every provider-required capability."
@@ -1978,16 +2350,16 @@ msgstr ""
 "que l’opérateur actuel doivent disposer de chaque capacité requise par le "
 "fournisseur."
 
-#: templates/admin/workflow-editor.php:217
+#: templates/admin/workflow-editor.php:212
 msgid "Execution authority"
 msgstr "Autorité d’exécution"
 
-#: templates/admin/workflow-editor.php:219
+#: templates/admin/workflow-editor.php:214
 msgid "Use my account as execution principal when saving"
 msgstr ""
 "Utiliser mon compte comme principal d’exécution lors de l’enregistrement"
 
-#: templates/admin/workflow-editor.php:220
+#: templates/admin/workflow-editor.php:215
 msgid ""
 "Core Blueprint never accepts an arbitrary Run as user ID from the browser. "
 "The server binds your current WordPress account and re-checks its "
@@ -1997,7 +2369,11 @@ msgstr ""
 "d’exécution arbitraire comme ID utilisateur. Le serveur associe votre compte "
 "WordPress actuel et revérifie ses autorisations à chaque exécution."
 
-#: templates/admin/workflow-editor.php:254
+#: templates/admin/workflow-editor.php:217
+msgid "Workflow health"
+msgstr "État du flux de travail"
+
+#: templates/admin/workflow-editor.php:248
 msgid ""
 "The visual workflow editor requires JavaScript. Name, activation and "
 "execution-authority intent can still be submitted using the currently stored "
@@ -2024,273 +2400,3 @@ msgstr ""
 "La définition du workflow enregistrée a été conservée sans modification. "
 "Restaurez ou mettez d’abord à jour le fournisseur concerné ; Automations "
 "réévaluera automatiquement le workflow au prochain chargement de la page."
-
-#: src/Admin/DesignerAssets.php
-msgid "No workflow step selected"
-msgstr "Aucune étape du flux sélectionnée"
-
-#: src/Admin/DesignerAssets.php
-msgid "Edit this step on the workflow canvas."
-msgstr "Modifiez cette étape dans la zone de travail du flux."
-
-#: src/Admin/DesignerAssets.php
-msgid "This capability is unavailable. Choose a replacement on the canvas."
-msgstr "Cette fonctionnalité est indisponible. Choisissez une autre option dans la zone de travail."
-
-#: src/Admin/DesignerAssets.php
-msgid "Capability reference and workflow identifiers"
-msgstr "Référence de la fonctionnalité et identifiants du flux"
-
-#: templates/admin/workflow-editor.php
-msgid "Workflow health"
-msgstr "État du flux de travail"
-
-#: src/Admin/DesignerAssets.php
-msgid "Wait for the current save to finish."
-msgstr "Attendez la fin de l’enregistrement en cours."
-
-#: src/Admin/DesignerAssets.php
-msgid "Workflow switching is not available. Reload the editor."
-msgstr "Le changement de flux n’est pas disponible. Rechargez l’éditeur."
-
-#: src/Admin/DesignerAssets.php
-msgid "Could not load the selected workflow."
-msgstr "Impossible de charger le flux sélectionné."
-
-#: src/Admin/DesignerAssets.php
-msgid "Available capabilities changed. Reload Designer before switching workflows."
-msgstr "Les fonctionnalités disponibles ont changé. Rechargez le concepteur avant de changer de flux."
-
-#: src/Admin/DesignerAssets.php
-msgid "Configure trigger"
-msgstr "Configurer le déclencheur"
-
-#: templates/admin/workflow-editor.php
-msgid "Conditions become available when earlier steps provide output data."
-msgstr "Les conditions deviennent disponibles lorsque les étapes précédentes fournissent des données de sortie."
-
-#: src/Admin/DesignerAssets.php
-msgid "Unsaved changes"
-msgstr "Modifications non enregistrées"
-
-#: src/Admin/DesignerAssets.php
-msgid "This workflow has unsaved changes. Save or discard them before switching."
-msgstr "Ce workflow comporte des modifications non enregistrées. Enregistrez-les ou ignorez-les avant de changer de workflow."
-
-#: src/Admin/DesignerAssets.php
-msgid "What should happen to your changes?"
-msgstr "Que souhaitez-vous faire de vos modifications ?"
-
-#: src/Admin/DesignerAssets.php
-msgid "Save changes"
-msgstr "Enregistrer les modifications"
-
-#: src/Admin/DesignerAssets.php
-msgid "Discard changes"
-msgstr "Ignorer les modifications"
-
-#: src/Admin/DesignerAssets.php
-msgid "Switch workflow"
-msgstr "Changer de workflow"
-
-#: src/Admin/DesignerAssets.php
-msgid "Cancel"
-msgstr "Annuler"
-
-#: src/Admin/DesignerAssets.php
-msgid "Close Automation Builder?"
-msgstr "Fermer Automation Builder ?"
-
-#: src/Admin/DesignerAssets.php
-msgid "Return to Automations?"
-msgstr "Revenir à Automations ?"
-
-#: src/Admin/DesignerAssets.php
-msgid "This workflow has unsaved changes. Save or discard them before closing the Builder."
-msgstr "Ce workflow comporte des modifications non enregistrées. Enregistrez-les ou ignorez-les avant de fermer le Builder."
-
-#: src/Admin/DesignerAssets.php
-msgid "Close Builder"
-msgstr "Fermer le Builder"
-
-msgid "%d issues to resolve in Builder"
-msgstr "%d problèmes à résoudre dans Builder"
-
-msgid "%d matching workflow"
-msgid_plural "%d matching workflows"
-msgstr[0] "%d flux de travail correspondant"
-msgstr[1] "%d flux de travail correspondants"
-
-msgid "+ New automation"
-msgstr "+ Nouvelle automatisation"
-
-msgid "All statuses"
-msgstr "Tous les statuts"
-
-msgid "Apply"
-msgstr "Appliquer"
-
-msgid "Assign execution authority in the Builder before enabling."
-msgstr "Attribuez les autorisations d’exécution dans Builder avant l’activation."
-
-msgid "Automation created from template. Review and assign execution authority before enabling."
-msgstr "Automatisation créée à partir d’un modèle. Vérifiez-la et attribuez les autorisations d’exécution avant l’activation."
-
-msgid "Automations workspace"
-msgstr "Espace de travail des automatisations"
-
-msgid "Choose a JSON file smaller than 256 KB."
-msgstr "Choisissez un fichier JSON de moins de 256 Ko."
-
-msgid "Create a disabled draft, then configure it securely in the Builder."
-msgstr "Créez un brouillon désactivé, puis configurez-le en toute sécurité dans Builder."
-
-msgid "Create a normal editable workflow from a provider template. The new workflow is not linked to the original."
-msgstr "Créez un flux de travail modifiable à partir d’un modèle de fournisseur. Il ne sera pas lié à l’original."
-
-msgid "Create disabled workflow"
-msgstr "Créer un flux de travail désactivé"
-
-msgid "Disabled (always)"
-msgstr "Désactivé (toujours)"
-
-msgid "Edit"
-msgstr "Modifier"
-
-msgid "Execution principal does not have the required permissions."
-msgstr "Le compte d’exécution ne dispose pas des autorisations requises."
-
-msgid "Export JSON"
-msgstr "Exporter le JSON"
-
-msgid "Find, manage and create your WordPress automations."
-msgstr "Recherchez, gérez et créez vos automatisations WordPress."
-
-msgid "Health"
-msgstr "État"
-
-msgid "Import JSON"
-msgstr "Importer du JSON"
-
-msgid "Import an exported workflow or a standalone workflow definition. Nothing is enabled automatically. Execution authority must be assigned after import."
-msgstr "Importez un flux de travail exporté ou une définition autonome. Rien n’est activé automatiquement. Les autorisations d’exécution doivent être attribuées après l’importation."
-
-msgid "Import automation JSON"
-msgstr "Importer le JSON d’une automatisation"
-
-msgid "Import blocked: sensitive literal data must not be stored in workflow definitions."
-msgstr "Importation bloquée : les données sensibles en valeur littérale ne doivent pas être stockées dans les définitions de flux de travail."
-
-msgid "Import is unavailable. No automation was created."
-msgstr "L’importation est indisponible. Aucune automatisation n’a été créée."
-
-msgid "Import preview"
-msgstr "Aperçu de l’importation"
-
-msgid "Import preview expired. Upload the file again."
-msgstr "L’aperçu de l’importation a expiré. Téléversez à nouveau le fichier."
-
-msgid "Invalid workflow configuration."
-msgstr "Configuration du flux de travail invalide."
-
-msgid "Name A–Z"
-msgstr "Nom A–Z"
-
-msgid "Name Z–A"
-msgstr "Nom Z–A"
-
-msgid "New automation"
-msgstr "Nouvelle automatisation"
-
-msgid "No starter templates available."
-msgstr "Aucun modèle de démarrage disponible."
-
-msgid "No workflows match your filters."
-msgstr "Aucun flux de travail ne correspond à vos filtres."
-
-msgid "Not assigned"
-msgstr "Non attribué"
-
-msgid "Oldest updated"
-msgstr "Mise à jour la plus ancienne"
-
-msgid "Ready to configure"
-msgstr "Prêt à configurer"
-
-msgid "Recently updated"
-msgstr "Mis à jour récemment"
-
-msgid "Reset"
-msgstr "Réinitialiser"
-
-msgid "Review configuration literals before sharing or activating any imported workflow."
-msgstr "Vérifiez les valeurs littérales de configuration avant de partager ou d’activer un flux de travail importé."
-
-msgid "Search by name..."
-msgstr "Rechercher par nom..."
-
-msgid "Search workflows"
-msgstr "Rechercher des flux de travail"
-
-msgid "Secure runtime encryption is unavailable."
-msgstr "Le chiffrement sécurisé à l’exécution est indisponible."
-
-msgid "Sort"
-msgstr "Trier"
-
-msgid "Stored execution principal no longer exists."
-msgstr "Le compte d’exécution enregistré n’existe plus."
-
-msgid "Templates"
-msgstr "Modèles"
-
-msgid "That workflow template is no longer available."
-msgstr "Ce modèle de flux de travail n’est plus disponible."
-
-msgid "The request could not be verified. Reload and try again."
-msgstr "La requête n’a pas pu être vérifiée. Rechargez la page et réessayez."
-
-msgid "The workflow changed in another request. Reload and retry."
-msgstr "Le flux de travail a été modifié par une autre requête. Rechargez la page et réessayez."
-
-msgid "The workflow contains data that cannot be persisted safely."
-msgstr "Le flux de travail contient des données qui ne peuvent pas être enregistrées en toute sécurité."
-
-msgid "The workflow could not be updated."
-msgstr "Le flux de travail n’a pas pu être mis à jour."
-
-msgid "This workflow cannot be exported safely."
-msgstr "Ce flux de travail ne peut pas être exporté en toute sécurité."
-
-msgid "Updated"
-msgstr "Mis à jour"
-
-msgid "Validate and preview"
-msgstr "Valider et prévisualiser"
-
-msgid "Validation"
-msgstr "Validation"
-
-msgid "Workflow JSON could not be decoded or is incompatible."
-msgstr "Le JSON du flux de travail n’a pas pu être décodé ou est incompatible."
-
-msgid "Workflow JSON file"
-msgstr "Fichier JSON du flux de travail"
-
-msgid "Workflow capability contracts cannot be verified."
-msgstr "Les contrats de capacités du flux de travail ne peuvent pas être vérifiés."
-
-msgid "Workflow not found."
-msgstr "Flux de travail introuvable."
-
-msgid "Workflow pages"
-msgstr "Pages des flux de travail"
-
-msgid "Workflow storage is unavailable."
-msgstr "Le stockage des flux de travail est indisponible."
-
-msgid "Workflow was saved but remains disabled because it is not valid."
-msgstr "Le flux de travail a été enregistré, mais reste désactivé car il n’est pas valide."
-
-msgid "Your account does not have the required permissions."
-msgstr "Votre compte ne dispose pas des autorisations requises."
