@@ -364,3 +364,19 @@
 .cb-automations-workspace__preview dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
 .cb-automations-workspace__preview-actions { display: flex; flex-wrap: wrap; gap: var(--cb-space-2); margin-top: var(--cb-space-4); }
 @media (max-width:782px){.cb-automations-workspace__preview dl{grid-template-columns:1fr}.cb-automations-workspace__preview dt{margin-bottom:-.5rem}}
+
+
+/* W3.1: workflow organisation is admin-only, additive and keyboard-operable. */
+.cb-automations-workspace__folder-manager { margin: var(--cb-space-3, 12px) 0 var(--cb-space-4, 16px); border: 1px solid var(--cb-border); border-radius: var(--cb-radius-md, 8px); padding: var(--cb-space-3, 12px); }
+.cb-automations-workspace__folder-manager > summary { cursor: pointer; font-weight: 600; }
+.cb-automations-workspace__folder-body { display: grid; gap: var(--cb-space-3, 12px); margin-top: var(--cb-space-3, 12px); }
+.cb-automations-workspace__folder-create, .cb-automations-workspace__folder-row, .cb-automations-workspace__folder-row form { display: flex; align-items: center; flex-wrap: wrap; gap: var(--cb-space-2, 8px); }
+.cb-automations-workspace__folder-row { padding-block: var(--cb-space-2, 8px); border-top: 1px solid var(--cb-border); justify-content: space-between; }
+.cb-automations-workspace__folder-row label { display: inline-flex; gap: 5px; align-items: center; }
+.cb-automations-workspace__folder-assign { display: flex; gap: 6px; align-items: center; }
+.cb-automations-workspace__folder-assign select { min-width: 110px; max-width: 170px; }
+.cb-automations-workspace__folder-manager input[type=text] { width: 220px; max-width: 100%; }
+@media (max-width: 782px) {
+ .cb-automations-workspace__folder-row { align-items: stretch; flex-direction: column; }
+ .cb-automations-workspace__folder-assign { min-width: 240px; }
+}

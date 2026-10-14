@@ -10,6 +10,9 @@
  * @var \CB\Automations\Template\WorkflowTemplate[] $templates
  * @var array{name:string,definition:\CB\Automations\Workflow\Definition,validation:\CB\Automations\Validation\ValidationResult}|null $import_preview
  * @var string $import_token
+ * @var list<array{id:int,name:string}> $folders
+ * @var int|null $folder_filter
+ * @var array<int,int> $assignments
  */
 defined( 'ABSPATH' ) || exit;
 
@@ -42,6 +45,15 @@ $notices = [
 	'import_expired' => [ 'error', __( 'Import preview expired. Upload the file again.', 'core-blueprint-automations' ) ],
 	'import_unavailable' => [ 'error', __( 'Import is unavailable. No automation was created.', 'core-blueprint-automations' ) ],
 	'export_unavailable' => [ 'error', __( 'This workflow cannot be exported safely.', 'core-blueprint-automations' ) ],
+	'folder_created' => [ 'success', __( 'Folder created.', 'core-blueprint-automations' ) ],
+	'folder_renamed' => [ 'success', __( 'Folder renamed.', 'core-blueprint-automations' ) ],
+	'folder_deleted' => [ 'success', __( 'Folder deleted. Workflows were moved to Unfiled.', 'core-blueprint-automations' ) ],
+	'folder_assigned' => [ 'success', __( 'Workflow moved.', 'core-blueprint-automations' ) ],
+	'folder_invalid' => [ 'error', __( 'Enter a valid folder name.', 'core-blueprint-automations' ) ],
+	'folder_missing' => [ 'error', __( 'Folder no longer exists.', 'core-blueprint-automations' ) ],
+	'folder_confirmation_required' => [ 'error', __( 'Confirm the folder deletion first.', 'core-blueprint-automations' ) ],
+	'folder_assignment_invalid' => [ 'error', __( 'The workflow or folder was not found.', 'core-blueprint-automations' ) ],
+	'folder_failed' => [ 'error', __( 'Folder change could not be saved. No workflow execution settings were changed.', 'core-blueprint-automations' ) ],
 ];
 ?>
 <div class="wrap cb-core-wrap cb-automations-admin cb-automations-index-page cb-automations-workspace">
@@ -147,6 +159,41 @@ $notices = [
 					<p class="description"><?php printf( esc_html( _n( '%d matching workflow', '%d matching workflows', $listing['total'], 'core-blueprint-automations' ) ), (int) $listing['total'] ); ?></p>
 				</div>
 			</div>
+			<details class="cb-automations-workspace__folder-manager">
+				<summary><?php esc_html_e( 'Manage folders', 'core-blueprint-automations' ); ?></summary>
+				<div class="cb-automations-workspace__folder-body">
+					<p class="description"><?php esc_html_e( 'Folders organise workflows only. They never change triggers, execution or permissions.', 'core-blueprint-automations' ); ?></p>
+					<form class="cb-automations-workspace__folder-create" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+						<input type="hidden" name="action" value="cb_automations_folder_create"/>
+						<?php wp_nonce_field( 'cb_automations_folder_create', '_cb_automations_nonce' ); ?>
+						<label for="cb-automations-folder-name"><?php esc_html_e( 'Folder name', 'core-blueprint-automations' ); ?></label>
+						<input id="cb-automations-folder-name" type="text" name="folder_name" maxlength="191" required />
+						<button type="submit" class="button"><?php esc_html_e( 'Add folder', 'core-blueprint-automations' ); ?></button>
+					</form>
+					<?php if ( [] === $folders ) : ?>
+						<p class="description"><?php esc_html_e( 'No folders yet. All existing workflows are Unfiled.', 'core-blueprint-automations' ); ?></p>
+					<?php endif; ?>
+					<?php foreach ( $folders as $folder ) : ?>
+						<div class="cb-automations-workspace__folder-row">
+							<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+								<input type="hidden" name="action" value="cb_automations_folder_rename" />
+								<input type="hidden" name="folder_id" value="<?php echo esc_attr( (string) $folder['id'] ); ?>" />
+								<?php wp_nonce_field( 'cb_automations_folder_rename', '_cb_automations_nonce' ); ?>
+								<label class="screen-reader-text" for="cb-folder-rename-<?php echo esc_attr( (string) $folder['id'] ); ?>"><?php esc_html_e( 'Rename folder', 'core-blueprint-automations' ); ?></label>
+								<input id="cb-folder-rename-<?php echo esc_attr( (string) $folder['id'] ); ?>" type="text" name="folder_name" value="<?php echo esc_attr( $folder['name'] ); ?>" maxlength="191" required />
+								<button class="button button-small" type="submit"><?php esc_html_e( 'Rename', 'core-blueprint-automations' ); ?></button>
+							</form>
+							<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+								<input type="hidden" name="action" value="cb_automations_folder_delete" />
+								<input type="hidden" name="folder_id" value="<?php echo esc_attr( (string) $folder['id'] ); ?>" />
+								<?php wp_nonce_field( 'cb_automations_folder_delete', '_cb_automations_nonce' ); ?>
+								<label><input type="checkbox" name="confirm_delete" value="1" required /><?php esc_html_e( 'Move workflows to Unfiled', 'core-blueprint-automations' ); ?></label>
+								<button class="button button-small" type="submit"><?php esc_html_e( 'Delete folder', 'core-blueprint-automations' ); ?></button>
+							</form>
+						</div>
+					<?php endforeach; ?>
+				</div>
+			</details>
 			<form class="cb-automations-workspace__filters" method="get" action="<?php echo esc_url( admin_url( 'admin.php' ) ); ?>">
 				<input type="hidden" name="page" value="<?php echo esc_attr( \CB\Automations\Admin\AutomationsPage::SLUG ); ?>" />
 				<label for="cb-automations-search"><?php esc_html_e( 'Search workflows', 'core-blueprint-automations' ); ?></label>
@@ -155,6 +202,14 @@ $notices = [
 				<select name="status" id="cb-automations-status">
 					<?php foreach ( [ 'all' => __( 'All statuses', 'core-blueprint-automations' ), 'enabled' => __( 'Enabled', 'core-blueprint-automations' ), 'disabled' => __( 'Disabled', 'core-blueprint-automations' ) ] as $value => $label ) : ?>
 						<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $status, $value ); ?>><?php echo esc_html( $label ); ?></option>
+					<?php endforeach; ?>
+				</select>
+				<label for="cb-automations-folder-filter"><?php esc_html_e( 'Folder', 'core-blueprint-automations' ); ?></label>
+				<select name="folder" id="cb-automations-folder-filter">
+					<option value="all" <?php selected( null === $folder_filter ); ?>><?php esc_html_e( 'All folders', 'core-blueprint-automations' ); ?></option>
+					<option value="unfiled" <?php selected( 0 === $folder_filter ); ?>><?php esc_html_e( 'Unfiled', 'core-blueprint-automations' ); ?></option>
+					<?php foreach ( $folders as $folder ) : ?>
+						<option value="<?php echo esc_attr( (string) $folder['id'] ); ?>" <?php selected( $folder_filter, $folder['id'] ); ?>><?php echo esc_html( $folder['name'] ); ?></option>
 					<?php endforeach; ?>
 				</select>
 				<label for="cb-automations-sort"><?php esc_html_e( 'Sort', 'core-blueprint-automations' ); ?></label>
@@ -173,6 +228,7 @@ $notices = [
 					<table class="widefat striped cb-automations-workspace__table">
 						<thead><tr>
 							<th scope="col"><?php esc_html_e( 'Automation', 'core-blueprint-automations' ); ?></th>
+							<th scope="col"><?php esc_html_e( 'Folder', 'core-blueprint-automations' ); ?></th>
 							<th scope="col"><?php esc_html_e( 'Trigger', 'core-blueprint-automations' ); ?></th>
 							<th scope="col"><?php esc_html_e( 'Status', 'core-blueprint-automations' ); ?></th>
 							<th scope="col"><?php esc_html_e( 'Health', 'core-blueprint-automations' ); ?></th>
@@ -192,6 +248,21 @@ $notices = [
 							?>
 							<tr>
 								<td><a class="cb-automations-workspace__name" href="<?php echo esc_url( \CB\Automations\Admin\AutomationsPage::url( [ 'workflow' => $record->id() ] ) ); ?>"><?php echo esc_html( $record->name() ); ?></a><span class="description">#<?php echo esc_html( (string) $record->id() ); ?> · r<?php echo esc_html( (string) $record->revision() ); ?></span></td>
+								<td>
+									<form class="cb-automations-workspace__folder-assign" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+										<input type="hidden" name="action" value="cb_automations_folder_assign" />
+										<input type="hidden" name="workflow_id" value="<?php echo esc_attr( (string) $record->id() ); ?>" />
+										<?php wp_nonce_field( 'cb_automations_folder_assign', '_cb_automations_nonce' ); ?>
+										<label class="screen-reader-text" for="cb-workflow-folder-<?php echo esc_attr( (string) $record->id() ); ?>"><?php esc_html_e( 'Move workflow to folder', 'core-blueprint-automations' ); ?>: <?php echo esc_html( $record->name() ); ?></label>
+										<select id="cb-workflow-folder-<?php echo esc_attr( (string) $record->id() ); ?>" name="folder_id">
+											<option value="0" <?php selected( (int) ( $assignments[ $record->id() ] ?? 0 ), 0 ); ?>><?php esc_html_e( 'Unfiled', 'core-blueprint-automations' ); ?></option>
+											<?php foreach ( $folders as $folder ) : ?>
+												<option value="<?php echo esc_attr( (string) $folder['id'] ); ?>" <?php selected( (int) ( $assignments[ $record->id() ] ?? 0 ), $folder['id'] ); ?>><?php echo esc_html( $folder['name'] ); ?></option>
+											<?php endforeach; ?>
+										</select>
+										<button type="submit" class="button button-small"><?php esc_html_e( 'Move', 'core-blueprint-automations' ); ?></button>
+									</form>
+								</td>
 								<td><?php echo null !== $ref ? esc_html( $ref->id() ) : '&mdash;'; ?></td>
 								<td><span class="cb-automations-workspace__state <?php echo $enabled ? 'is-enabled' : 'is-disabled'; ?>"><?php echo esc_html( $enabled ? __( 'Enabled', 'core-blueprint-automations' ) : __( 'Disabled', 'core-blueprint-automations' ) ); ?></span></td>
 								<td><span class="cb-automations-workspace__health <?php echo $valid ? 'is-ready' : 'has-issues'; ?>"><?php echo esc_html( $valid ? __( 'Ready', 'core-blueprint-automations' ) : sprintf( _n( '%d issue', '%d issues', count( $item['validation']->issues() ), 'core-blueprint-automations' ), count( $item['validation']->issues() ) ) ); ?></span></td>
@@ -223,7 +294,7 @@ $notices = [
 					<nav class="tablenav bottom cb-automations-pagination" aria-label="<?php esc_attr_e( 'Workflow pages', 'core-blueprint-automations' ); ?>">
 						<div class="tablenav-pages">
 							<?php echo wp_kses_post( paginate_links( [
-								'base' => add_query_arg( 'paged', '%#%', \CB\Automations\Admin\AutomationsPage::url( [ 's' => $search, 'status' => $status, 'sort' => $sort ] ) ),
+								'base' => add_query_arg( 'paged', '%#%', \CB\Automations\Admin\AutomationsPage::url( [ 's' => $search, 'status' => $status, 'sort' => $sort, 'folder' => null === $folder_filter ? 'all' : ( 0 === $folder_filter ? 'unfiled' : $folder_filter ) ] ) ),
 								'format' => '', 'current' => $listing['page'], 'total' => $listing['pages'],
 								'prev_text' => __( '‹ Previous', 'core-blueprint-automations' ),
 								'next_text' => __( 'Next ›', 'core-blueprint-automations' ),
