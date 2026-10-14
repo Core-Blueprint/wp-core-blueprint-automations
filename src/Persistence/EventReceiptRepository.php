@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace CB\Automations\Persistence;
 
 use CoreBlueprint\Core\Automation\TriggerEvent;
+use CB\Automations\Runtime\ActionCausality;
 use CB\Automations\Runtime\JobSubjectType;
 use CB\Automations\Runtime\Vault;
 
@@ -15,10 +16,14 @@ final class EventReceiptRepository {
 	private const STATUS_IGNORED = 'ignored';
 	private const STATUS_FAILED = 'failed';
 
-	public static function receive( TriggerEvent $event ): int {
+	public static function receive( TriggerEvent $event, ?array $causality = null ): int {
 		global $wpdb;
 		$fingerprint = self::fingerprint( $event->provider(), $event->trigger_id(), $event->event_id() );
-		$envelope = Vault::seal( [ 'payload' => $event->payload() ], self::aad( $fingerprint ) );
+		$content = [ 'payload' => $event->payload() ];
+		if ( null !== $causality ) {
+			$content['causality'] = ActionCausality::validate( $causality );
+		}
+		$envelope = Vault::seal( $content, self::aad( $fingerprint ) );
 		$table = Schema::event_receipts_table();
 		$occurred = self::normalize_occurred_at( $event->occurred_at() );
 		$now = current_time( 'mysql', true );
@@ -84,18 +89,36 @@ final class EventReceiptRepository {
 		return $row;
 	}
 
-	/** @param array<string,mixed> $receipt @return array<string,mixed> */
-	public static function open_payload( array $receipt ): array {
+	/**
+	 * @param array<string,mixed> $receipt
+	 * @return array{payload:array<string,mixed>,causality:array<string,mixed>|null}
+	 */
+	public static function open_event( array $receipt ): array {
 		self::assert_row( $receipt );
 		$envelope = (string) ( $receipt['payload_envelope'] ?? '' );
 		if ( '' === $envelope ) {
 			throw PersistenceFailure::definition();
 		}
 		$decoded = Vault::open( $envelope, self::aad( (string) $receipt['event_fingerprint'] ) );
-		if ( [ 'payload' ] !== array_keys( $decoded ) || ! is_array( $decoded['payload'] ) ) {
+		$keys = array_keys( $decoded );
+		sort( $keys );
+		if ( ! in_array( $keys, [ [ 'payload' ], [ 'causality', 'payload' ] ], true )
+			|| ! is_array( $decoded['payload'] ?? null ) ) {
 			throw PersistenceFailure::definition();
 		}
-		return $decoded['payload'];
+		try {
+			$causality = array_key_exists( 'causality', $decoded )
+				? ActionCausality::validate( $decoded['causality'] )
+				: null;
+		} catch ( \UnexpectedValueException ) {
+			throw PersistenceFailure::definition();
+		}
+		return [ 'payload' => $decoded['payload'], 'causality' => $causality ];
+	}
+
+	/** @param array<string,mixed> $receipt @return array<string,mixed> */
+	public static function open_payload( array $receipt ): array {
+		return self::open_event( $receipt )['payload'];
 	}
 
 	public static function finalize( int $receipt_id, bool $matched ): void {

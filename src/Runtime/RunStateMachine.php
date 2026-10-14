@@ -7,7 +7,7 @@ defined( 'ABSPATH' ) || exit;
 final class RunStateMachine {
 	public static function allows( RunStatus $from, RunStatus $to ): bool {
 		return match ( $from ) {
-			RunStatus::Queued => in_array( $to, [ RunStatus::Running, RunStatus::Blocked, RunStatus::Cancelled ], true ),
+			RunStatus::Queued => in_array( $to, [ RunStatus::Running, RunStatus::Blocked, RunStatus::Cancelled, RunStatus::Skipped ], true ),
 			RunStatus::Running => in_array(
 				$to,
 				[

@@ -37,7 +37,9 @@ final class EventMaterializer {
 				return 0;
 			}
 
-			$payload = EventReceiptRepository::open_payload( $receipt );
+			$event = EventReceiptRepository::open_event( $receipt );
+			$payload = $event['payload'];
+			$causality = $event['causality'];
 			$provider = (string) $receipt['provider'];
 			$trigger_id = (string) $receipt['trigger_id'];
 			$schema_version = (string) $receipt['schema_version'];
@@ -46,7 +48,7 @@ final class EventMaterializer {
 				throw PersistenceFailure::definition();
 			}
 
-			$correlation_id = wp_generate_uuid4();
+			$correlation_id = null !== $causality ? $causality['correlation_id'] : wp_generate_uuid4();
 			if ( ! is_string( $correlation_id ) || '' === $correlation_id ) {
 				throw PersistenceFailure::definition();
 			}
@@ -64,10 +66,19 @@ final class EventMaterializer {
 					if ( null === $trigger ) {
 						throw PersistenceFailure::definition();
 					}
+					$reason = ActionCausality::suppression_reason( $causality, $workflow->id() );
 					$run_id = RunRepository::create_snapshot( $receipt_id, $workflow, $correlation_id );
+					if ( '' !== $reason ) {
+						if ( ! RunRepository::transition_status( $run_id, RunStatus::Queued, RunStatus::Skipped, $reason ) ) {
+							throw PersistenceFailure::definition();
+						}
+						++$matched;
+						continue;
+					}
 					RunContextRepository::put(
 						$run_id,
 						[
+							'causality' => $causality,
 							'event' => [
 								'event_id' => (string) $receipt['event_id'],
 								'provider' => $provider,

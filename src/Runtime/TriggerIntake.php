@@ -44,7 +44,7 @@ final class TriggerIntake {
 		WorkerWakeup::request_at( time() + 2 );
 
 		try {
-			$receipt_id = EventReceiptRepository::receive( $event );
+			$receipt_id = EventReceiptRepository::receive( $event, ActionCausality::current() );
 			JobRepository::enqueue( JobSubjectType::Event, $receipt_id );
 			WorkerWakeup::request_if_pending_events();
 		} catch ( \Throwable ) {

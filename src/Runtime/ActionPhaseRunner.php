@@ -105,6 +105,14 @@ final class ActionPhaseRunner {
 				return ActionPhaseResult::failed( 'runtime.binding_resolution_failed' );
 			}
 
+			// Validate authenticated ancestry before beginning provider execution.
+			try {
+				$origin = ActionCausality::for_run( $run->workflow_id(), $run->correlation_id(), $context['causality'] ?? null );
+			} catch ( \UnexpectedValueException ) {
+				self::persist_blocked( $run_id, $attempt, 'runtime.causal_provenance_invalid', '', $lease );
+				return ActionPhaseResult::blocked( 'runtime.causal_provenance_invalid' );
+			}
+
 			$lease->renew();
 			$invocation = new InvocationContext(
 				$run->execution_principal_user_id(),
@@ -116,13 +124,13 @@ final class ActionPhaseRunner {
 				(string) $run->workflow_id(),
 				(string) $run->workflow_revision()
 			);
-			$result = ActionInvoker::invoke(
+			$result = ActionCausality::during_action( $origin, static fn () => ActionInvoker::invoke(
 				$reference->provider(),
 				$reference->id(),
 				$reference->schema_version(),
 				$input,
 				$invocation
-			);
+			) );
 
 			if ( is_wp_error( $result ) ) {
 				$error_code = self::error_code( $result );

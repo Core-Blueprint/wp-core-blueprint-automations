@@ -165,7 +165,7 @@ final class RunRepository {
 			throw new \InvalidArgumentException( 'Invalid automation run status transition.' );
 		}
 		$failure_code = self::normalize_error_code( $failure_code );
-		if ( in_array( $to, [ RunStatus::Running, RunStatus::Succeeded, RunStatus::Skipped ], true ) ) {
+		if ( in_array( $to, [ RunStatus::Running, RunStatus::Succeeded ], true ) ) {
 			$failure_code = '';
 		}
 		$table = Schema::runs_table();
