@@ -11,6 +11,7 @@ use CB\Automations\Admin\RunHistoryCapability;
 use CB\Automations\Admin\RunsAssets;
 use CB\Automations\Admin\WorkflowActivationController;
 use CB\Automations\Admin\WorkflowController;
+use CB\Automations\Admin\WorkflowFolderController;
 use CB\Automations\Admin\WorkflowTransferController;
 use CB\Automations\Persistence\Schema;
 use CB\Automations\Provider\WordPress\WordPressProvider;
@@ -57,6 +58,7 @@ final class Plugin {
 		RecoveryCapability::init();
 		OperatorRecoveryController::init();
 		WorkflowController::init();
+		WorkflowFolderController::init();
 		WorkflowTransferController::init();
 		WorkflowActivationController::init();
 		AdminAssets::init();

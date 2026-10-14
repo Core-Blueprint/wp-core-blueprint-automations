@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace CB\Automations\Persistence;
 
 use CB\Automations\Runtime\TriggerKey;
+use CB\Automations\Organisation\FolderRepository;
 use CB\Automations\Workflow\ActivationState;
 use CB\Automations\Workflow\Definition;
 use CB\Automations\Workflow\DefinitionCodec;
@@ -115,12 +116,12 @@ final class WorkflowRepository {
 	 *
 	 * @return WorkflowRecord[]
 	 */
-	public static function query_index( int $limit, int $offset, string $search = '', string $status = 'all', string $sort = 'updated_desc' ): array {
+	public static function query_index( int $limit, int $offset, string $search = '', string $status = 'all', string $sort = 'updated_desc', ?int $folder_id = null ): array {
 		global $wpdb;
 		$limit = max( 1, min( 100, $limit ) );
 		$offset = max( 0, $offset );
 		$args = [];
-		$where = self::index_where( $search, $status, $args );
+		$where = self::index_where( $search, $status, $args, $folder_id );
 		$order = self::index_order( $sort );
 		$table = Schema::table();
 		$args[] = $limit;
@@ -139,10 +140,10 @@ final class WorkflowRepository {
 		return self::hydrate_rows( $rows );
 	}
 
-	public static function count_index( string $search = '', string $status = 'all' ): int {
+	public static function count_index( string $search = '', string $status = 'all', ?int $folder_id = null ): int {
 		global $wpdb;
 		$args = [];
-		$where = self::index_where( $search, $status, $args );
+		$where = self::index_where( $search, $status, $args, $folder_id );
 		$table = Schema::table();
 		$sql = "SELECT COUNT(*) FROM {$table} {$where}";
 		$count = [] === $args ? $wpdb->get_var( $sql ) : $wpdb->get_var( $wpdb->prepare( $sql, ...$args ) );
@@ -153,12 +154,22 @@ final class WorkflowRepository {
 	}
 
 	/** @param list<string> $args */
-	private static function index_where( string $search, string $status, array &$args ): string {
+	private static function index_where( string $search, string $status, array &$args, ?int $folder_id = null ): string {
 		global $wpdb;
 		$clauses = [];
 		if ( in_array( $status, [ 'enabled', 'disabled' ], true ) ) {
 			$clauses[] = 'activation_state = %s';
 			$args[] = $status;
+		}
+		if ( null !== $folder_id ) {
+			$links = FolderRepository::assignments_table();
+			$workflows = Schema::table();
+			if ( 0 === $folder_id ) {
+				$clauses[] = "NOT EXISTS (SELECT 1 FROM {$links} f WHERE f.workflow_id = {$workflows}.id)";
+			} elseif ( $folder_id > 0 ) {
+				$clauses[] = "EXISTS (SELECT 1 FROM {$links} f WHERE f.workflow_id = {$workflows}.id AND f.folder_id = %d)";
+				$args[] = $folder_id;
+			}
 		}
 		$search = trim( $search );
 		if ( '' !== $search ) {

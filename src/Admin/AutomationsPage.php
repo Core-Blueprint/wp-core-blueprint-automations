@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace CB\Automations\Admin;
 
 use CB\Automations\Runtime\RunStatus;
+use CB\Automations\Organisation\FolderRepository;
 use CB\Automations\Runtime\StepStatus;
 use CB\Automations\Template\WorkflowTemplateRegistry;
 use CB\Automations\Validation\ValidationResult;
@@ -90,7 +91,27 @@ final class AutomationsPage implements Page {
 			$sort = isset( $_GET['sort'] ) && is_scalar( $_GET['sort'] )
 				? sanitize_key( wp_unslash( (string) $_GET['sort'] ) ) : 'updated_desc';
 			$status = in_array( $status, [ 'all', 'enabled', 'disabled' ], true ) ? $status : 'all';
+			$folders = [];
+			$folder_filter = null;
+			$assignments = [];
+			if ( 'workflows' === $view ) {
+				FolderRepository::ensure_ready();
+				$folders = FolderRepository::all();
+				$requested_folder = isset( $_GET['folder'] ) && is_scalar( $_GET['folder'] )
+					? sanitize_text_field( wp_unslash( (string) $_GET['folder'] ) ) : 'all';
+				if ( 'unfiled' === $requested_folder ) {
+					$folder_filter = 0;
+				} elseif ( ctype_digit( $requested_folder ) && (int) $requested_folder > 0 ) {
+					$folder_filter = (int) $requested_folder;
+				}
+			}
 			$sort = in_array( $sort, [ 'updated_desc', 'updated_asc', 'name_asc', 'name_desc' ], true ) ? $sort : 'updated_desc';
+			$listing = 'workflows' === $view ? $reader->index( $page, 25, $search, $status, $sort, $folder_filter ) : null;
+			if ( null !== $listing ) {
+				$assignments = FolderRepository::assignments(
+					array_map( static fn( array $item ): int => $item['record']->id(), $listing['items'] )
+				);
+			}
 			$this->template(
 				'automations.php',
 				[
@@ -98,7 +119,10 @@ final class AutomationsPage implements Page {
 					'search'    => $search,
 					'status'    => $status,
 					'sort'      => $sort,
-					'listing'   => 'workflows' === $view ? $reader->index( $page, 25, $search, $status, $sort ) : null,
+					'listing'   => $listing,
+					'folders' => $folders,
+					'folder_filter' => $folder_filter,
+					'assignments' => $assignments,
 					'templates' => 'templates' === $view ? WorkflowTemplateRegistry::all() : [],
 					'import_preview' => 'import' === $view && isset( $_GET['token'] ) && is_scalar( $_GET['token'] )
 						? WorkflowTransferController::preview( sanitize_text_field( wp_unslash( (string) $_GET['token'] ) ) ) : null,
