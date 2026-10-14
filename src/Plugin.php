@@ -46,6 +46,7 @@ final class Plugin {
 		StarterTemplates::init();
 		RuntimeWorker::init();
 		TriggerIntake::init();
+		WorkflowTransferController::init_maintenance();
 
 		if ( ! is_admin() || ! Requirements::admin_ready() ) {
 			return;

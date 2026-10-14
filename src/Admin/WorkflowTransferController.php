@@ -26,8 +26,13 @@ final class WorkflowTransferController {
 		add_action( 'admin_post_cb_automations_import_preview', [ self::class, 'upload' ] );
 		add_action( 'admin_post_cb_automations_import_confirm', [ self::class, 'confirm' ] );
 		add_action( 'admin_post_cb_automations_export_workflow', [ self::class, 'export' ] );
-		// Reuse WordPress's existing scheduled maintenance event. Do not schedule
-		// an additional one-shot event outside the runtime WorkerWakeup boundary.
+	}
+
+	/**
+	 * Register independently of the admin UI; wp-cron.php is not is_admin().
+	 * WordPress schedules the maintenance hook itself.
+	 */
+	public static function init_maintenance(): void {
 		add_action( 'wp_scheduled_delete', [ self::class, 'cleanup_expired_claims' ] );
 	}
 

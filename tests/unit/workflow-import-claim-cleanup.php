@@ -57,8 +57,11 @@ if ( ! str_contains( $GLOBALS['wpdb']->sql, 'LIMIT 200' )
 	throw new \RuntimeException( 'Maintenance query is not bounded.' );
 }
 $source = file_get_contents( dirname( __DIR__, 2 ) . '/src/Admin/WorkflowTransferController.php' );
-if ( false === $source || str_contains( $source, 'wp_schedule_single_event(' )
-	|| ! str_contains( $source, "add_action( 'wp_scheduled_delete'" ) ) {
+$plugin = file_get_contents( dirname( __DIR__, 2 ) . '/src/Plugin.php' );
+if ( false === $source || false === $plugin || str_contains( $source, 'wp_schedule_single_event(' )
+	|| ! str_contains( $source, "add_action( 'wp_scheduled_delete'" )
+	|| ! str_contains( $plugin, 'WorkflowTransferController::init_maintenance();' )
+	|| strpos( $plugin, 'WorkflowTransferController::init_maintenance();' ) > strpos( $plugin, 'if ( ! is_admin()' ) ) {
 	throw new \RuntimeException( 'Importer must not schedule its own WP-Cron event.' );
 }
 fwrite( STDOUT, "WordPress scheduled import claim cleanup: PASS\n" );
