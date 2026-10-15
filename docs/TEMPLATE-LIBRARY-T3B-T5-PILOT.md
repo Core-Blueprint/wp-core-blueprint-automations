@@ -103,3 +103,11 @@ must not be described as Golden/release-ready until proven.
 No merge, CI, marketplace/vendor calls, deployment or data cleanup without
 explicit user approval. No commands containing `exit` are to be copied
 into the operator's interactive terminal.
+
+## Follow-up: category facets (2026-10-15)
+
+The additive optional Base `TemplateCategorySourceInterface` is now implemented
+by Automations' source adapter. It advertises categories from registered
+starter templates and advertises `custom` only when the current actor can see
+at least one saved template. No document, owner identity, secret or count is
+sent to Base. Requires a compatible Base candidate with category facets.

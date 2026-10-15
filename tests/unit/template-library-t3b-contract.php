@@ -61,6 +61,9 @@ assert_true( str_contains( $code['trigger'], 'StoredTemplateRepository::TYPE' ),
 assert_true( str_contains( $code['worker'], 'TemplateSourceAdapter::SOURCE_ID === $source' ), 'Selected metadata must not override source identity.' );
 assert_true( str_contains( $code['worker'], 'StoredTemplateRepository::definition(' ), 'Create must re-read authenticated stored templates.' );
 assert_true( str_contains( $code['bridge'], 'TemplateSourceRegistry::register( new TemplateSourceAdapter() )' ), 'Browser provider must use Base registry.' );
+assert_true( str_contains( $code['source'], 'TemplateCategorySourceInterface' ), 'Provider must implement optional Base category facets.' );
+assert_true( str_contains( $code['source'], 'StoredTemplateRepository::search( $user_id' ), 'Saved custom category must be visible to the requesting actor.' );
+assert_true( str_contains( $code['source'], '$this->can_browse( $user_id )' ), 'Category facets must enforce browse authority.' );
 assert_true( str_contains( $code['plugin'], 'StoredTemplateRepository::register();' ), 'Private storage must register.' );
 assert_true( str_contains( $code['plugin'], 'TemplateLibraryBridge::init();' ), 'Provider must be booted before Base collects its sources.' );
 assert_true( str_contains( $rootfile = (string) file_get_contents( $root . '/src/Persistence/WorkflowRepository.php' ), 'ActivationState::Disabled->value' ), 'Instantiated workflows must default to DISABLED.' );

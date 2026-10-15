@@ -4,6 +4,7 @@ namespace CB\Automations\Template;
 
 use CB\Automations\Integration\Suite;
 use CoreBlueprint\Core\TemplateLibrary\TemplateManagementSourceInterface;
+use CoreBlueprint\Core\TemplateLibrary\TemplateCategorySourceInterface;
 use CoreBlueprint\Core\TemplateLibrary\TemplateMetadata;
 use CoreBlueprint\Core\TemplateLibrary\TemplateNavigation;
 use CoreBlueprint\Core\TemplateLibrary\TemplatePage;
@@ -15,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
  * One registered workflow Designer type; no other extension or Designer can
  * enumerate workflow definitions. Base receives metadata, never documents.
  */
-final class TemplateSourceAdapter implements TemplateManagementSourceInterface {
+final class TemplateSourceAdapter implements TemplateManagementSourceInterface, TemplateCategorySourceInterface {
 	public const SOURCE_ID = 'core-blueprint-automations-workflows';
 	public const DESIGNER_ID = 'workflow';
 
@@ -25,6 +26,25 @@ final class TemplateSourceAdapter implements TemplateManagementSourceInterface {
 
 	public function can_browse( int $user_id ): bool {
 		return StoredTemplateRepository::authorized( $user_id );
+	}
+
+	/** Category facets never return saved-template metadata or user counts. */
+	public function categories( int $user_id ): array {
+		if ( ! $this->can_browse( $user_id ) ) {
+			return [];
+		}
+		$categories = [];
+		foreach ( WorkflowTemplateRegistry::all() as $template ) {
+			$id = $template->category();
+			$categories[$id] = 'wordpress' === $id
+				? 'WordPress' : ucwords( str_replace( [ '-', '_', '.' ], ' ', $id ) );
+		}
+		$visible_saved = StoredTemplateRepository::search( $user_id, '', '', 1, '0' );
+		if ( [] !== $visible_saved['items'] ) {
+			$categories['custom'] = __( 'Custom' );
+		}
+		ksort( $categories, SORT_STRING );
+		return $categories;
 	}
 
 	public function can_view( string $template_id, int $user_id ): bool {
