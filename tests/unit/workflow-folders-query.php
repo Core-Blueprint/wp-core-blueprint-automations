@@ -28,7 +28,7 @@ namespace {
 			// Preserve placeholders for query-shape assertions; no SQL is executed.
 			return $sql;
 		}
-		public function get_var( string $sql ): int { $this->sql = $sql; $this->args = []; return 0; }
+		public function get_var( string $sql ): int { $this->sql = $sql; return 0; }
 		public function get_results( string $sql, string $type ): array { return []; }
 	}
 	$GLOBALS['wpdb'] = new FolderIndexFakeWpdb();
@@ -46,6 +46,8 @@ namespace {
 		throw new \RuntimeException( 'Folder filter must be combined with prepared search and status before counting.' );
 	}
 
+	// Reset the fake database capture between independent query scenarios.
+	$GLOBALS['wpdb']->args = [];
 	$repo::count_index( '', 'all', 0 );
 	if ( ! str_contains( $GLOBALS['wpdb']->sql, 'NOT EXISTS' ) || [] !== $GLOBALS['wpdb']->args ) {
 		throw new \RuntimeException( 'Unfiled filter must select workflows without a folder link.' );
