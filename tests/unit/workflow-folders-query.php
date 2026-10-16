@@ -28,7 +28,7 @@ namespace {
 			// Preserve placeholders for query-shape assertions; no SQL is executed.
 			return $sql;
 		}
-		public function get_var( string $sql ): int { $this->sql = $sql; return 0; }
+		public function get_var( string $sql ): int { $this->sql = $sql; $this->args = []; return 0; }
 		public function get_results( string $sql, string $type ): array { return []; }
 	}
 	$GLOBALS['wpdb'] = new FolderIndexFakeWpdb();
