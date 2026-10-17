@@ -2466,3 +2466,9 @@ msgstr "Workflow in Ordner verschieben"
 
 msgid "Move"
 msgstr "Verschieben"
+
+msgid "The workflow contains a number that cannot be represented safely in the editor. No changes were saved."
+msgstr "Der Workflow enthält eine Zahl, die im Editor nicht sicher dargestellt werden kann. Es wurden keine Änderungen gespeichert."
+
+msgid "Enter a number within the supported precision range."
+msgstr "Geben Sie eine Zahl innerhalb des unterstützten Genauigkeitsbereichs ein."
