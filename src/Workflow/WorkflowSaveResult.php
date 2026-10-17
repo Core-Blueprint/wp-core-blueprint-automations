@@ -11,6 +11,7 @@ final readonly class WorkflowSaveResult {
 	public const SAVED               = 'saved';
 	public const SAVED_DISABLED      = 'saved_disabled';
 	public const PERSISTENCE_BLOCKED = 'persistence_blocked';
+	public const PRECISION_BLOCKED   = 'precision_blocked';
 	public const CONFLICT            = 'conflict';
 	public const WORKFLOW_INVALID    = 'workflow_invalid';
 	public const EXECUTION_UNAVAILABLE = 'execution_unavailable';
@@ -33,6 +34,10 @@ final readonly class WorkflowSaveResult {
 
 	public static function persistence_blocked( ValidationResult $validation ): self {
 		return new self( self::PERSISTENCE_BLOCKED, $validation );
+	}
+
+	public static function precision_blocked( ValidationResult $validation ): self {
+		return new self( self::PRECISION_BLOCKED, $validation );
 	}
 
 	public static function conflict( ValidationResult $validation ): self {
