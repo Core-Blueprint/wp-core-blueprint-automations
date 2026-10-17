@@ -102,6 +102,9 @@ $complete = WorkflowRecoveryPlanner::plan( $stored, [
 ], $snapshot );
 assert_true( 'ready' === $complete['status'] && $complete['candidate'] instanceof Definition, 'C1-02: atomic complete repair should be ready.' );
 $fixed = DefinitionCodec::encode( $complete['candidate'] );
+$expected_full = $original;
+unset( $expected_full['actions'][0]['bindings']['secret_a'], $expected_full['actions'][0]['bindings']['secret_b'] );
+assert_true( $fixed === $expected_full, 'C3-03: full before/after proof must preserve every unrelated field and exact order.' );
 assert_true( count( $complete['intent_ids'] ) === 2 && $complete['intent_ids'] === [ 'fix_a', 'fix_b' ], 'C1-02: command IDs and order preserved.' );
 assert_true( $fixed['actions'][0]['bindings'] === [ 'label' => [ 'source' => 'literal', 'value' => 'keep-visible' ] ], 'C3-03: untouched fields preserved verbatim.' );
 assert_true( $fixed['actions'][0]['step_id'] === 'action_1' && $fixed['trigger']['step_id'] === 'trigger_1', 'C3-03: step identities changed.' );
@@ -193,6 +196,13 @@ $fully_mixed = WorkflowRecoveryPlanner::plan( $mixed, [
     $repair_integer,
 ], $snapshot );
 assert_true( 'ready' === $fully_mixed['status'], 'C1-04: mixed privacy+integer complete batch should be ready.' );
+$expected_mixed = DefinitionCodec::encode( $mixed );
+unset( $expected_mixed['actions'][0]['bindings']['secret_a'] );
+$expected_mixed['actions'][0]['bindings']['decimal']['value'] = (string) PHP_INT_MAX;
+assert_true(
+    DefinitionCodec::encode( $fully_mixed['candidate'] ) === $expected_mixed,
+    'C1-04: full mixed before/after proof must preserve unrelated field types and values.'
+);
 
 // No network, database, WordPress globals, provider callbacks or external execution:
 // all planner inputs above are canonically decoded objects and immutable array snapshots.
