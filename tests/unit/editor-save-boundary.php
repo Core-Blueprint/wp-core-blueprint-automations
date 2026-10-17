@@ -119,6 +119,40 @@ assert_true(
     'AU2-06: invisible stored condition cannot be discarded by ordinary Save.'
 );
 
+// Malformed historical trigger bindings cannot be exposed to the browser.
+// The runtime validator already disallows any trigger binding; AU-2 redacts
+// rather than exposing an old literal that may contain private data.
+$with_trigger_binding = definition(
+    step(
+        'trigger_1',
+        reference( CapabilityKind::TRIGGER, $work, 'privacy.trigger' ),
+        [ 'unsupported_input' => Binding::literal( 'historical-trigger-private-value' ) ]
+    ),
+    [],
+    [],
+    [ step( 'action_1', reference( CapabilityKind::ACTION, $work, 'privacy.save' ) ) ]
+);
+$bad_trigger_projection = EditorDefinitionProjection::project(
+    DefinitionCodec::encode( $with_trigger_binding ),
+    [
+        'trigger:' . $work . ':privacy.trigger' => $trigger,
+        'action:' . $work . ':privacy.save' => $action,
+    ]
+);
+assert_true(
+    [] === $bad_trigger_projection['definition']['trigger']['bindings']
+        && 1 === $bad_trigger_projection['redacted'],
+    'AU2-trigger: historical trigger input data must be redacted before browser output.'
+);
+assert_true(
+    null === EditorSaveBoundary::reconcile(
+        $with_trigger_binding,
+        DefinitionCodec::decode( $bad_trigger_projection['definition'] ),
+        $source
+    ),
+    'AU2-trigger: save must not delete unrendered trigger values.'
+);
+
 // No redactions: preserve canonical DefinitionCodec semantics and source order.
 $clean = definition(
     null,
