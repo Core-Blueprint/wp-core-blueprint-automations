@@ -62,6 +62,13 @@ final class AutomationsPage implements Page {
 					return;
 				}
 
+				// Never serialize 64-bit PHP integers into a JavaScript Number.
+				// This read-only recovery route leaves the stored definition intact.
+				if ( ! \CB\Automations\Workflow\EditorIntegerSafety::is_browser_safe( $detail['record']->definition() ) ) {
+					$this->render_unavailable();
+					return;
+				}
+
 				$this->template(
 					'workflow-editor.php',
 					[
