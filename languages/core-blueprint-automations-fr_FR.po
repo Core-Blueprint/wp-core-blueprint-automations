@@ -2469,3 +2469,9 @@ msgstr "Déplacer le flux de travail dans un dossier"
 
 msgid "Move"
 msgstr "Déplacer"
+
+msgid "The workflow contains a number that cannot be represented safely in the editor. No changes were saved."
+msgstr "Le workflow contient un nombre qui ne peut pas être représenté de manière sûre dans l’éditeur. Aucune modification n’a été enregistrée."
+
+msgid "Enter a number within the supported precision range."
+msgstr "Saisissez un nombre dans la plage de précision prise en charge."
