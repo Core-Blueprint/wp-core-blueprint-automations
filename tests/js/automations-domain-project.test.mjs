@@ -139,3 +139,23 @@ test('AU1-A09: rejects alternate wrappers, dirty JavaScript values and unauthori
   assert.throws(() => toProject({ ...empty(), execution_principal_user_id: 33 }), /fields/i);
   assert.throws(() => fromProject({ ...project, design_type: 'mail-template' }), /wrapper|design_type/i);
 });
+
+test('AU1-A10: trigger removal, condition insertion and immutable command preconditions', () => {
+  const start = toProject(populated());
+  const oldTrigger = fromProject(start).trigger;
+  const drop = workflowCommands.setTrigger({ expected: oldTrigger, entry: null });
+  const without = run(start, drop);
+  assert.equal(fromProject(without).trigger, null);
+  assert.throws(() => run(without, drop), /conflict/i);
+  const newCondition = { condition_id: 'condition_2', left: output('state_1'), operator: 'equals', right: literal('green') };
+  const create = workflowCommands.insert({ collection: 'conditions', index: 1, entry: newCondition });
+  newCondition.condition_id = 'condition_changed';
+  assert.deepEqual(fromProject(run(start, create)).conditions.map(x => x.condition_id), ['condition_1', 'condition_2']);
+  assert.deepEqual(fromProject(start), populated());
+});
+
+test('AU1-A11: sparse literal arrays cannot silently become null in JSON', () => {
+  const sparse = []; sparse[1] = 'visible';
+  const bad = { ...empty(), states: [step('state', 'state_1', { tags: literal(sparse) })] };
+  assert.throws(() => toProject(bad), /sparse/i);
+});
