@@ -30,6 +30,7 @@ function clone(value, seen = new WeakSet(), depth = 0) {
   if (typeof value !== 'object' || (!plain(value) && !Array.isArray(value))) fail('unsupported JSON value');
   if (seen.has(value)) fail('cyclic data');
   seen.add(value);
+  if (Array.isArray(value) && Array.from({ length: value.length }, (_, index) => index).some((index) => !has(value, index))) fail('sparse array is unsupported');
   const copy = Array.isArray(value) ? value.map((item) => clone(item, seen, depth + 1)) : {};
   if (plain(value)) {
     for (const key of Object.keys(value)) {
