@@ -44,3 +44,13 @@ test('AU3-J04: typed numeric text in strings remains a string in the codec', () 
   assert.equal(typeof JSON.parse(JSON.stringify(data)).value, 'string');
   assert.equal(JSON.parse(JSON.stringify(data)).value, '9223372036854775807');
 });
+
+test('AU3-J05: number inputs reject integral rounding and preserve finite decimals', () => {
+  const parseNumber = globalThis.cbAutomationsEditorHelpers.parseSafeNumber;
+  for (const [text, value] of [['0.5', 0.5], ['-1.25', -1.25], ['1e3', 1000], ['9007199254740991', Number.MAX_SAFE_INTEGER]]) {
+    assert.equal(parseNumber(text), value);
+  }
+  for (const text of ['9007199254740992', '9007199254740993', '-9007199254740992', '1e20', 'Infinity', '0x10', '']) {
+    assert.equal(parseNumber(text), null, `Refuse number precision loss: ${text}`);
+  }
+});
