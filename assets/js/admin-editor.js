@@ -40,12 +40,34 @@
 		return options;
 	}
 
+	// Check the decimal input against BigInt bounds BEFORE converting to Number.
+	function parseExactInteger(value) {
+		if (typeof value !== 'string' || !/^-?\d+$/.test(value) || /^-0+$/.test(value)) return null;
+		try {
+			const exact = BigInt(value);
+			if (exact > 9007199254740991n || exact < -9007199254740991n) return null;
+			const numeric = Number(exact);
+			return Number.isSafeInteger(numeric) ? numeric : null;
+		} catch {
+			return null;
+		}
+	}
+
+	function parseSafeNumber(value) {
+		if (typeof value !== 'string' || !/^-?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?$/.test(value)) return null;
+		const numeric = Number(value);
+		return Number.isFinite(numeric) && (!Number.isInteger(numeric) || Number.isSafeInteger(numeric))
+			? numeric : null;
+	}
+
 	if (typeof document === 'undefined') {
 		globalThis.cbAutomationsEditorHelpers = {
 			semanticType,
 			semanticsCompatible,
 			typeCompatible,
 			postStatusChoices,
+			parseExactInteger,
+			parseSafeNumber,
 		};
 		return;
 	}
@@ -266,13 +288,20 @@
 			textarea.addEventListener('input', () => {
 				const lines = textarea.value === '' ? [] : textarea.value.split(/\r?\n/);
 				const itemType = schema?.items || 'string';
-				onChange(lines.map((line) => {
+				let invalid = false;
+				const values = lines.map((line) => {
 					const trimmed = line.trim();
-					if (itemType === 'integer') return /^-?\d+$/.test(trimmed) ? Number.parseInt(trimmed, 10) : line;
-					if (itemType === 'number') return trimmed !== '' && Number.isFinite(Number(trimmed)) ? Number(trimmed) : line;
+					if (itemType === 'integer' || itemType === 'number') {
+						const parsed = itemType === 'integer' ? parseExactInteger(trimmed) : parseSafeNumber(trimmed);
+						if (parsed === null) invalid = true;
+						return parsed;
+					}
 					if (itemType === 'boolean') return trimmed.toLowerCase() === 'true' ? true : (trimmed.toLowerCase() === 'false' ? false : line);
 					return line;
-				}));
+				});
+				textarea.setCustomValidity(invalid ? (strings.invalid_number || 'Invalid numeric value.') : '');
+				if (invalid) return;
+				onChange(values);
 			});
 			wrap.append(textarea, el('p', { class: 'description' }, strings.empty_array || 'One value per line.'));
 			return wrap;
@@ -282,9 +311,15 @@
 		if (type === 'number') input.step = 'any';
 		input.value = binding.value ?? '';
 		input.addEventListener('input', () => {
-			if (type === 'integer') onChange(/^-?\d+$/.test(input.value) ? Number.parseInt(input.value, 10) : input.value);
-			else if (type === 'number') onChange(input.value !== '' && Number.isFinite(Number(input.value)) ? Number(input.value) : input.value);
-			else onChange(input.value);
+			if (type === 'integer' || type === 'number') {
+				const numeric = type === 'integer' ? parseExactInteger(input.value) : parseSafeNumber(input.value);
+				const invalid = numeric === null;
+				input.setCustomValidity(invalid ? (strings.invalid_number || 'Invalid numeric value.') : '');
+				if (invalid) return;
+				onChange(numeric);
+				return;
+			}
+			onChange(input.value);
 		});
 		wrap.append(input);
 		return wrap;
