@@ -28,11 +28,10 @@ final class EditorIntegerSafety {
             return $value <= self::MAX_SAFE_INTEGER && $value >= -self::MAX_SAFE_INTEGER;
         }
         if ( is_float( $value ) ) {
-            // A JSON number with integral magnitude beyond JS safe precision
-            // might already have been rounded by PHP JSON decoding.
-            return is_finite( $value )
-                && ( floor( $value ) !== $value
-                    || ( $value <= self::MAX_SAFE_INTEGER && $value >= -self::MAX_SAFE_INTEGER ) );
+            // Integral PHP floats are not type-stable through the current
+            // JSON codec (e.g. 1.0 encodes as 1 without PRESERVE_ZERO_FRACTION).
+            // This also rejects overflowed JSON integers decoded as floats.
+            return is_finite( $value ) && floor( $value ) !== $value;
         }
         if ( is_array( $value ) ) {
             foreach ( $value as $item ) {
