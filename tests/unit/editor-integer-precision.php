@@ -32,7 +32,7 @@ foreach ( [ 0, 1, -1, $int_max, -$int_max, [ $int_max, -$int_max, 0 ], '90071992
     $decoded = DefinitionCodec::decode( json_decode( $json, true, 64, JSON_THROW_ON_ERROR ) );
     assert_true( DefinitionCodec::encode( $definition ) === DefinitionCodec::encode( $decoded ), 'AU3-02: safe codec roundtrip changed type/value.' );
 }
-foreach ( [ $int_out, $negative_out, PHP_INT_MAX, PHP_INT_MIN, [ 1, $int_out ], [ $negative_out, 2 ], 1.0e20 ] as $unsafe ) {
+foreach ( [ $int_out, $negative_out, PHP_INT_MAX, PHP_INT_MIN, [ 1, $int_out ], [ $negative_out, 2 ], 1.0, 1.0e20 ] as $unsafe ) {
     assert_true( ! EditorIntegerSafety::is_browser_safe( $make( $unsafe ) ), 'AU3-03: unsafe integer/array/number must be blocked.' );
 }
 assert_true( ! EditorIntegerSafety::is_browser_safe( $make( $int_out, true ) ), 'AU3-04: condition operands must be precision-checked.' );
