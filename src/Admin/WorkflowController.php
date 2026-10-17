@@ -187,6 +187,7 @@ final class WorkflowController {
 		return match ( $result->status() ) {
 			WorkflowSaveResult::SAVED               => 'saved',
 			WorkflowSaveResult::PERSISTENCE_BLOCKED => 'persistence_blocked',
+			WorkflowSaveResult::PRECISION_BLOCKED   => 'precision_blocked',
 			WorkflowSaveResult::CONFLICT            => 'conflict',
 			default                                 => 'failed',
 		};
@@ -268,6 +269,7 @@ final class WorkflowController {
 			'saved_disabled_operator_denied' => __( 'Changes saved. Your account does not have all permissions required to enable this workflow.', 'core-blueprint-automations' ),
 			'saved_disabled_capability_unavailable' => __( 'Changes saved. Execution authority could not be verified against the current capability contracts.', 'core-blueprint-automations' ),
 			'persistence_blocked' => __( 'The automation was not saved because a sensitive input contains a literal value.', 'core-blueprint-automations' ),
+			'precision_blocked' => __( 'The workflow contains a number that cannot be represented safely in the editor. No changes were saved.', 'core-blueprint-automations' ),
 			'conflict' => __( 'This automation changed in another request. Reload the page before saving again.', 'core-blueprint-automations' ),
 			'invalid_name' => __( 'Enter an automation name between 1 and 191 characters.', 'core-blueprint-automations' ),
 			'invalid' => __( 'The submitted workflow could not be decoded safely. No changes were saved.', 'core-blueprint-automations' ),
