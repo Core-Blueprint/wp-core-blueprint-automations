@@ -24,6 +24,18 @@ final class EditorDefinitionProjection {
 		$redacted         = 0;
 		$sensitive_output = self::sensitive_output_map( $projected, $capabilities );
 
+		// Triggers have no legal input bindings (WorkflowValidator contract).
+		// Historical malformed stored definitions must never send them to the
+		// browser. Count them as redactions so AU-2 denies a destructive save.
+		if (
+			is_array( $projected['trigger'] ?? null )
+			&& is_array( $projected['trigger']['bindings'] ?? null )
+			&& [] !== $projected['trigger']['bindings']
+		) {
+			$redacted += count( $projected['trigger']['bindings'] );
+			$projected['trigger']['bindings'] = [];
+		}
+
 		foreach ( [ 'states', 'actions' ] as $collection ) {
 			if ( ! isset( $projected[ $collection ] ) || ! is_array( $projected[ $collection ] ) ) {
 				continue;
