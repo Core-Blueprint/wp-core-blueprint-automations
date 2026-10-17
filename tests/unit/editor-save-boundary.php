@@ -168,11 +168,26 @@ foreach ( [ $missing, $disabled, $drifted ] as $unsafe ) {
     );
 }
 
+// A hostile capability provider exception must not reach the Save response/log.
+$throwing = new class( $available ) implements \CB\Automations\Discovery\CapabilitySource {
+    public function __construct( private \CB\Automations\Discovery\ProviderStatus $status ) {}
+    public function current( \CB\Automations\Capability\CapabilityReference $reference ): ?\CB\Automations\Discovery\CapabilityDefinition {
+        throw new RuntimeException( 'Sensitive provider diagnostic must not escape' );
+    }
+    public function provider_status( string $provider ): \CB\Automations\Discovery\ProviderStatus {
+        return $this->status;
+    }
+};
+assert_true(
+    null === EditorSaveBoundary::reconcile( $clean, $clean_changed, $throwing ),
+    'AU2-09: failed capability provider must not leak diagnostics or permit a write.'
+);
+
 // Empty draft has no provider whose schema could silently hide stored values.
 $empty = definition( null, [], [], [] );
 assert_true(
     $empty === EditorSaveBoundary::reconcile( $empty, $empty, $missing ),
-    'AU2-09: empty draft remains authorable.'
+    'AU2-10: empty draft remains authorable.'
 );
 
 // Source gate: the real service must retrieve and compare the actual stored revision
@@ -186,7 +201,7 @@ $update = strpos( $service_source, 'WorkflowRepository::update(' );
 assert_true(
     false !== $find && false !== $version_check && false !== $save_guard && false !== $update
         && $find < $version_check && $version_check < $save_guard && $save_guard < $update,
-    'AU2-10: stale revision or data projection must not bypass the save boundary/SQL CAS.'
+    'AU2-11: stale revision or data projection must not bypass the save boundary/SQL CAS.'
 );
 
 fwrite( STDOUT, "Automations AU-2 editor save protection: PASS\n" );
