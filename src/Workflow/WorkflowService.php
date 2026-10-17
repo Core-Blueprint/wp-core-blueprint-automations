@@ -55,6 +55,9 @@ final class WorkflowService {
 		bool $rebind_execution_principal = false
 	): WorkflowSaveResult {
 		$validation = $this->validator->validate( $definition );
+		if ( ! EditorIntegerSafety::is_browser_safe( $definition ) ) {
+			return WorkflowSaveResult::precision_blocked( $validation );
+		}
 		if ( ! PersistencePolicy::allows( $validation ) ) {
 			return WorkflowSaveResult::persistence_blocked( $validation );
 		}
@@ -67,6 +70,10 @@ final class WorkflowService {
 		// The incoming browser definition is only the authorable projection.
 		// Never interpret deliberately redacted stored fields as user deletions.
 		// Block the entire write rather than re-persist prohibited literals.
+		if ( ! EditorIntegerSafety::is_browser_safe( $current->definition() ) ) {
+			return WorkflowSaveResult::precision_blocked( $validation );
+		}
+
 		$editor_candidate = EditorSaveBoundary::reconcile(
 			$current->definition(),
 			$definition,
