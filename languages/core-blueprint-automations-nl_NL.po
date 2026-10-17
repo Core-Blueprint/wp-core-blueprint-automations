@@ -2448,3 +2448,9 @@ msgstr "Workflow naar map verplaatsen"
 
 msgid "Move"
 msgstr "Verplaatsen"
+
+msgid "The workflow contains a number that cannot be represented safely in the editor. No changes were saved."
+msgstr "De workflow bevat een getal dat niet veilig in de editor kan worden weergegeven. Er zijn geen wijzigingen opgeslagen."
+
+msgid "Enter a number within the supported precision range."
+msgstr "Voer een getal in binnen het ondersteunde precisiebereik."
