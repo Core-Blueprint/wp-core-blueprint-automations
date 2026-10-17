@@ -2260,3 +2260,9 @@ msgstr ""
 
 msgid "Move"
 msgstr ""
+
+msgid "The workflow contains a number that cannot be represented safely in the editor. No changes were saved."
+msgstr ""
+
+msgid "Enter a number within the supported precision range."
+msgstr ""
