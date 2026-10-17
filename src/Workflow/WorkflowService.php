@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace CB\Automations\Workflow;
 
+use CB\Automations\Admin\EditorSaveBoundary;
 use CB\Automations\Discovery\CapabilityCatalog;
 use CB\Automations\Discovery\CapabilitySource;
 use CB\Automations\Persistence\WorkflowRecord;
@@ -59,9 +60,22 @@ final class WorkflowService {
 		}
 
 		$current = WorkflowRepository::find( $id );
-		if ( null === $current ) {
+		if ( null === $current || $current->revision() !== $expected_revision ) {
 			return WorkflowSaveResult::conflict( $validation );
 		}
+
+		// The incoming browser definition is only the authorable projection.
+		// Never interpret deliberately redacted stored fields as user deletions.
+		// Block the entire write rather than re-persist prohibited literals.
+		$editor_candidate = EditorSaveBoundary::reconcile(
+			$current->definition(),
+			$definition,
+			$this->source
+		);
+		if ( null === $editor_candidate ) {
+			return WorkflowSaveResult::persistence_blocked( $validation );
+		}
+		$definition = $editor_candidate;
 
 		$principal_user_id = $rebind_execution_principal
 			? $user_id
