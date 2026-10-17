@@ -2466,3 +2466,9 @@ msgstr "Mover flujo de trabajo a carpeta"
 
 msgid "Move"
 msgstr "Mover"
+
+msgid "The workflow contains a number that cannot be represented safely in the editor. No changes were saved."
+msgstr "El flujo de trabajo contiene un número que no se puede representar de forma segura en el editor. No se guardó ningún cambio."
+
+msgid "Enter a number within the supported precision range."
+msgstr "Introduce un número dentro del rango de precisión admitido."
