@@ -160,7 +160,7 @@ final class WorkflowRecoveryPlanner {
             }
             // Non-remediable defects must not be reported as a safe pending
             // batch: notably required-field removals and changed schemas.
-            if ( ! self::only_remediable_issues( $validation->issues() ) ) {
+            if ( ! self::only_remediable_issues( $validation->issues(), $candidate ) ) {
                 return self::blocked( 'blocked_invalid_candidate' );
             }
             if ( [] !== $pending_codes ) {
@@ -191,11 +191,25 @@ final class WorkflowRecoveryPlanner {
         return [ 'status' => $code, 'candidate' => null, 'intent_ids' => [], 'codes' => [ $code ] ];
     }
 
-    private static function only_remediable_issues( array $issues ): bool {
+    private static function only_remediable_issues( array $issues, Definition $candidate ): bool {
+        $encoded = DefinitionCodec::encode( $candidate );
         foreach ( $issues as $issue ) {
-            if ( ! in_array( $issue->code(), [ 'privacy.sensitive_literal', 'binding.trigger_has_bindings' ], true ) ) {
-                return false;
+            if ( in_array( $issue->code(), [ 'privacy.sensitive_literal', 'binding.trigger_has_bindings' ], true ) ) {
+                continue;
             }
+            // Historical oversized integers can also produce a binding
+            // schema mismatch (e.g. a stored integer in a string-only field).
+            // It may remain only in a NONPERSISTABLE pending batch and only
+            // while the exact offending literal is still unsafe.
+            if ( 'binding.type_mismatch' === $issue->code()
+                && 1 === preg_match( '/^(states|actions)\.([0-9]+)\.bindings\.([a-z][a-z0-9_]*)$/D', $issue->path(), $m ) ) {
+                $binding = $encoded[ $m[1] ][ (int) $m[2] ]['bindings'][ $m[3] ] ?? null;
+                if ( is_array( $binding ) && 'literal' === ( $binding['source'] ?? null )
+                    && ! self::safe_value( $binding['value'] ) ) {
+                    continue;
+                }
+            }
+            return false;
         }
         return true;
     }
