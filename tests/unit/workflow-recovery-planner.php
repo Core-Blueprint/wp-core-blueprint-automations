@@ -203,4 +203,87 @@ assert_true(
     && EditorIntegerSafety::is_browser_safe( $fully_mixed['candidate'] ),
     'C3-07: pure planner must preserve input and return a safe final Definition.'
 );
+
+// Additional adversarial authoring fixtures; these have no WordPress/database dependencies.
+$required = $make_snapshot();
+$action_key = 'action:' . $provider . ':recovery.action:1';
+$required['capabilities'][ $action_key ]['input_schema']['secret_a']['required'] = true;
+$required_remove = WorkflowRecoveryPlanner::plan(
+    $workflow( [ 'secret_a' => $private_a ] ),
+    [ $remove( 'required', 'secret_a', $private_a ) ],
+    $required
+);
+assert_true( 'blocked_invalid_candidate' === $required_remove['status'] && null === $required_remove['candidate'], 'C1-required: removal cannot leave a required field missing.' );
+
+$safe_secret_reference = $replace(
+    'safe_binding', 'replace_sensitive_binding', $target( 'secret_a' ),
+    $private_a, Binding::step_output( 'trigger_1', 'secret' )
+);
+$safely_rebound = WorkflowRecoveryPlanner::plan( $workflow( [ 'secret_a' => $private_a ] ), [ $safe_secret_reference ], $snapshot );
+assert_true( 'ready' === $safely_rebound['status'], 'C3-05: type-compatible prior output can replace sensitive literal.' );
+assert_true( $safely_rebound['candidate']->actions()[0]->bindings()['secret_a']->source() === Binding::SOURCE_STEP_OUTPUT, 'C3-05: replacement is not an output reference.' );
+
+$semantic_output = $replace(
+    'keep_semantic', 'replace_unsafe_integer_binding', $target( 'copy_id' ),
+    Binding::literal( PHP_INT_MAX ), Binding::step_output( 'trigger_1', 'id' )
+);
+$semantic_result = WorkflowRecoveryPlanner::plan(
+    $workflow( [ 'copy_id' => Binding::literal( PHP_INT_MAX ) ] ), [ $semantic_output ], $snapshot
+);
+assert_true( 'ready' === $semantic_result['status'], 'C3-semantic: matching semantic output can replace unsafe external ID.' );
+$wrong_semantic = $semantic_output;
+$wrong_semantic['replacement'] = Binding::step_output( 'trigger_1', 'label' );
+assert_true(
+    'blocked_invalid_candidate' === WorkflowRecoveryPlanner::plan(
+        $workflow( [ 'copy_id' => Binding::literal( PHP_INT_MAX ) ] ), [ $wrong_semantic ], $snapshot
+    )['status'],
+    'C3-semantic: output type or semantic mismatch must never be ready.'
+);
+
+$bad_snapshot = $snapshot;
+$bad_snapshot['capabilities'][ $action_key ]['input_schema']['decimal']['semantic_type'] = [];
+assert_true(
+    'blocked_schema_mismatch' === WorkflowRecoveryPlanner::plan(
+        $huge, [ $repair_integer ], $bad_snapshot
+    )['status'],
+    'C3-snapshot: malformed typed provider evidence cannot be accepted.'
+);
+
+$dupe_id = $remove( 'same', 'secret_a', $private_a );
+assert_true(
+    'blocked_invalid_intent' === WorkflowRecoveryPlanner::plan( $stored, [
+        $dupe_id, $remove( 'same', 'secret_b', $private_b ),
+    ], $snapshot )['status'],
+    'C3-identity: duplicate command IDs are forbidden.'
+);
+$unexpected = $remove( 'added', 'secret_a', $private_a );
+$unexpected['unknown'] = 'covert';
+assert_true(
+    'blocked_invalid_intent' === WorkflowRecoveryPlanner::plan( $stored, [ $unexpected ], $snapshot )['status'],
+    'C3-target: arbitrary extra command fields are rejected.'
+);
+assert_true(
+    'blocked_invalid_intent' === WorkflowRecoveryPlanner::plan( $stored, [], $snapshot )['status'],
+    'C3-noop: a no-op recovery cannot claim a successful save candidate.'
+);
+$bad_float = $workflow( [ 'decimal' => Binding::literal( 1.0 ) ] );
+assert_true(
+    'needs_integer_remediation' === WorkflowRecoveryPlanner::classify( $bad_float, $snapshot )['status'],
+    'C3-float: integral PHP floats are not type-stable in existing JSON storage.'
+);
+assert_true(
+    'blocked_precision_or_semantics' === WorkflowRecoveryPlanner::plan( $bad_float, [
+        $replace( 'bad_float', 'replace_unsafe_integer', $target( 'decimal' ), Binding::literal( 1.0 ), Binding::literal( '1' ) ),
+    ], $snapshot )['status'],
+    'C3-float: an integral float cannot be silently reclassified as an exact source integer.'
+);
+
+$public_pending = WorkflowRecoveryPlanner::plan( $stored, [ $remove( 'only_a', 'secret_a', $private_a ) ], $snapshot );
+assert_true(
+    null === $public_pending['candidate']
+    && ! str_contains( serialize( $public_pending ), 'hidden-b-value' )
+    && ! str_contains( serialize( $public_pending ), 'hidden-a-value' ),
+    'C3-privacy: incomplete private draft cannot leak into diagnostics or ready candidate.'
+);
+
 fwrite( STDOUT, "Automations AU-R1A recovery planner: PASS\n" );
