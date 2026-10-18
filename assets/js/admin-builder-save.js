@@ -185,12 +185,6 @@
 			// Server-Side EditorSaveBoundary reconstructs private bindings without
 			// echoing them to the browser. The accepted authoring projection must
 			// be exactly the one submitted in this server-confirmed revision CAS.
-			let historyReconciled = true;
-			try {
-				history.acknowledgeSave(checkpoint, submittedDefinition);
-			} catch (_error) {
-				historyReconciled = false;
-			}
 			// Verify the server acknowledged exactly one revision-CAS before
 			// rebasing Base history or telling the operator their draft was saved.
 			const sentRevision = String(payload.get('revision') || '');
@@ -202,6 +196,12 @@
 				throw new Error(strings.unknownSave);
 			}
 
+			let historyReconciled = true;
+			try {
+				history.acknowledgeSave(checkpoint, submittedDefinition);
+			} catch (_error) {
+				historyReconciled = false;
+			}
 			const definitionDirty = definition instanceof HTMLInputElement && definition.value !== submittedDefinitionJson;
 			const nameDirty = name instanceof HTMLInputElement && submittedName !== null && name.value !== submittedName;
 			const activationDirty = activation instanceof HTMLSelectElement && submittedActivation !== null && activation.value !== submittedActivation;
