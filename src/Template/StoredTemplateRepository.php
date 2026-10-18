@@ -16,6 +16,7 @@ defined( 'ABSPATH' ) || exit;
  */
 final class StoredTemplateRepository {
 	public const TYPE = 'cb_auto_tpl';
+	public const SOURCE_ID = 'core-blueprint-automations-workflows';
 	private const SCOPE_KEY = '_cb_auto_tpl_scope';
 	private const SCOPES = [ 'personal', 'site' ];
 	private const MAX_OFFSET = 100000;
