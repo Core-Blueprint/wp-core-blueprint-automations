@@ -170,7 +170,7 @@
 			// Compute the exact immutable submitted authoring JSON digest BEFORE
 			// network IO. A missing secure WebCrypto context must not start a write.
 			if (!window.crypto?.subtle || typeof TextEncoder !== 'function') {
-				throw new Error(strings.historyUnavailable);
+				throw new Error(strings.failed);
 			}
 			const digest = await window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(submittedDefinitionJson));
 			const submissionSha256 = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
