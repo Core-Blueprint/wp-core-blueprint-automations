@@ -125,14 +125,40 @@ final class WorkflowService {
 			return WorkflowSaveResult::conflict( $validation );
 		}
 
+		// An affected-row SQL CAS is necessary but not sufficient evidence for
+		// Base History rebase. Hydrate the actual persisted row independently.
+		// An intervening writer, lost read, or mismatched accepted content must
+		// NEVER produce a Saved response or cause another write/retry.
+		try {
+			$readback = WorkflowRepository::find( $id );
+			$receipt  = WorkflowSaveReceipt::verify(
+				$readback,
+				$id,
+				$expected_revision,
+				$name,
+				$target_state,
+				$definition,
+				$principal_user_id,
+				$user_id
+			);
+		} catch ( \Throwable ) {
+			// A committed write may already exist. Refuse a false Saved result.
+			return WorkflowSaveResult::readback_unverified( $validation );
+		}
+
+		if ( null === $receipt ) {
+			return WorkflowSaveResult::readback_unverified( $validation );
+		}
+
 		if ( $target_state !== $activation_state ) {
 			return WorkflowSaveResult::saved_disabled(
 				$validation,
 				$principal_user_id,
-				$block_reason ?? WorkflowSaveResult::WORKFLOW_INVALID
+				$block_reason ?? WorkflowSaveResult::WORKFLOW_INVALID,
+				$receipt
 			);
 		}
 
-		return WorkflowSaveResult::saved( $validation, $target_state, $principal_user_id );
+		return WorkflowSaveResult::saved( $validation, $target_state, $principal_user_id, $receipt );
 	}
 }
