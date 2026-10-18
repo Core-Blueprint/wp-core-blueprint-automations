@@ -5,7 +5,7 @@
  * canonical workflow commands, the redacted authoring projection and server CAS.
  * Never import or reproduce Base's internal history engine.
  */
-import { createDomainSession, animateLayoutChange } from '@cb-core/design-editor';
+import { createDomainSession, motion } from '@cb-core/design-editor';
 import { toProject, fromProject, workflowCommands } from './automations-domain-project.js';
 
 const api = window.cbAutomationsEditorSession;
@@ -19,6 +19,9 @@ if (api?.snapshot && api?.replace && api?.root && shell
     && typeof createDomainSession === 'function') {
   const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
   let applying = false;
+  // Base shell is initialized in presentation-only mode by the existing
+  // workspace. The single Base domain session below remains the sole history
+  // authority; no local project/history engine is constructed.
   const session = createDomainSession({
     project: toProject(api.snapshot()),
     validateProject: (project) => { fromProject(project); },
@@ -29,7 +32,7 @@ if (api?.snapshot && api?.replace && api?.root && shell
       if (same(api.snapshot(), definition)) return;
       applying = true;
       try {
-        animateLayoutChange(api.root, () => api.replace(definition, { source: 'history' }));
+        motion.animateLayoutChange(api.root, () => api.replace(definition, { source: 'history' }));
       } finally {
         applying = false;
       }
