@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace CB\Automations\Workflow;
 
 use CB\Automations\Persistence\WorkflowRecord;
+use CB\Automations\Runtime\TriggerKey;
 
 defined( 'ABSPATH' ) || exit;
 
