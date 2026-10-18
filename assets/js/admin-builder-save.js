@@ -191,14 +191,25 @@
 			} catch (_error) {
 				historyReconciled = false;
 			}
+			// Verify the server acknowledged exactly one revision-CAS before
+			// rebasing Base history or telling the operator their draft was saved.
+			const sentRevision = String(payload.get('revision') || '');
+			const acknowledgedRevision = result?.data?.revision;
+			if (typeof acknowledgedRevision !== 'string'
+				|| !/^[1-9][0-9]*$/.test(sentRevision)
+				|| !/^[1-9][0-9]*$/.test(acknowledgedRevision)
+				|| BigInt(acknowledgedRevision) !== BigInt(sentRevision) + 1n) {
+				throw new Error(strings.unknownSave);
+			}
+
 			const definitionDirty = definition instanceof HTMLInputElement && definition.value !== submittedDefinitionJson;
 			const nameDirty = name instanceof HTMLInputElement && submittedName !== null && name.value !== submittedName;
 			const activationDirty = activation instanceof HTMLSelectElement && submittedActivation !== null && activation.value !== submittedActivation;
 			const rebindDirty = rebindPrincipal instanceof HTMLInputElement && rebindPrincipal.checked !== submittedRebind;
 			const currentDirty = definitionDirty || nameDirty || activationDirty || rebindDirty;
 
-			if (revision instanceof HTMLInputElement && Number.isInteger(Number(result.data?.revision))) {
-				revision.value = String(result.data.revision);
+			if (revision instanceof HTMLInputElement) {
+				revision.value = acknowledgedRevision;
 			}
 			if (!activationDirty && activation instanceof HTMLSelectElement && ['enabled', 'disabled'].includes(result.data?.activation_state)) {
 				activation.value = result.data.activation_state;
