@@ -46,7 +46,7 @@ final class TemplateManagementPage {
 		echo '<p>' . esc_html__( 'Create a normal editable workflow from a provider template. The new workflow is yours and is not kept linked to the template.', 'core-blueprint-automations' ) . '</p>';
 		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
 		echo '<input type="hidden" name="action" value="cb_automations_create_from_template">';
-		echo '<input type="hidden" name="template_source" value="' . esc_attr( 'core-blueprint-automations-workflows' ) . '">';
+		echo '<input type="hidden" name="template_source" value="' . esc_attr( StoredTemplateRepository::SOURCE_ID ) . '">';
 		echo '<input type="hidden" name="template_provider" value="' . esc_attr( Suite::EXTENSION_ID ) . '">';
 		echo '<input type="hidden" name="template_id" value="' . esc_attr( $id ) . '">';
 		wp_nonce_field( 'cb_automations_create_from_template', '_cb_automations_nonce' );
