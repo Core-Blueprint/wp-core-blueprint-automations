@@ -95,7 +95,14 @@ $notices = [
 			<?php if ( [] === $templates ) : ?>
 				<p><?php esc_html_e( 'No starter templates available.', 'core-blueprint-automations' ); ?></p>
 			<?php else : ?>
-				<div class="cb-automations-template-grid">
+				<?php $template_scope = \CB\Automations\Template\TemplateLibraryBridge::scope_token(); ?>
+			<?php if ( null !== $template_scope ) : ?>
+				<p><button type="button" class="button button-primary" data-cb-automations-browse-templates
+					data-cb-template-scope="<?php echo esc_attr( $template_scope ); ?>"
+					data-cb-template-nonce="<?php echo esc_attr( wp_create_nonce( 'cb_automations_create_from_template' ) ); ?>"
+					data-cb-template-action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>"><?php esc_html_e( 'Browse templates', 'core-blueprint-automations' ); ?></button></p>
+			<?php endif; ?>
+			<div class="cb-automations-template-grid">
 					<?php foreach ( $templates as $workflow_template ) : ?>
 						<article class="cb-automations-template-card">
 							<div>
