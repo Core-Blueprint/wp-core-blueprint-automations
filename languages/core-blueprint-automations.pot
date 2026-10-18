@@ -2306,3 +2306,7 @@ msgstr ""
 #: templates/admin/workflow-editor.php
 msgid "Save as template"
 msgstr ""
+
+#: src/Admin/DesignerAssets.php
+msgid "Review latest version in a new tab"
+msgstr ""
