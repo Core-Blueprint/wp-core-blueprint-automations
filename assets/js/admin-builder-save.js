@@ -119,10 +119,15 @@
 			// URL cleanup is optional UI polish.
 		}
 	};
+	const uncertain = () => {
+		const failure = new Error(strings.unknownSave);
+		failure.code = 'SAVE_UNVERIFIED';
+		return failure;
+	};
 	const reconcileAfterUnparseableSuccess = () => {
 		// A successful HTTP status is not authoritative proof of a persisted CAS.
 		// Reloading here would silently destroy newer local edits.
-		throw new Error(strings.unknownSave);
+		throw uncertain();
 	};
 
 	form.addEventListener('submit', async (event) => {
@@ -162,6 +167,13 @@
 		payload.set(ASYNC_FIELD, '1');
 		const endpoint = form.getAttribute('action') || window.location.href;
 		try {
+			// Compute the exact immutable submitted authoring JSON digest BEFORE
+			// network IO. A missing secure WebCrypto context must not start a write.
+			if (!window.crypto?.subtle || typeof TextEncoder !== 'function') {
+				throw new Error(strings.historyUnavailable);
+			}
+			const digest = await window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(submittedDefinitionJson));
+			const submissionSha256 = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
 			const response = await window.fetch(endpoint, {
 				method: 'POST',
 				body: payload,
@@ -178,6 +190,7 @@
 				}
 			}
 			if (!response.ok || result?.success !== true) {
+				if (result?.data?.notice === 'save_unverified') throw uncertain();
 				const failure = new Error(response.status === 409
 					? strings.conflictSave
 					: responseMessage(result, strings.failed));
@@ -192,18 +205,31 @@
 			// rebasing Base history or telling the operator their draft was saved.
 			const sentRevision = String(payload.get('revision') || '');
 			const acknowledgedRevision = result?.data?.revision;
-			if (typeof acknowledgedRevision !== 'string'
+			const persisted = result?.data?.persisted;
+			const submittedId = String(payload.get('workflow_id') || '');
+			if (typeof persisted?.workflow_id !== 'string'
+				|| !/^[1-9][0-9]*$/.test(submittedId)
+				|| persisted.workflow_id !== submittedId
+				|| persisted.revision !== acknowledgedRevision
+				|| typeof persisted.submitted_sha256 !== 'string'
+				|| !/^[a-f0-9]{64}$/.test(persisted.submitted_sha256)
+				|| persisted.submitted_sha256 !== submissionSha256
+				|| typeof result?.data?.name !== 'string'
+				|| !['enabled', 'disabled'].includes(result?.data?.activation_state)
+				|| typeof acknowledgedRevision !== 'string'
 				|| !/^[1-9][0-9]*$/.test(sentRevision)
 				|| !/^[1-9][0-9]*$/.test(acknowledgedRevision)
 				|| BigInt(acknowledgedRevision) !== BigInt(sentRevision) + 1n) {
-				throw new Error(strings.unknownSave);
+				throw uncertain();
 			}
 
-			let historyReconciled = true;
+			// Base must acknowledge this exact save before any local revision,
+			// toolbar or baseline state can be changed. An uncertain rebase leaves
+			// the original draft, form cursor and history intact for recovery.
 			try {
 				history.acknowledgeSave(checkpoint, submittedDefinition);
 			} catch (_error) {
-				historyReconciled = false;
+				throw new Error(strings.historyReconcileFailed);
 			}
 			const definitionDirty = definition instanceof HTMLInputElement && definition.value !== submittedDefinitionJson;
 			const nameDirty = name instanceof HTMLInputElement && submittedName !== null && name.value !== submittedName;
@@ -229,10 +255,6 @@
 			updatePersistedStatuses(result, !definitionDirty);
 			if (!definitionDirty) updateHealth(result);
 			cleanLocation();
-			if (!historyReconciled) {
-				emit('error', strings.historyReconcileFailed);
-				return;
-			}
 			emit(
 				'saved',
 				currentDirty ? strings.savedWithChanges : responseMessage(result, save.textContent?.trim() || ''),
@@ -245,7 +267,7 @@
 			);
 		} catch (error) {
 			emit('error', error instanceof Error && error.message ? error.message : strings.failed);
-			if (error?.code === 'REVISION_CONFLICT' && status) {
+			if ((error?.code === 'REVISION_CONFLICT' || error?.code === 'SAVE_UNVERIFIED') && status) {
 				// The current tab retains the complete authoring draft and history.
 				// Open the authenticated editor separately for manual reconciliation.
 				const review = document.createElement('a');
