@@ -2454,3 +2454,50 @@ msgstr "De workflow bevat een getal dat niet veilig in de editor kan worden weer
 
 msgid "Enter a number within the supported precision range."
 msgstr "Voer een getal in binnen het ondersteunde precisiebereik."
+
+#: templates/admin/automations.php:62
+msgid ""
+"Create a normal editable workflow from a provider template. The new workflow "
+"is yours and is not kept linked to the template."
+msgstr ""
+"Maak een normale bewerkbare workflow vanuit een providersjabloon. De nieuwe "
+"workflow is van jou en blijft niet gekoppeld aan het sjabloon."
+
+#: src/Admin/TemplateManagementPage.php
+msgid "Duplicate template"
+msgstr "Sjabloon dupliceren"
+
+#: src/Admin/TemplateManagementPage.php
+msgid "Delete template"
+msgstr "Sjabloon verwijderen"
+
+#: templates/admin/automations.php:18
+msgid ""
+"That workflow template is no longer available. No automation was created."
+msgstr ""
+"Dat workflowsjabloon is niet langer beschikbaar. Er is geen automatisering "
+"aangemaakt."
+
+#: src/Template/TemplateSourceAdapter.php
+msgid "Preview template"
+msgstr "Sjabloon bekijken"
+
+#: src/Template/TemplateSourceAdapter.php
+msgid "Manage template"
+msgstr "Sjabloon beheren"
+
+#: templates/admin/automations.php
+msgid "Browse templates"
+msgstr "Sjablonen bekijken"
+
+#: templates/admin/workflow-editor.php
+msgid "Personal"
+msgstr "Persoonlijk"
+
+#: templates/admin/workflow-editor.php
+msgid "Site"
+msgstr "Site"
+
+#: templates/admin/workflow-editor.php
+msgid "Save as template"
+msgstr "Opslaan als sjabloon"
