@@ -96,7 +96,16 @@ final class WorkflowController {
 		self::guard( 'cb_automations_save_workflow' );
 
 		$id       = isset( $_POST['workflow_id'] ) && is_scalar( $_POST['workflow_id'] ) ? absint( wp_unslash( (string) $_POST['workflow_id'] ) ) : 0;
-		$revision = isset( $_POST['revision'] ) && is_scalar( $_POST['revision'] ) ? absint( wp_unslash( (string) $_POST['revision'] ) ) : 0;
+		// Revision is an exact server-side CAS cursor, never a rounded browser number.
+		$revision_input = isset( $_POST['revision'] ) && is_string( $_POST['revision'] )
+			? wp_unslash( $_POST['revision'] ) : '';
+		$revision = 0;
+		if ( 1 === preg_match( '/^[1-9][0-9]*$/D', $revision_input ) ) {
+			$checked_revision = filter_var( $revision_input, FILTER_VALIDATE_INT, [
+				'options' => [ 'min_range' => 1, 'max_range' => PHP_INT_MAX - 1 ],
+			] );
+			$revision = false === $checked_revision ? 0 : $checked_revision;
+		}
 		$name     = isset( $_POST['name'] ) && is_scalar( $_POST['name'] ) ? sanitize_text_field( wp_unslash( (string) $_POST['name'] ) ) : '';
 		$state    = isset( $_POST['activation_state'] ) && is_scalar( $_POST['activation_state'] )
 			? ActivationState::tryFrom( sanitize_key( wp_unslash( (string) $_POST['activation_state'] ) ) )
@@ -214,7 +223,8 @@ final class WorkflowController {
 		$data = [
 			'notice'                      => $notice,
 			'message'                     => self::notice_message( $notice ),
-			'revision'                    => $result->was_saved() ? $revision + 1 : $revision,
+			// A decimal string survives browser JSON parsing without Number rounding.
+			'revision'                    => (string) ( $result->was_saved() ? $revision + 1 : $revision ),
 			'name'                        => $persisted_name,
 			'activation_state'            => $persisted_state->value,
 			'validation_state'            => ValidationState::from_result( $result->validation() )->value,
