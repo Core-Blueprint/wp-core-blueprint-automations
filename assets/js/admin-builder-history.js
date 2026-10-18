@@ -5,7 +5,7 @@
  * canonical workflow commands, the redacted authoring projection and server CAS.
  * Never import or reproduce Base's internal history engine.
  */
-import { createDomainSession, motion } from '@cb-core/design-editor';
+import { createDomainSession, animateLayoutChange } from '@cb-core/design-editor';
 import { toProject, fromProject, workflowCommands } from './automations-domain-project.js';
 
 const api = window.cbAutomationsEditorSession;
@@ -32,7 +32,7 @@ if (api?.snapshot && api?.replace && api?.root && shell
       if (same(api.snapshot(), definition)) return;
       applying = true;
       try {
-        motion.animateLayoutChange(api.root, () => api.replace(definition, { source: 'history' }));
+        animateLayoutChange(api.root, () => api.replace(definition, { source: 'history' }));
       } finally {
         applying = false;
       }
