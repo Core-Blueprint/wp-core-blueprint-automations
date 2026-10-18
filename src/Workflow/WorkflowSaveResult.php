@@ -13,6 +13,7 @@ final readonly class WorkflowSaveResult {
 	public const PERSISTENCE_BLOCKED = 'persistence_blocked';
 	public const PRECISION_BLOCKED   = 'precision_blocked';
 	public const CONFLICT            = 'conflict';
+	public const READBACK_UNVERIFIED = 'readback_unverified';
 	public const WORKFLOW_INVALID    = 'workflow_invalid';
 	public const EXECUTION_UNAVAILABLE = 'execution_unavailable';
 
@@ -21,15 +22,17 @@ final readonly class WorkflowSaveResult {
 		private ValidationResult $validation,
 		private ?ActivationState $activation_state = null,
 		private ?int $execution_principal_user_id = null,
-		private ?string $activation_block_reason = null
+		private ?string $activation_block_reason = null,
+		/** @var array{workflow_id:string,revision:string,name:string,activation_state:string,execution_principal_user_id:int}|null */
+		private ?array $persisted_receipt = null
 	) {}
 
-	public static function saved( ValidationResult $validation, ActivationState $state, int $principal_user_id ): self {
-		return new self( self::SAVED, $validation, $state, $principal_user_id );
+	public static function saved( ValidationResult $validation, ActivationState $state, int $principal_user_id, array $receipt ): self {
+		return new self( self::SAVED, $validation, $state, $principal_user_id, null, $receipt );
 	}
 
-	public static function saved_disabled( ValidationResult $validation, int $principal_user_id, string $reason ): self {
-		return new self( self::SAVED_DISABLED, $validation, ActivationState::Disabled, $principal_user_id, $reason );
+	public static function saved_disabled( ValidationResult $validation, int $principal_user_id, string $reason, array $receipt ): self {
+		return new self( self::SAVED_DISABLED, $validation, ActivationState::Disabled, $principal_user_id, $reason, $receipt );
 	}
 
 	public static function persistence_blocked( ValidationResult $validation ): self {
@@ -42,6 +45,15 @@ final readonly class WorkflowSaveResult {
 
 	public static function conflict( ValidationResult $validation ): self {
 		return new self( self::CONFLICT, $validation );
+	}
+
+	public static function readback_unverified( ValidationResult $validation ): self {
+		return new self( self::READBACK_UNVERIFIED, $validation );
+	}
+
+	/** @return array{workflow_id:string,revision:string,name:string,activation_state:string,execution_principal_user_id:int}|null */
+	public function persisted_receipt(): ?array {
+		return $this->persisted_receipt;
 	}
 
 	public function status(): string {
