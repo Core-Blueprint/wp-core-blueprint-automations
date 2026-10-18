@@ -2501,3 +2501,7 @@ msgstr "Site"
 #: templates/admin/workflow-editor.php
 msgid "Save as template"
 msgstr "Opslaan als sjabloon"
+
+#: src/Admin/DesignerAssets.php
+msgid "Review latest version in a new tab"
+msgstr "Nieuwste versie in een nieuw tabblad bekijken"
