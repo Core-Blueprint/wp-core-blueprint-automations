@@ -2266,3 +2266,43 @@ msgstr ""
 
 msgid "Enter a number within the supported precision range."
 msgstr ""
+
+#: templates/admin/automations.php:62
+msgid "Create a normal editable workflow from a provider template. The new workflow is yours and is not kept linked to the template."
+msgstr ""
+
+#: src/Admin/TemplateManagementPage.php
+msgid "Duplicate template"
+msgstr ""
+
+#: src/Admin/TemplateManagementPage.php
+msgid "Delete template"
+msgstr ""
+
+#: templates/admin/automations.php:18
+msgid "That workflow template is no longer available. No automation was created."
+msgstr ""
+
+#: src/Template/TemplateSourceAdapter.php
+msgid "Preview template"
+msgstr ""
+
+#: src/Template/TemplateSourceAdapter.php
+msgid "Manage template"
+msgstr ""
+
+#: templates/admin/automations.php
+msgid "Browse templates"
+msgstr ""
+
+#: templates/admin/workflow-editor.php
+msgid "Personal"
+msgstr ""
+
+#: templates/admin/workflow-editor.php
+msgid "Site"
+msgstr ""
+
+#: templates/admin/workflow-editor.php
+msgid "Save as template"
+msgstr ""
