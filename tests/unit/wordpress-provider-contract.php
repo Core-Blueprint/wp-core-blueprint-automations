@@ -42,8 +42,11 @@ foreach ( [
 if ( ! str_contains( $listeners, 'unset( $new_pass );' ) ) {
 	$failures[] = 'Password reset adapter does not explicitly discard the plaintext password.';
 }
-if ( ! str_contains( $listeners, "in_array( \$post->post_type, [ 'revision', 'attachment' ], true )" ) ) {
+if ( ! str_contains( $listeners, "in_array( \$post->post_type, [ 'revision', 'attachment'" ) ) {
 	$failures[] = 'Generic post trigger adapter no longer excludes revision/attachment noise.';
+}
+if ( ! str_contains( $listeners, 'StoredTemplateRepository::TYPE' ) ) {
+	$failures[] = 'Internal template records must not emit generic content-post triggers.';
 }
 if ( ! str_contains( $listeners, 'wp_is_post_autosave( $post )' ) ) {
 	$failures[] = 'Generic post trigger adapter no longer suppresses autosave noise.';
