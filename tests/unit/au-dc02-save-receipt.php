@@ -62,4 +62,33 @@ assert_true( null === $verify( $make( actual: $other ) ), 'Different persisted d
 
 // Empty bindings and literal arrays roundtrip through stored PHP definitions.
 assert_true( DefinitionCodec::encode( $definition ) === DefinitionCodec::encode( $make()->definition() ), 'Canonical persisted definition must be used.' );
+// Contract gate: saved status requires the proof, readback uncertainty never
+// declares Saved, and the real production Service calls the proof AFTER SQL CAS.
+$validation = new \CB\Automations\Validation\ValidationResult( [] );
+$saved = \CB\Automations\Workflow\WorkflowSaveResult::saved(
+	$validation, ActivationState::Disabled, 23, $receipt
+);
+assert_true( $saved->was_saved() && $saved->persisted_receipt() === $receipt,
+	'Success result must carry the verified persisted receipt.' );
+$unverified = \CB\Automations\Workflow\WorkflowSaveResult::readback_unverified( $validation );
+assert_true( ! $unverified->was_saved() && null === $unverified->persisted_receipt(),
+	'Post-CAS uncertain readback must never be a success result.' );
+
+$service_source = file_get_contents( dirname( __DIR__, 2 ) . '/src/Workflow/WorkflowService.php' );
+$controller_source = file_get_contents( dirname( __DIR__, 2 ) . '/src/Admin/WorkflowController.php' );
+assert_true( is_string( $service_source ) && is_string( $controller_source ), 'SOURCE contract files missing.' );
+$write = strpos( $service_source, 'WorkflowRepository::update(' );
+$read = false === $write ? false : strpos( $service_source, 'WorkflowRepository::find( $id )', $write );
+$verify_index = strpos( $service_source, 'WorkflowSaveReceipt::verify(' );
+$saved_index = strrpos( $service_source, 'WorkflowSaveResult::saved(' );
+assert_true( false !== $write && false !== $read && false !== $verify_index
+	&& false !== $saved_index && $write < $read && $read < $verify_index && $verify_index < $saved_index,
+	'Persistence readback must occur after SQL CAS and before successful Save.' );
+assert_true(
+	str_contains( $controller_source, '$result->persisted_receipt()' )
+	&& str_contains( $controller_source, "'submitted_sha256' => hash( 'sha256', \$submitted_definition_json )" )
+	&& str_contains( $controller_source, 'WorkflowSaveResult::READBACK_UNVERIFIED' ),
+	'Controller must bind its Success payload to persisted proof and distinguish uncertain writes.'
+);
+
 echo "AU-DC-02 authoritative persisted Save witness: PASS\n";
