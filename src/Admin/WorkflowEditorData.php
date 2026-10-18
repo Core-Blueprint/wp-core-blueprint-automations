@@ -41,7 +41,7 @@ final class WorkflowEditorData {
 				'name'             => $record->name(),
 				'activation_state' => $record->activation_state()->value,
 				'revision'         => $record->revision(),
-				'definition'       => $projection['definition'],
+				'definition'       => self::browser_definition( $projection['definition'] ),
 			],
 			'capabilities'                => $capabilities,
 			'post_status_options'        => self::post_status_options(),
@@ -49,6 +49,37 @@ final class WorkflowEditorData {
 			'validation'                  => $validation->to_array(),
 			'redacted_sensitive_literals' => $projection['redacted'],
 		];
+	}
+
+	/**
+	 * Browser-only JSON shape: PHP's empty associative bindings map encodes as
+	 * [], whereas the public Automations DesignProject expects an object.
+	 *
+	 * The private workflow is already projected/redacted above. Change ONLY
+	 * exact empty step-binding maps to JSON objects. Never change nonempty
+	 * bindings, literal array values, credentials, or persisted DefinitionCodec
+	 * data. json_decode(..., true) on Save returns [] as before.
+	 *
+	 * @param array<string,mixed> $definition Sanitized, authorable projection.
+	 * @return array<string,mixed>
+	 */
+	private static function browser_definition( array $definition ): array {
+		if ( is_array( $definition['trigger'] ?? null )
+			&& [] === ( $definition['trigger']['bindings'] ?? null ) ) {
+			$definition['trigger']['bindings'] = (object) [];
+		}
+
+		foreach ( [ 'states', 'actions' ] as $collection ) {
+			if ( ! is_array( $definition[ $collection ] ?? null ) ) {
+				continue;
+			}
+			foreach ( $definition[ $collection ] as $index => $step ) {
+				if ( is_array( $step ) && [] === ( $step['bindings'] ?? null ) ) {
+					$definition[ $collection ][ $index ]['bindings'] = (object) [];
+				}
+			}
+		}
+		return $definition;
 	}
 
 	/** @return array<string,mixed> */
