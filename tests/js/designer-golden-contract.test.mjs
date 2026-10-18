@@ -82,7 +82,9 @@ test('Inspector composes Base helpers without a second authoring surface', async
 	assert.match(inspector, /aria-current/);
 	assert.match(inspector, /cb:design-editor:ready/);
 	const history = await read('assets/js/admin-builder-history.js');
-	assert.match(history, /createDesignerStateHistory/);
+	assert.match(history, /createDomainSession/);
+	assert.match(history, /session\.captureSave\(\)/);
+	assert.match(history, /session\.rebase\(/);
 	assert.doesNotMatch(history, /\b(?:ProjectState|EditorState|CommandHistory)\b/);
 	assert.doesNotMatch(inspector, /assets\/js\/design\//);
 	assert.match(assets, /'technicalDetails'/);
