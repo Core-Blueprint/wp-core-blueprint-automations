@@ -2470,3 +2470,50 @@ msgstr "Il flusso di lavoro contiene un numero che non può essere rappresentato
 
 msgid "Enter a number within the supported precision range."
 msgstr "Inserisci un numero nell'intervallo di precisione supportato."
+
+#: templates/admin/automations.php:62
+msgid ""
+"Create a normal editable workflow from a provider template. The new workflow "
+"is yours and is not kept linked to the template."
+msgstr ""
+"Crea un normale workflow modificabile a partire da un modello del provider. "
+"Il nuovo workflow è tuo e non rimane collegato al modello."
+
+#: src/Admin/TemplateManagementPage.php
+msgid "Duplicate template"
+msgstr "Duplica modello"
+
+#: src/Admin/TemplateManagementPage.php
+msgid "Delete template"
+msgstr "Elimina modello"
+
+#: templates/admin/automations.php:18
+msgid ""
+"That workflow template is no longer available. No automation was created."
+msgstr ""
+"Quel modello di workflow non è più disponibile. Non è stata creata alcuna "
+"automazione."
+
+#: src/Template/TemplateSourceAdapter.php
+msgid "Preview template"
+msgstr "Anteprima del modello"
+
+#: src/Template/TemplateSourceAdapter.php
+msgid "Manage template"
+msgstr "Gestisci modello"
+
+#: templates/admin/automations.php
+msgid "Browse templates"
+msgstr "Sfoglia i modelli"
+
+#: templates/admin/workflow-editor.php
+msgid "Personal"
+msgstr "Personale"
+
+#: templates/admin/workflow-editor.php
+msgid "Site"
+msgstr "Sito"
+
+#: templates/admin/workflow-editor.php
+msgid "Save as template"
+msgstr "Salva come modello"
