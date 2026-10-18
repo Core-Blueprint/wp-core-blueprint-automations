@@ -71,9 +71,14 @@ if (api?.snapshot && api?.replace && api?.root && shell
   redo.addEventListener('click', () => run('redo'));
   document.addEventListener('keydown', (event) => {
     if (event.defaultPrevented || !(event.ctrlKey || event.metaKey) || event.altKey) return;
+    // Never steal Undo while a Base dialog, another interactive editor, or
+    // an active save/context transition owns focus.
+    if (shell.hasAttribute('aria-busy')
+      || document.querySelector('dialog[open], [role="dialog"][aria-modal="true"]')) return;
     const target = event.target;
     if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement
-      || target instanceof HTMLSelectElement || target?.isContentEditable) return;
+      || target instanceof HTMLSelectElement || target?.isContentEditable
+      || target?.closest?.('[contenteditable], [role="textbox"], [role="combobox"], [role="menu"], [role="listbox"]')) return;
     if (String(event.key || '').toLowerCase() !== 'z') return;
     event.preventDefault();
     run(event.shiftKey ? 'redo' : 'undo');
@@ -110,6 +115,10 @@ if (api?.snapshot && api?.replace && api?.root && shell
     session.replace(toProject(definition), { source: 'context', contextChanged: true });
     syncButtons();
   };
+
+  // Release the Base-owned session on page unmount; context switch uses
+  // session.replace() above and retains this one session for the live page.
+  window.addEventListener('pagehide', () => session.dispose(), { once: true });
 
   window.cbAutomationsBuilderHistory = Object.freeze({
     status: () => session.historyStatus(),
