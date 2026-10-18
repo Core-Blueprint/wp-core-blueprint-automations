@@ -41,8 +41,18 @@ if (root) {
 		const contextError = (key, fallback) => new Error(
 			String(window.cbAutomationsInspectorStrings?.[key] || fallback)
 		);
+		let switchGeneration = 0;
 		const switchContext = async (url) => {
 			if (root.hasAttribute('aria-busy')) throw contextError('saveInProgress', 'Wait for the current save to finish.');
+			// A context GET is not an exclusive editor transaction. Fence its
+			// eventual result against newer requests, saves and user edits.
+			const generation = ++switchGeneration;
+			const sourceId = String(form?.querySelector('[name="workflow_id"]')?.value || '');
+			const sourceRevision = String(form?.querySelector('[name="revision"]')?.value || '');
+			const sourceDefinition = normalized(definition?.value);
+			const sourceName = String(name?.value || '');
+			const sourceActivation = String(activation?.value || '');
+			const sourceRebind = Boolean(authority?.checked);
 			const session = window.cbAutomationsEditorSession;
 			const history = window.cbAutomationsBuilderHistory;
 			if (!session?.replace || !history?.resetForContext || !contextDataNode) {
@@ -96,6 +106,21 @@ if (root) {
 				...issue,
 				message: messages[index] || '',
 			})) : [];
+			// Recheck after all awaits and before the first visible mutation.
+			// A Save can begin and finish while the context GET was in flight;
+			// its changed revision is as important as an active aria-busy flag.
+			if (root.hasAttribute('aria-busy')) {
+				throw contextError('saveInProgress', 'Wait for the current save to finish.');
+			}
+			if (generation !== switchGeneration
+				|| String(form?.querySelector('[name="workflow_id"]')?.value || '') !== sourceId
+				|| String(form?.querySelector('[name="revision"]')?.value || '') !== sourceRevision
+				|| normalized(definition?.value) !== sourceDefinition
+				|| String(name?.value || '') !== sourceName
+				|| String(activation?.value || '') !== sourceActivation
+				|| Boolean(authority?.checked) !== sourceRebind) {
+				throw contextError('contextUnavailable', 'Workflow switching is not available. Reload the editor.');
+			}
 			session.replace(nextDefinition, { source: 'context' });
 			currentId.value = String(id);
 			currentRevision.value = nextRevision.value;
