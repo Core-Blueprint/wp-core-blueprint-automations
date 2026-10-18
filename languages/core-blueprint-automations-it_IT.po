@@ -2517,3 +2517,7 @@ msgstr "Sito"
 #: templates/admin/workflow-editor.php
 msgid "Save as template"
 msgstr "Salva come modello"
+
+#: src/Admin/DesignerAssets.php
+msgid "Review latest version in a new tab"
+msgstr "Visualizza la versione più recente in una nuova scheda"
