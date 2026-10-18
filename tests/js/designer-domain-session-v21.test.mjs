@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { readFile } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
@@ -84,11 +84,8 @@ test('G1a-V21-A06: workspace, folders, templates and import are preserved', asyn
 });
 
 
-test('G1a-V21-A07: actual pinned Base ESM exports match the consumer named imports', (t) => {
-  const historySource = String(execFileSync('git', [
-    '-C', fileURLToPath(new URL('../../', import.meta.url)),
-    'show', 'HEAD:assets/js/admin-builder-history.js',
-  ], { encoding: 'utf8' }));
+test('G1a-V21-A07: actual pinned Base ESM exports match the consumer named imports', () => {
+  const historySource = readFileSync(new URL('../../assets/js/admin-builder-history.js', import.meta.url), 'utf8');
   const matches = historySource.match(
     /import\s*\{([^}]+)\}\s*from\s*['"]@cb-core\/design-editor['"]/s,
   );
@@ -102,10 +99,8 @@ test('G1a-V21-A07: actual pinned Base ESM exports match the consumer named impor
   // export fixture or a source-string regex. Require the immutable Base SHA.
   const baseRepo = process.env.CB_BASE_DESIGNER_REPO
     || fileURLToPath(new URL('../../../wp-core-blueprint/', import.meta.url));
-  if (!existsSync(join(baseRepo, '.git'))) {
-    t.skip('Exact Base ESM runtime parity requires CB_BASE_DESIGNER_REPO or a sibling Base checkout');
-    return;
-  }
+  assert.ok(existsSync(join(baseRepo, '.git')),
+    'Pinned Base v2 checkout is required for this gate: set CB_BASE_DESIGNER_REPO (no skipped export checks).');
   let baseSource;
   try {
     baseSource = execFileSync('git', [
