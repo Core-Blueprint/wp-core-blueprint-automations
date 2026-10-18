@@ -4,7 +4,6 @@ namespace CB\Automations\Admin;
 
 use CB\Automations\Integration\Suite;
 use CB\Automations\Template\StoredTemplateRepository;
-use CB\Automations\Template\TemplateSourceAdapter;
 use CB\Automations\Template\WorkflowTemplateRegistry;
 
 defined( 'ABSPATH' ) || exit;
@@ -16,14 +15,15 @@ final class TemplateManagementPage {
 			wp_die( esc_html__( 'Forbidden', 'core-blueprint-automations' ), '', [ 'response' => 403 ] );
 		}
 		$actor = get_current_user_id();
-		$source = new TemplateSourceAdapter();
-		if ( ! $source->can_view( $id, $actor ) ) {
+		// Native template management remains safe and usable even when the
+		// optional Base Template Category/Browser interface is not installed.
+		$saved_id = StoredTemplateRepository::saved_id( $id );
+		$post = null !== $saved_id ? StoredTemplateRepository::get( $saved_id, $actor ) : null;
+		$builtin = null === $saved_id ? WorkflowTemplateRegistry::get( Suite::EXTENSION_ID, $id ) : null;
+		if ( null === $post && null === $builtin ) {
 			self::unavailable();
 			return;
 		}
-		$saved_id = TemplateSourceAdapter::saved_id( $id );
-		$post = null !== $saved_id ? StoredTemplateRepository::get( $saved_id, $actor ) : null;
-		$builtin = null === $saved_id ? WorkflowTemplateRegistry::get( Suite::EXTENSION_ID, $id ) : null;
 		$title = null !== $post ? $post->post_title : ( null !== $builtin ? $builtin->title() : '' );
 		if ( '' === $title ) {
 			self::unavailable();
@@ -46,7 +46,7 @@ final class TemplateManagementPage {
 		echo '<p>' . esc_html__( 'Create a normal editable workflow from a provider template. The new workflow is yours and is not kept linked to the template.', 'core-blueprint-automations' ) . '</p>';
 		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
 		echo '<input type="hidden" name="action" value="cb_automations_create_from_template">';
-		echo '<input type="hidden" name="template_source" value="' . esc_attr( TemplateSourceAdapter::SOURCE_ID ) . '">';
+		echo '<input type="hidden" name="template_source" value="' . esc_attr( 'core-blueprint-automations-workflows' ) . '">';
 		echo '<input type="hidden" name="template_provider" value="' . esc_attr( Suite::EXTENSION_ID ) . '">';
 		echo '<input type="hidden" name="template_id" value="' . esc_attr( $id ) . '">';
 		wp_nonce_field( 'cb_automations_create_from_template', '_cb_automations_nonce' );
