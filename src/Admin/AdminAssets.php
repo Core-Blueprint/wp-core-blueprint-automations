@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace CB\Automations\Admin;
 
 use CoreBlueprint\Core\Admin\MenuGroupRegistry;
+use CB\Automations\Template\TemplateLibraryBridge;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -31,6 +32,7 @@ final class AdminAssets {
 			is_file( $css ) ? (string) filemtime( $css ) : CB_AUTOMATIONS_VERSION
 		);
 
+		TemplateLibraryBridge::enqueue();
 		if ( 0 === AutomationsPage::requested_workflow_id() ) {
 			$overview_css = CB_AUTOMATIONS_DIR . 'assets/css/admin-overview.css';
 			wp_enqueue_style(
