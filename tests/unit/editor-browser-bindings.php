@@ -34,6 +34,13 @@ assert_true( 0 === $projection['redacted'], 'Ordinary fixture should not be reda
 assert_true( [] === $projection['definition']['trigger']['bindings'], 'RED fixture: PHP encodes empty trigger bindings as a JSON list.' );
 assert_true( [] === $projection['definition']['states'][0]['bindings'], 'RED fixture: PHP encodes empty state bindings as a JSON list.' );
 
+// Guard the actual entrypoint, not just the normalization helper.
+$browser_source = file_get_contents( dirname( __DIR__, 2 ) . '/src/Admin/WorkflowEditorData.php' );
+assert_true(
+	is_string( $browser_source ) && str_contains( $browser_source, 'self::browser_definition( $projection[\'definition\'] )' ),
+	'WorkflowEditorData::build() must emit the normalized privacy-projected definition.'
+);
+
 $normalize = new ReflectionMethod( WorkflowEditorData::class, 'browser_definition' );
 $browser = $normalize->invoke( null, $projection['definition'] );
 
