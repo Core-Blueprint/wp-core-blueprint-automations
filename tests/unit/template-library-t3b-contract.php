@@ -58,7 +58,7 @@ assert_true( str_contains( $code['store'], "'personal'" ) && str_contains( $code
 assert_true( str_contains( $code['controller'], 'wp_verify_nonce' ) && str_contains( $code['controller'], 'current_user_can' ), 'All mutations require capability and nonce.' );
 assert_true( str_contains( $code['controller'], 'TemplateSafety' ) === false && str_contains( $code['controller'], 'StoredTemplateRepository::definition' ), 'Export must load a scrubbed copy.' );
 assert_true( str_contains( $code['trigger'], 'StoredTemplateRepository::TYPE' ), 'Internal template post events must not trigger automation workflows.' );
-assert_true( str_contains( $code['worker'], 'TemplateSourceAdapter::SOURCE_ID === $source' ), 'Selected metadata must not override source identity.' );
+assert_true( str_contains( $code['worker'], 'StoredTemplateRepository::SOURCE_ID === $source' ), 'Selected metadata must not override source identity.' );
 assert_true( str_contains( $code['worker'], 'StoredTemplateRepository::definition(' ), 'Create must re-read authenticated stored templates.' );
 assert_true( str_contains( $code['bridge'], 'TemplateSourceRegistry::register( new TemplateSourceAdapter() )' ), 'Browser provider must use Base registry.' );
 assert_true( str_contains( $code['source'], 'TemplateCategorySourceInterface' ), 'Provider must implement optional Base category facets.' );
