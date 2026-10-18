@@ -173,6 +173,20 @@ function makeCommand(label, mutate) {
 
 /** Each command is a single user intent. Callers supply immutable IDs before command creation. */
 export const workflowCommands = Object.freeze({
+  /**
+   * One editor-originated, fully validated user intent. Base owns history; this
+   * command only defines a deterministic, immutable domain transition.
+   * Reject a replay against another workflow revision rather than merging data.
+   */
+  editorChange({ expected, next }) {
+    const before = freeze(fromProject(toProject(expected)));
+    const after = freeze(fromProject(toProject(next)));
+    return makeCommand('editor-change', (definition) => {
+      if (!equal(definition, before)) conflict();
+      for (const key of Object.keys(definition)) delete definition[key];
+      Object.assign(definition, clone(after));
+    });
+  },
   insert({ collection, index, entry }) {
     const kind = collectionKind(collection);
     position(index);
