@@ -337,7 +337,7 @@ final class TriggerListeners {
 	}
 
 	private static function is_content_post( \WP_Post $post ): bool {
-		return ! in_array( $post->post_type, [ 'revision', 'attachment' ], true ) && ! wp_is_post_autosave( $post );
+		return ! in_array( $post->post_type, [ 'revision', 'attachment', \CB\Automations\Template\StoredTemplateRepository::TYPE ], true ) && ! wp_is_post_autosave( $post );
 	}
 
 	/** @return array<string,mixed> */
