@@ -5,6 +5,8 @@ namespace CB\Automations\Admin;
 
 use CB\Automations\Persistence\PersistenceFailure;
 use CB\Automations\Template\WorkflowTemplateRegistry;
+use CB\Automations\Template\StoredTemplateRepository;
+use CB\Automations\Integration\Suite;
 use CB\Automations\Validation\ValidationState;
 use CB\Automations\Workflow\ActivationState;
 use CB\Automations\Workflow\Definition;
@@ -71,15 +73,32 @@ final class WorkflowController {
 			? sanitize_text_field( wp_unslash( (string) $_POST['template_id'] ) )
 			: '';
 
-		$template = WorkflowTemplateRegistry::get( $provider, $template_id );
-		if ( null === $template ) {
+		$source = isset( $_POST['template_source'] ) && is_scalar( $_POST['template_source'] )
+			? sanitize_text_field( wp_unslash( (string) $_POST['template_source'] ) ) : '';
+		if ( '' !== $source && ( StoredTemplateRepository::SOURCE_ID !== $source || Suite::EXTENSION_ID !== $provider ) ) {
+			self::redirect( [ 'notice' => 'template_unavailable' ] );
+		}
+		$saved_id = StoredTemplateRepository::saved_id( $template_id );
+		$definition = null;
+		$name = '';
+		if ( null !== $saved_id && StoredTemplateRepository::SOURCE_ID === $source ) {
+			$stored = StoredTemplateRepository::get( $saved_id, get_current_user_id() );
+			$definition = StoredTemplateRepository::definition( $saved_id, get_current_user_id() );
+			$name = null !== $stored ? $stored->post_title : '';
+		} elseif ( null === $saved_id ) {
+			$template = WorkflowTemplateRegistry::get( $provider, $template_id );
+			$definition = null !== $template ? $template->definition() : null;
+			$name = null !== $template ? $template->title() : '';
+		}
+		if ( null === $definition || '' === $name ) {
 			self::redirect( [ 'notice' => 'template_unavailable' ] );
 		}
 
 		try {
+			// WorkflowService::create enforces disabled-by-default and principal=0.
 			$id = ( new WorkflowService() )->create(
-				$template->title(),
-				$template->definition(),
+				$name,
+				$definition,
 				get_current_user_id()
 			);
 			self::redirect( [ 'workflow' => $id, 'notice' => 'created_template' ] );
