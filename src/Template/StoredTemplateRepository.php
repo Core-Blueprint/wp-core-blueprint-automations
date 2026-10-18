@@ -42,6 +42,14 @@ final class StoredTemplateRepository {
 		return 'saved-' . $id;
 	}
 
+	/** Numeric, bounded identity independent of optional Base browser interfaces. */
+	public static function saved_id( string $id ): ?int {
+		if ( 1 !== preg_match( '/^saved-([1-9][0-9]{0,9})$/D', $id, $match ) ) {
+			return null;
+		}
+		return (int) $match[1];
+	}
+
 	/** @return \WP_Post|null */
 	public static function get( int $id, int $actor ): ?\WP_Post {
 		if ( $id < 1 || ! self::authorized( $actor ) ) {
