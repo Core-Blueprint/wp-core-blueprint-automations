@@ -1,6 +1,10 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { readFile } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import { join } from 'node:path';
 import { toProject, fromProject, workflowCommands } from '../../assets/js/automations-domain-project.js';
 
 // SOURCE development pin: Base Designer G1d-B, not an installed ZIP receipt.
@@ -77,4 +81,68 @@ test('G1a-V21-A06: workspace, folders, templates and import are preserved', asyn
   assert.match(controller, /create_from_template/);
   assert.match(transfer, /function confirm\(/);
   assert.match(transfer, /function export\(/);
+});
+
+
+test('G1a-V21-A07: actual pinned Base ESM exports match the consumer named imports', (t) => {
+  const historySource = String(execFileSync('git', [
+    '-C', fileURLToPath(new URL('../../', import.meta.url)),
+    'show', 'HEAD:assets/js/admin-builder-history.js',
+  ], { encoding: 'utf8' }));
+  const matches = historySource.match(
+    /import\s*\{([^}]+)\}\s*from\s*['"]@cb-core\/design-editor['"]/s,
+  );
+  assert.ok(matches, 'Designer must import the public Base module');
+  const consumerNames = matches[1].split(',').map((name) => name.trim()).filter(Boolean);
+  assert.deepEqual(consumerNames, ['createDomainSession', 'animateLayoutChange']);
+  assert.match(historySource, /\banimateLayoutChange\(api\.root,/);
+  assert.doesNotMatch(historySource, /\bmotion\.animateLayoutChange\(/);
+
+  // Verify the ESM namespace of the real Base source, not an Automations-side
+  // export fixture or a source-string regex. Require the immutable Base SHA.
+  const baseRepo = process.env.CB_BASE_DESIGNER_REPO
+    || fileURLToPath(new URL('../../../wp-core-blueprint/', import.meta.url));
+  if (!existsSync(join(baseRepo, '.git'))) {
+    t.skip('Exact Base ESM runtime parity requires CB_BASE_DESIGNER_REPO or a sibling Base checkout');
+    return;
+  }
+  let baseSource;
+  try {
+    baseSource = execFileSync('git', [
+      '-C', baseRepo,
+      'show', BASE_DESIGNER_V2_SOURCE_SHA + ':assets/js/design/editor.js',
+    ], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+  } catch {
+    assert.fail('Pinned Base v2 SHA is unavailable: fetch Base G1d-B before claiming export parity.');
+  }
+
+  // Compile/link the untouched pinned Base entry as a real ESM module. The
+  // imported private dependencies are synthetic only because evaluating Base
+  // would require a WordPress browser; ESM export-name resolution is native.
+  const checkExports = [
+    "import { SourceTextModule, SyntheticModule } from 'node:vm';",
+    "let src = '';",
+    "for await (const part of process.stdin) src += part;",
+    "const bindings = new Map();",
+    "const importPattern = /import\\s+(\\{[\\s\\S]*?\\}|\\*\\s+as\\s+[\\w$]+)\\s+from\\s+['\\\"]([^'\\\"]+)['\\\"]\\s*;/g;",
+    "for (const match of src.matchAll(importPattern)) {",
+    "  const names = match[1].startsWith('{') ? match[1].slice(1, -1).split(',').map(s => s.trim().split(/\\s+as\\s+/)[0]).filter(Boolean) : ['__namespace'];",
+    "  const have = bindings.get(match[2]) || new Set();",
+    "  for (const name of names) have.add(name);",
+    "  bindings.set(match[2], have);",
+    "}",
+    "const entry = new SourceTextModule(src, { identifier: 'pinned-base-v2-public-editor.js' });",
+    "await entry.link(async specifier => new SyntheticModule([...bindings.get(specifier) || ['__namespace']], function () {}, { identifier: specifier }));",
+    "process.stdout.write(JSON.stringify(Reflect.ownKeys(entry.namespace).filter(x => typeof x === 'string')));",
+  ].join('\\n');
+  const output = execFileSync(process.execPath, [
+    '--no-warnings', '--experimental-vm-modules', '--input-type=module', '--eval', checkExports,
+  ], { input: baseSource, encoding: 'utf8' });
+  const baseExports = JSON.parse(output);
+  assert.ok(baseExports.includes('createDomainSession'));
+  assert.ok(baseExports.includes('animateLayoutChange'));
+  assert.ok(!baseExports.includes('motion'), 'Base does not export motion as an ESM binding');
+  for (const imported of consumerNames) {
+    assert.ok(baseExports.includes(imported), 'Unavailable Base named ESM export: ' + imported);
+  }
 });
