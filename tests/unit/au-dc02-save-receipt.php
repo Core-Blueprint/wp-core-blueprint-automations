@@ -9,7 +9,7 @@ use CB\Automations\Capability\CapabilityKind;
 use CB\Automations\Persistence\WorkflowRecord;
 use CB\Automations\Workflow\ActivationState;
 use CB\Automations\Workflow\DefinitionCodec;
-use CB\Automations\Workflow\TriggerKey;
+use CB\Automations\Runtime\TriggerKey;
 use CB\Automations\Workflow\WorkflowSaveReceipt;
 
 if ( ! function_exists( 'wp_strip_all_tags' ) ) {
