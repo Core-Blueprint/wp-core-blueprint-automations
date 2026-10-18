@@ -183,6 +183,8 @@ test('Context switch uses the live Designer root and dispatches both lifecycle e
 	const { runInNewContext } = await import('node:vm');
 	const switchContext = runInNewContext(block[0] + '\nswitchContext;', {
 		root, form, contextDataNode, window: windowMock,
+		switchGeneration: 0,
+		definition: { value: JSON.stringify({ definition_version: 1, trigger: null, states: [], conditions: [], actions: [] }) },
 		contextError: (_key, message) => new Error(message),
 		fetch: async () => ({ ok: true, text: async () => '' }),
 		DOMParser: class { parseFromString() { return nextDocument; } },
