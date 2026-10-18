@@ -2520,3 +2520,7 @@ msgstr "Sitio"
 #: templates/admin/workflow-editor.php
 msgid "Save as template"
 msgstr "Guardar como plantilla"
+
+#: src/Admin/DesignerAssets.php
+msgid "Review latest version in a new tab"
+msgstr "Ver la versión más reciente en una pestaña nueva"
