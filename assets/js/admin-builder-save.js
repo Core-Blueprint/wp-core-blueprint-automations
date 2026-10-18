@@ -11,6 +11,10 @@
 		validDescription: 'The current definition is valid against the live capability catalog.',
 		invalidDescription: 'Resolve these items before the automation can be enabled.',
 		workflowIssue: 'Workflow issue',
+		conflictSave: 'This automation was changed elsewhere. Your unsaved draft is still open. Review it before reloading or trying to save again.',
+		unknownSave: 'The server response was incomplete. Your draft remains open. Verify the saved workflow before attempting another save.',
+		historyUnavailable: 'Designer history is unavailable. No save was attempted.',
+		historyReconcileFailed: 'Saved on the server, but newer Designer edits could not be reconciled safely. Your local draft is preserved.',
 		activationEnabled: 'Enabled',
 		activationDisabled: 'Disabled',
 		validationValid: 'Valid',
@@ -115,14 +119,33 @@
 		}
 	};
 	const reconcileAfterUnparseableSuccess = () => {
-		cleanLocation();
-		window.location.reload();
+		// A successful HTTP status is not authoritative proof of a persisted CAS.
+		// Reloading here would silently destroy newer local edits.
+		throw new Error(strings.unknownSave);
 	};
 
 	form.addEventListener('submit', async (event) => {
 		if (event.submitter !== save && !aliases.includes(event.submitter)) return;
 		event.preventDefault();
 		if (saving) return;
+
+		// Capture a one-use Base v2 save token at the exact submitted authoring
+		// snapshot. Keep the token in memory: it is never posted to WordPress.
+		const history = window.cbAutomationsBuilderHistory;
+		let checkpoint;
+		try {
+			if (!history?.captureSave || !history?.acknowledgeSave || !history?.snapshot) {
+				throw new Error(strings.historyUnavailable);
+			}
+			checkpoint = history.captureSave();
+			const formDefinition = parseDefinition(definition?.value);
+			if (!formDefinition || JSON.stringify(formDefinition) !== JSON.stringify(history.snapshot())) {
+				throw new Error(strings.historyUnavailable);
+			}
+		} catch (error) {
+			emit('error', error instanceof Error ? error.message : strings.historyUnavailable);
+			return;
+		}
 
 		saving = true;
 		save.disabled = true;
@@ -154,9 +177,20 @@
 				}
 			}
 			if (!response.ok || result?.success !== true) {
-				throw new Error(responseMessage(result, strings.failed));
+				throw new Error(response.status === 409
+					? strings.conflictSave
+					: responseMessage(result, strings.failed));
 			}
 
+			// Server-Side EditorSaveBoundary reconstructs private bindings without
+			// echoing them to the browser. The accepted authoring projection must
+			// be exactly the one submitted in this server-confirmed revision CAS.
+			let historyReconciled = true;
+			try {
+				history.acknowledgeSave(checkpoint, submittedDefinition);
+			} catch (_error) {
+				historyReconciled = false;
+			}
 			const definitionDirty = definition instanceof HTMLInputElement && definition.value !== submittedDefinitionJson;
 			const nameDirty = name instanceof HTMLInputElement && submittedName !== null && name.value !== submittedName;
 			const activationDirty = activation instanceof HTMLSelectElement && submittedActivation !== null && activation.value !== submittedActivation;
@@ -181,6 +215,10 @@
 			updatePersistedStatuses(result, !definitionDirty);
 			if (!definitionDirty) updateHealth(result);
 			cleanLocation();
+			if (!historyReconciled) {
+				emit('error', strings.historyReconcileFailed);
+				return;
+			}
 			emit(
 				'saved',
 				currentDirty ? strings.savedWithChanges : responseMessage(result, save.textContent?.trim() || ''),
