@@ -3,6 +3,9 @@ import test from 'node:test';
 import { readFile } from 'node:fs/promises';
 import { toProject, fromProject, workflowCommands } from '../../assets/js/automations-domain-project.js';
 
+// SOURCE development pin: Base Designer G1d-B, not an installed ZIP receipt.
+// Cross-repo execution evidence must cite this exact immutable Base commit.
+const BASE_DESIGNER_V2_SOURCE_SHA = '084ff07b4eb1c4a5e53a32fe23eb6b49ca700042';
 const read = (file) => readFile(new URL('../../' + file, import.meta.url), 'utf8');
 const definition = () => ({
   definition_version: 1, trigger: null, states: [], conditions: [],
@@ -49,6 +52,7 @@ test('G1a-V21-A03: save never refreshes on ambiguous responses and keeps the loc
 });
 
 test('G1a-V21-A04: only same-build advertised Domain Session v2 enables Designer', async () => {
+  assert.equal(BASE_DESIGNER_V2_SOURCE_SHA, '084ff07b4eb1c4a5e53a32fe23eb6b49ca700042');
   const assets = await read('src/Admin/DesignerAssets.php');
   assert.match(assets, /DOMAIN_SESSION_API/);
   assert.match(assets, />=\s*2/);
