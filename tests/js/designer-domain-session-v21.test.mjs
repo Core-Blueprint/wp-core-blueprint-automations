@@ -134,7 +134,7 @@ test('G1a-V21-A07: actual pinned Base ESM exports match the consumer named impor
     "const entry = new SourceTextModule(src, { identifier: 'pinned-base-v2-public-editor.js' });",
     "await entry.link(async specifier => new SyntheticModule([...bindings.get(specifier) || ['__namespace']], function () {}, { identifier: specifier }));",
     "process.stdout.write(JSON.stringify(Reflect.ownKeys(entry.namespace).filter(x => typeof x === 'string')));",
-  ].join('\\n');
+  ].join('\n');
   const output = execFileSync(process.execPath, [
     '--no-warnings', '--experimental-vm-modules', '--input-type=module', '--eval', checkExports,
   ], { input: baseSource, encoding: 'utf8' });
