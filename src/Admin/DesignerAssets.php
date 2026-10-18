@@ -145,6 +145,10 @@ final class DesignerAssets {
 			&& is_callable( [ DesignEditorAssets::class, 'enqueue' ] )
 			&& is_callable( [ DesignEditorAssets::class, 'enqueue_designer_mode' ] )
 			&& defined( DesignEditorAssets::class . '::MODULE_ID' )
-			&& defined( DesignEditorAssets::class . '::SHELL_STYLE' );
+			&& defined( DesignEditorAssets::class . '::SHELL_STYLE' )
+			// No v1/low-level-history fallback: a public, same-build Domain Session
+			// v2 is required before this Designer can safely bind Undo/Save.
+			&& defined( DesignEditorAssets::class . '::DOMAIN_SESSION_API' )
+			&& constant( DesignEditorAssets::class . '::DOMAIN_SESSION_API' ) >= 2;
 	}
 }
