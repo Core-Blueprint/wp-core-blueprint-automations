@@ -68,12 +68,14 @@ test('Automation Builder keeps canonical persistence, shared-shell ownership and
 	assert.match(editor, /window\.cbAutomationsEditorSession/);
 	assert.match(editor, /cb-automations:definitionchange/);
 	assert.match(editor, /window\.cbCore\?\.designEditor\?\.motion\?\.animateLayoutChange/);
-	assert.match(history, /createDesignerStateHistory/);
+	assert.match(history, /createDomainSession/);
+	assert.match(history, /session\.captureSave\(\)/);
+	assert.match(history, /session\.rebase\(/);
 	assert.doesNotMatch(history, /\b(?:CommandHistory|EditorState|ProjectState)\b/);
 	assert.match(history, /resetForContext/);
-	assert.match(history, /history\.undo\(\)/);
-	assert.match(history, /history\.redo\(\)/);
-	assert.match(history, /event\.detail\?\.baselineDefinition/);
+	assert.match(history, /session\.undo\(\)/);
+	assert.match(history, /session\.redo\(\)/);
+	assert.match(history, /session\.baselineSnapshot\(\)/);
 
 	assert.match(save, /new FormData\(form\)/);
 	assert.match(save, /payload\.set\(ASYNC_FIELD, '1'\)/);
