@@ -2472,3 +2472,50 @@ msgstr "Der Workflow enthält eine Zahl, die im Editor nicht sicher dargestellt 
 
 msgid "Enter a number within the supported precision range."
 msgstr "Geben Sie eine Zahl innerhalb des unterstützten Genauigkeitsbereichs ein."
+
+#: templates/admin/automations.php:62
+msgid ""
+"Create a normal editable workflow from a provider template. The new workflow "
+"is yours and is not kept linked to the template."
+msgstr ""
+"Erstelle aus einer Anbietervorlage einen normalen bearbeitbaren Workflow. "
+"Der neue Workflow gehört dir und bleibt nicht mit der Vorlage verknüpft."
+
+#: src/Admin/TemplateManagementPage.php
+msgid "Duplicate template"
+msgstr "Vorlage duplizieren"
+
+#: src/Admin/TemplateManagementPage.php
+msgid "Delete template"
+msgstr "Vorlage löschen"
+
+#: templates/admin/automations.php:18
+msgid ""
+"That workflow template is no longer available. No automation was created."
+msgstr ""
+"Diese Workflow-Vorlage ist nicht mehr verfügbar. Es wurde keine "
+"Automatisierung erstellt."
+
+#: src/Template/TemplateSourceAdapter.php
+msgid "Preview template"
+msgstr "Vorlage ansehen"
+
+#: src/Template/TemplateSourceAdapter.php
+msgid "Manage template"
+msgstr "Vorlage verwalten"
+
+#: templates/admin/automations.php
+msgid "Browse templates"
+msgstr "Vorlagen durchsuchen"
+
+#: templates/admin/workflow-editor.php
+msgid "Personal"
+msgstr "Persönlich"
+
+#: templates/admin/workflow-editor.php
+msgid "Site"
+msgstr "Website"
+
+#: templates/admin/workflow-editor.php
+msgid "Save as template"
+msgstr "Als Vorlage speichern"
