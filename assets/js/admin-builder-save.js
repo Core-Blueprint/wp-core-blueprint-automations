@@ -12,6 +12,7 @@
 		invalidDescription: 'Resolve these items before the automation can be enabled.',
 		workflowIssue: 'Workflow issue',
 		conflictSave: 'This automation was changed elsewhere. Your unsaved draft is still open. Review it before reloading or trying to save again.',
+		conflictReview: 'Review latest version in a new tab',
 		unknownSave: 'The server response was incomplete. Your draft remains open. Verify the saved workflow before attempting another save.',
 		historyUnavailable: 'Designer history is unavailable. No save was attempted.',
 		historyReconcileFailed: 'Saved on the server, but newer Designer edits could not be reconciled safely. Your local draft is preserved.',
@@ -177,9 +178,11 @@
 				}
 			}
 			if (!response.ok || result?.success !== true) {
-				throw new Error(response.status === 409
+				const failure = new Error(response.status === 409
 					? strings.conflictSave
 					: responseMessage(result, strings.failed));
+				if (response.status === 409) failure.code = 'REVISION_CONFLICT';
+				throw failure;
 			}
 
 			// Server-Side EditorSaveBoundary reconstructs private bindings without
@@ -242,6 +245,16 @@
 			);
 		} catch (error) {
 			emit('error', error instanceof Error && error.message ? error.message : strings.failed);
+			if (error?.code === 'REVISION_CONFLICT' && status) {
+				// The current tab retains the complete authoring draft and history.
+				// Open the authenticated editor separately for manual reconciliation.
+				const review = document.createElement('a');
+				review.href = window.location.href;
+				review.target = '_blank';
+				review.rel = 'noopener noreferrer';
+				review.textContent = strings.conflictReview;
+				status.append(' ', review);
+			}
 		} finally {
 			saving = false;
 			save.disabled = false;
