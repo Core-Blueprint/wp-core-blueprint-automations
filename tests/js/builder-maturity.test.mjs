@@ -104,7 +104,12 @@ test('Automation Builder keeps canonical persistence, shared-shell ownership and
 	assert.match(controller, /PersistencePolicy::allows_encoded_definition/);
 	assert.match(controller, /DefinitionCodec::decode/);
 	assert.match(controller, /ValidationState::from_result\( \$result->validation\(\) \)->value/);
-	assert.match(controller, /'name'\s*=>\s*\$persisted_name/);
+	assert.match(controller, /'name'\s*=>\s*\$witness\['name'\]\s*\?\?\s*\$persisted_name/);
+	assert.match(controller, /\$witness\s*=\s*\$result->persisted_receipt\(\)/);
+	assert.match(controller, /if\s*\(\s*\$result->was_saved\(\)\s*&&\s*null\s*!==\s*\$witness\s*\)/);
+	assert.match(controller, /'workflow_id'\s*=>\s*\$witness\['workflow_id'\]/);
+	assert.match(controller, /'revision'\s*=>\s*\$witness\['revision'\]/);
+	assert.doesNotMatch(controller, /'revision'\s*=>\s*\(string\)\s*\(\s*\$result->was_saved\(\)\s*\?\s*\$revision\s*\+\s*1/);
 	assert.match(controller, /'activation_state'\s*=>\s*\$persisted_state->value/);
 	assert.doesNotMatch(controller, /WorkflowRepository::(?:create|update)\(/);
 
