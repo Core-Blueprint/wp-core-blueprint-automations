@@ -164,7 +164,7 @@ final class WorkflowController {
 			$notice = self::notice_for_result( $result );
 
 			if ( self::is_async_request() ) {
-				self::respond_save_result( $result, $notice, $revision, $state, $name );
+				self::respond_save_result( $result, $notice, $revision, $state, $name, $json );
 			}
 			self::redirect( [ 'workflow' => $id, 'notice' => $notice ] );
 		} catch ( InvalidArgumentException $error ) {
@@ -217,6 +217,7 @@ final class WorkflowController {
 			WorkflowSaveResult::PERSISTENCE_BLOCKED => 'persistence_blocked',
 			WorkflowSaveResult::PRECISION_BLOCKED   => 'precision_blocked',
 			WorkflowSaveResult::CONFLICT            => 'conflict',
+			WorkflowSaveResult::READBACK_UNVERIFIED => 'save_unverified',
 			default                                 => 'failed',
 		};
 	}
@@ -226,7 +227,8 @@ final class WorkflowController {
 		string $notice,
 		int $revision,
 		ActivationState $requested_state,
-		string $persisted_name
+		string $persisted_name,
+		string $submitted_definition_json
 	): never {
 		$issues = [];
 		foreach ( $result->validation()->issues() as $issue ) {
@@ -237,14 +239,15 @@ final class WorkflowController {
 			];
 		}
 
+		$witness = $result->persisted_receipt();
 		$persisted_state = $result->activation_state() ?? $requested_state;
 		$principal_user_id = $result->execution_principal_user_id();
 		$data = [
 			'notice'                      => $notice,
 			'message'                     => self::notice_message( $notice ),
 			// A decimal string survives browser JSON parsing without Number rounding.
-			'revision'                    => (string) ( $result->was_saved() ? $revision + 1 : $revision ),
-			'name'                        => $persisted_name,
+			'revision'                    => $witness['revision'] ?? (string) $revision,
+			'name'                        => $witness['name'] ?? $persisted_name,
 			'activation_state'            => $persisted_state->value,
 			'validation_state'            => ValidationState::from_result( $result->validation() )->value,
 			'execution_principal_user_id' => $principal_user_id,
@@ -254,12 +257,20 @@ final class WorkflowController {
 			'issues'                      => $issues,
 		];
 
-		if ( $result->was_saved() ) {
+		if ( $result->was_saved() && null !== $witness ) {
+			// The original browser JSON is acknowledged only after the Service
+			// compared the hydrated persisted Definition to the accepted input.
+			// Never expose a stored private definition or its digest to the browser.
+			$data['persisted'] = [
+				'workflow_id' => $witness['workflow_id'],
+				'revision' => $witness['revision'],
+				'submitted_sha256' => hash( 'sha256', $submitted_definition_json ),
+			];
 			wp_send_json_success( $data );
 			exit;
 		}
 
-		$status = WorkflowSaveResult::CONFLICT === $result->status() ? 409 : 400;
+		$status = in_array( $result->status(), [ WorkflowSaveResult::CONFLICT, WorkflowSaveResult::READBACK_UNVERIFIED ], true ) ? 409 : 400;
 		wp_send_json_error( $data, $status );
 		exit;
 	}
