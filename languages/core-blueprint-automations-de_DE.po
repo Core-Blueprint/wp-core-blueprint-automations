@@ -2519,3 +2519,7 @@ msgstr "Website"
 #: templates/admin/workflow-editor.php
 msgid "Save as template"
 msgstr "Als Vorlage speichern"
+
+#: src/Admin/DesignerAssets.php
+msgid "Review latest version in a new tab"
+msgstr "Neueste Version in einem neuen Tab öffnen"
