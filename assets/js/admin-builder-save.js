@@ -191,12 +191,20 @@
 			}
 			const digest = await window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(submittedDefinitionJson));
 			const submissionSha256 = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
-			const response = await window.fetch(endpoint, {
-				method: 'POST',
-				body: payload,
-				credentials: 'same-origin',
-			});
-			const body = await response.text();
+			let response;
+			let body;
+			try {
+				response = await window.fetch(endpoint, {
+					method: 'POST',
+					body: payload,
+					credentials: 'same-origin',
+				});
+				body = await response.text();
+			} catch (_error) {
+				// A write may have committed before the connection or response failed.
+				// Never retry automatically or present a definitive failure.
+				throw uncertain();
+			}
 			let result = null;
 			try {
 				result = JSON.parse(body);
@@ -246,7 +254,11 @@
 			try {
 				history.acknowledgeSave(checkpoint, submittedDefinition);
 			} catch (_error) {
-				throw new Error(strings.historyReconcileFailed);
+				// The server has a verified write, but Base rejected its checkpoint.
+				// Preserve the browser cursor and expose the same recovery affordance.
+				const failure = new Error(strings.historyReconcileFailed);
+				failure.code = 'SAVE_UNVERIFIED';
+				throw failure;
 			}
 			const definitionDirty = definition instanceof HTMLInputElement && definition.value !== submittedDefinitionJson;
 			const nameDirty = name instanceof HTMLInputElement && submittedName !== null && name.value !== submittedName;
@@ -260,7 +272,12 @@
 			if (!activationDirty && activation instanceof HTMLSelectElement && ['enabled', 'disabled'].includes(result.data?.activation_state)) {
 				activation.value = result.data.activation_state;
 			}
-			if (!nameDirty && headingTitle && typeof result.data?.name === 'string' && result.data.name) {
+			// The accepted, independently verified server name is authoritative.
+			// Only normalize the input when no newer local name edit has occurred.
+			if (!nameDirty && name instanceof HTMLInputElement) {
+				name.value = result.data.name;
+			}
+			if (!nameDirty && headingTitle && result.data.name) {
 				headingTitle.textContent = result.data.name;
 			}
 			if (principalLabel && typeof result.data?.execution_principal_label === 'string' && result.data.execution_principal_label) {
@@ -277,9 +294,9 @@
 				currentDirty ? strings.savedWithChanges : responseMessage(result, save.textContent?.trim() || ''),
 				{
 					baselineDefinition: submittedDefinition,
-					baselineName: submittedName,
+					baselineName: result.data.name,
 					baselineActivation: String(result.data?.activation_state || submittedActivation || ''),
-					currentDirty: definitionDirty,
+					currentDirty,
 				}
 			);
 		} catch (error) {
