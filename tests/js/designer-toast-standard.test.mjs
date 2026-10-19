@@ -47,6 +47,7 @@ test('TOAST-A03: persistent conflict recovery moved to Settings, never transient
   const recoveryIndex = template.indexOf('data-cb-automations-save-recovery');
   assert.ok(settingsIndex >= 0 && recoveryIndex > settingsIndex, 'recovery surface must be in Settings panel');
   assert.match(template, /data-cb-automations-save-recovery hidden/);
+  assert.match(css, /\[data-cb-automations-save-recovery\]\[hidden\]\s*\{[^}]*display:\s*none\s*!important/s);
   assert.match(save, /review\.target = '_blank'/);
   assert.match(save, /review\.rel = 'noopener noreferrer'/);
   assert.match(save, /shell\.addEventListener\('cb-automations:contextloaded', clearRecovery\)/);
