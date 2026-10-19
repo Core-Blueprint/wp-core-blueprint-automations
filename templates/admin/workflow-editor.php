@@ -160,7 +160,6 @@ if ( ! is_string( $definition_json ) ) {
 				</div>
 				<div class="cb-core-design-shell__toolbar-group">
 					<button type="button" class="button cb-core-button cb-core-button--secondary" data-cb-design-shell-fullscreen data-cb-design-shell-fullscreen-enter-label="<?php esc_attr_e( 'Open focus mode', 'core-blueprint-automations' ); ?>" data-cb-design-shell-fullscreen-exit-label="<?php esc_attr_e( 'Exit focus mode', 'core-blueprint-automations' ); ?>" aria-pressed="false"><span data-cb-design-shell-fullscreen-label><?php esc_html_e( 'Open focus mode', 'core-blueprint-automations' ); ?></span></button>
-					<span class="cb-automations-builder-status" data-cb-design-shell-status aria-live="polite"></span>
 					<button type="submit" class="button button-primary cb-core-button cb-core-button--primary" data-cb-design-shell-primary-action><?php esc_html_e( 'Save automation', 'core-blueprint-automations' ); ?></button>
 				</div>
 			</div>
@@ -241,7 +240,8 @@ if ( ! is_string( $definition_json ) ) {
 								<label><input type="checkbox" name="rebind_execution_principal" value="1" data-cb-automations-rebind-principal /> <?php esc_html_e( 'Use my account as execution principal when saving', 'core-blueprint-automations' ); ?></label>
 								<p class="cb-core-design-shell__field-hint"><?php esc_html_e( 'Core Blueprint never accepts an arbitrary Run as user ID from the browser. The server binds your current WordPress account and re-checks its permissions on every execution.', 'core-blueprint-automations' ); ?></p>
 							</section>
-							<section class="cb-core-design-shell__panel-section cb-automations-validation-panel" aria-label="<?php esc_attr_e( 'Workflow health', 'core-blueprint-automations' ); ?>">
+							<section class="cb-core-design-shell__panel-section" data-cb-automations-save-recovery hidden aria-label="<?php esc_attr_e( 'Review latest version in a new tab', 'core-blueprint-automations' ); ?>"></section>
+						<section class="cb-core-design-shell__panel-section cb-automations-validation-panel" aria-label="<?php esc_attr_e( 'Workflow health', 'core-blueprint-automations' ); ?>">
 							<section class="cb-core-design-shell__panel-section">
 								<h3 class="cb-core-design-shell__panel-section-title"><?php echo esc_html( $validation->is_valid() ? __( 'Ready', 'core-blueprint-automations' ) : __( 'Needs attention', 'core-blueprint-automations' ) ); ?></h3>
 								<?php if ( $validation->is_valid() ) : ?>
