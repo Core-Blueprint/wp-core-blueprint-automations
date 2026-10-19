@@ -16,7 +16,7 @@ if (root) {
 			try { return JSON.stringify(JSON.parse(String(value || '{}'))); }
 			catch { return String(value || ''); }
 		};
-		let allowConfirmedExit = false;
+		// Base Designer Exit Guard owns native browser unload protection.
 		let baseline = {
 			definition: normalized(definition?.value),
 			name: String(name?.value || ''),
@@ -29,12 +29,6 @@ if (root) {
 			|| String(activation?.value || '') !== baseline.activation
 			|| Boolean(authority?.checked) !== baseline.rebind
 		);
-
-		window.addEventListener('beforeunload', (event) => {
-			if (allowConfirmedExit || !isDirty()) return;
-			event.preventDefault();
-			event.returnValue = '';
-		});
 
 		const launchRoot = root.closest('[data-cb-design-launch-root]');
 		const contextDataNode = document.getElementById('cb-automations-editor-data');
@@ -198,14 +192,11 @@ if (root) {
 				reject(error);
 			}
 		});
-		const chooseSwitchAction = async (purpose = 'switch') => {
-			const exiting = purpose === 'exit';
+		const chooseSwitchAction = async () => {
 			const labels = window.cbAutomationsInspectorStrings || {};
 			const body = document.createElement('div');
 			const description = document.createElement('p');
-			description.textContent = String(exiting
-				? (labels.closeUnsavedDescription || 'This workflow has unsaved changes. Save or discard them before closing the Builder.')
-				: (labels.unsavedChanges || 'This workflow has unsaved changes. Save or discard them before switching.'));
+			description.textContent = String(labels.unsavedChanges || 'This workflow has unsaved changes. Save or discard them before switching.');
 			body.append(description);
 			const options = document.createElement('fieldset');
 			options.className = 'cb-automations-switch-options';
@@ -241,7 +232,7 @@ if (root) {
 			const accepted = await showModal({
 				title: String(labels.unsavedTitle || 'Unsaved changes'),
 				body,
-				confirmLabel: String(exiting ? (labels.closeBuilder || 'Close Builder') : (labels.switchWorkflow || 'Switch workflow')),
+				confirmLabel: String(labels.switchWorkflow || 'Switch workflow'),
 				cancelLabel: String(labels.cancel || 'Cancel'),
 				onConfirm: async () => {
 					const selected = radios.find((radio) => radio.checked)?.value;
@@ -265,71 +256,6 @@ if (root) {
 			});
 			return accepted ? action : null;
 		};
-
-		// Direct Designer Mode close belongs to Base. Intercept the close
-		// intent before Base toggles fullscreen, then replay its own control
-		// only after the user approves. Never navigate around Base's lifecycle.
-		const chooseExitAction = async () => {
-			if (isDirty()) return chooseSwitchAction('exit');
-			const labels = window.cbAutomationsInspectorStrings || {};
-			const approved = await showModal({
-				title: String(labels.closeTitle || 'Close Automation Builder?'),
-				body: String(labels.closeDescription || 'Return to Automations?'),
-				confirmLabel: String(labels.closeBuilder || 'Close Builder'),
-				cancelLabel: String(labels.cancel || 'Cancel'),
-			});
-			return approved ? 'close' : null;
-		};
-		let exitPending = false;
-		const requestExit = async () => {
-			if (exitPending || allowConfirmedExit) return;
-			if (root.hasAttribute('aria-busy')) {
-				notify('warning', window.cbAutomationsInspectorStrings?.saveInProgress || 'Wait for the current save to finish.');
-				return;
-			}
-			exitPending = true;
-			try {
-				const action = await chooseExitAction();
-				if (!action) return;
-				// In direct Designer Mode Base removes the fullscreen button from
-				// the rendered toolbar. The public shell controller remains valid.
-				if (!designerController?.isFullscreen?.() || typeof designerController.exitFullscreen !== 'function') {
-					throw contextError('contextUnavailable', 'The Designer close control is unavailable.');
-				}
-				allowConfirmedExit = true;
-				if (designerController.exitFullscreen() !== true) {
-					throw contextError('contextUnavailable', 'The Designer could not be closed.');
-				}
-			} catch (error) {
-				allowConfirmedExit = false;
-				notify('error', error instanceof Error ? error.message : String(error));
-			} finally {
-				exitPending = false;
-			}
-		};
-		launchRoot?.addEventListener('click', (event) => {
-			const close = event.target?.closest?.('[data-cb-design-shell-close]');
-			if (!close || !root.contains(close)) return;
-			event.preventDefault();
-			event.stopImmediatePropagation();
-			requestExit();
-		}, true);
-		window.addEventListener('keydown', (event) => {
-			if (event.key !== 'Escape' || event.defaultPrevented
-				|| !root.classList.contains('is-fullscreen')) return;
-			const modal = document.querySelector('dialog.cb-core-modal[open]');
-			if (modal) {
-				// Base fullscreen also listens for Escape. Let the open dialog
-				// handle dismissal instead of accidentally exiting the Builder.
-				event.preventDefault();
-				event.stopImmediatePropagation();
-				modal.dispatchEvent(new Event('cancel', { cancelable: true }));
-				return;
-			}
-			event.preventDefault();
-			event.stopImmediatePropagation();
-			requestExit();
-		}, true);
 
 		launchRoot?.addEventListener('cb:design-shell:contextrequest', (event) => {
 			if (event.detail?.control !== workflowSwitcher) return;
@@ -377,6 +303,35 @@ if (root) {
 				rebind: false,
 			};
 		});
+
+		// Base owns Exit Guard presentation and the fullscreen lifecycle.
+		// Automations supplies only dirty state and a verified Save receipt.
+		const exitGuard = window.cbCore?.designerExitGuard;
+		if (typeof exitGuard?.register === 'function') {
+			const labels = window.cbAutomationsInspectorStrings || {};
+			exitGuard.register(root, {
+				isDirty,
+				save: async () => {
+					await saveBeforeSwitch();
+					return true;
+				},
+				labels: {
+					cleanTitle: String(labels.closeTitle || 'Close Automation Builder?'),
+					cleanDescription: String(labels.closeDescription || 'Return to Automations?'),
+					dirtyTitle: String(labels.unsavedTitle || 'Unsaved changes'),
+					dirtyDescription: String(labels.closeUnsavedDescription || 'Save or discard unsaved changes before closing.'),
+					choiceTitle: String(labels.unsavedChoice || 'What should happen to your changes?'),
+					save: String(labels.optionSave || 'Save changes'),
+					discard: String(labels.optionDiscard || 'Discard changes'),
+					close: String(labels.closeBuilder || 'Close Builder'),
+					cancel: String(labels.cancel || 'Cancel'),
+					busy: String(labels.saveInProgress || 'Wait for the current save to finish.'),
+				},
+			});
+		} else {
+			// Mismatched Base ZIP: never attach a second, consumer-owned exit UI.
+			root.addEventListener('cb:design-shell:beforeexit', (event) => event.preventDefault());
+		}
 
 	}
 
