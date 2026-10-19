@@ -27,7 +27,7 @@
 	const form = document.querySelector('[data-cb-automations-editor-form]');
 	const shell = document.querySelector('[data-cb-automations-designer-shell]');
 	const save = shell?.querySelector('[data-cb-design-shell-primary-action]');
-	const status = shell?.querySelector('[data-cb-design-shell-status]');
+	const recovery = shell?.querySelector('[data-cb-automations-save-recovery]');
 	const revision = form?.querySelector('[name="revision"]');
 	const name = form?.querySelector('[name="name"]');
 	const activation = form?.querySelector('[name="activation_state"]');
@@ -53,7 +53,6 @@
 	};
 	const emit = (state, message = '', extra = {}) => {
 		const text = String(message || '');
-		if (status) status.textContent = text;
 		shell.toggleAttribute('aria-busy', state === 'saving');
 		shell.dispatchEvent(new CustomEvent('cb:design-shell:savechange', {
 			bubbles: true,
@@ -130,10 +129,27 @@
 		throw uncertain();
 	};
 
+	const clearRecovery = () => {
+		if (!recovery) return;
+		recovery.hidden = true;
+		recovery.replaceChildren();
+	};
+	const showRecovery = () => {
+		if (!recovery) return;
+		const review = document.createElement('a');
+		review.href = window.location.href;
+		review.target = '_blank';
+		review.rel = 'noopener noreferrer';
+		review.textContent = strings.conflictReview;
+		recovery.replaceChildren(review);
+		recovery.hidden = false;
+	};
+
 	form.addEventListener('submit', async (event) => {
 		if (event.submitter !== save && !aliases.includes(event.submitter)) return;
 		event.preventDefault();
 		if (saving) return;
+		clearRecovery();
 
 		// Capture a one-use Base v2 save token at the exact submitted authoring
 		// snapshot. Keep the token in memory: it is never posted to WordPress.
@@ -267,15 +283,10 @@
 			);
 		} catch (error) {
 			emit('error', error instanceof Error && error.message ? error.message : strings.failed);
-			if ((error?.code === 'REVISION_CONFLICT' || error?.code === 'SAVE_UNVERIFIED') && status) {
-				// The current tab retains the complete authoring draft and history.
-				// Open the authenticated editor separately for manual reconciliation.
-				const review = document.createElement('a');
-				review.href = window.location.href;
-				review.target = '_blank';
-				review.rel = 'noopener noreferrer';
-				review.textContent = strings.conflictReview;
-				status.append(' ', review);
+			if (error?.code === 'REVISION_CONFLICT' || error?.code === 'SAVE_UNVERIFIED') {
+				// An actionable recovery link remains in Settings, never in the toolbar.
+				// Base owns the single transient error Toast through savechange.
+				showRecovery();
 			}
 		} finally {
 			saving = false;
