@@ -95,8 +95,11 @@ test('Automation Builder keeps canonical persistence, shared-shell ownership and
 	assert.match(save, /cb-core-status__dot--danger/);
 	assert.match(save, /cb-core-status__dot--muted/);
 	assert.match(save, /baselineDefinition: submittedDefinition/);
-	assert.match(save, /baselineName: submittedName/);
-	assert.match(save, /currentDirty: definitionDirty/);
+	// Save must rebase dirty state against the verified server name, not the submitted spelling.
+	assert.match(save, /baselineName: result\.data\.name/);
+	assert.match(save, /if \(!nameDirty && name instanceof HTMLInputElement\) \{\s*name\.value = result\.data\.name;/);
+	assert.match(save, /const currentDirty = definitionDirty \|\| nameDirty \|\| activationDirty \|\| rebindDirty/);
+	assert.match(save, /^\s*currentDirty,\s*$/m);
 	assert.match(save, /cb:design-shell:savechange/);
 
 	assert.match(controller, /new\s+WorkflowService\(\)\s*\)->save\(/);
@@ -254,13 +257,12 @@ test('Designer close invokes Base shell controller even when fullscreen button i
 	assert.ok(match, 'the guarded exit function remains separately testable');
 	const { runInNewContext } = await import('node:vm');
 	const runCase = async ({ selection = 'close', saving = false, fullscreen = true, exitResult = true } = {}) => {
-		const status = { textContent: '' };
+		const notifications = [];
 		let exits = 0;
 		let prompts = 0;
 		const state = {
 			root: {
 				hasAttribute: (name) => name === 'aria-busy' && saving,
-				querySelector: () => status,
 			},
 			window: { cbAutomationsInspectorStrings: {} },
 			designerController: {
@@ -269,23 +271,31 @@ test('Designer close invokes Base shell controller even when fullscreen button i
 			},
 			chooseExitAction: async () => { prompts += 1; return selection; },
 			contextError: (_key, message) => new Error(message),
+			// Designer close/blocked Save feedback goes through the public Base Toast adapter.
+			notify: (variant, message) => notifications.push({ variant, message }),
 			exitPending: false,
 			allowConfirmedExit: false,
 		};
 		const requestExit = runInNewContext(match[0] + '\nrequestExit;', state);
 		await requestExit();
-		return { status, exits, prompts, state };
+		return { notifications, exits, prompts, state };
 	};
 	const confirmed = await runCase({ selection: 'discard' });
 	assert.equal(confirmed.exits, 1, 'the Base controller is called for confirmed discard');
 	assert.equal(confirmed.state.allowConfirmedExit, true, 'beforeunload is bypassed only after approval');
 	assert.equal((await runCase({ selection: null })).exits, 0, 'Cancel never exits');
-	assert.equal((await runCase({ saving: true })).prompts, 0, 'saving blocks the confirmation');
+	const busy = await runCase({ saving: true });
+	assert.equal(busy.prompts, 0, 'saving blocks the confirmation');
+	assert.deepEqual(busy.notifications, [{ variant: 'warning', message: 'Wait for the current save to finish.' }]);
 	const unavailable = await runCase({ fullscreen: false });
 	assert.equal(unavailable.exits, 0, 'fullscreen inactive fails closed');
-	assert.match(unavailable.status.textContent, /unavailable/i);
+	assert.equal(unavailable.notifications.length, 1, 'unavailable close produces one error Toast');
+	assert.equal(unavailable.notifications[0].variant, 'error');
+	assert.match(unavailable.notifications[0].message, /unavailable/i);
 	const rejected = await runCase({ exitResult: false });
 	assert.equal(rejected.exits, 1);
 	assert.equal(rejected.state.allowConfirmedExit, false, 'failed close restores unload protection');
-	assert.match(rejected.status.textContent, /could not be closed/i);
+	assert.equal(rejected.notifications.length, 1, 'rejected close produces one error Toast');
+	assert.equal(rejected.notifications[0].variant, 'error');
+	assert.match(rejected.notifications[0].message, /could not be closed/i);
 });
