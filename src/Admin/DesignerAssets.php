@@ -150,6 +150,9 @@ final class DesignerAssets {
 			// No v1/low-level-history fallback: a public, same-build Domain Session
 			// v2 is required before this Designer can safely bind Undo/Save.
 			&& defined( DesignEditorAssets::class . '::DOMAIN_SESSION_API' )
-			&& constant( DesignEditorAssets::class . '::DOMAIN_SESSION_API' ) >= 2;
+			&& constant( DesignEditorAssets::class . '::DOMAIN_SESSION_API' ) >= 2
+			// Exit Guard belongs to the same installed Base ZIP as the shell.
+			&& defined( DesignEditorAssets::class . '::DESIGNER_EXIT_GUARD_API' )
+			&& constant( DesignEditorAssets::class . '::DESIGNER_EXIT_GUARD_API' ) >= 1;
 	}
 }
