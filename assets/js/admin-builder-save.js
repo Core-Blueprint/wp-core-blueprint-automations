@@ -134,6 +134,7 @@
 		recovery.hidden = true;
 		recovery.replaceChildren();
 	};
+	shell.addEventListener('cb-automations:contextloaded', clearRecovery);
 	const showRecovery = () => {
 		if (!recovery) return;
 		const review = document.createElement('a');
