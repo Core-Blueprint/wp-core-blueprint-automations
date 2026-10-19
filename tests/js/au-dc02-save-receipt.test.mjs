@@ -105,7 +105,7 @@ async function simulate(serverResponse, { rebaseFails = false } = {}) {
     Uint8Array, URL, console });
   assert.equal(typeof form.submitHandler, 'function', 'actual Save script must register its handler');
   await form.submitHandler({ submitter: save, preventDefault() {} });
-  return { events, notifications, statusText: status.textContent, recovery,
+  return { events, notifications, statusText: status.textContent, recovery, root,
     writeCount, rebases, revision: inputs['[name="revision"]'].value };
 }
 
@@ -115,6 +115,10 @@ test('AU-DC02-J01: exact persisted receipt permits one Base rebase and advances 
   assert.equal(v.rebases, 1);
   assert.equal(v.revision, '9');
   assert.equal(v.events.at(-1)?.state, 'saved');
+  assert.equal(v.notifications.length, 1, 'one Base-owned success Toast');
+  assert.equal(v.notifications[0]?.variant, 'success');
+  assert.equal(v.statusText, '', 'no transient toolbar message');
+  assert.equal(v.recovery.hidden, true, 'no conflict recovery on confirmed Save');
 });
 
 test('AU-DC02-J02: no credible content/identity/revision receipt ever rebases or advances cursor', async () => {
@@ -132,6 +136,9 @@ test('AU-DC02-J02: no credible content/identity/revision receipt ever rebases or
     assert.equal(v.rebases, 0);
     assert.equal(v.revision, '8');
     assert.equal(v.events.at(-1)?.state, 'error');
+    assert.equal(v.notifications.length, 1, 'one Base-owned error Toast for unknown Save');
+    assert.equal(v.notifications[0].variant, 'error');
+    assert.equal(v.statusText, '', 'no transient toolbar error');
   }
 });
 
@@ -142,6 +149,13 @@ test('AU-DC02-J03: post-CAS uncertain readback and ordinary conflict both preser
     assert.equal(v.rebases, 0);
     assert.equal(v.revision, '8');
     assert.equal(v.events.at(-1)?.state, 'error');
+    assert.equal(v.notifications.length, 1, 'one Base-owned conflict/uncertain Toast');
+    assert.equal(v.notifications[0].variant, 'error');
+    assert.equal(v.recovery.hidden, false, 'persistent Settings recovery must remain visible');
+    assert.equal(v.recovery.children[0]?.target, '_blank');
+    assert.equal(v.statusText, '', 'no transient toolbar conflict message');
+    v.root.dispatchEvent({ type: 'cb-automations:contextloaded' });
+    assert.equal(v.recovery.hidden, true, 'switching workflow must clear the old recovery action');
   }
 });
 
@@ -150,4 +164,7 @@ test('AU-DC02-J04: Base rebase refusal does not falsely advance browser revision
   assert.equal(v.rebases, 1);
   assert.equal(v.revision, '8');
   assert.equal(v.events.at(-1)?.state, 'error');
+  assert.equal(v.notifications.length, 1);
+  assert.equal(v.notifications[0]?.variant, 'error');
+  assert.equal(v.statusText, '');
 });
