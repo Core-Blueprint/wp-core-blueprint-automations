@@ -25,16 +25,19 @@ const response = (options = {}) => ({
 
 async function simulate(serverResponse, { rebaseFails = false } = {}) {
   const events = [];
+  const notifications = [];
   const fields = {
     workflow_id: '17', revision: '8', name: 'Example', activation_state: 'disabled',
     definition_json: definition,
   };
   class Element {
-    constructor(value = '') { this.value = value; this.textContent = ''; this.disabled = false; this.checked = false; this.attributes = {}; }
+    constructor(value = '') { this.value = value; this.textContent = ''; this.disabled = false; this.checked = false; this.attributes = {}; this.handlers = new Map(); this.children = []; this.hidden = false; }
+    addEventListener(type, handler) { this.handlers.set(type, [...(this.handlers.get(type) || []), handler]); }
+    replaceChildren(...children) { this.children = children; }
     querySelector() { return null; }
     querySelectorAll() { return []; }
     toggleAttribute(key, value) { this.attributes[key] = value; }
-    dispatchEvent(event) { events.push(event.detail); return true; }
+    dispatchEvent(event) { events.push(event.detail); for (const cb of this.handlers.get(event.type) || []) cb(event); return true; }
     append() {}
   }
   class HTMLFormElement extends Element {
@@ -49,6 +52,13 @@ async function simulate(serverResponse, { rebaseFails = false } = {}) {
   const save = new HTMLButtonElement();
   save.textContent = 'Save';
   const status = new Element();
+  const recovery = new Element();
+  recovery.hidden = true;
+  root.addEventListener('cb:design-shell:savechange', (event) => {
+    // Simulate Base's documented ONE Toast mapping, not a consumer Toast.
+    const state = event.detail?.state;
+    if (state === 'saved' || state === 'error') notifications.push({ variant: state === 'saved' ? 'success' : 'error', message: event.detail?.message });
+  });
   const inputs = {
     '[name="revision"]': new HTMLInputElement('8'),
     '[name="name"]': new HTMLInputElement('Example'),
@@ -60,6 +70,7 @@ async function simulate(serverResponse, { rebaseFails = false } = {}) {
   root.querySelector = (selector) => ({
     '[data-cb-design-shell-primary-action]': save,
     '[data-cb-design-shell-status]': status,
+    '[data-cb-automations-save-recovery]': recovery,
     '.cb-automations-validation-panel': null,
   })[selector] ?? null;
   let writeCount = 0;
@@ -94,7 +105,8 @@ async function simulate(serverResponse, { rebaseFails = false } = {}) {
     Uint8Array, URL, console });
   assert.equal(typeof form.submitHandler, 'function', 'actual Save script must register its handler');
   await form.submitHandler({ submitter: save, preventDefault() {} });
-  return { events, writeCount, rebases, revision: inputs['[name="revision"]'].value };
+  return { events, notifications, statusText: status.textContent, recovery,
+    writeCount, rebases, revision: inputs['[name="revision"]'].value };
 }
 
 test('AU-DC02-J01: exact persisted receipt permits one Base rebase and advances version', async () => {
