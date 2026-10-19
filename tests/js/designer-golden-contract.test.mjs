@@ -65,7 +65,8 @@ test('Context switching respects the public Base event and unsaved editor data',
 	assert.match(shell, /beforeunload/);
 	assert.match(shell, /cb:design-shell:savechange/);
 	assert.match(save, /baselineDefinition: submittedDefinition/);
-	assert.match(save, /baselineName: submittedName/);
+	assert.match(save, /baselineName: result\.data\.name/, 'baseline must reflect verified persisted name');
+	assert.match(save, /if \(!nameDirty && name instanceof HTMLInputElement\) \{\s*name\.value = result\.data\.name;/, 'server normalization must not overwrite newer edits');
 	assert.match(save, /baselineActivation:/);
 });
 
