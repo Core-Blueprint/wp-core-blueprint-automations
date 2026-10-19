@@ -8,6 +8,12 @@
 	max-width: none;
 }
 
+/* Keep conflict recovery inert until a rejected/uncertain save activates it.
+ * Base panel-section layout rules must never override the hidden state. */
+.cb-automations-design-shell [data-cb-automations-save-recovery][hidden] {
+	display: none !important;
+}
+
 .cb-automations-design-shell__canvas .cb-automations-linear-editor {
 	margin-top: 0;
 }
