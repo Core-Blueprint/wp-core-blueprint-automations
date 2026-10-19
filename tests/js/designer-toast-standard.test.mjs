@@ -21,7 +21,7 @@ test('TOAST-A01: Base owns Save state and Toast presentation, no consumer toolba
   assert.doesNotMatch(css, /\.cb-automations-builder-status/);
 });
 
-test('TOAST-A02: separate public Toast path for context/close failures, no alternate notifier', () => {
+test('TOAST-A02: context failures use public Toast; Exit Guard owns close feedback', () => {
   assert.match(designerAssets, /enqueue_designer_mode\(/);
   assert.match(designerAssets, /\[ '@cb-core\/design-editor', '@cb-core\/modal', '@cb-core\/toast' \]/);
   const match = shell.match(/const notify = \(variant, message\) => \{([\s\S]*?)\n\t\t\};/);
@@ -37,7 +37,12 @@ test('TOAST-A02: separate public Toast path for context/close failures, no alter
     ['warning', 'Wait for save'],
     ['error', 'Context failed'],
   ]);
-  assert.match(shell, /notify\('warning', window\.cbAutomationsInspectorStrings\?\.saveInProgress/);
+  // Closing a Designer is Base-owned after Exit Guard migration.
+  assert.match(shell, /exitGuard\.register\(root/);
+  assert.match(shell, /busy: String\(labels\.saveInProgress/);
+  assert.match(designerAssets, /DESIGNER_EXIT_GUARD_API/);
+  assert.doesNotMatch(shell, /notify\('warning', window\.cbAutomationsInspectorStrings\?\.saveInProgress/);
+  assert.doesNotMatch(shell, /const requestExit|const chooseExitAction|data-cb-design-shell-close/);
   assert.match(shell, /notify\('error', error instanceof Error \? error\.message : String\(error\)\)/);
   assert.doesNotMatch(shell, /wp\.data\.dispatch|wp\.notices|alert\(|window\.confirm\(/);
 });
