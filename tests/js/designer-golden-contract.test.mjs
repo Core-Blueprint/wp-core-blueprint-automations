@@ -62,7 +62,8 @@ test('Context switching respects the public Base event and unsaved editor data',
 	assert.match(shell, /launchRoot\?\.addEventListener\('cb:design-shell:contextrequest'/);
 	assert.match(shell, /event\.detail\.respondWith/);
 	assert.match(shell, /isDirty\(\)/);
-	assert.match(shell, /beforeunload/);
+	assert.match(shell, /exitGuard\.register\(root/);
+	assert.doesNotMatch(shell, /beforeunload|allowConfirmedExit/);
 	assert.match(shell, /cb:design-shell:savechange/);
 	assert.match(save, /baselineDefinition: submittedDefinition/);
 	assert.match(save, /baselineName: result\.data\.name/, 'baseline must reflect verified persisted name');
