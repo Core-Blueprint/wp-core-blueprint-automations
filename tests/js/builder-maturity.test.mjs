@@ -81,7 +81,8 @@ test('Automation Builder keeps canonical persistence, shared-shell ownership and
 	assert.match(save, /payload\.set\(ASYNC_FIELD, '1'\)/);
 	assert.match(save, /window\.fetch\(endpoint/);
 	assert.match(save, /cb-automations:validation-saved/);
-	assert.match(shell, /beforeunload/);
+	assert.match(shell, /exitGuard\.register\(root/);
+	assert.doesNotMatch(shell, /beforeunload|allowConfirmedExit/);
 	assert.match(shell, /window\.history\.replaceState\(/);
 	assert.match(inspector, /setAttribute\('role', 'group'\)/);
 	assert.match(save, /aliases\.includes\(event\.submitter\)/);
@@ -209,93 +210,18 @@ test('Context switch uses the live Designer root and dispatches both lifecycle e
 	assert.ok(updated.definition && updated.history, 'editor and history were refreshed');
 });
 
-test('Designer close confirmation is required with or without changes', async () => {
-	const source = await read('assets/js/admin-designer-shell.js');
-	const block = source.match(/const chooseExitAction = async \(\) => \{[\s\S]*?\n\t\t\};/);
-	assert.ok(block, 'exit choice helper is present');
-	const { runInNewContext } = await import('node:vm');
-	let dirty = false;
-	let modalResult = false;
-	let opened = 0;
-	let exitPurpose = null;
-	const select = runInNewContext(block[0] + '\nchooseExitAction;', {
-		isDirty: () => dirty,
-		showModal: async ({ title, confirmLabel, cancelLabel }) => {
-			opened += 1;
-			assert.equal(title, 'Close Automation Builder?');
-			assert.equal(confirmLabel, 'Close Builder');
-			assert.equal(cancelLabel, 'Cancel');
-			return modalResult;
-		},
-		chooseSwitchAction: async (purpose) => {
-			exitPurpose = purpose;
-			return 'discard';
-		},
-		window: { cbAutomationsInspectorStrings: {} },
-	});
-	assert.equal(await select(), null, 'cancel keeps a clean workflow open');
-	modalResult = true;
-	assert.equal(await select(), 'close', 'clean close also requires confirmation');
-	dirty = true;
-	assert.equal(await select(), 'discard', 'dirty close delegates to save/discard choices');
-	assert.equal(exitPurpose, 'exit');
-	assert.equal(opened, 2, 'no double modal when changes exist');
-	assert.match(source, /launchRoot\?\.addEventListener\('click',[\s\S]*?data-cb-design-shell-close/);
-	assert.match(source, /window\.addEventListener\('keydown',[\s\S]*?requestExit\(\)/);
-	assert.match(source, /if \(allowConfirmedExit \|\| !isDirty\(\)\) return;/);
-	assert.match(source, /allowConfirmedExit = true;/);
-	assert.match(source, /designerController = createDesignerShell\(root, \{ defaultPanel: 'settings' \}\)/);
-	assert.match(source, /designerController\.exitFullscreen\(\)/);
-	assert.doesNotMatch(source, /approvedCloseClick/);
-	assert.doesNotMatch(source, /root\.querySelector\('\[data-cb-design-shell-fullscreen\]'\)/);
-	assert.match(source, /if \(root\.hasAttribute\('aria-busy'\)\) \{[\s\S]*?saveInProgress/);
-});
-
-test('Designer close invokes Base shell controller even when fullscreen button is detached', async () => {
-	const source = await read('assets/js/admin-designer-shell.js');
-	const match = source.match(/const requestExit = async \(\) => \{[\s\S]*?\n\t\t\};/);
-	assert.ok(match, 'the guarded exit function remains separately testable');
-	const { runInNewContext } = await import('node:vm');
-	const runCase = async ({ selection = 'close', saving = false, fullscreen = true, exitResult = true } = {}) => {
-		const notifications = [];
-		let exits = 0;
-		let prompts = 0;
-		const state = {
-			root: {
-				hasAttribute: (name) => name === 'aria-busy' && saving,
-			},
-			window: { cbAutomationsInspectorStrings: {} },
-			designerController: {
-				isFullscreen: () => fullscreen,
-				exitFullscreen: () => { exits += 1; return exitResult; },
-			},
-			chooseExitAction: async () => { prompts += 1; return selection; },
-			contextError: (_key, message) => new Error(message),
-			// Designer close/blocked Save feedback goes through the public Base Toast adapter.
-			notify: (variant, message) => notifications.push({ variant, message }),
-			exitPending: false,
-			allowConfirmedExit: false,
-		};
-		const requestExit = runInNewContext(match[0] + '\nrequestExit;', state);
-		await requestExit();
-		return { notifications, exits, prompts, state };
-	};
-	const confirmed = await runCase({ selection: 'discard' });
-	assert.equal(confirmed.exits, 1, 'the Base controller is called for confirmed discard');
-	assert.equal(confirmed.state.allowConfirmedExit, true, 'beforeunload is bypassed only after approval');
-	assert.equal((await runCase({ selection: null })).exits, 0, 'Cancel never exits');
-	const busy = await runCase({ saving: true });
-	assert.equal(busy.prompts, 0, 'saving blocks the confirmation');
-	assert.deepEqual(busy.notifications, [{ variant: 'warning', message: 'Wait for the current save to finish.' }]);
-	const unavailable = await runCase({ fullscreen: false });
-	assert.equal(unavailable.exits, 0, 'fullscreen inactive fails closed');
-	assert.equal(unavailable.notifications.length, 1, 'unavailable close produces one error Toast');
-	assert.equal(unavailable.notifications[0].variant, 'error');
-	assert.match(unavailable.notifications[0].message, /unavailable/i);
-	const rejected = await runCase({ exitResult: false });
-	assert.equal(rejected.exits, 1);
-	assert.equal(rejected.state.allowConfirmedExit, false, 'failed close restores unload protection');
-	assert.equal(rejected.notifications.length, 1, 'rejected close produces one error Toast');
-	assert.equal(rejected.notifications[0].variant, 'error');
-	assert.match(rejected.notifications[0].message, /could not be closed/i);
+test('Designer exits use Base guard with verified Save, no second modal or keydown ownership', async () => {
+	const [source, assets] = await Promise.all([
+		read('assets/js/admin-designer-shell.js'),
+		read('src/Admin/DesignerAssets.php'),
+	]);
+	assert.match(source, /exitGuard\.register\(root/);
+	assert.match(source, /isDirty,/);
+	assert.match(source, /save: async \(\) => \{\s*await saveBeforeSwitch\(\);\s*return true;/);
+	assert.match(source, /cb:design-shell:beforeexit/);
+	assert.match(assets, /DESIGNER_EXIT_GUARD_API/);
+	assert.doesNotMatch(source, /const chooseExitAction|const requestExit|allowConfirmedExit/);
+	assert.doesNotMatch(source, /window\.addEventListener\('beforeunload'|window\.addEventListener\('keydown'/);
+	assert.doesNotMatch(source, /data-cb-design-shell-close/);
+	assert.match(source, /chooseSwitchAction/, 'workflow context changes keep their domain-specific Save\/Discard modal');
 });
