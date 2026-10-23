@@ -241,7 +241,7 @@ test('Designer close confirmation is required with or without changes', async ()
 	assert.match(source, /window\.addEventListener\('keydown',[\s\S]*?requestExit\(\)/);
 	assert.match(source, /if \(allowConfirmedExit \|\| !isDirty\(\)\) return;/);
 	assert.match(source, /allowConfirmedExit = true;/);
-	assert.match(source, /designerController = createDesignerShell\(root, \{ defaultPanel: 'settings' \}\)/);
+	assert.match(source, /designerController = createDesignerShell\(root, \{ defaultPanel: 'settings', defaultPanels: \{ palette: 'elements' \} \}\)/);
 	assert.match(source, /designerController\.exitFullscreen\(\)/);
 	assert.doesNotMatch(source, /approvedCloseClick/);
 	assert.doesNotMatch(source, /root\.querySelector\('\[data-cb-design-shell-fullscreen\]'\)/);
@@ -254,14 +254,14 @@ test('Designer close invokes Base shell controller even when fullscreen button i
 	assert.ok(match, 'the guarded exit function remains separately testable');
 	const { runInNewContext } = await import('node:vm');
 	const runCase = async ({ selection = 'close', saving = false, fullscreen = true, exitResult = true } = {}) => {
-		const status = { textContent: '' };
+		const notifications = [];
 		let exits = 0;
 		let prompts = 0;
 		const state = {
 			root: {
 				hasAttribute: (name) => name === 'aria-busy' && saving,
-				querySelector: () => status,
 			},
+			notify: (type, message) => notifications.push({ type, message }),
 			window: { cbAutomationsInspectorStrings: {} },
 			designerController: {
 				isFullscreen: () => fullscreen,
@@ -274,7 +274,7 @@ test('Designer close invokes Base shell controller even when fullscreen button i
 		};
 		const requestExit = runInNewContext(match[0] + '\nrequestExit;', state);
 		await requestExit();
-		return { status, exits, prompts, state };
+		return { notifications, exits, prompts, state };
 	};
 	const confirmed = await runCase({ selection: 'discard' });
 	assert.equal(confirmed.exits, 1, 'the Base controller is called for confirmed discard');
@@ -283,9 +283,13 @@ test('Designer close invokes Base shell controller even when fullscreen button i
 	assert.equal((await runCase({ saving: true })).prompts, 0, 'saving blocks the confirmation');
 	const unavailable = await runCase({ fullscreen: false });
 	assert.equal(unavailable.exits, 0, 'fullscreen inactive fails closed');
-	assert.match(unavailable.status.textContent, /unavailable/i);
+	assert.equal(unavailable.notifications.length, 1);
+	assert.equal(unavailable.notifications[0].type, 'error');
+	assert.match(unavailable.notifications[0].message, /unavailable/i);
 	const rejected = await runCase({ exitResult: false });
 	assert.equal(rejected.exits, 1);
 	assert.equal(rejected.state.allowConfirmedExit, false, 'failed close restores unload protection');
-	assert.match(rejected.status.textContent, /could not be closed/i);
+	assert.equal(rejected.notifications.length, 1);
+	assert.equal(rejected.notifications[0].type, 'error');
+	assert.match(rejected.notifications[0].message, /could not be closed/i);
 });
