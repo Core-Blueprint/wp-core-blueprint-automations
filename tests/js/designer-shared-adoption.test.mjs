@@ -16,6 +16,8 @@ const assets = read('src/Admin/DesignerAssets.php');
 test('DSA-01: Automations uses two Base-owned palette tabs and keeps Inspector/Settings', () => {
   assert.match(template, /cb-core-design-shell__palette--tabbed/);
   assert.match(template, /data-cb-design-shell-group="palette" data-cb-design-shell-palette-role="elements"/);
+  assert.match(template, /data-cb-design-shell-palette-role="elements"><\\?php esc_html_e\\( 'Stages', 'core-blueprint-automations' \\); \\?><\\/button>/);
+  assert.doesNotMatch(template, /esc_html_e\\( 'Elements', 'core-blueprint' \\)/);
   assert.match(template, /data-cb-design-shell-group="palette" data-cb-design-shell-palette-role="layers"/);
   assert.match(template, /data-cb-design-shell-panel="elements" data-cb-design-shell-group="palette"/);
   assert.match(template, /data-cb-design-shell-panel="layers" data-cb-design-shell-group="palette"/);
@@ -136,5 +138,24 @@ test('DSA-06: merged Base owns context menu and fail-closed Exit Guard; Automati
     assert.match(launch, /const bindSaveState = \(shell, save\)/);
     assert.match(layer, /row\.addEventListener\('contextmenu'/);
     assert.match(layer, /row\.addEventListener\('dragstart'/);
+  }
+});
+
+test('DSA-07: Stages is translated in the Automations domain for all six locales', () => {
+  assert.match(read('languages/core-blueprint-automations.pot'), /msgid "Stages"\\nmsgstr ""/);
+  const translations = {
+    nl_NL: 'Fasen',
+    de_DE: 'Phasen',
+    fr_FR: 'Étapes',
+    es_ES: 'Etapas',
+    it_IT: 'Fasi',
+    pt_PT: 'Fases',
+  };
+  for (const [locale, expected] of Object.entries(translations)) {
+    const po = read(`languages/core-blueprint-automations-${locale}.po`);
+    assert.ok(
+      po.includes(`msgid "Stages"\\nmsgstr "${expected}"`),
+      `localized Stages label must be present and reviewed for ${locale}`,
+    );
   }
 });
