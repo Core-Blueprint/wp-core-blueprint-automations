@@ -4,6 +4,13 @@
  * owns only workflow content rendered inside the shared palette/canvas/sidebar.
  */
 
+/* Base composed panels use display:grid; hidden recovery sections must stay
+ * absent until a real conflict or fail-closed History diagnostic occurs. */
+[data-cb-automations-save-recovery][hidden],
+[data-cb-automations-history-warning][hidden] {
+	display: none !important;
+}
+
 .cb-automations-editor-page {
 	max-width: none;
 }
