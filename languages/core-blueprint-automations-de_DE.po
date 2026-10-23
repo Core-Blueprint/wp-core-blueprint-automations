@@ -616,6 +616,10 @@ msgstr "Trigger konfigurieren"
 msgid "Stage"
 msgstr "Phase"
 
+#: templates/admin/workflow-editor.php:170
+msgid "Stages"
+msgstr "Phasen"
+
 #: src/Admin/DesignerAssets.php:99 templates/admin/workflow-editor.php:50
 msgid "Provider"
 msgstr "Anbieter"
