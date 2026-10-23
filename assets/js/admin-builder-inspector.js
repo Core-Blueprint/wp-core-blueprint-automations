@@ -174,6 +174,10 @@
 		card.classList.add('is-builder-selected');
 		card.setAttribute('aria-current', 'true');
 		selected = record.key;
+		shell.dispatchEvent(new CustomEvent('cb-automations:inspector-selection', {
+			bubbles: true,
+			detail: Object.freeze({ key: selected }),
+		}));
 		renderInspector(record);
 		if (open) tab.click();
 	};
@@ -211,6 +215,15 @@
 		restoreSelection();
 	};
 
+	// Base Layers publishes a selection intent. Inspector remains the single
+	// selection presenter; selecting a layer never edits the workflow.
+	shell.addEventListener('cb-automations:layerselect', (event) => {
+		const key = String(event.detail?.key || '');
+		const cards = Array.from(root.querySelectorAll('.cb-automations-step, .cb-automations-condition'));
+		const card = cards.find((candidate) => cardRecord(candidate)?.key === key);
+		if (card) selectCard(card);
+	});
+
 	renderInspector(null);
 	decorate();
 	const observer = new MutationObserver(() => decorate());
@@ -218,6 +231,9 @@
 	root.addEventListener('cb-automations:definitionchange', () => queueMicrotask(restoreSelection));
 	shell.addEventListener('cb-automations:contextloaded', () => {
 		selected = null;
+		shell.dispatchEvent(new CustomEvent('cb-automations:inspector-selection', {
+			bubbles: true, detail: Object.freeze({ key: '' }),
+		}));
 		root.querySelectorAll('.is-builder-selected').forEach((card) => {
 			card.classList.remove('is-builder-selected');
 			card.removeAttribute('aria-current');
