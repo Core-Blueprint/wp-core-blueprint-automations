@@ -23,7 +23,7 @@ const response = (options = {}) => ({
   }),
 });
 
-async function simulate(serverResponse, { rebaseFails = false, initialName = 'Example', changeNameDuringSave = null } = {}) {
+async function simulate(serverResponse, { rebaseFails = false, initialName = 'Example', changeNameDuringSave = null, repeatAfterResult = false } = {}) {
   const events = [];
   const notifications = [];
   const fields = {
@@ -118,7 +118,9 @@ async function simulate(serverResponse, { rebaseFails = false, initialName = 'Ex
     Uint8Array, URL, console });
   assert.equal(typeof form.submitHandler, 'function', 'actual Save script must register its handler');
   await form.submitHandler({ submitter: save, preventDefault() {} });
+  if (repeatAfterResult) await form.submitHandler({ submitter: save, preventDefault() {} });
   return { events, notifications, statusText: status.textContent, recovery, root,
+    saveDisabled: save.disabled,
     writeCount, rebases, revision: inputs['[name="revision"]'].value,
     name: inputs['[name="name"]'].value, heading: heading.textContent };
 }
@@ -242,4 +244,15 @@ test('AU-DC02-J08: newer user name edit is preserved while server-normalized bas
   assert.equal(v.events.at(-1)?.currentDirty, true);
   assert.match(v.events.at(-1)?.message || '', /newer edits/i);
   assert.equal(v.recovery.hidden, true);
+});
+
+// A sticky UNKNOWN must not be undone by the consumer finally block even if
+// code submits a second form event after Base disables the primary action.
+test('AU-DC02-J09: UNKNOWN Save remains disabled and cannot issue a second write', async () => {
+  const v = await simulate(new Error('Response lost after write'), { repeatAfterResult: true });
+  assert.equal(v.writeCount, 1, 'no second write after UNKNOWN, even on synthetic submit');
+  assert.equal(v.saveDisabled, true, 'Save button remains disabled after finally');
+  assert.equal(v.events.at(-1)?.state, 'unknown');
+  assert.equal(v.root.dataset.cbDesignShellSaveOutcomeUnknown, 'true');
+  assert.equal(v.notifications.length, 1, 'one Base-owned outcome Toast');
 });
