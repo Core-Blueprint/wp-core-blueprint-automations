@@ -65,7 +65,7 @@ test('Context switching respects the public Base event and unsaved editor data',
 	assert.match(shell, /beforeunload/);
 	assert.match(shell, /cb:design-shell:savechange/);
 	assert.match(save, /baselineDefinition: submittedDefinition/);
-	assert.match(save, /baselineName: submittedName/);
+	assert.match(save, /baselineName: result\.data\.name/);
 	assert.match(save, /baselineActivation:/);
 });
 
