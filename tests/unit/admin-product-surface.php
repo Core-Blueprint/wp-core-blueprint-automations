@@ -13,6 +13,7 @@ $files = [
 	'activation'   => $root . '/src/Admin/WorkflowActivationController.php',
 	'overview'     => $root . '/templates/admin/automations.php',
 	'editor'       => $root . '/templates/admin/workflow-editor.php',
+	'save_js'      => $root . '/assets/js/admin-builder-save.js',
 	'designer_css' => $root . '/assets/css/admin-designer-shell.css',
 	'finish_css'   => $root . '/assets/css/admin-builder-finish.css',
 ];
@@ -48,7 +49,9 @@ $expectations = [
 	[ str_contains( $files['editor'], 'AutomationsPage::url(' ), 'Designer workflow switching must reuse the canonical workflow route builder.' ],
 	[ str_contains( $files['editor'], 'data-cb-design-shell-undo' ), 'Undo must be declared in the server-rendered Designer toolbar.' ],
 	[ str_contains( $files['editor'], 'data-cb-design-shell-redo' ), 'Redo must be declared in the server-rendered Designer toolbar.' ],
-	[ str_contains( $files['editor'], 'data-cb-design-shell-status' ), 'Save status must be declared in the server-rendered Designer toolbar.' ],
+	[ ! str_contains( $files['editor'], 'data-cb-design-shell-status' ), 'Automations must not render a duplicate transient Save status in the Base Designer toolbar.' ],
+	[ str_contains( $files['save_js'], 'cb:design-shell:savechange' ), 'Save feedback must use the canonical Base Designer event contract.' ],
+	[ str_contains( $files['editor'], 'data-cb-automations-save-recovery' ), 'Persistent Save conflict recovery must remain available in Designer Settings.' ],
 	[ str_contains( $files['editor'], 'data-cb-design-shell-panel="inspector"' ), 'Inspector must be declared server-side before its behavior attaches.' ],
 	[ str_contains( file_get_contents( $root . '/src/Admin/WorkflowController.php' ), "'code'    => \$issue->code()" ), 'Save issues must preserve machine-readable issue codes for recovery.' ],
 	[ str_contains( $files['editor'], 'data-cb-design-shell-primary-action' ), 'Primary Save must be declared server-side for Base header composition.' ],
