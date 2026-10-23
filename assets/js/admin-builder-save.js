@@ -43,6 +43,8 @@
 	if (!(form instanceof HTMLFormElement) || !shell || !(save instanceof HTMLButtonElement) || typeof window.fetch !== 'function') return;
 
 	let saving = false;
+	// An unverified network write cannot be retried in this editor session.
+	let saveUnverified = false;
 	const parseDefinition = (value) => {
 		try {
 			const parsed = JSON.parse(String(value || '{}'));
@@ -149,7 +151,7 @@
 	form.addEventListener('submit', async (event) => {
 		if (event.submitter !== save && !aliases.includes(event.submitter)) return;
 		event.preventDefault();
-		if (saving) return;
+		if (saving || saveUnverified) return;
 		clearRecovery();
 
 		// Capture a one-use Base v2 save token at the exact submitted authoring
@@ -303,6 +305,7 @@
 			// Base Exit Guard must retain UNKNOWN after a potentially committed
 			// write. Never present this as a recoverable definitive error.
 			const unverified = error?.code === 'SAVE_UNVERIFIED';
+			if (unverified) saveUnverified = true;
 			emit(unverified ? 'unknown' : 'error',
 				error instanceof Error && error.message ? error.message : strings.failed,
 				unverified ? { uncertain: true } : {});
@@ -313,8 +316,9 @@
 			}
 		} finally {
 			saving = false;
-			save.disabled = false;
-			aliases.forEach((button) => { button.disabled = false; });
+			// Never undo Base's sticky UNKNOWN disable on the final cleanup path.
+			save.disabled = saveUnverified;
+			aliases.forEach((button) => { button.disabled = saveUnverified; });
 		}
 	});
 	window.cbAutomationsAsyncSaveReady = true;
