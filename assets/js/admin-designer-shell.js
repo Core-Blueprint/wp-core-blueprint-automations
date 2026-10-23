@@ -4,7 +4,7 @@ import { show as showModal } from '@cb-core/modal';
 const root = document.querySelector('[data-cb-automations-designer-shell]');
 
 if (root) {
-	let designerController = null;
+
 	const workflowSwitcher = root.querySelector('[data-cb-automations-workflow-switcher]');
 	if (workflowSwitcher instanceof HTMLSelectElement) {
 		const form = document.querySelector('[data-cb-automations-editor-form]');
@@ -16,7 +16,7 @@ if (root) {
 			try { return JSON.stringify(JSON.parse(String(value || '{}'))); }
 			catch { return String(value || ''); }
 		};
-		let allowConfirmedExit = false;
+
 		let baseline = {
 			definition: normalized(definition?.value),
 			name: String(name?.value || ''),
@@ -29,12 +29,6 @@ if (root) {
 			|| String(activation?.value || '') !== baseline.activation
 			|| Boolean(authority?.checked) !== baseline.rebind
 		);
-
-		window.addEventListener('beforeunload', (event) => {
-			if (allowConfirmedExit || !isDirty()) return;
-			event.preventDefault();
-			event.returnValue = '';
-		});
 
 		const launchRoot = root.closest('[data-cb-design-launch-root]');
 		const contextDataNode = document.getElementById('cb-automations-editor-data');
@@ -180,9 +174,9 @@ if (root) {
 			}
 			const onSaveChange = (event) => {
 				const state = String(event.detail?.state || '');
-				if (state !== 'saved' && state !== 'error') return;
+				if (state !== 'saved' && state !== 'error' && state !== 'unknown') return;
 				root.removeEventListener('cb:design-shell:savechange', onSaveChange);
-				if (state === 'error') {
+				if (state !== 'saved') {
 					reject(new Error(String(event.detail?.message || window.cbAutomationsSaveStrings?.failed || 'The automation could not be saved.')));
 				} else if (isDirty()) {
 					reject(new Error(String(window.cbAutomationsSaveStrings?.savedWithChanges || 'Automation saved. Newer edits are not saved yet.')));
@@ -266,70 +260,41 @@ if (root) {
 			return accepted ? action : null;
 		};
 
-		// Direct Designer Mode close belongs to Base. Intercept the close
-		// intent before Base toggles fullscreen, then replay its own control
-		// only after the user approves. Never navigate around Base's lifecycle.
-		const chooseExitAction = async () => {
-			if (isDirty()) return chooseSwitchAction('exit');
+		// Base owns the one Exit Guard, confirmation Modal, Escape handling and
+		// beforeunload safety. Register only authoritative Automations adapters.
+		const exitGuard = window.cbCore?.designerExitGuard;
+		if (typeof exitGuard?.register !== 'function') {
+			root.dispatchEvent(new CustomEvent('cb:design-shell:failure', {
+				bubbles: true,
+				detail: Object.freeze({
+					phase: 'exit-guard',
+					message: 'The shared Designer Exit Guard is unavailable. Reload the editor.',
+				}),
+			}));
+		} else {
 			const labels = window.cbAutomationsInspectorStrings || {};
-			const approved = await showModal({
-				title: String(labels.closeTitle || 'Close Automation Builder?'),
-				body: String(labels.closeDescription || 'Return to Automations?'),
-				confirmLabel: String(labels.closeBuilder || 'Close Builder'),
-				cancelLabel: String(labels.cancel || 'Cancel'),
+			exitGuard.register(root, {
+				isDirty,
+				isUncertain: () => root.dataset.cbDesignShellSaveOutcomeUnknown === 'true'
+					|| root.dataset.cbDesignShellSaveState === 'unknown',
+				save: async () => {
+					await saveBeforeSwitch();
+					return !isDirty();
+				},
+				labels: {
+					cleanTitle: String(labels.closeTitle || 'Close Automation Builder?'),
+					cleanDescription: String(labels.closeDescription || 'Return to Automations?'),
+					dirtyTitle: String(labels.unsavedTitle || 'Unsaved changes'),
+					dirtyDescription: String(labels.closeUnsavedDescription || 'Save or discard your changes before closing the Builder.'),
+					choiceTitle: String(labels.unsavedChoice || 'What should happen to your changes?'),
+					save: String(labels.optionSave || 'Save changes'),
+					discard: String(labels.optionDiscard || 'Discard changes'),
+					close: String(labels.closeBuilder || 'Close Builder'),
+					cancel: String(labels.cancel || 'Cancel'),
+					busy: String(labels.saveInProgress || 'Wait for the current save to finish.'),
+				},
 			});
-			return approved ? 'close' : null;
-		};
-		let exitPending = false;
-		const requestExit = async () => {
-			if (exitPending || allowConfirmedExit) return;
-			if (root.hasAttribute('aria-busy')) {
-				notify('warning', window.cbAutomationsInspectorStrings?.saveInProgress || 'Wait for the current save to finish.');
-				return;
-			}
-			exitPending = true;
-			try {
-				const action = await chooseExitAction();
-				if (!action) return;
-				// In direct Designer Mode Base removes the fullscreen button from
-				// the rendered toolbar. The public shell controller remains valid.
-				if (!designerController?.isFullscreen?.() || typeof designerController.exitFullscreen !== 'function') {
-					throw contextError('contextUnavailable', 'The Designer close control is unavailable.');
-				}
-				allowConfirmedExit = true;
-				if (designerController.exitFullscreen() !== true) {
-					throw contextError('contextUnavailable', 'The Designer could not be closed.');
-				}
-			} catch (error) {
-				allowConfirmedExit = false;
-				notify('error', error instanceof Error ? error.message : String(error));
-			} finally {
-				exitPending = false;
-			}
-		};
-		launchRoot?.addEventListener('click', (event) => {
-			const close = event.target?.closest?.('[data-cb-design-shell-close]');
-			if (!close || !root.contains(close)) return;
-			event.preventDefault();
-			event.stopImmediatePropagation();
-			requestExit();
-		}, true);
-		window.addEventListener('keydown', (event) => {
-			if (event.key !== 'Escape' || event.defaultPrevented
-				|| !root.classList.contains('is-fullscreen')) return;
-			const modal = document.querySelector('dialog.cb-core-modal[open]');
-			if (modal) {
-				// Base fullscreen also listens for Escape. Let the open dialog
-				// handle dismissal instead of accidentally exiting the Builder.
-				event.preventDefault();
-				event.stopImmediatePropagation();
-				modal.dispatchEvent(new Event('cancel', { cancelable: true }));
-				return;
-			}
-			event.preventDefault();
-			event.stopImmediatePropagation();
-			requestExit();
-		}, true);
+		}
 
 		launchRoot?.addEventListener('cb:design-shell:contextrequest', (event) => {
 			if (event.detail?.control !== workflowSwitcher) return;
@@ -396,7 +361,7 @@ if (root) {
 	applyPanelTitle(propertiesSidebar, propertiesLabel);
 	if (workflowTitle) workflowTitle.remove();
 
-	designerController = createDesignerShell(root, { defaultPanel: 'settings', defaultPanels: { palette: 'elements' } });
+	createDesignerShell(root, { defaultPanel: 'settings', defaultPanels: { palette: 'elements' } });
 	configureDesignerSidebar(root, {
 		roles: { inspector: 'inspector', settings: 'settings' },
 		activeRole: 'settings',
