@@ -37,12 +37,12 @@ test('TOAST-A02: context failures use public Toast; Exit Guard owns close feedba
     ['warning', 'Wait for save'],
     ['error', 'Context failed'],
   ]);
-  // Closing a Designer is Base-owned after Exit Guard migration.
-  assert.match(shell, /exitGuard\.register\(root/);
-  assert.match(shell, /busy: String\(labels\.saveInProgress/);
-  assert.match(designerAssets, /DESIGNER_EXIT_GUARD_API/);
-  assert.doesNotMatch(shell, /notify\('warning', window\.cbAutomationsInspectorStrings\?\.saveInProgress/);
-  assert.doesNotMatch(shell, /const requestExit|const chooseExitAction|data-cb-design-shell-close/);
+  // Current public Base main supplies shared Modal, but does not yet
+  // advertise a stable native Exit Guard API. Keep one public Modal path.
+  assert.match(shell, /showModal\(\{/);
+  assert.match(shell, /const requestExit = async/);
+  assert.match(shell, /notify\('warning', window\.cbAutomationsInspectorStrings\?\.saveInProgress/);
+  assert.doesNotMatch(designerAssets, /DESIGNER_EXIT_GUARD_API/);
   assert.match(shell, /notify\('error', error instanceof Error \? error\.message : String\(error\)\)/);
   assert.doesNotMatch(shell, /wp\.data\.dispatch|wp\.notices|alert\(|window\.confirm\(/);
 });
