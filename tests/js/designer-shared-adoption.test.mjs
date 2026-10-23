@@ -113,3 +113,28 @@ test('DSA-05: only supported layer actions, no secret values or consumer context
   assert.match(editor, /renderAll\(\);\n\t\t\treturn true;/);
   assert.match(history, /workflowCommands\.editorChange/);
 });
+
+test('DSA-06: merged Base owns context menu and fail-closed Exit Guard; Automations registers an adapter', () => {
+  assert.match(shell, /exitGuard\.register\(root, \{/);
+  assert.match(shell, /isUncertain: \(\) => root\.dataset\.cbDesignShellSaveOutcomeUnknown/);
+  assert.match(shell, /save: async \(\) => \{/);
+  assert.doesNotMatch(shell, /allowConfirmedExit|const requestExit = async|window\.addEventListener\('beforeunload'/);
+  const baseDir = process.env.CB_BASE_DESIGNER_REPO;
+  if (baseDir) {
+    const guardPath = join(baseDir, 'assets/js/features/designer-exit-guard.js');
+    const launchPath = join(baseDir, 'assets/js/features/designer-launch.js');
+    const layerPath = join(baseDir, 'assets/js/design/shell/layers.js');
+    for (const path of [guardPath, launchPath, layerPath]) {
+      assert.ok(existsSync(path), 'merged Base source must provide the shared Designer contract');
+    }
+    const guard = readFileSync(guardPath, 'utf8');
+    const launch = readFileSync(launchPath, 'utf8');
+    const layer = readFileSync(layerPath, 'utf8');
+    assert.match(guard, /window\.cbCore\.designerExitGuard = Object\.freeze\(\{ observe, register, request, canTransition/);
+    assert.match(guard, /const unresolved = \(shell, adapter\)/);
+    assert.match(launch, /designerExitGuard\?\.canTransition\?\.\(shell\)/);
+    assert.match(launch, /const bindSaveState = \(shell, save\)/);
+    assert.match(layer, /row\.addEventListener\('contextmenu'/);
+    assert.match(layer, /row\.addEventListener\('dragstart'/);
+  }
+});
