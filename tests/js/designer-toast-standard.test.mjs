@@ -21,7 +21,7 @@ test('TOAST-A01: Base owns Save state and Toast presentation, no consumer toolba
   assert.doesNotMatch(css, /\.cb-automations-builder-status/);
 });
 
-test('TOAST-A02: context failures use public Toast; Exit Guard owns close feedback', () => {
+test('TOAST-A02: public Base Modal owns close confirmation; operational failures use Base Toast', () => {
   assert.match(designerAssets, /enqueue_designer_mode\(/);
   assert.match(designerAssets, /\[ '@cb-core\/design-editor', '@cb-core\/modal', '@cb-core\/toast' \]/);
   const match = shell.match(/const notify = \(variant, message\) => \{([\s\S]*?)\n\t\t\};/);
