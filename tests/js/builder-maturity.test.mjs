@@ -81,7 +81,7 @@ test('Automation Builder keeps canonical persistence, shared-shell ownership and
 	assert.match(save, /payload\.set\(ASYNC_FIELD, '1'\)/);
 	assert.match(save, /window\.fetch\(endpoint/);
 	assert.match(save, /cb-automations:validation-saved/);
-	assert.match(shell, /beforeunload/);
+	assert.match(shell, /exitGuard\.register\(root, \{/);
 	assert.match(shell, /window\.history\.replaceState\(/);
 	assert.match(inspector, /setAttribute\('role', 'group'\)/);
 	assert.match(save, /aliases\.includes\(event\.submitter\)/);
@@ -207,90 +207,54 @@ test('Context switch uses the live Designer root and dispatches both lifecycle e
 	assert.ok(updated.definition && updated.history, 'editor and history were refreshed');
 });
 
-test('Designer close confirmation is required with or without changes', async () => {
+test('Designer close and unload authority belong to the public Base Exit Guard', async () => {
 	const source = await read('assets/js/admin-designer-shell.js');
-	const block = source.match(/const chooseExitAction = async \(\) => \{[\s\S]*?\n\t\t\};/);
-	assert.ok(block, 'exit choice helper is present');
-	const { runInNewContext } = await import('node:vm');
-	let dirty = false;
-	let modalResult = false;
-	let opened = 0;
-	let exitPurpose = null;
-	const select = runInNewContext(block[0] + '\nchooseExitAction;', {
-		isDirty: () => dirty,
-		showModal: async ({ title, confirmLabel, cancelLabel }) => {
-			opened += 1;
-			assert.equal(title, 'Close Automation Builder?');
-			assert.equal(confirmLabel, 'Close Builder');
-			assert.equal(cancelLabel, 'Cancel');
-			return modalResult;
-		},
-		chooseSwitchAction: async (purpose) => {
-			exitPurpose = purpose;
-			return 'discard';
-		},
-		window: { cbAutomationsInspectorStrings: {} },
-	});
-	assert.equal(await select(), null, 'cancel keeps a clean workflow open');
-	modalResult = true;
-	assert.equal(await select(), 'close', 'clean close also requires confirmation');
-	dirty = true;
-	assert.equal(await select(), 'discard', 'dirty close delegates to save/discard choices');
-	assert.equal(exitPurpose, 'exit');
-	assert.equal(opened, 2, 'no double modal when changes exist');
-	assert.match(source, /launchRoot\?\.addEventListener\('click',[\s\S]*?data-cb-design-shell-close/);
-	assert.match(source, /window\.addEventListener\('keydown',[\s\S]*?requestExit\(\)/);
-	assert.match(source, /if \(allowConfirmedExit \|\| !isDirty\(\)\) return;/);
-	assert.match(source, /allowConfirmedExit = true;/);
-	assert.match(source, /designerController = createDesignerShell\(root, \{ defaultPanel: 'settings', defaultPanels: \{ palette: 'elements' \} \}\)/);
-	assert.match(source, /designerController\.exitFullscreen\(\)/);
-	assert.doesNotMatch(source, /approvedCloseClick/);
-	assert.doesNotMatch(source, /root\.querySelector\('\[data-cb-design-shell-fullscreen\]'\)/);
-	assert.match(source, /if \(root\.hasAttribute\('aria-busy'\)\) \{[\s\S]*?saveInProgress/);
+	assert.match(source, /const exitGuard = window\.cbCore\?\.designerExitGuard/);
+	assert.match(source, /exitGuard\.register\(root, \{/);
+	assert.match(source, /isDirty,/);
+	assert.match(source, /isUncertain: \(\) => root\.dataset\.cbDesignShellSaveOutcomeUnknown/);
+	assert.match(source, /save: async \(\) => \{/);
+	assert.match(source, /await saveBeforeSwitch\(\)/);
+	assert.match(source, /cleanTitle:/);
+	assert.match(source, /dirtyDescription:/);
+	assert.match(source, /close: String\(labels\.closeBuilder/);
+	assert.match(source, /phase: 'exit-guard'/);
+	assert.doesNotMatch(source, /const requestExit = async|chooseExitAction = async/);
+	assert.doesNotMatch(source, /allowConfirmedExit|window\.addEventListener\('beforeunload'\)|window\.addEventListener\('keydown'/);
+	assert.doesNotMatch(source, /launchRoot\?\.addEventListener\('click',[\s\S]*?data-cb-design-shell-close/);
+	assert.match(source, /createDesignerShell\(root, \{ defaultPanel: 'settings', defaultPanels: \{ palette: 'elements' \} \}\)/);
 });
 
-test('Designer close invokes Base shell controller even when fullscreen button is detached', async () => {
+test('Automations supplies a bounded Base Exit Guard adapter with verified Save and UNKNOWN fencing', async () => {
 	const source = await read('assets/js/admin-designer-shell.js');
-	const match = source.match(/const requestExit = async \(\) => \{[\s\S]*?\n\t\t\};/);
-	assert.ok(match, 'the guarded exit function remains separately testable');
+	const block = source.match(/exitGuard\.register\(root, \{[\s\S]*?\n\t\t\t\}\);/);
+	assert.ok(block, 'one public Base Exit Guard adapter is registered');
 	const { runInNewContext } = await import('node:vm');
-	const runCase = async ({ selection = 'close', saving = false, fullscreen = true, exitResult = true } = {}) => {
-		const notifications = [];
-		let exits = 0;
-		let prompts = 0;
-		const state = {
-			root: {
-				hasAttribute: (name) => name === 'aria-busy' && saving,
-			},
-			notify: (type, message) => notifications.push({ type, message }),
-			window: { cbAutomationsInspectorStrings: {} },
-			designerController: {
-				isFullscreen: () => fullscreen,
-				exitFullscreen: () => { exits += 1; return exitResult; },
-			},
-			chooseExitAction: async () => { prompts += 1; return selection; },
-			contextError: (_key, message) => new Error(message),
-			exitPending: false,
-			allowConfirmedExit: false,
-		};
-		const requestExit = runInNewContext(match[0] + '\nrequestExit;', state);
-		await requestExit();
-		return { notifications, exits, prompts, state };
-	};
-	const confirmed = await runCase({ selection: 'discard' });
-	assert.equal(confirmed.exits, 1, 'the Base controller is called for confirmed discard');
-	assert.equal(confirmed.state.allowConfirmedExit, true, 'beforeunload is bypassed only after approval');
-	assert.equal((await runCase({ selection: null })).exits, 0, 'Cancel never exits');
-	assert.equal((await runCase({ saving: true })).prompts, 0, 'saving blocks the confirmation');
-	const unavailable = await runCase({ fullscreen: false });
-	assert.equal(unavailable.exits, 0, 'fullscreen inactive fails closed');
-	assert.equal(unavailable.notifications.length, 1);
-	assert.equal(unavailable.notifications[0].type, 'error');
-	assert.match(unavailable.notifications[0].message, /unavailable/i);
-	const rejected = await runCase({ exitResult: false });
-	assert.equal(rejected.exits, 1);
-	assert.equal(rejected.state.allowConfirmedExit, false, 'failed close restores unload protection');
-	assert.equal(rejected.notifications.length, 1);
-	assert.equal(rejected.notifications[0].type, 'error');
-	assert.match(rejected.notifications[0].message, /could not be closed/i);
+	let dirty = true;
+	let candidate = null;
+	let writes = 0;
+	const root = { dataset: { cbDesignShellSaveOutcomeUnknown: 'false', cbDesignShellSaveState: 'idle' } };
+	runInNewContext(block[0], {
+		exitGuard: { register: (shell, adapter) => {
+			assert.equal(shell, root);
+			candidate = adapter;
+		} },
+		root,
+		isDirty: () => dirty,
+		saveBeforeSwitch: async () => { writes++; dirty = false; },
+		labels: {},
+	});
+	assert.ok(candidate, 'Base has received the only authoritative close adapter');
+	assert.equal(candidate.isDirty(), true);
+	assert.equal(candidate.isUncertain(), false);
+	assert.equal(await candidate.save(), true, 'verified Save permits close only once the draft is clean');
+	assert.equal(writes, 1);
+	root.dataset.cbDesignShellSaveOutcomeUnknown = 'true';
+	assert.equal(candidate.isUncertain(), true, 'ambiguous writes remain fenced');
+	root.dataset.cbDesignShellSaveOutcomeUnknown = 'false';
+	root.dataset.cbDesignShellSaveState = 'unknown';
+	assert.equal(candidate.isUncertain(), true, 'native Base UNKNOWN is also fenced');
+	assert.equal(typeof candidate.labels.cleanTitle, 'string');
+	assert.equal(typeof candidate.labels.dirtyDescription, 'string');
+	assert.equal(typeof candidate.labels.cancel, 'string');
 });
