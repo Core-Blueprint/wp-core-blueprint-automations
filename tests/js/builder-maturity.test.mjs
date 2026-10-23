@@ -95,8 +95,9 @@ test('Automation Builder keeps canonical persistence, shared-shell ownership and
 	assert.match(save, /cb-core-status__dot--danger/);
 	assert.match(save, /cb-core-status__dot--muted/);
 	assert.match(save, /baselineDefinition: submittedDefinition/);
-	assert.match(save, /baselineName: submittedName/);
-	assert.match(save, /currentDirty: definitionDirty/);
+	assert.match(save, /baselineName: result\.data\.name/);
+	assert.match(save, /const currentDirty = definitionDirty \|\| nameDirty \|\| activationDirty \|\| rebindDirty/);
+	assert.match(save, /\bcurrentDirty,\s*\}/);
 	assert.match(save, /cb:design-shell:savechange/);
 
 	assert.match(controller, /new\s+WorkflowService\(\)\s*\)->save\(/);
