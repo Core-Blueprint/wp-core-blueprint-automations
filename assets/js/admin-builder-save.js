@@ -27,7 +27,7 @@
 	const form = document.querySelector('[data-cb-automations-editor-form]');
 	const shell = document.querySelector('[data-cb-automations-designer-shell]');
 	const save = shell?.querySelector('[data-cb-design-shell-primary-action]');
-	const status = shell?.querySelector('[data-cb-design-shell-status]');
+	const recovery = shell?.querySelector('[data-cb-automations-save-recovery]');
 	const revision = form?.querySelector('[name="revision"]');
 	const name = form?.querySelector('[name="name"]');
 	const activation = form?.querySelector('[name="activation_state"]');
@@ -53,7 +53,6 @@
 	};
 	const emit = (state, message = '', extra = {}) => {
 		const text = String(message || '');
-		if (status) status.textContent = text;
 		shell.toggleAttribute('aria-busy', state === 'saving');
 		shell.dispatchEvent(new CustomEvent('cb:design-shell:savechange', {
 			bubbles: true,
@@ -130,10 +129,28 @@
 		throw uncertain();
 	};
 
+	const clearRecovery = () => {
+		if (!recovery) return;
+		recovery.hidden = true;
+		recovery.replaceChildren();
+	};
+	shell.addEventListener('cb-automations:contextloaded', clearRecovery);
+	const showRecovery = () => {
+		if (!recovery) return;
+		const review = document.createElement('a');
+		review.href = window.location.href;
+		review.target = '_blank';
+		review.rel = 'noopener noreferrer';
+		review.textContent = strings.conflictReview;
+		recovery.replaceChildren(review);
+		recovery.hidden = false;
+	};
+
 	form.addEventListener('submit', async (event) => {
 		if (event.submitter !== save && !aliases.includes(event.submitter)) return;
 		event.preventDefault();
 		if (saving) return;
+		clearRecovery();
 
 		// Capture a one-use Base v2 save token at the exact submitted authoring
 		// snapshot. Keep the token in memory: it is never posted to WordPress.
@@ -174,12 +191,20 @@
 			}
 			const digest = await window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(submittedDefinitionJson));
 			const submissionSha256 = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
-			const response = await window.fetch(endpoint, {
-				method: 'POST',
-				body: payload,
-				credentials: 'same-origin',
-			});
-			const body = await response.text();
+			let response;
+			let body;
+			try {
+				response = await window.fetch(endpoint, {
+					method: 'POST',
+					body: payload,
+					credentials: 'same-origin',
+				});
+				body = await response.text();
+			} catch (_error) {
+				// A write may have committed before the connection or response failed.
+				// Never retry automatically or present a definitive failure.
+				throw uncertain();
+			}
 			let result = null;
 			try {
 				result = JSON.parse(body);
@@ -229,7 +254,11 @@
 			try {
 				history.acknowledgeSave(checkpoint, submittedDefinition);
 			} catch (_error) {
-				throw new Error(strings.historyReconcileFailed);
+				// The server has a verified write, but Base rejected its checkpoint.
+				// Preserve the browser cursor and expose the same recovery affordance.
+				const failure = new Error(strings.historyReconcileFailed);
+				failure.code = 'SAVE_UNVERIFIED';
+				throw failure;
 			}
 			const definitionDirty = definition instanceof HTMLInputElement && definition.value !== submittedDefinitionJson;
 			const nameDirty = name instanceof HTMLInputElement && submittedName !== null && name.value !== submittedName;
@@ -243,7 +272,12 @@
 			if (!activationDirty && activation instanceof HTMLSelectElement && ['enabled', 'disabled'].includes(result.data?.activation_state)) {
 				activation.value = result.data.activation_state;
 			}
-			if (!nameDirty && headingTitle && typeof result.data?.name === 'string' && result.data.name) {
+			// The accepted, independently verified server name is authoritative.
+			// Only normalize the input when no newer local name edit has occurred.
+			if (!nameDirty && name instanceof HTMLInputElement) {
+				name.value = result.data.name;
+			}
+			if (!nameDirty && headingTitle && result.data.name) {
 				headingTitle.textContent = result.data.name;
 			}
 			if (principalLabel && typeof result.data?.execution_principal_label === 'string' && result.data.execution_principal_label) {
@@ -260,22 +294,17 @@
 				currentDirty ? strings.savedWithChanges : responseMessage(result, save.textContent?.trim() || ''),
 				{
 					baselineDefinition: submittedDefinition,
-					baselineName: submittedName,
+					baselineName: result.data.name,
 					baselineActivation: String(result.data?.activation_state || submittedActivation || ''),
-					currentDirty: definitionDirty,
+					currentDirty,
 				}
 			);
 		} catch (error) {
 			emit('error', error instanceof Error && error.message ? error.message : strings.failed);
-			if ((error?.code === 'REVISION_CONFLICT' || error?.code === 'SAVE_UNVERIFIED') && status) {
-				// The current tab retains the complete authoring draft and history.
-				// Open the authenticated editor separately for manual reconciliation.
-				const review = document.createElement('a');
-				review.href = window.location.href;
-				review.target = '_blank';
-				review.rel = 'noopener noreferrer';
-				review.textContent = strings.conflictReview;
-				status.append(' ', review);
+			if (error?.code === 'REVISION_CONFLICT' || error?.code === 'SAVE_UNVERIFIED') {
+				// An actionable recovery link remains in Settings, never in the toolbar.
+				// Base owns the single transient error Toast through savechange.
+				showRecovery();
 			}
 		} finally {
 			saving = false;
