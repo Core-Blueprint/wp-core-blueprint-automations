@@ -300,8 +300,13 @@
 				}
 			);
 		} catch (error) {
-			emit('error', error instanceof Error && error.message ? error.message : strings.failed);
-			if (error?.code === 'REVISION_CONFLICT' || error?.code === 'SAVE_UNVERIFIED') {
+			// Base Exit Guard must retain UNKNOWN after a potentially committed
+			// write. Never present this as a recoverable definitive error.
+			const unverified = error?.code === 'SAVE_UNVERIFIED';
+			emit(unverified ? 'unknown' : 'error',
+				error instanceof Error && error.message ? error.message : strings.failed,
+				unverified ? { uncertain: true } : {});
+			if (error?.code === 'REVISION_CONFLICT' || unverified) {
 				// An actionable recovery link remains in Settings, never in the toolbar.
 				// Base owns the single transient error Toast through savechange.
 				showRecovery();
