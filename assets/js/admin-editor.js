@@ -664,11 +664,43 @@
 		renderAll();
 	});
 
+	// Layers never mutate definitions directly. All supported operations go
+	// through this existing workflow editor and its one Base Domain Session
+	// via renderAll() → definitionchange → canonical workflow command.
+	const layerCollection = (kind) => ({
+		state: state.states,
+		condition: state.conditions,
+		action: state.actions,
+	})[kind] || null;
+	const layerIndex = (collection, kind, id) => collection.findIndex((entry) =>
+		String(kind === 'condition' ? entry.condition_id : entry.step_id) === String(id)
+	);
+	const layerAction = (operation, kind, id, targetIndex = -1) => {
+		if (root.closest('[data-cb-automations-designer-shell]')?.hasAttribute('aria-busy')) return false;
+		if (!['state', 'condition', 'action'].includes(kind) || typeof id !== 'string' || !id) return false;
+		const collection = layerCollection(kind);
+		if (!Array.isArray(collection)) return false;
+		const index = layerIndex(collection, kind, id);
+		if (index < 0) return false;
+		if (operation === 'move') {
+			if (!Number.isInteger(targetIndex) || targetIndex < 0 || targetIndex >= collection.length || targetIndex === index) return false;
+			reorder(collection, index, targetIndex - index);
+			return true;
+		}
+		if (operation === 'remove') {
+			collection.splice(index, 1);
+			renderAll();
+			return true;
+		}
+		return false;
+	};
+
 	window.cbAutomationsEditorSession = Object.freeze({
 		root,
 		form,
 		snapshot: () => clone(state),
 		replace: (definition, options = {}) => replaceDefinition(definition, options),
+		layerAction,
 	});
 
 	form.addEventListener('submit', () => sync('submit'));
