@@ -41,6 +41,9 @@ if (root) {
 		const contextError = (key, fallback) => new Error(
 			String(window.cbAutomationsInspectorStrings?.[key] || fallback)
 		);
+		const notify = (variant, message) => {
+			window.cbCore?.toast?.[variant]?.(String(message || ''));
+		};
 		let switchGeneration = 0;
 		const switchContext = async (url) => {
 			if (root.hasAttribute('aria-busy')) throw contextError('saveInProgress', 'Wait for the current save to finish.');
@@ -281,8 +284,7 @@ if (root) {
 		const requestExit = async () => {
 			if (exitPending || allowConfirmedExit) return;
 			if (root.hasAttribute('aria-busy')) {
-				const status = root.querySelector('[data-cb-design-shell-status]');
-				if (status) status.textContent = String(window.cbAutomationsInspectorStrings?.saveInProgress || 'Wait for the current save to finish.');
+				notify('warning', window.cbAutomationsInspectorStrings?.saveInProgress || 'Wait for the current save to finish.');
 				return;
 			}
 			exitPending = true;
@@ -300,8 +302,7 @@ if (root) {
 				}
 			} catch (error) {
 				allowConfirmedExit = false;
-				const status = root.querySelector('[data-cb-design-shell-status]');
-				if (status) status.textContent = error instanceof Error ? error.message : String(error);
+				notify('error', error instanceof Error ? error.message : String(error));
 			} finally {
 				exitPending = false;
 			}
@@ -355,8 +356,8 @@ if (root) {
 					handedOff = approvedSwitchUrl === '';
 					approvedSwitchUrl = '';
 				}).catch((error) => {
-					const status = root.querySelector('[data-cb-design-shell-status]');
-					if (status) status.textContent = error instanceof Error ? error.message : String(error);
+					// Context selection failure, not a second Save notification.
+					notify('error', error instanceof Error ? error.message : String(error));
 				}).finally(() => {
 					awaitingChoice = false;
 					if (!handedOff) workflowSwitcher.disabled = false;
