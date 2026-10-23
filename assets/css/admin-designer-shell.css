@@ -8,11 +8,6 @@
 	max-width: none;
 }
 
-.cb-automations-builder-status {
-	color: var(--cb-text-muted);
-	font-size: var(--cb-fs-sm);
-}
-
 .cb-automations-design-shell__canvas .cb-automations-linear-editor {
 	margin-top: 0;
 }
