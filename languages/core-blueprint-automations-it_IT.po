@@ -618,6 +618,10 @@ msgstr "Configura attivatore"
 msgid "Stage"
 msgstr "Fase"
 
+#: templates/admin/workflow-editor.php:170
+msgid "Stages"
+msgstr "Fasi"
+
 #: src/Admin/DesignerAssets.php:99 templates/admin/workflow-editor.php:50
 msgid "Provider"
 msgstr "Provider"
