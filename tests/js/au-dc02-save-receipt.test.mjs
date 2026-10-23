@@ -31,7 +31,7 @@ async function simulate(serverResponse, { rebaseFails = false, initialName = 'Ex
     definition_json: definition,
   };
   class Element {
-    constructor(value = '') { this.value = value; this.textContent = ''; this.disabled = false; this.checked = false; this.attributes = {}; this.handlers = new Map(); this.children = []; this.hidden = false; }
+    constructor(value = '') { this.value = value; this.textContent = ''; this.disabled = false; this.checked = false; this.attributes = {}; this.dataset = {}; this.handlers = new Map(); this.children = []; this.hidden = false; }
     addEventListener(type, handler) { this.handlers.set(type, [...(this.handlers.get(type) || []), handler]); }
     replaceChildren(...children) { this.children = children; }
     querySelector() { return null; }
@@ -57,7 +57,13 @@ async function simulate(serverResponse, { rebaseFails = false, initialName = 'Ex
   root.addEventListener('cb:design-shell:savechange', (event) => {
     // Simulate Base's documented ONE Toast mapping, not a consumer Toast.
     const state = event.detail?.state;
-    if (state === 'saved' || state === 'error') notifications.push({ variant: state === 'saved' ? 'success' : 'error', message: event.detail?.message });
+    if (state === 'unknown') {
+      root.dataset.cbDesignShellSaveOutcomeUnknown = 'true';
+      root.dataset.cbDesignShellSaveState = 'unknown';
+    }
+    if (state === 'saved' || state === 'error' || state === 'unknown') {
+      notifications.push({ variant: state === 'saved' ? 'success' : 'error', message: event.detail?.message });
+    }
   });
   const inputs = {
     '[name="revision"]': new HTMLInputElement('8'),
@@ -143,7 +149,9 @@ test('AU-DC02-J02: no credible content/identity/revision receipt ever rebases or
     assert.equal(v.writeCount, 1, 'uncertain client must not automatically retry');
     assert.equal(v.rebases, 0);
     assert.equal(v.revision, '8');
-    assert.equal(v.events.at(-1)?.state, 'error');
+    assert.equal(v.events.at(-1)?.state, 'unknown');
+    assert.equal(v.events.at(-1)?.uncertain, true);
+    assert.equal(v.root.dataset.cbDesignShellSaveOutcomeUnknown, 'true');
     assert.equal(v.notifications.length, 1, 'one Base-owned error Toast for unknown Save');
     assert.equal(v.notifications[0].variant, 'error');
     assert.equal(v.statusText, '', 'no transient toolbar error');
@@ -156,7 +164,8 @@ test('AU-DC02-J03: post-CAS uncertain readback and ordinary conflict both preser
       body: { success: false, data: { notice, message: 'No verified save' } } }));
     assert.equal(v.rebases, 0);
     assert.equal(v.revision, '8');
-    assert.equal(v.events.at(-1)?.state, 'error');
+    assert.equal(v.events.at(-1)?.state, notice === 'save_unverified' ? 'unknown' : 'error');
+    assert.equal(v.root.dataset.cbDesignShellSaveOutcomeUnknown === 'true', notice === 'save_unverified');
     assert.equal(v.notifications.length, 1, 'one Base-owned conflict/uncertain Toast');
     assert.equal(v.notifications[0].variant, 'error');
     assert.equal(v.recovery.hidden, false, 'persistent Settings recovery must remain visible');
@@ -171,7 +180,8 @@ test('AU-DC02-J04: Base rebase refusal does not falsely advance browser revision
   const v = await simulate(response(), { rebaseFails: true });
   assert.equal(v.rebases, 1);
   assert.equal(v.revision, '8');
-  assert.equal(v.events.at(-1)?.state, 'error');
+  assert.equal(v.events.at(-1)?.state, 'unknown');
+  assert.equal(v.root.dataset.cbDesignShellSaveOutcomeUnknown, 'true');
   assert.equal(v.notifications.length, 1);
   assert.equal(v.notifications[0]?.variant, 'error');
   assert.equal(v.statusText, '');
@@ -184,7 +194,8 @@ test('AU-DC02-J05: lost fetch acknowledgement preserves local draft and exposes 
   assert.equal(v.rebases, 0);
   assert.equal(v.revision, '8');
   assert.equal(v.name, 'Example');
-  assert.equal(v.events.at(-1)?.state, 'error');
+  assert.equal(v.events.at(-1)?.state, 'unknown');
+  assert.equal(v.root.dataset.cbDesignShellSaveOutcomeUnknown, 'true');
   assert.equal(v.notifications.length, 1);
   assert.equal(v.notifications[0]?.variant, 'error');
   assert.equal(v.recovery.hidden, false, 'unknown post-submit outcome requires Settings recovery');
@@ -200,7 +211,8 @@ test('AU-DC02-J06: unreadable HTTP response body is an uncertain save with no au
   assert.equal(v.writeCount, 1);
   assert.equal(v.rebases, 0);
   assert.equal(v.revision, '8');
-  assert.equal(v.events.at(-1)?.state, 'error');
+  assert.equal(v.events.at(-1)?.state, 'unknown');
+  assert.equal(v.root.dataset.cbDesignShellSaveOutcomeUnknown, 'true');
   assert.equal(v.notifications.length, 1);
   assert.equal(v.recovery.hidden, false);
 });
