@@ -395,12 +395,12 @@ if (root) {
 	applyPanelTitle(propertiesSidebar, propertiesLabel);
 	if (workflowTitle) workflowTitle.remove();
 
-	designerController = createDesignerShell(root, { defaultPanel: 'settings' });
+	designerController = createDesignerShell(root, { defaultPanel: 'settings', defaultPanels: { palette: 'elements' } });
 	configureDesignerSidebar(root, {
 		roles: { inspector: 'inspector', settings: 'settings' },
 		activeRole: 'settings',
 	});
-	const stageHost = root.querySelector('.cb-core-design-shell__palette');
+	const stageHost = root.querySelector('[data-cb-automations-elements-panel]');
 	const canvas = root.querySelector('.cb-core-design-shell__canvas-workarea');
 	const stages = [
 		{ id: 'trigger', step: '1', label: 'WHEN', description: 'Trigger', targetId: 'cb-automations-stage-trigger' },
