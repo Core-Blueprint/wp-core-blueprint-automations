@@ -42,7 +42,7 @@ test('TOAST-A02: public Base Modal owns close confirmation; operational failures
   assert.match(shell, /showModal\(\{/);
   assert.match(shell, /exitGuard\.register\(root, \{/);
   assert.doesNotMatch(shell, /const requestExit = async|window\.addEventListener\('keydown'/);
-  assert.match(shell, /notify\('warning', window\.cbAutomationsInspectorStrings\?\.saveInProgress/);
+  assert.match(shell, /busy: String\(labels\.saveInProgress/);
   assert.doesNotMatch(designerAssets, /DESIGNER_EXIT_GUARD_API/);
   assert.match(shell, /notify\('error', error instanceof Error \? error\.message : String\(error\)\)/);
   assert.doesNotMatch(shell, /wp\.data\.dispatch|wp\.notices|alert\(|window\.confirm\(/);
@@ -57,7 +57,8 @@ test('TOAST-A03: persistent conflict recovery moved to Settings, never transient
   assert.match(save, /review\.target = '_blank'/);
   assert.match(save, /review\.rel = 'noopener noreferrer'/);
   assert.match(save, /shell\.addEventListener\('cb-automations:contextloaded', clearRecovery\)/);
-  assert.match(save, /if \(error\?\.code === 'REVISION_CONFLICT' \|\| error\?\.code === 'SAVE_UNVERIFIED'\)/);
+  assert.match(save, /if \(error\?\.code === 'REVISION_CONFLICT' \|\| unverified\)/);
+  assert.match(save, /emit\(unverified \? 'unknown' : 'error'/);
 });
 
 test('TOAST-A04: no persistence, CAS or execution authority rewrite in presentation patch', () => {
