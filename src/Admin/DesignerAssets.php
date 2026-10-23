@@ -14,6 +14,7 @@ final class DesignerAssets {
 	private const INSPECTOR_HANDLE = 'cb-automations-admin-builder-inspector';
 	private const SAVE_HANDLE      = 'cb-automations-admin-builder-save';
 	private const HISTORY_MODULE   = 'cb-automations-admin-builder-history';
+	private const LAYERS_MODULE    = 'cb-automations-admin-builder-layers';
 
 	private static bool $initialized = false;
 
@@ -46,6 +47,7 @@ final class DesignerAssets {
 		$inspector      = CB_AUTOMATIONS_DIR . 'assets/js/admin-builder-inspector.js';
 		$save           = CB_AUTOMATIONS_DIR . 'assets/js/admin-builder-save.js';
 		$history        = CB_AUTOMATIONS_DIR . 'assets/js/admin-builder-history.js';
+		$layers         = CB_AUTOMATIONS_DIR . 'assets/js/admin-builder-layers.js';
 
 		wp_enqueue_script(
 			self::INSPECTOR_HANDLE,
@@ -139,6 +141,7 @@ final class DesignerAssets {
 
 		wp_enqueue_script_module( 'cb-automations-admin-designer-shell', CB_AUTOMATIONS_URL . 'assets/js/admin-designer-shell.js', [ '@cb-core/design-editor', '@cb-core/modal' ], is_file( $js ) ? (string) filemtime( $js ) : CB_AUTOMATIONS_VERSION );
 		wp_enqueue_script_module( self::HISTORY_MODULE, CB_AUTOMATIONS_URL . 'assets/js/admin-builder-history.js', [ '@cb-core/design-editor', 'cb-automations-admin-designer-shell' ], is_file( $history ) ? (string) filemtime( $history ) : CB_AUTOMATIONS_VERSION );
+		wp_enqueue_script_module( self::LAYERS_MODULE, CB_AUTOMATIONS_URL . 'assets/js/admin-builder-layers.js', [ '@cb-core/design-editor', self::HISTORY_MODULE ], is_file( $layers ) ? (string) filemtime( $layers ) : CB_AUTOMATIONS_VERSION );
 	}
 
 	private static function base_editor_available(): bool {
