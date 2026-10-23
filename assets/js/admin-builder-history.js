@@ -12,7 +12,7 @@ const api = window.cbAutomationsEditorSession;
 const shell = document.querySelector('[data-cb-automations-designer-shell]');
 const undo = shell?.querySelector('[data-cb-design-shell-undo]');
 const redo = shell?.querySelector('[data-cb-design-shell-redo]');
-const status = shell?.querySelector('[data-cb-design-shell-status]');
+const status = shell?.querySelector('[data-cb-automations-history-warning]');
 
 if (api?.snapshot && api?.replace && api?.root && shell
     && undo instanceof HTMLButtonElement && redo instanceof HTMLButtonElement
@@ -66,7 +66,10 @@ if (api?.snapshot && api?.replace && api?.root && shell
       applying = true;
       try { api.replace(previous, { source: 'history' }); }
       finally { applying = false; }
-      if (status) status.textContent = 'This edit could not be applied safely. The previous workflow was restored.';
+      if (status) {
+        status.textContent = 'This edit could not be applied safely. The previous workflow was restored.';
+        status.hidden = false;
+      }
     }
   });
 
@@ -137,5 +140,8 @@ if (api?.snapshot && api?.replace && api?.root && shell
 } else {
   if (undo instanceof HTMLButtonElement) undo.disabled = true;
   if (redo instanceof HTMLButtonElement) redo.disabled = true;
-  if (status) status.textContent = 'Designer history is unavailable. Workflow saving is paused.';
+  if (status) {
+    status.textContent = 'Designer history is unavailable. Workflow saving is paused.';
+    status.hidden = false;
+  }
 }
