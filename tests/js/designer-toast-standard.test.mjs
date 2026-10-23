@@ -37,10 +37,11 @@ test('TOAST-A02: public Base Modal owns close confirmation; operational failures
     ['warning', 'Wait for save'],
     ['error', 'Context failed'],
   ]);
-  // Current public Base main supplies shared Modal, but does not yet
-  // advertise a stable native Exit Guard API. Keep one public Modal path.
+  // Base Exit Guard now owns close/unload; the consumer Modal remains only
+  // for the bounded context-switch choice, not a duplicate exit path.
   assert.match(shell, /showModal\(\{/);
-  assert.match(shell, /const requestExit = async/);
+  assert.match(shell, /exitGuard\.register\(root, \{/);
+  assert.doesNotMatch(shell, /const requestExit = async|window\.addEventListener\('keydown'/);
   assert.match(shell, /notify\('warning', window\.cbAutomationsInspectorStrings\?\.saveInProgress/);
   assert.doesNotMatch(designerAssets, /DESIGNER_EXIT_GUARD_API/);
   assert.match(shell, /notify\('error', error instanceof Error \? error\.message : String\(error\)\)/);
