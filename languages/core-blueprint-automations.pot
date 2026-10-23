@@ -641,6 +641,10 @@ msgstr ""
 msgid "Stage"
 msgstr ""
 
+#: templates/admin/workflow-editor.php:170
+msgid "Stages"
+msgstr ""
+
 #: src/Admin/DesignerAssets.php:99
 #: templates/admin/workflow-editor.php:50
 msgid "Provider"
