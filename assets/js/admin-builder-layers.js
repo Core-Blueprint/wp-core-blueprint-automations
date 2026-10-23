@@ -110,4 +110,9 @@ if (shell && host && hidden && editor?.snapshot && editor?.layerAction) {
 	}, { signal });
 	window.addEventListener('pagehide', () => controller.abort(), { once: true });
 	render();
+} else if (host) {
+	// Required public consumer state is absent: do not show inert controls or
+	// make up a second source of workflow truth.
+	host.setAttribute('role', 'alert');
+	host.textContent = String(window.cbAutomationsInspectorStrings?.contextUnavailable || 'Workflow layers are unavailable. Reload the editor.');
 }
