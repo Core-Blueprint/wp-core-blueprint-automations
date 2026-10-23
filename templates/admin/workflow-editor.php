@@ -171,10 +171,10 @@ if ( ! is_string( $definition_json ) ) {
 						<button type="button" class="cb-core-design-shell__tab" role="tab" aria-selected="false" data-cb-design-shell-tab="layers" data-cb-design-shell-group="palette" data-cb-design-shell-palette-role="layers"><?php esc_html_e( 'Layers', 'core-blueprint' ); ?></button>
 					</div>
 					<section class="cb-core-design-shell__panel cb-core-design-shell__palette-panel" role="tabpanel" data-cb-design-shell-panel="elements" data-cb-design-shell-group="palette">
-						<div data-cb-automations-elements-panel></div>
+						<div class="cb-core-design-shell__panel-body" data-cb-automations-elements-panel></div>
 					</section>
 					<section class="cb-core-design-shell__panel cb-core-design-shell__palette-panel" role="tabpanel" data-cb-design-shell-panel="layers" data-cb-design-shell-group="palette" hidden>
-						<div data-cb-automations-layers-host></div>
+						<div class="cb-core-design-shell__panel-body" data-cb-automations-layers-host></div>
 					</section>
 				</aside>
 
