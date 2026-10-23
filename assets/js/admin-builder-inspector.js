@@ -191,6 +191,9 @@
 			return;
 		}
 		selected = null;
+		shell.dispatchEvent(new CustomEvent('cb-automations:inspector-selection', {
+			bubbles: true, detail: Object.freeze({ key: '' }),
+		}));
 		root.querySelectorAll('.cb-automations-step.is-builder-selected, .cb-automations-condition.is-builder-selected').forEach((item) => item.classList.remove('is-builder-selected'));
 		renderInspector(null);
 	};
