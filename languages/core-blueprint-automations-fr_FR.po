@@ -620,6 +620,10 @@ msgstr "Configurer le déclencheur"
 msgid "Stage"
 msgstr "Étape"
 
+#: templates/admin/workflow-editor.php:170
+msgid "Stages"
+msgstr "Étapes"
+
 #: src/Admin/DesignerAssets.php:99 templates/admin/workflow-editor.php:50
 msgid "Provider"
 msgstr "Fournisseur"
