@@ -6,7 +6,10 @@
 
 /* Base composed panels use display:grid; hidden recovery sections must stay
  * absent until a real conflict or fail-closed History diagnostic occurs. */
-[data-cb-automations-save-recovery][hidden],
+[data-cb-automations-save-recovery][hidden] {
+	display: none !important;
+}
+
 [data-cb-automations-history-warning][hidden] {
 	display: none !important;
 }
