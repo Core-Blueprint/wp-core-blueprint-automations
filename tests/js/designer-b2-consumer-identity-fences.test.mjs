@@ -119,3 +119,9 @@ test('A-B2-T04: real Canvas card interception refuses precommit and stale mutati
     assert.equal(e.blocked,true,'old Canvas handler must refuse '+kind);
   }
 });
+
+test('A-B2-T05: refused context commit restores workflow identity before old Canvas handlers are rebound', () => {
+  const shell = source('assets/js/admin-designer-shell.js');
+  assert.match(shell, /currentId\.value = previous\.id;[\s\S]{0,150}currentRevision\.value = previous\.revision;[\s\S]{0,150}session\.replace\(previous\.definition, \{ source: 'context-rollback' \}\)/);
+  assert.match(shell, /JSON\.stringify\(history\.contextWitness\(\)\) === JSON\.stringify\(historyBefore\)/);
+});
