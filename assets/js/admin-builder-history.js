@@ -66,7 +66,12 @@ if (api?.snapshot && api?.replace && api?.root && shell
   let flushStep = 0;
   const cleanups = [];
   let controller = null;
-  let renderedEpoch = session.selection().contextEpoch;
+  // Only a complete, successful final Base view flush may become verified.
+  // An initial or newly committed epoch is not evidence of rendered views.
+  let renderedEpoch = null;
+  let renderedWorkflowId = null;
+  let flushEpoch = null;
+  let flushWorkflowId = null;
   let boundCanvasOrigin = null;
   let disposed = false;
   // The Automation Builder already exposes this translated, accessible
@@ -104,10 +109,26 @@ if (api?.snapshot && api?.replace && api?.root && shell
     if (name === 'layers' && (flushStep === 0 || flushStep === 3)) {
       flushStep = 0;
       viewResults.clear();
+      flushEpoch = null;
+      flushWorkflowId = null;
     }
     if (name !== viewOrder[flushStep] || viewResults.has(name)) {
       fenceView(); // Duplicate, missing or out-of-order adapter acknowledgement.
       return;
+    }
+    const canonicalEpoch = session.selection().contextEpoch;
+    const projectedEpoch = context?.selection?.contextEpoch;
+    const currentWorkflowId = workflowId();
+    if (!Number.isSafeInteger(projectedEpoch) || projectedEpoch !== canonicalEpoch
+      || currentWorkflowId === ''
+      || (name !== 'layers' && (flushEpoch !== projectedEpoch
+        || flushWorkflowId !== currentWorkflowId))) {
+      fenceView(); // Reject stale or mixed-context views before rendering.
+      return;
+    }
+    if (name === 'layers') {
+      flushEpoch = projectedEpoch;
+      flushWorkflowId = currentWorkflowId;
     }
     flushStep += 1;
     const render = views.get(name);
@@ -129,6 +150,20 @@ if (api?.snapshot && api?.replace && api?.root && shell
     } finally {
       viewResults.set(name, ok);
       if (!ok) fenceView();
+      if (name === 'canvas' && flushStep === viewOrder.length) {
+        if (viewOrder.every((view) => viewResults.get(view) === true)
+          && session.selection().contextEpoch === flushEpoch
+          && workflowId() === flushWorkflowId
+          && shell.dataset.cbDesignShellSaveOutcomeUnknown !== 'true'
+          && shell.dataset.cbDesignShellSaveState !== 'unknown') {
+          // All three adapters finished the SAME canonical final F02 view.
+          // Never advance the receipt on an intermediate Selection notification.
+          renderedEpoch = flushEpoch;
+          renderedWorkflowId = flushWorkflowId;
+        } else {
+          fenceView();
+        }
+      }
     }
   };
   const renderAdapters = Object.freeze({
@@ -181,7 +216,10 @@ if (api?.snapshot && api?.replace && api?.root && shell
       catch { return false; }
     },
     verified: (name) => flushStep === 3 && viewResults.get(name) === true
-      && renderedEpoch === session.selection().contextEpoch,
+      && renderedEpoch !== null && renderedEpoch === session.selection().contextEpoch
+      && renderedWorkflowId === workflowId()
+      && shell.dataset.cbDesignShellSaveOutcomeUnknown !== 'true'
+      && shell.dataset.cbDesignShellSaveState !== 'unknown',
     reportView: (name, ok) => {
       if (!['layers', 'inspector', 'canvas'].includes(name) || ok !== true) {
         fenceView();
