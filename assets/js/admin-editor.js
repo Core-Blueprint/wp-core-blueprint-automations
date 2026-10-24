@@ -419,7 +419,7 @@
 			event.preventDefault();
 			event.stopImmediatePropagation();
 		};
-		for (const type of ['click', 'input', 'change', 'keydown']) {
+		for (const type of ['click', 'input', 'change', 'keydown', 'contextmenu', 'dragstart', 'drop']) {
 			card.addEventListener(type, check, true);
 		}
 	};
