@@ -164,6 +164,29 @@ const position = (value) => {
   if (!Number.isSafeInteger(value) || value < 0) fail('invalid command index');
   return value;
 };
+/**
+ * One editor event is one operator intent. Modifying a capability/binding or
+ * reordering never changes a persisted identity. A deliberate remove and a
+ * later add are two separate events, not an implicit rename or replacement.
+ * This also protects step_output references from silent retargeting.
+ */
+function assertEditorIdentities(before, after) {
+  let membershipChanges = 0;
+  if (before.trigger && after.trigger && before.trigger.step_id !== after.trigger.step_id) conflict();
+  if (Boolean(before.trigger) !== Boolean(after.trigger)) membershipChanges += 1;
+  for (const collection of Object.keys(COLLECTION_KINDS)) {
+    const key = collection === 'conditions' ? 'condition_id' : 'step_id';
+    const previous = new Set(before[collection].map((entry) => entry[key]));
+    const current = new Set(after[collection].map((entry) => entry[key]));
+    const removed = [...previous].filter((id) => !current.has(id));
+    const inserted = [...current].filter((id) => !previous.has(id));
+    // A swapped identity is neither an edit nor an explicit two-step remove/add.
+    if (removed.length && inserted.length) conflict();
+    membershipChanges += removed.length + inserted.length;
+  }
+  if (membershipChanges > 1) conflict();
+}
+
 function makeCommand(label, mutate) {
   return Object.freeze({
     label,
@@ -185,6 +208,7 @@ export const workflowCommands = Object.freeze({
   editorChange({ expected, next }) {
     const before = freeze(fromProject(toProject(expected)));
     const after = freeze(fromProject(toProject(next)));
+    assertEditorIdentities(before, after);
     return makeCommand('editor-change', (definition) => {
       if (!equal(definition, before)) conflict();
       for (const key of Object.keys(definition)) delete definition[key];
