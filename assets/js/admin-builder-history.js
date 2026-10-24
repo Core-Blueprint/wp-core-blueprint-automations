@@ -62,6 +62,8 @@ if (api?.snapshot && api?.replace && api?.root && shell
   // including contextChanged with structurally equal DesignProjects.
   const views = new Map();
   const viewResults = new Map();
+  const viewOrder = Object.freeze(['layers', 'inspector', 'canvas']);
+  let flushStep = 0;
   const cleanups = [];
   let controller = null;
   let renderedEpoch = session.selection().contextEpoch;
@@ -98,6 +100,15 @@ if (api?.snapshot && api?.replace && api?.root && shell
       pendingEpoch = context.selection.contextEpoch;
       return; // Never acknowledge an early B2 Selection projection.
     }
+    if (name === 'layers' && (flushStep === 0 || flushStep === 3)) {
+      flushStep = 0;
+      viewResults.clear();
+    }
+    if (name !== viewOrder[flushStep] || viewResults.has(name)) {
+      fenceView(); // Duplicate, missing or out-of-order adapter acknowledgement.
+      return;
+    }
+    flushStep += 1;
     const render = views.get(name);
     let ok = false;
     try {
@@ -154,6 +165,7 @@ if (api?.snapshot && api?.replace && api?.root && shell
     renderedEpoch = epoch;
     pendingEpoch = null;
     viewResults.clear();
+    flushStep = 0;
     // The controller's own History listener runs FIRST and suppresses any
     // early new-epoch adapter calls. Publish exactly one visible final flush.
     try { controller.refresh(); } catch (_error) { fenceView(); }
@@ -177,7 +189,7 @@ if (api?.snapshot && api?.replace && api?.root && shell
       try { return controller.clear({ expectedEpoch: origin.expectedEpoch, source: 'ui' }); }
       catch { return false; }
     },
-    verified: (name) => viewResults.get(name) === true
+    verified: (name) => flushStep === 3 && viewResults.get(name) === true
       && pendingEpoch === null
       && renderedEpoch === session.selection().contextEpoch,
     reportView: (name, ok) => {
