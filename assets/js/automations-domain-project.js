@@ -127,7 +127,11 @@ function validate(definition) {
 export function toProject(authorableDefinition) {
   const definition = validate(clone(authorableDefinition));
   return freeze({
-    schema_version: 1,
+    // Base's public domain-neutral History Session uses generation 0.
+    // Generation 1 requires verified native Host Registry context, which
+    // Automations does not claim or fabricate. Workflow definition_version
+    // remains 1 and the strict consumer codec remains authoritative.
+    schema_version: 0,
     design_type: 'automations.workflow',
     root: {
       type: 'automations.workflow',
@@ -142,7 +146,7 @@ export function toProject(authorableDefinition) {
 export function fromProject(project) {
   const value = clone(project);
   exact(value, ['schema_version', 'design_type', 'root'], 'DesignProject wrapper');
-  if (value.schema_version !== 1 || value.design_type !== 'automations.workflow') fail('incorrect DesignProject wrapper');
+  if (value.schema_version !== 0 || value.design_type !== 'automations.workflow') fail('incorrect consumer domain project wrapper');
   exact(value.root, ['type', 'provider', 'properties', 'children'], 'DesignProject root wrapper');
   if (value.root.type !== 'automations.workflow' || value.root.provider !== 'core-blueprint-automations'
     || !Array.isArray(value.root.children) || value.root.children.length !== 0) fail('incorrect DesignProject children or wrapper');
