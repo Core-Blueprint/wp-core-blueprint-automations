@@ -141,7 +141,7 @@ final class DesignerAssets {
 		wp_enqueue_style( 'cb-automations-admin-builder-authoring', CB_AUTOMATIONS_URL . 'assets/css/admin-builder-authoring.css', [ 'cb-automations-admin-builder-inspector' ], is_file( $authoring_css ) ? (string) filemtime( $authoring_css ) : CB_AUTOMATIONS_VERSION );
 		wp_enqueue_style( 'cb-automations-admin-builder-finish', CB_AUTOMATIONS_URL . 'assets/css/admin-builder-finish.css', [ 'cb-automations-admin-builder-authoring' ], is_file( $finish_css ) ? (string) filemtime( $finish_css ) : CB_AUTOMATIONS_VERSION );
 
-		wp_enqueue_script_module( 'cb-automations-admin-designer-shell', CB_AUTOMATIONS_URL . 'assets/js/admin-designer-shell.js', [ '@cb-core/design-editor', '@cb-core/modal', '@cb-core/toast' ], is_file( $js ) ? (string) filemtime( $js ) : CB_AUTOMATIONS_VERSION );
+		wp_enqueue_script_module( 'cb-automations-admin-designer-shell', CB_AUTOMATIONS_URL . 'assets/js/admin-designer-shell.js', [ '@cb-core/design-editor', '@cb-core/toast' ], is_file( $js ) ? (string) filemtime( $js ) : CB_AUTOMATIONS_VERSION );
 		// Import this consumer-owned domain codec through WordPress' versioned
 		// script-module registry. A bare relative import would retain a stale,
 		// unversioned browser cache entry after RC2 package replacement.
@@ -159,6 +159,9 @@ final class DesignerAssets {
 			// No v1/low-level-history fallback: a public, same-build Domain Session
 			// v2 is required before this Designer can safely bind Undo/Save.
 			&& defined( DesignEditorAssets::class . '::DOMAIN_SESSION_API' )
-			&& constant( DesignEditorAssets::class . '::DOMAIN_SESSION_API' ) >= 2;
+			&& constant( DesignEditorAssets::class . '::DOMAIN_SESSION_API' ) >= 2
+			// Base B1 owns context authorization. Older Exit Guard contracts fail closed.
+			&& defined( DesignEditorAssets::class . '::DESIGNER_EXIT_GUARD_API' )
+			&& constant( DesignEditorAssets::class . '::DESIGNER_EXIT_GUARD_API' ) >= 2;
 	}
 }
