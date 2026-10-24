@@ -156,7 +156,10 @@
 		event.preventDefault();
 		const submitter = event.submitter;
 		if (submitter != null && submitter !== save && !aliases.includes(submitter)) return;
-		if (saving || saveUnverified) return;
+		// Respect Base's sticky UNKNOWN fence, including failed context recovery.
+		if (saving || saveUnverified
+			|| shell.dataset.cbDesignShellSaveOutcomeUnknown === 'true'
+			|| shell.dataset.cbDesignShellSaveState === 'unknown') return;
 		clearRecovery();
 
 		// Capture a one-use Base v2 save token at the exact submitted authoring
