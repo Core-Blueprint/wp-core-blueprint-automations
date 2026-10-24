@@ -62,6 +62,7 @@ if (api?.snapshot && api?.replace && api?.root && shell
   // including contextChanged with structurally equal DesignProjects.
   const views = new Map();
   const viewResults = new Map();
+  const cleanups = [];
   let controller = null;
   let renderedEpoch = session.selection().contextEpoch;
   let boundCanvasOrigin = null;
@@ -158,6 +159,11 @@ if (api?.snapshot && api?.replace && api?.root && shell
   };
   const selectionApi = Object.freeze({
     registerView,
+    registerCleanup: (release) => {
+      if (disposed || typeof release !== 'function') { fenceView(); return false; }
+      cleanups.push(release);
+      return true;
+    },
     captureOrigin,
     isCurrentOrigin,
     select: (ref, origin) => {
@@ -320,6 +326,9 @@ if (api?.snapshot && api?.replace && api?.root && shell
     if (disposed) return;
     disposed = true;
     try {
+      for (const cleanup of cleanups.splice(0)) {
+        try { cleanup(); } catch (_error) { /* Proceed with teardown. */ }
+      }
       releaseFinalHistory?.();
       controller?.destroy();
     } finally { session.dispose(); }
