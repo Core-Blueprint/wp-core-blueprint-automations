@@ -193,3 +193,15 @@ test('G1a-V21-A08: real Base ProjectState accepts consumer generation 0 and reje
     '--no-warnings', '--experimental-vm-modules', '--input-type=module', '--eval', evaluate,
   ], { input: JSON.stringify({ sources, project }), encoding: 'utf8' });
 });
+
+
+test('G1a-V21-A09: History imports the domain codec through a versioned WordPress module', async () => {
+  const history = await read('assets/js/admin-builder-history.js');
+  const assets = await read('src/Admin/DesignerAssets.php');
+  assert.match(history, /from 'cb-automations-domain-project'/);
+  assert.doesNotMatch(history, /from ['"]\.\/automations-domain-project\.js['"]/);
+  assert.match(assets, /private const DOMAIN_PROJECT_MODULE\s*=\s*'cb-automations-domain-project'/);
+  assert.match(assets, /\$domain_project\s*=\s*CB_AUTOMATIONS_DIR \. 'assets\/js\/automations-domain-project\.js'/);
+  assert.match(assets, /wp_enqueue_script_module\(\s*self::DOMAIN_PROJECT_MODULE,\s*CB_AUTOMATIONS_URL \. 'assets\/js\/automations-domain-project\.js',\s*\[\],\s*is_file\( \$domain_project \) \? \(string\) filemtime\( \$domain_project \) : CB_AUTOMATIONS_VERSION\s*\)/);
+  assert.match(assets, /wp_enqueue_script_module\(\s*self::HISTORY_MODULE[\s\S]*?\[\s*'@cb-core\/design-editor',\s*'cb-automations-admin-designer-shell',\s*self::DOMAIN_PROJECT_MODULE\s*\]/);
+});
