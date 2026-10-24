@@ -5,6 +5,8 @@ import { runInNewContext } from 'node:vm';
 import { fromProject, toProject } from '../../assets/js/automations-domain-project.js';
 
 const source = readFileSync(new URL('../../assets/js/admin-designer-shell.js', import.meta.url), 'utf8');
+const fence = source.match(/const fenceUncertainContext = \(\) => \{[\s\S]*?\n\t\t\};/);
+assert.ok(fence, 'exercise production context UNKNOWN fence');
 const block = source.match(/const saveIsUncertainOrBusy = \(\) => \([\s\S]*?\n\t\t\);[\s\S]*?const switchContext = async \(url\) => \{[\s\S]*?\n\t\t\};/);
 assert.ok(block, 'exercise the actual production Save fence and context transaction');
 const clone = (value) => JSON.parse(JSON.stringify(value));
@@ -105,7 +107,7 @@ function fixture({ nextDefinition = definition(), nextRevision = '3', nextCatalo
     },
     history: { state: null, replaceState: () => operations.push('browser-url') },
   };
-  const switchContext = runInNewContext(block[0] + '\nswitchContext;', {
+  const switchContext = runInNewContext(fence[0] + '\n' + block[0] + '\nswitchContext;', {
     switchGeneration: 0, form, root, contextDataNode, window,
     definition: definitionControl, name, activation, authority,
     normalized: (value) => JSON.stringify(JSON.parse(String(value || '{}'))),
