@@ -149,8 +149,13 @@
 	};
 
 	form.addEventListener('submit', async (event) => {
-		if (event.submitter !== save && !aliases.includes(event.submitter)) return;
+		// The active Designer owns every submission of this workflow form.
+		// Enter and requestSubmit() without a button have no explicit submitter
+		// and use this same checkpoint/receipt writer. Reject any OTHER button
+		// before it can fall through to an unchecked native POST.
 		event.preventDefault();
+		const submitter = event.submitter;
+		if (submitter != null && submitter !== save && !aliases.includes(submitter)) return;
 		if (saving || saveUnverified) return;
 		clearRecovery();
 
