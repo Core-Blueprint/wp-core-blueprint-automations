@@ -164,3 +164,74 @@ test('AU1-A11: sparse literal arrays cannot silently become null in JSON', () =>
   const bad = { ...empty(), states: [step('state', 'state_1', { tags: literal(sparse) })] };
   assert.throws(() => toProject(bad), /sparse/i);
 });
+
+
+// A1-B: exercise the SAME generic command used by admin-builder-history.js,
+// not only the narrower replace()/setTrigger() convenience commands.
+test('A1-B-D01: imported trigger and nonsequential step IDs survive editor edits and reorder', () => {
+  const imported = {
+    definition_version: 1,
+    trigger: step('trigger', 'webhook_entry'),
+    states: [step('state', 'lookup_profile'), step('state', 'lookup_team')],
+    conditions: [{ condition_id: 'only_for_team', left: output('lookup_profile'), operator: 'equals', right: literal('yes') }],
+    actions: [step('action', 'publish_report', { account: output('lookup_profile') })],
+  };
+  const changed = structuredClone(imported);
+  changed.trigger.capability = capability('trigger');
+  changed.states.reverse();
+  changed.states[0].bindings.flag = literal(true);
+  changed.conditions[0].right = literal('ready');
+  const command = workflowCommands.editorChange({ expected: imported, next: changed });
+  const project = toProject(imported);
+  const result = run(project, command);
+  assert.deepEqual(fromProject(result), changed);
+  assert.equal(fromProject(result).trigger.step_id, 'webhook_entry');
+  assert.deepEqual(fromProject(result).states.map(x => x.step_id), ['lookup_team', 'lookup_profile']);
+  assert.deepEqual(fromProject(result).actions[0].bindings.account, output('lookup_profile'));
+  assert.deepEqual(fromProject(toProject(fromProject(result))), changed, 'Save/Reopen authoring projection is lossless');
+  assert.throws(() => run(result, command), /conflict/i, 'stale replay denied');
+  assert.deepEqual(fromProject(project), imported, 'the previous immutable project remains intact');
+});
+
+test('A1-B-D02: generic editor command refuses implicit trigger, step and condition identity substitution', () => {
+  const current = populated();
+  for (const modify of [
+    (d) => { d.trigger.step_id = 'trigger_changed'; },
+    (d) => { d.states[0].step_id = 'state_changed'; },
+    (d) => { d.actions[0].step_id = 'action_changed'; },
+    (d) => { d.conditions[0].condition_id = 'condition_changed'; },
+    (d) => { d.states[0].step_id = 'new_state'; d.actions.push(step('action', 'action_extra')); },
+  ]) {
+    const modified = structuredClone(current);
+    modify(modified);
+    assert.throws(() => workflowCommands.editorChange({ expected: current, next: modified }), /conflict/i);
+  }
+  assert.deepEqual(fromProject(toProject(current)), current);
+});
+
+test('A1-B-D03: explicit remove and subsequent new insert preserve surviving output refs', () => {
+  const before = populated();
+  const removed = structuredClone(before);
+  removed.actions = [];
+  const removal = workflowCommands.editorChange({ expected: before, next: removed });
+  const noAction = run(toProject(before), removal);
+  assert.equal(fromProject(noAction).states[0].step_id, 'state_1');
+  const added = structuredClone(removed);
+  added.actions = [step('action', 'action_fresh_48', { project_id: output('state_1') })];
+  const addition = workflowCommands.editorChange({ expected: removed, next: added });
+  const result = run(noAction, addition);
+  assert.deepEqual(fromProject(result), added);
+  assert.equal(fromProject(result).actions[0].bindings.project_id.step_id, 'state_1');
+  assert.throws(() => run(result, addition), /conflict/i);
+  const swapped = structuredClone(before);
+  swapped.actions = [step('action', 'action_fresh_48')];
+  assert.throws(() => workflowCommands.editorChange({ expected: before, next: swapped }), /conflict/i);
+});
+
+test('A1-B-D04: a single generic editor mutation cannot quietly delete and insert across collections', () => {
+  const before = populated();
+  const after = structuredClone(before);
+  after.states = [];
+  after.actions.push(step('action', 'action_new'));
+  assert.throws(() => workflowCommands.editorChange({ expected: before, next: after }), /conflict/i);
+});
