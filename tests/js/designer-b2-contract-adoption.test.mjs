@@ -43,10 +43,10 @@ test('A-B2-T04: rendered workflow identity and epoch fence selection AND mutatio
   assert.match(editor, /isCurrentOrigin/);
   assert.doesNotMatch(layers, /cb-automations:layerselect/);
 });
-test('A-B2-T06: final History view flush and equal-project epoch deferred', () => {
-  assert.match(history, /subscribeHistory/);
+test('A-B2-T06: final History view is Base F02-owned with no duplicate consumer refresh', () => {
+  assert.match(history, /createDesignerSelectionController\(/);
   assert.match(history, /contextEpoch/);
-  assert.match(history, /\.refresh\(/);
+  assert.doesNotMatch(history, /controller\.refresh\(/);
   assert.match(history, /renderLayers/);
   assert.match(history, /renderInspector/);
   assert.match(history, /syncCanvas/);
