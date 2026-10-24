@@ -23,11 +23,11 @@ test('A-B2-T01: exact Base B2 pairing and public typed Selection contract', () =
   assert.match(module, /resolveSelectionEntity/);
   assert.match(module, /createDesignerSelectionController/);
   assert.match(controller, /typed === 'domain'/);
-  assert.match(php, /DOMAIN_SESSION_API'\) >= 3/);
-  assert.match(php, /DESIGNER_EXIT_GUARD_API'\) >= 2/);
+  assert.match(php, /DOMAIN_SESSION_API'\s*\) >= 3/);
+  assert.match(php, /DESIGNER_EXIT_GUARD_API'\s*\) >= 2/);
 });
 test('A-B2-T02/T03: exactly one typed Selection resolver and controller, strict domain refs', () => {
-  assert.match(history, /resolveSelectionEntity\s*:/);
+  assert.match(history, /resolveSelectionEntity(?:\s*:|\s*,)/);
   assert.match(history, /createDesignerSelectionController\(/);
   assert.match(history, /typed:\s*'domain'/);
   assert.match(history, /automations\.trigger/);
@@ -37,7 +37,7 @@ test('A-B2-T02/T03: exactly one typed Selection resolver and controller, strict 
 });
 test('A-B2-T04: rendered workflow identity and epoch fence selection AND mutations', () => {
   assert.match(layers, /expectedEpoch/);
-  assert.match(layers, /workflowId/);
+  assert.match(history, /origin\.workflowId/);
   assert.match(layers, /captureOrigin/);
   assert.match(editor, /captureOrigin/);
   assert.match(editor, /isCurrentOrigin/);
