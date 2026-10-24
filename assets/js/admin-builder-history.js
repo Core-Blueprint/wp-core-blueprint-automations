@@ -135,6 +135,8 @@ if (api?.snapshot && api?.replace && api?.root && shell
           typed: 'domain', session, ...renderAdapters,
           openInspectorOnInsert: false,
         });
+        // Subscribe AFTER Base controller to guarantee last-in-order flush.
+        releaseFinalHistory = session.subscribeHistory(finalizeSelection);
       } catch (_error) {
         fenceView();
         return false;
@@ -142,18 +144,18 @@ if (api?.snapshot && api?.replace && api?.root && shell
     }
     return true;
   };
-  session.subscribeHistory(() => {
+  let releaseFinalHistory = null;
+  const finalizeSelection = () => {
     if (!controller) return;
     const epoch = session.selection().contextEpoch;
     if (epoch === renderedEpoch) return;
     renderedEpoch = epoch;
     pendingEpoch = null;
     viewResults.clear();
-    // Base's public controller may have fired a Selection callback early
-    // when identical projects produced no projectEvent. This final refresh
-    // is the only visible view publication of that effective context commit.
+    // The controller's own History listener runs FIRST and suppresses any
+    // early new-epoch adapter calls. Publish exactly one visible final flush.
     try { controller.refresh(); } catch (_error) { fenceView(); }
-  });
+  };
   const selectionApi = Object.freeze({
     registerView,
     captureOrigin,
@@ -317,7 +319,10 @@ if (api?.snapshot && api?.replace && api?.root && shell
   window.addEventListener('pagehide', () => {
     if (disposed) return;
     disposed = true;
-    try { controller?.destroy(); } finally { session.dispose(); }
+    try {
+      releaseFinalHistory?.();
+      controller?.destroy();
+    } finally { session.dispose(); }
   }, { once: true });
 
   window.cbAutomationsBuilderHistory = Object.freeze({
