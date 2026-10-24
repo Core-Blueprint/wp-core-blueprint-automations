@@ -6,7 +6,7 @@
  * Never import or reproduce Base's internal history engine.
  */
 import { createDomainSession, animateLayoutChange } from '@cb-core/design-editor';
-import { toProject, fromProject, workflowCommands } from './automations-domain-project.js';
+import { toProject, fromProject, workflowCommands } from 'cb-automations-domain-project';
 
 const api = window.cbAutomationsEditorSession;
 const shell = document.querySelector('[data-cb-automations-designer-shell]');
