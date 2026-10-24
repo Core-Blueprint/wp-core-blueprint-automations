@@ -33,12 +33,12 @@ test('Automation Builder keeps canonical persistence, shared-shell ownership and
 	assert.match(shell, /launchRoot\?\.addEventListener\('cb:design-shell:contextrequest'/);
 	assert.match(shell, /event\.detail\.respondWith/);
 	assert.match(shell, /isDirty\(\)/);
-	assert.match(shell, /showModal\(\{/);
-	assert.match(shell, /chooseSwitchAction/);
+	assert.doesNotMatch(shell, /showModal\(\{/);
+	assert.doesNotMatch(shell, /chooseSwitchAction|awaitingChoice|approvedSwitchUrl/);
 	assert.match(shell, /saveBeforeSwitch/);
 	assert.match(shell, /form\.requestSubmit\(saveButton\)/);
-	assert.match(shell, /workflowSwitcher\.dispatchEvent\(new Event\('change'/);
-	assert.match(shell, /approvedSwitchUrl === url\.href/);
+	assert.doesNotMatch(shell, /workflowSwitcher\.dispatchEvent\(new Event\('change'/);
+	assert.match(shell, /event\.detail\.respondWith\(switchContext\(url\)\)/);
 	assert.match(save, /cbAutomationsAsyncSaveReady = true/);
 	assert.doesNotMatch(shell, /window\.confirm\(/);
 	assert.match(shell, /cb:design-shell:savechange/);
@@ -140,71 +140,17 @@ test('Automation Builder keeps canonical persistence, shared-shell ownership and
 	}
 });
 
-test('Context switch uses the live Designer root and dispatches both lifecycle events', async () => {
-	const source = await read('assets/js/admin-designer-shell.js');
-	const block = source.match(/const switchContext = async \(url\) => \{[\s\S]*?\n\t\t\};/);
-	assert.ok(block, 'context switch must remain separately identifiable');
-	assert.doesNotMatch(block[0], /\bshell\.(?:hasAttribute|dispatchEvent)\(/, 'no undefined shell alias in switch path');
-
-	const events = [];
-	const updated = { id: null, revision: null };
-	const currentId = { value: '1' };
-	const currentRevision = { value: '1' };
-	const contextDataNode = { textContent: JSON.stringify({ capabilities: [], operators: [] }) };
-	const nextDataNode = { textContent: JSON.stringify({
-		workflow: { id: 2, definition: { trigger: null, actions: [] } },
-		capabilities: [], operators: [], validation: [],
-	}) };
-	const fields = {
-		'[name="workflow_id"]': currentId,
-		'[name="revision"]': currentRevision,
-	};
-	const incoming = {
-		'[name="workflow_id"]': { value: '2' },
-		'[name="revision"]': { value: '3' },
-		'[name="name"]': { value: 'Workflow B' },
-		'[name="activation_state"]': { value: 'disabled' },
-	};
-	const root = {
-		hasAttribute: () => false,
-		dispatchEvent: (event) => { events.push(event.type); },
-	};
-	const form = { querySelector: (selector) => fields[selector] || null };
-	const nextForm = { querySelector: (selector) => incoming[selector] || null };
-	const nextDocument = {
-		getElementById: (id) => id === 'cb-automations-editor-data' ? nextDataNode : null,
-		querySelector: (selector) => selector === '[data-cb-automations-editor-form]' ? nextForm : null,
-		querySelectorAll: () => [],
-	};
-	const windowMock = {
-		cbAutomationsEditorSession: { replace: (definition) => { updated.definition = definition; } },
-		cbAutomationsBuilderHistory: { resetForContext: (definition) => { updated.history = definition; } },
-		history: { state: null, replaceState: (_state, _title, href) => { updated.href = href; } },
-	};
-	const { runInNewContext } = await import('node:vm');
-	const switchContext = runInNewContext(block[0] + '\nswitchContext;', {
-		root, form, contextDataNode, window: windowMock,
-		switchGeneration: 0,
-		definition: { value: JSON.stringify({ definition_version: 1, trigger: null, states: [], conditions: [], actions: [] }) },
-		contextError: (_key, message) => new Error(message),
-		fetch: async () => ({ ok: true, text: async () => '' }),
-		DOMParser: class { parseFromString() { return nextDocument; } },
-		document: { querySelector: () => null, querySelectorAll: () => [] },
-		CustomEvent: class { constructor(type) { this.type = type; } },
-		name: { value: 'Workflow A' },
-		activation: { value: 'disabled' },
-		authority: { checked: false },
-		baseline: {},
-		normalized: (value) => value,
-	});
-	const url = new URL('https://example.test/wp-admin/admin.php?page=core-blueprint-automations-workflows&workflow=2');
-	const result = await switchContext(url);
-	assert.equal(result.workflowId, 2);
-	assert.equal(currentId.value, '2');
-	assert.equal(currentRevision.value, '3');
-	assert.deepEqual(events, ['cb-automations:validation-saved', 'cb-automations:contextloaded']);
-	assert.equal(updated.href, url.href);
-	assert.ok(updated.definition && updated.history, 'editor and history were refreshed');
+test('Base B1 context authorization has a single consumer transaction', async () => {
+  const shell = await read('assets/js/admin-designer-shell.js');
+  const history = await read('assets/js/admin-builder-history.js');
+  const assets = await read('src/Admin/DesignerAssets.php');
+  assert.match(assets, /DESIGNER_EXIT_GUARD_API/);
+  assert.match(assets, /DESIGNER_EXIT_GUARD_API' \) >= 2/);
+  assert.match(shell, /event\.detail\.respondWith\(switchContext\(url\)\)/);
+  assert.match(shell, /history\.prepareContext\(nextWorkflow\.definition\)/);
+  assert.match(shell, /history\.resetForContext\(nextDefinition\)/);
+  assert.match(history, /resetSelection: true/);
+  assert.doesNotMatch(shell, /approvedSwitchUrl|chooseSwitchAction|awaitingChoice|new Event\('change'/);
 });
 
 test('Designer close and unload authority belong to the public Base Exit Guard', async () => {
