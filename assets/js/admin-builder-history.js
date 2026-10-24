@@ -72,7 +72,8 @@ if (api?.snapshot && api?.replace && api?.root && shell
   const fenceView = () => {
     shell.dataset.cbDesignShellSaveOutcomeUnknown = 'true';
     shell.dataset.cbDesignShellSaveState = 'unknown';
-    const message = 'Workflow selection could not be synchronized. Reload the editor before saving.';
+    const message = String(window.cbAutomationsInspectorStrings?.contextUnavailable
+      || 'Workflow switching is not available. Reload the editor.');
     if (notice) {
       notice.hidden = false;
       notice.textContent = message;
