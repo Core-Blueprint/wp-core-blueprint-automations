@@ -63,7 +63,7 @@ test('A-B2-T04: real Layers callbacks cannot mutate B with callbacks from A, eve
   const selection = {
     captureOrigin: () => ({expectedEpoch:epoch,workflowId}),
     isCurrentOrigin: (origin) => origin.expectedEpoch === epoch && origin.workflowId === workflowId,
-    select: () => events.push('select'),
+    select: (_ref, origin) => { if (!selection.isCurrentOrigin(origin)) return false; events.push('select'); return true; },
   };
   const editor = {layerAction: () => {events.push('mutate');return true;}};
   const fake = {render: (groups) => {selectedGroups = groups;}};
@@ -85,7 +85,7 @@ test('A-B2-T04: real Layers callbacks cannot mutate B with callbacks from A, eve
   const current=selectedGroups.find((g)=>g.key==='stage:actions').children;
   assert.equal(current[0].actions.remove(),true);
   assert.equal(current[0].reorder.onMove(1),true);
-  assert.equal(current[0].onSelect(),1);
+  assert.equal(current[0].onSelect(),true);
   assert.deepEqual(events,['mutate','mutate','select']);
 });
 
