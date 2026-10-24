@@ -31,7 +31,7 @@ test('DSA-01: Automations uses two Base-owned palette tabs and keeps Inspector/S
 });
 
 test('DSA-02: one canonical Base Domain Session, no second renderer or private imports', () => {
-  assert.match(history, /import \{ createDomainSession, animateLayoutChange \} from '@cb-core\/design-editor'/);
+  assert.match(history, /import \{ createDomainSession, createDesignerSelectionController, animateLayoutChange \} from '@cb-core\/design-editor'/);
   assert.equal((history.match(/createDomainSession\(\{/g) || []).length, 1);
   for (const source of [shell, layers, history]) {
     assert.doesNotMatch(source, /from ['"][^'"]*assets\/js\/design\//);
@@ -54,14 +54,14 @@ test('DSA-02: one canonical Base Domain Session, no second renderer or private i
   }
 });
 
-test('DSA-03: Layers selection is presentation-only and invokes the one Inspector', () => {
-  assert.match(layers, /cb-automations:layerselect/);
-  assert.match(inspector, /addEventListener\('cb-automations:layerselect'/);
-  assert.match(inspector, /if \(card\) selectCard\(card\)/);
-  assert.match(inspector, /cb-automations:inspector-selection/);
-  assert.match(layers, /addEventListener\('cb-automations:inspector-selection'/);
-  assert.match(layers, /cb-automations:contextloaded/);
-  assert.match(layers, /tree\.render\(groups\)/);
+test('DSA-03: Layers and Inspector project one canonical typed Domain Selection', () => {
+  assert.match(history, /createDesignerSelectionController\(/);
+  assert.match(history, /typed: 'domain'/);
+  assert.match(layers, /selection\.registerView\('layers', render\)/);
+  assert.match(inspector, /selection\.registerView\('inspector'/);
+  assert.match(inspector, /selection\.registerView\('canvas'/);
+  assert.match(layers, /tree\.render\(/);
+  assert.doesNotMatch(layers + inspector, /cb-automations:layerselect|cb-automations:inspector-selection/);
   assert.doesNotMatch(layers, /createDomainSession|\.rebase\(|\.captureSave\(|\.execute\(/);
 });
 
@@ -109,7 +109,8 @@ test('DSA-05: only supported layer actions, no secret values or consumer context
   assert.match(layers, /reorder:\s*\{/);
   assert.match(layers, /remove: \(\) => allowed\(kind, id, 'remove'\)/);
   assert.match(layers, /kind === 'condition' \? 'condition_id' : 'step_id'/);
-  assert.match(layers, /if \(!id \|\| values\.findIndex/);
+  assert.match(layers, /items\.filter\(\(candidate\) => candidate\?\.\[field\] === id\)\.length !== 1/);
+  assert.match(layers, /selection\.isCurrentOrigin\(origin\)/);
   assert.doesNotMatch(layers, /binding\.value|literal|credential|password|contextmenu|contextMenu/);
   assert.doesNotMatch(layers, /createElement\('(?:div|ul|li)'\)/);
   assert.match(editor, /renderAll\(\);\n\t\t\treturn true;/);
