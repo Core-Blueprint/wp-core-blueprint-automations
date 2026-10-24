@@ -232,16 +232,25 @@
 	const observer = new MutationObserver(() => decorate());
 	observer.observe(root, { childList: true, subtree: true });
 	root.addEventListener('cb-automations:definitionchange', () => queueMicrotask(restoreSelection));
-	shell.addEventListener('cb-automations:contextloaded', () => {
-		selected = null;
-		shell.dispatchEvent(new CustomEvent('cb-automations:inspector-selection', {
-			bubbles: true, detail: Object.freeze({ key: '' }),
-		}));
-		root.querySelectorAll('.is-builder-selected').forEach((card) => {
-			card.classList.remove('is-builder-selected');
-			card.removeAttribute('aria-current');
-		});
-		renderInspector(null);
+	shell.addEventListener('cb-automations:contextloaded', (event) => {
+		let synchronized = false;
+		try {
+			selected = null;
+			shell.dispatchEvent(new CustomEvent('cb-automations:inspector-selection', {
+				bubbles: true, detail: Object.freeze({ key: '' }),
+			}));
+			root.querySelectorAll('.is-builder-selected').forEach((card) => {
+				card.classList.remove('is-builder-selected');
+				card.removeAttribute('aria-current');
+			});
+			renderInspector(null);
+			synchronized = true;
+		} catch (_error) {
+			// Base History is already committed. The transition owner will
+			// block Save until the dependent view is reloaded.
+		} finally {
+			event.detail?.acknowledgeView?.('inspector', synchronized);
+		}
 	});
 	return true;
 	};
