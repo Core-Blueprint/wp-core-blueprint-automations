@@ -227,6 +227,11 @@ if (root) {
 				}
 				let recovered = false;
 				try {
+					// Restore workflow identity BEFORE rebuilding old Canvas bindings.
+					// Otherwise their render-time origin would falsely capture the
+					// attempted target workflow even though Base refused the commit.
+					currentId.value = previous.id;
+					currentRevision.value = previous.revision;
 					session.replace(previous.definition, { source: 'context-rollback' });
 					restorePresentation();
 					recovered = normalized(JSON.stringify(session.snapshot())) === sourceDefinition
