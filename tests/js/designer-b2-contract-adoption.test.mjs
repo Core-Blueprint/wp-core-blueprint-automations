@@ -36,7 +36,8 @@ test('A-B2-T02/T03: exactly one typed Selection resolver and controller, strict 
   assert.match(history, /automations\.condition/);
 });
 test('A-B2-T04: rendered workflow identity and epoch fence selection AND mutations', () => {
-  assert.match(layers, /expectedEpoch/);
+  assert.match(layers, /selection\.captureOrigin\(\)/);
+  assert.match(history, /origin\.expectedEpoch/);
   assert.match(history, /origin\.workflowId/);
   assert.match(layers, /captureOrigin/);
   assert.match(editor, /captureOrigin/);
