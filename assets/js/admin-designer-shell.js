@@ -437,10 +437,18 @@ if (root) {
 			currentDefinition = event.detail?.definition || currentDefinition;
 			navigation.update(itemsFor(currentDefinition), { activeId: activeStage });
 		});
-		root.addEventListener('cb-automations:contextloaded', () => {
-			activeStage = 'trigger';
-			canvas.scrollTop = 0;
-			navigation.setActive(activeStage);
+		root.addEventListener('cb-automations:contextloaded', (event) => {
+			let synchronized = false;
+			try {
+				activeStage = 'trigger';
+				canvas.scrollTop = 0;
+				navigation.setActive(activeStage);
+				synchronized = true;
+			} catch (_error) {
+				// Base History has committed; a failed stage view blocks Save.
+			} finally {
+				event.detail?.acknowledgeView?.('stages', synchronized);
+			}
 		});
 		syncStage();
 	}
