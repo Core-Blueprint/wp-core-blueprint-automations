@@ -34,11 +34,18 @@ test('A-B2-F02-02: execute real Base F02 source regressions for S→H→V and id
   assert.equal(existsSync(file), true);
   // This is Base's own real-module suite; it covers the public controller
   // with canonical ProjectState, Selection and CommandHistory, not copied mocks.
+  // Node's outer --test runner sets NODE_TEST_CONTEXT=child-v8. Passing
+  // that internal marker to another --test process can yield empty stdout
+  // with exit code 0, silently bypassing actual nested test execution.
+  // Keep the independent F02 suite in a fresh test-runner environment.
+  const nestedEnv = { ...process.env, CB_F02_BASE_SOURCE: '' };
+  delete nestedEnv.NODE_TEST_CONTEXT;
   const output = execFileSync(process.execPath, ['--test', '--test-reporter=tap', file], {
     cwd: base, encoding: 'utf8',
-    env: {...process.env, CB_F02_BASE_SOURCE: ''},
+    env: nestedEnv,
     stdio: ['ignore', 'pipe', 'pipe'],
   });
-  assert.match(output, /# pass 19/);
-  assert.match(output, /# fail 0/);
+  assert.match(output, /^# tests 19$/m);
+  assert.match(output, /^# pass 19$/m);
+  assert.match(output, /^# fail 0$/m);
 });
