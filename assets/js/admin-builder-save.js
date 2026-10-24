@@ -215,6 +215,10 @@
 				// Never retry automatically or present a definitive failure.
 				throw uncertain();
 			}
+			// A gateway/server 5xx after POST cannot prove that no CAS committed.
+			// This applies even to parseable JSON errors; retain the original
+			// checkpoint and draft, and let Base own the sticky UNKNOWN fence.
+			if (response.status >= 500 && response.status <= 599) throw uncertain();
 			let result = null;
 			try {
 				result = JSON.parse(body);
