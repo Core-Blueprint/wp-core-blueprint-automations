@@ -68,7 +68,6 @@ if (api?.snapshot && api?.replace && api?.root && shell
   let controller = null;
   let renderedEpoch = session.selection().contextEpoch;
   let boundCanvasOrigin = null;
-  let pendingEpoch = null;
   let disposed = false;
   const notice = shell.querySelector('[data-cb-design-shell-persistent-notice]');
   const fenceView = () => {
@@ -96,10 +95,10 @@ if (api?.snapshot && api?.replace && api?.root && shell
     && shell.dataset.cbDesignShellSaveOutcomeUnknown !== 'true'
     && shell.dataset.cbDesignShellSaveState !== 'unknown');
   const renderView = (name, context) => {
-    if (context.selection.contextEpoch !== renderedEpoch) {
-      pendingEpoch = context.selection.contextEpoch;
-      return; // Never acknowledge an early B2 Selection projection.
-    }
+    // Corrected Base F02 fires this adapter ONLY at final History for a
+    // commit, after correlating the Base-owned Selection historyRevision.
+    // An ordinary unmarked select/clear reaches this adapter immediately.
+    // Do not create a second consumer refresh/History publication.
     if (name === 'layers' && (flushStep === 0 || flushStep === 3)) {
       flushStep = 0;
       viewResults.clear();
@@ -116,7 +115,8 @@ if (api?.snapshot && api?.replace && api?.root && shell
       if (name === 'layers') {
         const origin = captureOrigin();
         if (!boundCanvasOrigin || !same(boundCanvasOrigin, origin)) {
-          // Update stale Canvas DOM bindings after Base committed the epoch.
+          // Rebind existing Canvas cards against the newly committed context.
+          // This is presentation-only; never create a second history command.
           api.replace(api.snapshot(), { source: 'selection-binding' });
           boundCanvasOrigin = origin;
         }
@@ -150,27 +150,14 @@ if (api?.snapshot && api?.replace && api?.root && shell
             shell.querySelector('[data-cb-design-shell-tab="' + id + '"]')?.click() },
           openInspectorOnInsert: false,
         });
-        // Subscribe AFTER Base controller to guarantee last-in-order flush.
-        releaseFinalHistory = session.subscribeHistory(finalizeSelection);
+        // F02 controller already emits exactly one finalized view per Base
+        // historyRevision. No consumer History observer may call refresh().
       } catch (_error) {
         fenceView();
         return false;
       }
     }
     return true;
-  };
-  let releaseFinalHistory = null;
-  const finalizeSelection = () => {
-    if (!controller) return;
-    const epoch = session.selection().contextEpoch;
-    if (epoch === renderedEpoch) return;
-    renderedEpoch = epoch;
-    pendingEpoch = null;
-    viewResults.clear();
-    flushStep = 0;
-    // The controller's own History listener runs FIRST and suppresses any
-    // early new-epoch adapter calls. Publish exactly one visible final flush.
-    try { controller.refresh(); } catch (_error) { fenceView(); }
   };
   const selectionApi = Object.freeze({
     registerView,
@@ -192,7 +179,6 @@ if (api?.snapshot && api?.replace && api?.root && shell
       catch { return false; }
     },
     verified: (name) => flushStep === 3 && viewResults.get(name) === true
-      && pendingEpoch === null
       && renderedEpoch === session.selection().contextEpoch,
     reportView: (name, ok) => {
       if (!['layers', 'inspector', 'canvas'].includes(name) || ok !== true) {
@@ -357,7 +343,6 @@ if (api?.snapshot && api?.replace && api?.root && shell
       for (const cleanup of cleanups.splice(0)) {
         try { cleanup(); } catch (_error) { /* Proceed with teardown. */ }
       }
-      releaseFinalHistory?.();
       releaseDiagnostics();
       controller?.destroy();
     } finally { session.dispose(); }
