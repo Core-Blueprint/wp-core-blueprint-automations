@@ -132,7 +132,7 @@ test('DSA-06: merged Base owns context menu and fail-closed Exit Guard; Automati
     const guard = readFileSync(guardPath, 'utf8');
     const launch = readFileSync(launchPath, 'utf8');
     const layer = readFileSync(layerPath, 'utf8');
-    assert.match(guard, /window\.cbCore\.designerExitGuard = Object\.freeze\(\{ observe, register, request, canTransition/);
+    assert.match(guard, /window\.cbCore\.designerExitGuard = Object\.freeze\(\{ observe, register, request, requestTransition, canTransition/);
     assert.match(guard, /const unresolved = \(shell, adapter\)/);
     assert.match(launch, /designerExitGuard\?\.canTransition\?\.\(shell\)/);
     assert.match(launch, /const bindSaveState = \(shell, save\)/);
