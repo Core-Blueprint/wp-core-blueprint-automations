@@ -1,5 +1,4 @@
 import { createDesignerShell, configureDesignerSidebar, createDesignerNavigation } from '@cb-core/design-editor';
-import { show as showModal } from '@cb-core/modal';
 
 const root = document.querySelector('[data-cb-automations-designer-shell]');
 
@@ -35,14 +34,16 @@ if (root) {
 		const contextError = (key, fallback) => new Error(
 			String(window.cbAutomationsInspectorStrings?.[key] || fallback)
 		);
-		const notify = (variant, message) => {
-			window.cbCore?.toast?.[variant]?.(String(message || ''));
-		};
+		// Base B1 owns approval, modal, selection restoration and single-flight.
+		// This consumer owns only the validated workflow transaction.
 		let switchGeneration = 0;
+		const saveIsUncertainOrBusy = () => (
+			root.dataset?.cbDesignShellSaveState === 'saving'
+			|| root.dataset?.cbDesignShellSaveState === 'unknown'
+			|| root.dataset?.cbDesignShellSaveOutcomeUnknown === 'true'
+		);
 		const switchContext = async (url) => {
-			if (root.hasAttribute('aria-busy')) throw contextError('saveInProgress', 'Wait for the current save to finish.');
-			// A context GET is not an exclusive editor transaction. Fence its
-			// eventual result against newer requests, saves and user edits.
+			if (saveIsUncertainOrBusy()) throw contextError('saveInProgress', 'Wait for the current save to finish.');
 			const generation = ++switchGeneration;
 			const sourceId = String(form?.querySelector('[name="workflow_id"]')?.value || '');
 			const sourceRevision = String(form?.querySelector('[name="revision"]')?.value || '');
@@ -52,11 +53,14 @@ if (root) {
 			const sourceRebind = Boolean(authority?.checked);
 			const session = window.cbAutomationsEditorSession;
 			const history = window.cbAutomationsBuilderHistory;
-			if (!session?.replace || !history?.resetForContext || !contextDataNode) {
+			if (!session?.replace || !session?.snapshot || !history?.prepareContext
+				|| !history?.resetForContext || !history?.snapshot || !contextDataNode) {
 				throw contextError('contextUnavailable', 'Workflow switching is not available. Reload the editor.');
 			}
 			const id = Number(url.searchParams.get('workflow'));
-			if (!Number.isSafeInteger(id) || id < 1 || url.searchParams.get('page') !== 'core-blueprint-automations-workflows') {
+			if (!Number.isSafeInteger(id) || id < 1
+				|| url.searchParams.get('page') !== 'core-blueprint-automations-workflows'
+				|| String(id) === sourceId) {
 				throw contextError('contextUnavailable', 'Invalid workflow selection.');
 			}
 			const response = await fetch(url.href, { credentials: 'same-origin' });
@@ -73,13 +77,11 @@ if (root) {
 			} catch {
 				throw contextError('loadFailed', 'The selected workflow data could not be read.');
 			}
-			const nextWorkflow = nextData.workflow;
-			const nextDefinition = nextWorkflow?.definition;
-			if (Number(nextWorkflow?.id) !== id || !nextDefinition || typeof nextDefinition !== 'object' || Array.isArray(nextDefinition)) {
+			const nextWorkflow = nextData?.workflow;
+			if (Number(nextWorkflow?.id) !== id || !nextWorkflow?.definition || typeof nextWorkflow.definition !== 'object'
+				|| Array.isArray(nextWorkflow.definition)) {
 				throw contextError('loadFailed', 'The selected workflow data is invalid.');
 			}
-			// Editor/picker condition registries are session-scoped; fail closed if
-			// provider contracts have changed since initialization.
 			if (JSON.stringify(nextData.capabilities) !== JSON.stringify(existingData.capabilities)
 				|| JSON.stringify(nextData.operators) !== JSON.stringify(existingData.operators)) {
 				throw contextError('catalogChanged', 'Available capabilities changed. Reload Designer before switching workflows.');
@@ -91,76 +93,137 @@ if (root) {
 			const incomingName = nextForm.querySelector('[name="name"]');
 			const incomingActivation = nextForm.querySelector('[name="activation_state"]');
 			const incomingPrincipal = nextForm.querySelector('[data-cb-automations-principal-label]');
-			if (!nextId || !nextRevision || !currentId || !currentRevision || !incomingName || !incomingActivation) {
+			const principalLabel = form?.querySelector('[data-cb-automations-principal-label]');
+			const heading = document.querySelector('.cb-automations-editor-heading .cb-core-title');
+			if (!nextId || !nextRevision || !currentId || !currentRevision
+				|| !incomingName || !incomingActivation
+				|| Boolean(principalLabel) !== Boolean(incomingPrincipal)) {
 				throw contextError('loadFailed', 'The selected workflow form is incomplete.');
 			}
-			if (String(nextId.value) !== String(id)) throw contextError('loadFailed', 'Workflow identifiers do not match.');
-			// Validation recovery owns status cards; its issue shape is the saved
-			// validation contract with messages from the server-rendered view.
+			const revision = Number(nextRevision.value);
+			if (String(nextId.value) !== String(id)
+				|| !Number.isSafeInteger(revision) || revision < 1
+				|| !String(incomingName.value || '').trim()
+				|| !['enabled', 'disabled'].includes(String(incomingActivation.value))) {
+				throw contextError('loadFailed', 'The selected workflow metadata is invalid.');
+			}
+			let nextDefinition;
+			try {
+				// Full domain codec validation before editing any live surface.
+				nextDefinition = history.prepareContext(nextWorkflow.definition);
+			} catch {
+				throw contextError('loadFailed', 'The selected workflow definition is invalid.');
+			}
 			const messages = Array.from(nextDocument.querySelectorAll('.cb-automations-validation-list > li strong'))
 				.map((node) => node.textContent?.trim() || '');
-			const issues = Array.isArray(nextData.validation) ? nextData.validation.map((issue, index) => ({
-				...issue,
-				message: messages[index] || '',
-			})) : [];
-			// Recheck after all awaits and before the first visible mutation.
-			// A Save can begin and finish while the context GET was in flight;
-			// its changed revision is as important as an active aria-busy flag.
-			if (root.hasAttribute('aria-busy')) {
-				throw contextError('saveInProgress', 'Wait for the current save to finish.');
+			if (nextData.validation !== undefined && !Array.isArray(nextData.validation)) {
+				throw contextError('loadFailed', 'The selected workflow validation is invalid.');
 			}
+			const issues = (nextData.validation || []).map((issue, index) => {
+				if (!issue || typeof issue !== 'object' || Array.isArray(issue)) {
+					throw contextError('loadFailed', 'The selected workflow validation is invalid.');
+				}
+				return { ...issue, message: messages[index] || '' };
+			});
+			const oldStatuses = Array.from(document.querySelectorAll('.cb-automations-editor-statuses .cb-core-status'));
+			const newStatuses = Array.from(nextDocument.querySelectorAll('.cb-automations-editor-statuses .cb-core-status'));
+			if (oldStatuses.length !== newStatuses.length) {
+				throw contextError('loadFailed', 'The selected workflow status is incomplete.');
+			}
+			// The Base context overlay deliberately marks the shell aria-busy
+			// after requestTransition dispatch. Only the Save state is authoritative.
+			if (saveIsUncertainOrBusy()) throw contextError('saveInProgress', 'Wait for the current save to finish.');
 			if (generation !== switchGeneration
-				|| String(form?.querySelector('[name="workflow_id"]')?.value || '') !== sourceId
-				|| String(form?.querySelector('[name="revision"]')?.value || '') !== sourceRevision
+				|| String(currentId.value) !== sourceId || String(currentRevision.value) !== sourceRevision
 				|| normalized(definition?.value) !== sourceDefinition
 				|| String(name?.value || '') !== sourceName
 				|| String(activation?.value || '') !== sourceActivation
-				|| Boolean(authority?.checked) !== sourceRebind) {
-				throw contextError('contextUnavailable', 'Workflow switching is not available. Reload the editor.');
+				|| Boolean(authority?.checked) !== sourceRebind
+				|| normalized(JSON.stringify(session.snapshot())) !== sourceDefinition
+				|| normalized(JSON.stringify(history.snapshot())) !== sourceDefinition) {
+				throw contextError('contextUnavailable', 'Workflow changed during selection. Reload the editor.');
 			}
-			session.replace(nextDefinition, { source: 'context' });
-			currentId.value = String(id);
-			currentRevision.value = nextRevision.value;
-			if (name) name.value = incomingName.value;
-			if (activation) activation.value = incomingActivation.value;
-			if (authority) authority.checked = false;
-			const principalLabel = form?.querySelector('[data-cb-automations-principal-label]');
-			if (principalLabel && incomingPrincipal) principalLabel.textContent = incomingPrincipal.textContent;
-			const heading = document.querySelector('.cb-automations-editor-heading .cb-core-title');
-			if (heading) heading.textContent = incomingName.value;
-			const oldStatuses = document.querySelectorAll('.cb-automations-editor-statuses .cb-core-status');
-			const newStatuses = nextDocument.querySelectorAll('.cb-automations-editor-statuses .cb-core-status');
-			oldStatuses.forEach((node, index) => {
-				const next = newStatuses.item(index);
-				if (!next) return;
-				node.className = next.className;
-				node.replaceChildren(...Array.from(next.childNodes).map((child) => document.importNode(child, true)));
-			});
-			contextDataNode.textContent = nextDataNode.textContent;
-			history.resetForContext(nextDefinition);
-			root.dispatchEvent(new CustomEvent('cb-automations:validation-saved', {
-				bubbles: true,
-				detail: Object.freeze({ valid: issues.length === 0, issues }),
-			}));
-			root.dispatchEvent(new CustomEvent('cb-automations:contextloaded', {
-				bubbles: true,
-				detail: Object.freeze({ workflowId: id, definition: nextDefinition }),
-			}));
+			// Stage the rollback journal before the first live mutation.
+			const previous = {
+				definition: session.snapshot(),
+				id: currentId.value, revision: currentRevision.value,
+				name: name?.value, activation: activation?.value,
+				rebind: Boolean(authority?.checked),
+				principal: principalLabel?.textContent, heading: heading?.textContent,
+				context: contextDataNode.textContent,
+				statuses: oldStatuses.map((node) => ({
+					className: node.className,
+					children: Array.from(node.childNodes).map((child) => child.cloneNode(true)),
+				})),
+			};
+			const restorePresentation = () => {
+				currentId.value = previous.id;
+				currentRevision.value = previous.revision;
+				if (name) name.value = previous.name;
+				if (activation) activation.value = previous.activation;
+				if (authority) authority.checked = previous.rebind;
+				if (principalLabel) principalLabel.textContent = previous.principal;
+				if (heading) heading.textContent = previous.heading;
+				oldStatuses.forEach((node, index) => {
+					node.className = previous.statuses[index].className;
+					node.replaceChildren(...previous.statuses[index].children.map((child) => child.cloneNode(true)));
+				});
+				contextDataNode.textContent = previous.context;
+			};
+			// The only irreversible step is Base History context reset.
+			// All fallible DOM/editor work precedes it; Base stage() validates before
+			// committing and keeps observer exceptions outside its commit boundary.
+			try {
+				session.replace(nextDefinition, { source: 'context' });
+				currentId.value = String(id);
+				currentRevision.value = nextRevision.value;
+				if (name) name.value = incomingName.value;
+				if (activation) activation.value = incomingActivation.value;
+				if (authority) authority.checked = false;
+				if (principalLabel) principalLabel.textContent = incomingPrincipal.textContent;
+				if (heading) heading.textContent = incomingName.value;
+				oldStatuses.forEach((node, index) => {
+					node.className = newStatuses[index].className;
+					node.replaceChildren(...Array.from(newStatuses[index].childNodes)
+						.map((child) => document.importNode(child, true)));
+				});
+				contextDataNode.textContent = nextDataNode.textContent;
+				history.resetForContext(nextDefinition);
+			} catch (failure) {
+				let recovered = false;
+				try {
+					session.replace(previous.definition, { source: 'context-rollback' });
+					restorePresentation();
+					recovered = normalized(JSON.stringify(session.snapshot())) === sourceDefinition
+						&& normalized(JSON.stringify(history.snapshot())) === sourceDefinition
+						&& String(currentId.value) === sourceId && String(currentRevision.value) === sourceRevision;
+				} catch { /* Refuse further writes if restoration itself fails. */ }
+				if (!recovered) {
+					root.dataset.cbDesignShellSaveOutcomeUnknown = 'true';
+					root.dispatchEvent(new CustomEvent('cb:design-shell:failure', {
+						bubbles: true,
+						detail: Object.freeze({ phase: 'context-rollback', message: 'Workflow context recovery failed. Reload before saving.' }),
+					}));
+				}
+				throw failure;
+			}
+			// Commit completed. Notifications and browser history are best-effort
+			// presentation effects and must never manufacture a failed transaction.
 			baseline = {
 				definition: normalized(JSON.stringify(nextDefinition)),
-				name: incomingName.value,
-				activation: incomingActivation.value,
-				rebind: false,
+				name: incomingName.value, activation: incomingActivation.value, rebind: false,
 			};
-			window.history.replaceState(window.history.state, '', url.href);
+			root.dispatchEvent(new CustomEvent('cb-automations:validation-saved', {
+				bubbles: true, detail: Object.freeze({ valid: issues.length === 0, issues }),
+			}));
+			root.dispatchEvent(new CustomEvent('cb-automations:contextloaded', {
+				bubbles: true, detail: Object.freeze({ workflowId: id, definition: nextDefinition }),
+			}));
+			try { window.history.replaceState(window.history.state, '', url.href); } catch { /* Browser URL is not the data commit. */ }
 			return Object.freeze({ workflowId: id });
 		};
 
-
-		// Base requires respondWith() synchronously. On dirty changes let Base
-		// restore the previous selection; replay it only after modal approval.
-		let awaitingChoice = false;
-		let approvedSwitchUrl = '';
+		// One adapter Save callback is shared by Base close and context authority.
 		const saveBeforeSwitch = () => new Promise((resolve, reject) => {
 			const saveButton = root.querySelector('[data-cb-design-shell-primary-action]');
 			if (!(form instanceof HTMLFormElement) || !(saveButton instanceof HTMLButtonElement)
@@ -168,7 +231,7 @@ if (root) {
 				reject(contextError('contextUnavailable', 'Workflow saving is unavailable. Reload the editor.'));
 				return;
 			}
-			if (root.hasAttribute('aria-busy') || saveButton.disabled) {
+			if (saveIsUncertainOrBusy() || saveButton.disabled) {
 				reject(contextError('saveInProgress', 'Wait for the current save to finish.'));
 				return;
 			}
@@ -180,90 +243,19 @@ if (root) {
 					reject(new Error(String(event.detail?.message || window.cbAutomationsSaveStrings?.failed || 'The automation could not be saved.')));
 				} else if (isDirty()) {
 					reject(new Error(String(window.cbAutomationsSaveStrings?.savedWithChanges || 'Automation saved. Newer edits are not saved yet.')));
-				} else {
-					resolve();
-				}
+				} else resolve();
 			};
 			root.addEventListener('cb:design-shell:savechange', onSaveChange);
-			try {
-				form.requestSubmit(saveButton);
-			} catch (error) {
+			try { form.requestSubmit(saveButton); }
+			catch (error) {
 				root.removeEventListener('cb:design-shell:savechange', onSaveChange);
 				reject(error);
 			}
 		});
-		const chooseSwitchAction = async (purpose = 'switch') => {
-			const exiting = purpose === 'exit';
-			const labels = window.cbAutomationsInspectorStrings || {};
-			const body = document.createElement('div');
-			const description = document.createElement('p');
-			description.textContent = String(exiting
-				? (labels.closeUnsavedDescription || 'This workflow has unsaved changes. Save or discard them before closing the Builder.')
-				: (labels.unsavedChanges || 'This workflow has unsaved changes. Save or discard them before switching.'));
-			body.append(description);
-			const options = document.createElement('fieldset');
-			options.className = 'cb-automations-switch-options';
-			const legend = document.createElement('legend');
-			legend.textContent = String(labels.unsavedChoice || 'What should happen to your changes?');
-			options.append(legend);
-			const radios = [];
-			const choices = document.createElement('div');
-			choices.className = 'cb-automations-switch-choices';
-			for (const [value, caption] of [
-				['save', labels.optionSave || 'Save changes'],
-				['discard', labels.optionDiscard || 'Discard changes'],
-			]) {
-				const option = document.createElement('label');
-				option.className = 'cb-automations-switch-option';
-				const radio = document.createElement('input');
-				radio.type = 'radio';
-				radio.name = 'cb-automations-switch-action';
-				radio.value = value;
-				radio.checked = value === 'save';
-				option.append(radio, document.createTextNode(String(caption)));
-				choices.append(option);
-				radios.push(radio);
-			}
-			options.append(choices);
-			body.append(options);
-			const errorMessage = document.createElement('p');
-			errorMessage.className = 'cb-automations-switch-error';
-			errorMessage.setAttribute('role', 'alert');
-			errorMessage.hidden = true;
-			body.append(errorMessage);
-			let action = null;
-			const accepted = await showModal({
-				title: String(labels.unsavedTitle || 'Unsaved changes'),
-				body,
-				confirmLabel: String(exiting ? (labels.closeBuilder || 'Close Builder') : (labels.switchWorkflow || 'Switch workflow')),
-				cancelLabel: String(labels.cancel || 'Cancel'),
-				onConfirm: async () => {
-					const selected = radios.find((radio) => radio.checked)?.value;
-					if (!selected) return false;
-					errorMessage.hidden = true;
-					if (selected === 'save') {
-						radios.forEach((radio) => { radio.disabled = true; });
-						try {
-							await saveBeforeSwitch();
-						} catch (error) {
-							errorMessage.textContent = error instanceof Error ? error.message : String(window.cbAutomationsSaveStrings?.failed || 'The automation could not be saved.');
-							errorMessage.hidden = false;
-							return false;
-						} finally {
-							radios.forEach((radio) => { radio.disabled = false; });
-						}
-					}
-					action = selected;
-					return true;
-				},
-			});
-			return accepted ? action : null;
-		};
-
 		// Base owns the one Exit Guard, confirmation Modal, Escape handling and
 		// beforeunload safety. Register only authoritative Automations adapters.
 		const exitGuard = window.cbCore?.designerExitGuard;
-		if (typeof exitGuard?.register !== 'function') {
+		if (typeof exitGuard?.register !== 'function' || typeof exitGuard?.requestTransition !== 'function') {
 			root.dispatchEvent(new CustomEvent('cb:design-shell:failure', {
 				bubbles: true,
 				detail: Object.freeze({
@@ -286,6 +278,8 @@ if (root) {
 					cleanDescription: String(labels.closeDescription || 'Return to Automations?'),
 					dirtyTitle: String(labels.unsavedTitle || 'Unsaved changes'),
 					dirtyDescription: String(labels.closeUnsavedDescription || 'Save or discard your changes before closing the Builder.'),
+					transitionDirtyDescription: String(labels.unsavedChanges || 'Save or discard your changes before switching workflows.'),
+					transitionConfirm: String(labels.switchWorkflow || 'Switch workflow'),
 					choiceTitle: String(labels.unsavedChoice || 'What should happen to your changes?'),
 					save: String(labels.optionSave || 'Save changes'),
 					discard: String(labels.optionDiscard || 'Discard changes'),
@@ -298,37 +292,12 @@ if (root) {
 
 		launchRoot?.addEventListener('cb:design-shell:contextrequest', (event) => {
 			if (event.detail?.control !== workflowSwitcher) return;
+			// Base B1's synchronous authorization window is the only caller.
 			const target = String(event.detail.value || '').trim();
 			let url;
-			try { url = new URL(target, window.location.href); }
-			catch { return; }
+			try { url = new URL(target, window.location.href); } catch { return; }
 			if (!target || url.origin !== window.location.origin) return;
-			if (approvedSwitchUrl === url.href) {
-				approvedSwitchUrl = '';
-				event.detail.respondWith(switchContext(url));
-				return;
-			}
-			if (awaitingChoice) return;
-			if (isDirty()) {
-				awaitingChoice = true;
-				workflowSwitcher.disabled = true;
-				let handedOff = false;
-				Promise.resolve().then(chooseSwitchAction).then((action) => {
-					if (!action) return;
-					approvedSwitchUrl = url.href;
-					workflowSwitcher.value = target;
-					workflowSwitcher.dispatchEvent(new Event('change', { bubbles: true }));
-					handedOff = approvedSwitchUrl === '';
-					approvedSwitchUrl = '';
-				}).catch((error) => {
-					// Context selection failure, not a second Save notification.
-					notify('error', error instanceof Error ? error.message : String(error));
-				}).finally(() => {
-					awaitingChoice = false;
-					if (!handedOff) workflowSwitcher.disabled = false;
-				});
-				return;
-			}
+			if (typeof window.cbCore?.designerExitGuard?.requestTransition !== 'function') return;
 			event.detail.respondWith(switchContext(url));
 		});
 
