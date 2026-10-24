@@ -21,18 +21,22 @@ const fixture = ({ replaceFault = '', uiFault = false, corruptWitness = false } 
   let current = toProject(definition());
   let baseline = toProject(definition());
   let status = { canUndo: true, canRedo: false, size: 1 };
+  let selection = { refs: [{kind:'entity',type:'automations.action',id:'old_action'}],
+    primary: {kind:'entity',type:'automations.action',id:'old_action'}, revision: 1, contextEpoch: 0 };
   const next = withAction();
   const calls = [];
   const session = {
     snapshot: () => clone(current),
     baselineSnapshot: () => clone(baseline),
     historyStatus: () => clone(status),
+    selection: () => clone(selection),
     replace: (project, options) => {
       calls.push(['replace', options]);
       if (replaceFault === 'refused') throw new Error('Base stage rejected');
       current = clone(project);
       baseline = clone(project);
       status = { canUndo: false, canRedo: false, size: 0 };
+      selection = {refs:[],primary:null,revision:selection.revision+1,contextEpoch:selection.contextEpoch+1};
       if (replaceFault === 'ambiguous') throw new Error('Unexpected postcommit failure');
       if (corruptWitness) status = { canUndo: true, canRedo: false, size: 1 };
     },
