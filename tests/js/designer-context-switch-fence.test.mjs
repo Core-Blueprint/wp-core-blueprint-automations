@@ -11,7 +11,7 @@ const clone = (value) => JSON.parse(JSON.stringify(value));
 const definition = () => ({ definition_version: 1, trigger: null, states: [], conditions: [], actions: [] });
 const workflowUrl = (id) => new URL('https://example.test/wp-admin/admin.php?page=core-blueprint-automations-workflows&workflow=' + id);
 
-function fixture({ nextDefinition = definition(), nextRevision = '3', nextCatalog = [], failEditor = false, failHistory = false } = {}) {
+function fixture({ nextDefinition = definition(), nextRevision = '3', nextCatalog = [], failEditor = false, failHistory = false, failHeading = false } = {}) {
   const pending = [];
   const events = [];
   const operations = [];
@@ -32,7 +32,19 @@ function fixture({ nextDefinition = definition(), nextRevision = '3', nextCatalo
     dataset: { cbDesignShellSaveState: 'idle', cbDesignShellSaveOutcomeUnknown: 'false' },
     dispatchEvent: (event) => events.push(event.type),
   };
-  const document = { querySelector: () => null, querySelectorAll: () => [] };
+  let headingText = 'Original';
+  let throwHeading = failHeading;
+  const heading = {
+    get textContent() { return headingText; },
+    set textContent(value) {
+      headingText = value;
+      if (throwHeading) { throwHeading = false; throw new Error('Heading apply failed'); }
+    },
+  };
+  const document = {
+    querySelector: (key) => key === '.cb-automations-editor-heading .cb-core-title' ? heading : null,
+    querySelectorAll: () => [],
+  };
   const responseFor = (target) => {
     const input = {
       '[name="workflow_id"]': { value: String(target) },
@@ -87,6 +99,7 @@ function fixture({ nextDefinition = definition(), nextRevision = '3', nextCatalo
     select, respond, pending, events, operations, id, revision, name, activation,
     authority, definitionControl, contextDataNode, root,
     get editor() { return clone(editor); }, get history() { return clone(historyDefinition); },
+    get heading() { return headingText; },
     edit() {
       const changed = { ...editor, actions: [] };
       changed.actions.push({ step_id: 'action_1', capability: {
@@ -234,4 +247,19 @@ test('A2-12: source PHP gate, no replay/modal and single shared context authoriz
   assert.match(source, /typeof exitGuard\?\.requestTransition !== 'function'/);
   assert.doesNotMatch(source, /chooseSwitchAction|approvedSwitchUrl|awaitingChoice|showModal|dispatchEvent\(new Event\('change'/);
   assert.match(history, /resetSelection: true/);
+});
+
+
+test('A2-13: DOM application failure after editor render rolls back metadata and Base draft', async () => {
+  const x = fixture({ failHeading: true });
+  const request = x.select(2); x.respond(0, 2);
+  await assert.rejects(request, /Heading apply failed/);
+  assert.equal(x.id.value, '1');
+  assert.equal(x.revision.value, '7');
+  assert.equal(x.name.value, 'Original');
+  assert.equal(x.heading, 'Original');
+  assert.deepEqual(x.editor, definition());
+  assert.deepEqual(x.history, definition());
+  assert.equal(x.events.includes('cb-automations:contextloaded'), false);
+  assert.equal(x.operations.includes('history'), false);
 });
