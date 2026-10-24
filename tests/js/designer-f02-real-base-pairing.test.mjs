@@ -34,7 +34,7 @@ test('A-B2-F02-02: execute real Base F02 source regressions for S→H→V and id
   assert.equal(existsSync(file), true);
   // This is Base's own real-module suite; it covers the public controller
   // with canonical ProjectState, Selection and CommandHistory, not copied mocks.
-  const output = execFileSync(process.execPath, ['--test', file], {
+  const output = execFileSync(process.execPath, ['--test', '--test-reporter=tap', file], {
     cwd: base, encoding: 'utf8',
     env: {...process.env, CB_F02_BASE_SOURCE: ''},
     stdio: ['ignore', 'pipe', 'pipe'],
