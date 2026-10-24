@@ -41,50 +41,30 @@
 		editorData = {};
 	}
 	const catalog = Array.isArray(editorData.capabilities) ? editorData.capabilities : [];
-	let selected = null;
 
-	const refKey = (ref) => [ref?.kind || '', ref?.provider || '', ref?.id || '', ref?.schema_version || ''].join(':');
-	const capabilityFor = (ref) => catalog.find((item) => refKey(item?.reference) === refKey(ref)) || null;
-	const currentDefinition = () => {
-		try {
-			return JSON.parse(hidden.value || '{}');
-		} catch (error) {
-			return {};
-		}
-	};
-	const interactive = (target) => target?.closest?.('button, a, input, select, textarea, details, summary, label, [role="button"]');
-
-	const cardRecord = (card) => {
-		if (!(card instanceof HTMLElement)) return null;
-		const definition = currentDefinition();
-		const triggerRoot = root.querySelector('[data-cb-automations-trigger]');
-		const statesRoot = root.querySelector('[data-cb-automations-states]');
-		const conditionsRoot = root.querySelector('[data-cb-automations-conditions]');
-		const actionsRoot = root.querySelector('[data-cb-automations-actions]');
-
-		if (triggerRoot?.contains(card)) {
-			return { key: 'trigger', stage: 'WHEN', kind: 'Trigger', value: definition.trigger || null };
-		}
-		if (statesRoot?.contains(card)) {
-			const cards = Array.from(statesRoot.children).filter((item) => item instanceof HTMLElement && item.classList.contains('cb-automations-step'));
-			const index = cards.indexOf(card);
-			const value = index >= 0 ? definition.states?.[index] || null : null;
-			return index >= 0 ? { key: `state:${value?.step_id || index}`, stage: 'GET DATA', kind: 'Data lookup', value } : null;
-		}
-		if (conditionsRoot?.contains(card)) {
-			const cards = Array.from(conditionsRoot.children).filter((item) => item instanceof HTMLElement && item.classList.contains('cb-automations-condition'));
-			const index = cards.indexOf(card);
-			const value = index >= 0 ? definition.conditions?.[index] || null : null;
-			return index >= 0 ? { key: `condition:${value?.condition_id || index}`, stage: 'ONLY IF', kind: 'Condition', value } : null;
-		}
-		if (actionsRoot?.contains(card)) {
-			const cards = Array.from(actionsRoot.children).filter((item) => item instanceof HTMLElement && item.classList.contains('cb-automations-step'));
-			const index = cards.indexOf(card);
-			const value = index >= 0 ? definition.actions?.[index] || null : null;
-			return index >= 0 ? { key: `action:${value?.step_id || index}`, stage: 'THEN', kind: 'Action', value } : null;
-		}
-		return null;
-	};
+  // Resolve against the current Base-provided immutable project, never DOM
+  // index, capability label or another consumer-owned Selection authority.
+  const refKey = (ref) => [ref?.kind || '', ref?.provider || '', ref?.id || '', ref?.schema_version || ''].join(':');
+  const capabilityFor = (ref) => catalog.find((item) => refKey(item?.reference) === refKey(ref)) || null;
+  const interactive = (target) => target?.closest?.('button, a, input, select, textarea, details, summary, label, [role="button"]');
+  const recordForRef = (ref, project) => {
+    if (ref?.kind !== 'entity' || !project?.root?.properties?.definition) return null;
+    const definition = project.root.properties.definition;
+    const types = {
+      'automations.trigger': ['trigger', 'step_id', 'WHEN', 'Trigger'],
+      'automations.state': ['states', 'step_id', 'GET DATA', 'Data lookup'],
+      'automations.action': ['actions', 'step_id', 'THEN', 'Action'],
+      'automations.condition': ['conditions', 'condition_id', 'ONLY IF', 'Condition'],
+    };
+    if (!Object.hasOwn(types, ref.type)) return null;
+    const [collection, field, stage, kind] = types[ref.type];
+    const values = collection === 'trigger'
+      ? (definition.trigger ? [definition.trigger] : [])
+      : definition[collection];
+    const matches = values.filter((item) => item?.[field] === ref.id);
+    if (matches.length !== 1) return null;
+    return { key: ref.type + ':' + ref.id, stage, kind, value: matches[0] };
+  };
 
 	const addRow = (list, label, value) => {
 		if (!value) return;
@@ -167,91 +147,85 @@
 		panelBody.append(identity.element, controls);
 	};
 
-	const selectCard = (card, { open = true } = {}) => {
-		const record = cardRecord(card);
-		if (!record) return;
-		root.querySelectorAll('.cb-automations-step.is-builder-selected, .cb-automations-condition.is-builder-selected').forEach((item) => (item.classList.remove('is-builder-selected'), item.removeAttribute('aria-current')));
-		card.classList.add('is-builder-selected');
-		card.setAttribute('aria-current', 'true');
-		selected = record.key;
-		shell.dispatchEvent(new CustomEvent('cb-automations:inspector-selection', {
-			bubbles: true,
-			detail: Object.freeze({ key: selected }),
-		}));
-		renderInspector(record);
-		if (open) tab.click();
-	};
 
-	const restoreSelection = () => {
-		if (!selected) return;
-		const cards = Array.from(root.querySelectorAll('.cb-automations-step, .cb-automations-condition'));
-		const match = cards.find((card) => cardRecord(card)?.key === selected);
-		if (match) {
-			selectCard(match, { open: false });
-			return;
-		}
-		selected = null;
-		shell.dispatchEvent(new CustomEvent('cb-automations:inspector-selection', {
-			bubbles: true, detail: Object.freeze({ key: '' }),
-		}));
-		root.querySelectorAll('.cb-automations-step.is-builder-selected, .cb-automations-condition.is-builder-selected').forEach((item) => item.classList.remove('is-builder-selected'));
-		renderInspector(null);
-	};
+  const bindings = new WeakMap();
+  let selection = null;
+  let observer = null;
+  const cards = () => Array.from(root.querySelectorAll(
+    '[data-cb-automations-selection-type][data-cb-automations-selection-id]'
+  ));
+  const cardRef = (card) => Object.freeze({
+    kind: 'entity',
+    type: String(card.dataset.cbAutomationsSelectionType),
+    id: String(card.dataset.cbAutomationsSelectionId),
+  });
+  const decorate = () => {
+    if (!selection) return;
+    const origin = selection.captureOrigin();
+    for (const card of cards()) {
+      if (!(card instanceof HTMLElement)) continue;
+      const existing = bindings.get(card);
+      if (existing && existing.origin.expectedEpoch === origin.expectedEpoch
+        && existing.origin.workflowId === origin.workflowId) continue;
+      existing?.controller.abort();
+      const controller = new AbortController();
+      const ref = cardRef(card);
+      const select = () => {
+        if (selection.select(ref, origin)) tab.click();
+      };
+      card.setAttribute('role', 'group');
+      card.setAttribute('aria-label', String(card.querySelector('.cb-automations-step-head, .cb-automations-condition-head')?.textContent || strings.selectedStep).trim());
+      card.tabIndex = card.tabIndex >= 0 ? card.tabIndex : 0;
+      card.addEventListener('click', (event) => {
+        if (!interactive(event.target)) select();
+      }, { signal: controller.signal });
+      card.addEventListener('keydown', (event) => {
+        if (event.target !== card || !['Enter', ' '].includes(event.key)) return;
+        event.preventDefault();
+        select();
+      }, { signal: controller.signal });
+      bindings.set(card, { origin, controller });
+    }
+  };
+  const syncCanvas = ({ primary }) => {
+    decorate();
+    for (const card of cards()) {
+      const ref = cardRef(card);
+      const active = primary?.kind === 'entity'
+        && ref.type === primary.type && ref.id === primary.id;
+      card.classList.toggle('is-builder-selected', active);
+      if (active) card.setAttribute('aria-current', 'true');
+      else card.removeAttribute('aria-current');
+    }
+    return true;
+  };
+  const bindSelection = () => {
+    if (selection) return;
+    selection = window.cbAutomationsBuilderSelection || null;
+    if (!selection?.registerView) return;
+    const inspectorOk = selection.registerView('inspector', (view) => {
+      renderInspector(recordForRef(view.primary, view.project));
+      return true;
+    });
+    const canvasOk = selection.registerView('canvas', syncCanvas);
+    if (!inspectorOk || !canvasOk) return;
+    observer = new MutationObserver(() => decorate());
+    observer.observe(root, { childList: true, subtree: true });
+    selection.registerCleanup(() => {
+      observer?.disconnect();
+      for (const card of cards()) bindings.get(card)?.controller.abort();
+    });
+  };
 
-	const decorate = () => {
-		root.querySelectorAll('.cb-automations-step, .cb-automations-condition').forEach((card) => {
-			if (!(card instanceof HTMLElement) || card.dataset.cbBuilderSelectable === '1') return;
-			card.dataset.cbBuilderSelectable = '1';
-			card.setAttribute('role', 'group');
-			card.setAttribute('aria-label', String(card.querySelector('.cb-automations-step-head, .cb-automations-condition-head')?.textContent || strings.selectedStep).trim());
-			card.tabIndex = card.tabIndex >= 0 ? card.tabIndex : 0;
-			card.addEventListener('click', (event) => {
-				if (interactive(event.target)) return;
-				selectCard(card);
-			});
-			card.addEventListener('keydown', (event) => {
-				if (event.target !== card || !['Enter', ' '].includes(event.key)) return;
-				event.preventDefault();
-				selectCard(card);
-			});
-		});
-		restoreSelection();
-	};
+  renderInspector(null);
+  shell.addEventListener('cb-automations:contextloaded', (event) => {
+    // Selection has already flushed from the canonical B2 controller.
+    event.detail?.acknowledgeView?.('inspector',
+      Boolean(selection?.verified('inspector') && selection?.verified('canvas')));
+  });
+  if (window.cbAutomationsBuilderSelection) bindSelection();
+  else window.addEventListener('cb-automations:selection-ready', bindSelection, { once: true });
 
-	// Base Layers publishes a selection intent. Inspector remains the single
-	// selection presenter; selecting a layer never edits the workflow.
-	shell.addEventListener('cb-automations:layerselect', (event) => {
-		const key = String(event.detail?.key || '');
-		const cards = Array.from(root.querySelectorAll('.cb-automations-step, .cb-automations-condition'));
-		const card = cards.find((candidate) => cardRecord(candidate)?.key === key);
-		if (card) selectCard(card);
-	});
-
-	renderInspector(null);
-	decorate();
-	const observer = new MutationObserver(() => decorate());
-	observer.observe(root, { childList: true, subtree: true });
-	root.addEventListener('cb-automations:definitionchange', () => queueMicrotask(restoreSelection));
-	shell.addEventListener('cb-automations:contextloaded', (event) => {
-		let synchronized = false;
-		try {
-			selected = null;
-			shell.dispatchEvent(new CustomEvent('cb-automations:inspector-selection', {
-				bubbles: true, detail: Object.freeze({ key: '' }),
-			}));
-			root.querySelectorAll('.is-builder-selected').forEach((card) => {
-				card.classList.remove('is-builder-selected');
-				card.removeAttribute('aria-current');
-			});
-			renderInspector(null);
-			synchronized = true;
-		} catch (_error) {
-			// Base History is already committed. The transition owner will
-			// block Save until the dependent view is reloaded.
-		} finally {
-			event.detail?.acknowledgeView?.('inspector', synchronized);
-		}
-	});
 	return true;
 	};
 	if (!initialize()) window.addEventListener('cb:design-editor:ready', initialize, { once: true });
