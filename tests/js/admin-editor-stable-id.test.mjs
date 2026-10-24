@@ -5,9 +5,11 @@ import { runInNewContext } from 'node:vm';
 
 const script = readFileSync(new URL('../../assets/js/admin-editor.js', import.meta.url), 'utf8');
 const allocator = script.match(/function freshId\(prefix\) \{[\s\S]*?\n\t\}\n\n\tfunction nextStepId\(prefix\) \{[\s\S]*?\n\t\}\n\n\tfunction nextConditionId\(\) \{[\s\S]*?\n\t\}/);
+const guard = script.match(/const guardCanvasCard = \(card, type = '', id = ''\) => \{[\s\S]*?\n\t\};(?=\n\tfunction renderTrigger)/);
 const trigger = script.match(/function renderTrigger\(\) \{[\s\S]*?\n\t\}(?=\n\n\tfunction motionRootFor)/);
 assert.ok(allocator, 'production allocator must remain covered');
 assert.ok(trigger, 'production trigger editor must remain covered');
+assert.ok(guard, 'production render-time Canvas context guard must remain covered');
 
 const ref = (kind, id = 'trigger.old') => ({
   kind, provider: 'core-blueprint-work', id, schema_version: '1',
@@ -16,20 +18,31 @@ function harness(initialTrigger, { secureRandom = true } = {}) {
   const state = { trigger: initialTrigger, states: [], actions: [], conditions: [] };
   let onChange = null;
   let nonce = 0;
-  const root = { replaceChildren() {}, append() {} };
+  let lastCard = null;
+  const root = { replaceChildren() { lastCard = null; }, append(card) { lastCard = card; } };
+  const selection = {
+    captureOrigin: () => ({ expectedEpoch: 0, workflowId: 'workflow_a' }),
+    isCurrentOrigin: (origin) => origin?.expectedEpoch === 0 && origin?.workflowId === 'workflow_a',
+  };
   const crypto = secureRandom ? {
     getRandomValues(bytes) { nonce += 1; bytes.fill(nonce); return bytes; },
   } : undefined;
-  const controls = runInNewContext(allocator[0] + '\n' + trigger[0] + '\n({ nextStepId, nextConditionId, renderTrigger })', {
-    state, window: { crypto }, Uint8Array,
+  const controls = runInNewContext(allocator[0] + '\n' + guard[0] + '\n' + trigger[0]
+    + '\n({ nextStepId, nextConditionId, renderTrigger })', {
+    state, window: { crypto, cbAutomationsBuilderSelection: selection }, Uint8Array,
     triggerRoot: root,
     capabilitySelect: (kind, current, handler) => { onChange = handler; return {}; },
     selectedReference: (key) => key === 'different' ? ref('trigger', 'trigger.different') : null,
-    el: () => ({ append() {} }),
+    el: () => ({ dataset: {}, handlers: new Map(), append() {},
+      addEventListener(type, callback, capture) {
+        assert.equal(capture, true, 'Canvas mutation events must be guarded in capture phase');
+        this.handlers.set(type, callback);
+      } }),
     capabilityFor: () => null,
     renderAll: () => {},
   });
-  return { state, controls, choose(key) { controls.renderTrigger(); onChange(key); } };
+  return { state, controls, get card() { return lastCard; },
+    choose(key) { controls.renderTrigger(); onChange(key); } };
 }
 
 test('A1-B-E01: changing an imported trigger capability preserves its stable ID', () => {
@@ -62,4 +75,15 @@ test('A1-B-E04: missing secure entropy fails closed instead of allocating a reus
   const h = harness(null, { secureRandom: false });
   assert.throws(() => h.controls.nextStepId('action'), /secure workflow identifier/i);
   assert.throws(() => h.controls.nextConditionId(), /secure workflow identifier/i);
+});
+
+test('A1-B-E05: real trigger render annotates stable Selection identity and guards event capture', () => {
+  const h = harness({ step_id: 'external_webhook', capability: ref('trigger'), bindings: {} });
+  h.controls.renderTrigger();
+  assert.equal(h.card.dataset.cbAutomationsSelectionType, 'automations.trigger');
+  assert.equal(h.card.dataset.cbAutomationsSelectionId, 'external_webhook');
+  for (const type of ['click', 'input', 'change', 'keydown', 'contextmenu', 'dragstart', 'drop']) {
+    assert.equal(typeof h.card.handlers.get(type), 'function',
+      'the production Canvas guard must cover ' + type);
+  }
 });
