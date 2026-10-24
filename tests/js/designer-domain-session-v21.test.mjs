@@ -7,9 +7,9 @@ import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 import { toProject, fromProject, workflowCommands } from '../../assets/js/automations-domain-project.js';
 
-// SOURCE development pin: Base Designer G1d-B, not an installed ZIP receipt.
+// Runtime SOURCE pin: merged Base main Host Registry guard (not an installed ZIP receipt).
 // Cross-repo execution evidence must cite this exact immutable Base commit.
-const BASE_DESIGNER_V2_SOURCE_SHA = '084ff07b4eb1c4a5e53a32fe23eb6b49ca700042';
+const BASE_DESIGNER_V2_SOURCE_SHA = '5e9d59a2f7ffe384873a6c0650822bbb0e7eb557';
 const read = (file) => readFile(new URL('../../' + file, import.meta.url), 'utf8');
 const definition = () => ({
   definition_version: 1, trigger: null, states: [], conditions: [],
@@ -56,7 +56,7 @@ test('G1a-V21-A03: save never refreshes on ambiguous responses and keeps the loc
 });
 
 test('G1a-V21-A04: only same-build advertised Domain Session v2 enables Designer', async () => {
-  assert.equal(BASE_DESIGNER_V2_SOURCE_SHA, '084ff07b4eb1c4a5e53a32fe23eb6b49ca700042');
+  assert.equal(BASE_DESIGNER_V2_SOURCE_SHA, '5e9d59a2f7ffe384873a6c0650822bbb0e7eb557');
   const assets = await read('src/Admin/DesignerAssets.php');
   assert.match(assets, /DOMAIN_SESSION_API/);
   assert.match(assets, />=\s*2/);
@@ -140,4 +140,56 @@ test('G1a-V21-A07: actual pinned Base ESM exports match the consumer named impor
   for (const imported of consumerNames) {
     assert.ok(baseExports.includes(imported), 'Unavailable Base named ESM export: ' + imported);
   }
+});
+
+
+test('G1a-V21-A08: real Base ProjectState accepts consumer generation 0 and rejects unverified Host generation 1', () => {
+  const project = toProject(definition());
+  assert.equal(project.schema_version, 0, 'Automations must use the public, non-Host domain session generation');
+  const baseRepo = process.env.CB_BASE_DESIGNER_REPO
+    || fileURLToPath(new URL('../../../wp-core-blueprint/', import.meta.url));
+  assert.ok(existsSync(join(baseRepo, '.git')), 'real Base source checkout required');
+  const sources = {};
+  for (const name of ['value.js', 'stable-schema.js', 'project-state.js']) {
+    try {
+      sources[name] = execFileSync('git', [
+        '-C', baseRepo, 'show',
+        BASE_DESIGNER_V2_SOURCE_SHA + ':assets/js/design/core/' + name,
+      ], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+    } catch {
+      assert.fail('Pinned merged Base ProjectState source unavailable: ' + name);
+    }
+  }
+
+  // Load the REAL Base ProjectState and its REAL dependencies in an isolated
+  // Node ESM VM. No copied Host logic, mocked validators or private imports.
+  const evaluate = [
+    "import assert from 'node:assert/strict';",
+    "import { SourceTextModule } from 'node:vm';",
+    "let input = ''; for await (const part of process.stdin) input += part;",
+    "const { sources, project } = JSON.parse(input);",
+    "const modules = new Map(Object.entries(sources).map(([name, code]) =>",
+    "  [name, new SourceTextModule(code, { identifier: name })]));",
+    "const target = modules.get('project-state.js');",
+    "await target.link(async (specifier) => {",
+    "  const dependency = modules.get(specifier.replace(/^\\.\\//, ''));",
+    "  if (!dependency) throw new Error('Unpinned Base dependency: ' + specifier);",
+    "  return dependency;",
+    "});",
+    "await target.evaluate();",
+    "const State = target.namespace.ProjectState;",
+    "const validate = (candidate) => {",
+    "  assert.equal(candidate.design_type, 'automations.workflow');",
+    "  assert.equal(candidate.root.type, 'automations.workflow');",
+    "};",
+    "const session = new State(project, { validate });",
+    "assert.equal(session.snapshot().schema_version, 0);",
+    "assert.throws(() => new State({ ...project, schema_version: 1 }, { validate }),",
+    "  /Stable DesignProject requires verified Host registry context/);",
+    "assert.throws(() => new State({ ...project, schema_version: 2 }, { validate }),",
+    "  /Unsupported DesignProject schema generation/);",
+  ].join('\n');
+  execFileSync(process.execPath, [
+    '--no-warnings', '--experimental-vm-modules', '--input-type=module', '--eval', evaluate,
+  ], { input: JSON.stringify({ sources, project }), encoding: 'utf8' });
 });
