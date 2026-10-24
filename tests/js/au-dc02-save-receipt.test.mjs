@@ -23,7 +23,7 @@ const response = (options = {}) => ({
   }),
 });
 
-async function simulate(serverResponse, { rebaseFails = false, initialName = 'Example', changeNameDuringSave = null, repeatAfterResult = false, submitKind = 'primary' } = {}) {
+async function simulate(serverResponse, { rebaseFails = false, initialName = 'Example', changeNameDuringSave = null, repeatAfterResult = false, submitKind = 'primary', externallyFenced = false } = {}) {
   const events = [];
   const notifications = [];
   const fields = {
@@ -49,6 +49,7 @@ async function simulate(serverResponse, { rebaseFails = false, initialName = 'Ex
   class HTMLSelectElement extends Element {}
   const form = new HTMLFormElement();
   const root = new Element();
+  if (externallyFenced) root.dataset.cbDesignShellSaveOutcomeUnknown = 'true';
   const save = new HTMLButtonElement();
   const alias = new HTMLButtonElement();
   save.textContent = 'Save';
@@ -308,4 +309,17 @@ test('A1-A-J12: implicit Save with uncertain response remains fenced without ret
   assert.equal(v.saveDisabled, true);
   assert.equal(v.events.at(-1)?.state, 'unknown');
   assert.equal(v.notifications.length, 1);
+});
+
+
+test('A2-SAVE-01: a failed context rollback UNKNOWN fence blocks Enter and prevents any native POST', async () => {
+  for (const submitKind of ['primary', 'enter', 'requestSubmit', 'alias']) {
+    const v = await simulate(response(), { submitKind, externallyFenced: true, repeatAfterResult: true });
+    assert.equal(v.submitPrevented, true);
+    assert.equal(v.repeatPrevented, true);
+    assert.equal(v.writeCount, 0, 'context UNKNOWN may not trigger another writer');
+    assert.equal(v.rebases, 0);
+    assert.equal(v.revision, '8');
+    assert.equal(v.notifications.length, 0, 'no spurious Save success');
+  }
 });
