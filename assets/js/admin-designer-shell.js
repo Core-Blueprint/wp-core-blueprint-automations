@@ -34,6 +34,25 @@ if (root) {
 		const contextError = (key, fallback) => new Error(
 			String(window.cbAutomationsInspectorStrings?.[key] || fallback)
 		);
+		// An uncertain context cannot safely write either workflow. Force a
+		// fresh server read rather than guessing whether the Base commit occurred.
+		const fenceUncertainContext = () => {
+			root.dataset.cbDesignShellSaveOutcomeUnknown = 'true';
+			root.dataset.cbDesignShellSaveState = 'unknown';
+			const message = 'Workflow context could not be verified. Reload the editor before saving.';
+			const notice = root.querySelector?.('[data-cb-design-shell-persistent-notice]');
+			if (notice) {
+				notice.textContent = message;
+				notice.setAttribute('role', 'alert');
+				notice.hidden = false;
+			}
+			try {
+				root.dispatchEvent(new CustomEvent('cb:design-shell:failure', {
+					bubbles: true,
+					detail: Object.freeze({ phase: 'context-integrity', message }),
+				}));
+			} catch { /* The sticky Save fence survives broken presentation. */ }
+		};
 		// Base B1 owns approval, modal, selection restoration and single-flight.
 		// This consumer owns only the validated workflow transaction.
 		let switchGeneration = 0;
@@ -54,7 +73,8 @@ if (root) {
 			const session = window.cbAutomationsEditorSession;
 			const history = window.cbAutomationsBuilderHistory;
 			if (!session?.replace || !session?.snapshot || !history?.prepareContext
-				|| !history?.resetForContext || !history?.snapshot || !contextDataNode) {
+				|| !history?.resetForContext || !history?.contextWitness
+				|| !history?.snapshot || !contextDataNode) {
 				throw contextError('contextUnavailable', 'Workflow switching is not available. Reload the editor.');
 			}
 			const id = Number(url.searchParams.get('workflow'));
@@ -143,7 +163,9 @@ if (root) {
 				|| normalized(JSON.stringify(history.snapshot())) !== sourceDefinition) {
 				throw contextError('contextUnavailable', 'Workflow changed during selection. Reload the editor.');
 			}
-			// Stage the rollback journal before the first live mutation.
+			// Stage the rollback journal before the first live mutation. The
+			// Base witness includes baseline and Undo/Redo status, not just JSON.
+			const historyBefore = history.contextWitness();
 			const previous = {
 				definition: session.snapshot(),
 				id: currentId.value, revision: currentRevision.value,
@@ -173,6 +195,7 @@ if (root) {
 			// The only irreversible step is Base History context reset.
 			// All fallible DOM/editor work precedes it; Base stage() validates before
 			// committing and keeps observer exceptions outside its commit boundary.
+			let commitStatus = 'not-started';
 			try {
 				session.replace(nextDefinition, { source: 'context' });
 				currentId.value = String(id);
@@ -188,23 +211,30 @@ if (root) {
 						.map((child) => document.importNode(child, true)));
 				});
 				contextDataNode.textContent = nextDataNode.textContent;
-				history.resetForContext(nextDefinition);
+				commitStatus = 'attempted';
+				const commit = history.resetForContext(nextDefinition);
+				commitStatus = commit?.status === 'committed' || commit?.status === 'refused'
+					? commit.status : 'unknown';
+				if (commitStatus !== 'committed') {
+					throw commit?.error || contextError('contextUnavailable', 'Workflow context commit could not be verified.');
+				}
 			} catch (failure) {
+				// Once Base might have committed, restoring only editor JSON could
+				// display an old workflow with the NEW History/Selection/epoch.
+				if (commitStatus === 'unknown' || commitStatus === 'committed' || commitStatus === 'attempted') {
+					fenceUncertainContext();
+					throw contextError('contextUnavailable', 'Workflow context could not be verified. Reload before saving.');
+				}
 				let recovered = false;
 				try {
 					session.replace(previous.definition, { source: 'context-rollback' });
 					restorePresentation();
 					recovered = normalized(JSON.stringify(session.snapshot())) === sourceDefinition
 						&& normalized(JSON.stringify(history.snapshot())) === sourceDefinition
+						&& JSON.stringify(history.contextWitness()) === JSON.stringify(historyBefore)
 						&& String(currentId.value) === sourceId && String(currentRevision.value) === sourceRevision;
 				} catch { /* Refuse further writes if restoration itself fails. */ }
-				if (!recovered) {
-					root.dataset.cbDesignShellSaveOutcomeUnknown = 'true';
-					root.dispatchEvent(new CustomEvent('cb:design-shell:failure', {
-						bubbles: true,
-						detail: Object.freeze({ phase: 'context-rollback', message: 'Workflow context recovery failed. Reload before saving.' }),
-					}));
-				}
+				if (!recovered) fenceUncertainContext();
 				throw failure;
 			}
 			// Commit completed. Notifications and browser history are best-effort
@@ -213,12 +243,20 @@ if (root) {
 				definition: normalized(JSON.stringify(nextDefinition)),
 				name: incomingName.value, activation: incomingActivation.value, rebind: false,
 			};
-			root.dispatchEvent(new CustomEvent('cb-automations:validation-saved', {
-				bubbles: true, detail: Object.freeze({ valid: issues.length === 0, issues }),
-			}));
-			root.dispatchEvent(new CustomEvent('cb-automations:contextloaded', {
-				bubbles: true, detail: Object.freeze({ workflowId: id, definition: nextDefinition }),
-			}));
+			// Postcommit observers can fail, but cannot revoke committed Base History.
+			// A broken dependent view requires reload and blocks further Saves.
+			let notificationFailed = false;
+			try {
+				root.dispatchEvent(new CustomEvent('cb-automations:validation-saved', {
+					bubbles: true, detail: Object.freeze({ valid: issues.length === 0, issues }),
+				}));
+			} catch { notificationFailed = true; }
+			try {
+				root.dispatchEvent(new CustomEvent('cb-automations:contextloaded', {
+					bubbles: true, detail: Object.freeze({ workflowId: id, definition: nextDefinition }),
+				}));
+			} catch { notificationFailed = true; }
+			if (notificationFailed) fenceUncertainContext();
 			try { window.history.replaceState(window.history.state, '', url.href); } catch { /* Browser URL is not the data commit. */ }
 			return Object.freeze({ workflowId: id });
 		};
