@@ -32,7 +32,8 @@ test('Async saves reconcile workflow validation and both save entrypoints', asyn
 		read('templates/admin/workflow-editor.php'),
 	]);
 	assert.match(template, /data-cb-automations-save-alias/);
-	assert.match(save, /aliases\.includes\(event\.submitter\)/);
+	assert.match(save, /aliases\.includes\(submitter\)/);
+	assert.match(save, /event\.preventDefault\(\)/);
 	assert.match(save, /cb-automations:validation-saved/);
 	assert.match(recovery, /renderSavedValidation\(event\.detail\)/);
 	assert.match(recovery, /summaryItems = Array\.from\(list\?\.children/);
