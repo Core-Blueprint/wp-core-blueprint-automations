@@ -25,7 +25,7 @@ test('R1-BASE: pinned Base B1 preserves actual Undo/Redo and Selection on aborte
   assert.equal(execFileSync('git', ['-C', baseDir, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(), BASE_B1);
   const code = `
 import assert from 'node:assert/strict';
-import { SourceTextModule, createContext } from 'node:vm';
+import { SourceTextModule, createContext, runInContext } from 'node:vm';
 import { readFileSync } from 'node:fs';
 import { join, dirname, posix } from 'node:path';
 import { TextEncoder } from 'node:util';
@@ -56,7 +56,7 @@ await entry.link((specifier, reference) => {
 await entry.evaluate();
 const { ProjectState, EditorState, CommandHistory } = entry.namespace;
 // Create project records inside the SAME realm as Base's strict ProjectState.
-const makeProject = (value) => JSON.parse(JSON.stringify(value));
+const makeProject = (value) => runInContext('JSON.parse(' + JSON.stringify(JSON.stringify(value)) + ')', context);
 const original = context.__original = makeProject(first);
 const next = context.__next = makeProject(second);
 const project = new ProjectState(original);
