@@ -84,6 +84,7 @@ async function simulate(serverResponse, { rebaseFails = false, initialName = 'Ex
   const heading = new Element();
   let writeCount = 0;
   let rebases = 0;
+  let checkpoints = 0;
   const window = {
     fetch: async () => {
       writeCount++;
@@ -95,7 +96,7 @@ async function simulate(serverResponse, { rebaseFails = false, initialName = 'Ex
     location: { href: 'https://example.test/wp-admin/admin.php?page=core-blueprint-automations-workflows' },
     history: { replaceState() {} },
     cbAutomationsBuilderHistory: {
-      captureSave: () => ({ token: 'opaque-test' }),
+      captureSave: () => { checkpoints++; return { token: 'opaque-test' }; },
       snapshot: () => JSON.parse(definition),
       acknowledgeSave: () => { rebases++; if (rebaseFails) throw Error('REBASE_STALE'); },
     },
@@ -136,7 +137,8 @@ async function simulate(serverResponse, { rebaseFails = false, initialName = 'Ex
   return { events, notifications, statusText: status.textContent, recovery, root,
     submitPrevented: submitEvent.prevented, repeatPrevented: secondEvent?.prevented,
     saveDisabled: save.disabled,
-    writeCount, rebases, revision: inputs['[name="revision"]'].value,
+    writeCount, rebases, checkpoints, draftDefinition: inputs['[data-cb-automations-definition]'].value,
+    revision: inputs['[name="revision"]'].value,
     name: inputs['[name="name"]'].value, heading: heading.textContent };
 }
 
@@ -322,4 +324,79 @@ test('A2-SAVE-01: a failed context rollback UNKNOWN fence blocks Enter and preve
     assert.equal(v.revision, '8');
     assert.equal(v.notifications.length, 0, 'no spurious Save success');
   }
+});
+
+
+// A-B2-G01: after a POST, any HTTP 5xx without a verified persisted receipt
+// has an UNKNOWN outcome, even if the gateway returns parseable JSON.
+const assertHttp5xxUnknown = (v, description) => {
+  assert.equal(v.submitPrevented, true, description + ': no native form fallback');
+  assert.equal(v.repeatPrevented, true, description + ': blocked synthetic repeat');
+  assert.equal(v.writeCount, 1, description + ': exactly one POST');
+  assert.equal(v.checkpoints, 1, description + ': original Base checkpoint captured once');
+  assert.equal(v.rebases, 0, description + ': no Base acknowledgeSave');
+  assert.equal(v.revision, '8', description + ': original revision cursor retained');
+  assert.equal(v.name, 'Example', description + ': original local name retained');
+  assert.equal(v.draftDefinition, definition, description + ': draft definition retained');
+  assert.equal(v.events.at(-1)?.state, 'unknown', description + ': Base UNKNOWN protocol');
+  assert.equal(v.events.at(-1)?.uncertain, true, description + ': outcome marked uncertain');
+  assert.equal(v.root.dataset.cbDesignShellSaveOutcomeUnknown, 'true', description + ': Base sticky fence');
+  assert.equal(v.saveDisabled, true, description + ': Save remains disabled');
+  assert.equal(v.notifications.length, 1, description + ': one Base-owned Toast');
+  assert.equal(v.notifications[0]?.variant, 'error', description + ': no success Toast');
+  assert.equal(v.statusText, '', description + ': no consumer toolbar Toast');
+  assert.equal(v.recovery.hidden, false, description + ': Settings recovery visible');
+  assert.equal(v.recovery.children[0]?.target, '_blank', description + ': safe review tab');
+};
+
+test('A-B2-G01-J13: HTTP 500 readable JSON error remains sticky UNKNOWN after POST', async () => {
+  const v = await simulate(response({
+    ok: false, status: 500,
+    body: { success: false, data: { notice: 'server_error', message: 'Internal failure' } },
+  }), { repeatAfterResult: true });
+  assertHttp5xxUnknown(v, 'HTTP 500 JSON');
+});
+
+test('A-B2-G01-J14: HTTP 500 HTML, empty and corrupt bodies all remain sticky UNKNOWN', async () => {
+  for (const body of ['<html><body>Gateway failure</body></html>', '', '{not valid JSON']) {
+    const v = await simulate({ ok: false, status: 500, text: async () => body },
+      { repeatAfterResult: true });
+    assertHttp5xxUnknown(v, 'HTTP 500 ' + JSON.stringify(body));
+  }
+});
+
+test('A-B2-G01-J15: HTTP 502, 503 and 504 do not permit another Save', async () => {
+  for (const status of [502, 503, 504]) {
+    const v = await simulate(response({
+      ok: false, status,
+      body: { success: false, data: { notice: 'gateway_error', message: 'Unavailable' } },
+    }), { repeatAfterResult: true });
+    assertHttp5xxUnknown(v, 'HTTP ' + status);
+  }
+});
+
+test('A-B2-G01-J16: ordinary confirmed 409 revision conflict remains a definitive error', async () => {
+  const v = await simulate(response({
+    ok: false, status: 409,
+    body: { success: false, data: { notice: 'conflict', message: 'Revision changed' } },
+  }));
+  assert.equal(v.writeCount, 1);
+  assert.equal(v.checkpoints, 1);
+  assert.equal(v.rebases, 0);
+  assert.equal(v.revision, '8');
+  assert.equal(v.events.at(-1)?.state, 'error');
+  assert.equal(v.root.dataset.cbDesignShellSaveOutcomeUnknown, undefined);
+  assert.equal(v.saveDisabled, false, 'ordinary conflict is not an UNKNOWN sticky fence');
+  assert.equal(v.recovery.hidden, false, 'conflict remains recoverable from Settings');
+});
+
+test('A-B2-G01-J17: exact HTTP 200 persisted receipt still rebases and advances once', async () => {
+  const v = await simulate(response());
+  assert.equal(v.writeCount, 1);
+  assert.equal(v.checkpoints, 1);
+  assert.equal(v.rebases, 1);
+  assert.equal(v.revision, '9');
+  assert.equal(v.events.at(-1)?.state, 'saved');
+  assert.equal(v.saveDisabled, false);
+  assert.equal(v.recovery.hidden, true);
 });
