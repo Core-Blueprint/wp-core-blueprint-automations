@@ -118,13 +118,54 @@ if (api?.snapshot && api?.replace && api?.root && shell
 
   const prepareContext = (definition) => fromProject(toProject(definition));
 
+  // The public Base Domain Session is the only History authority. A witness
+  // is observational, not a restorable copy of Base's private Undo/Redo stacks.
+  const contextWitness = () => ({
+    project: session.snapshot(),
+    baseline: session.baselineSnapshot(),
+    history: session.historyStatus(),
+  });
   const resetForContext = (definition) => {
     const next = prepareContext(definition);
-    // Caller has already rendered the prepared workflow. If a stale form or
-    // a failed editor render remains, never commit a mismatched Base baseline.
+    // All consumer rendering must finish before the irreversible Base commit.
     if (!same(api.snapshot(), next)) throw new Error('Workflow form and context baseline disagree.');
-    session.replace(toProject(next), { source: 'context', contextChanged: true, resetSelection: true });
-    syncButtons();
+    const before = contextWitness();
+    try {
+      // Base B1 stages and atomically commits Project, Selection, History,
+      // baseline and context epoch. A thrown Base operation restores its own
+      // precommit state; callbacks run after commit and are isolated by Base.
+      session.replace(toProject(next), { source: 'context', contextChanged: true, resetSelection: true });
+    } catch (error) {
+      // Never infer refusal from a matching definition alone. Verify the
+      // baseline AND Undo/Redo status. If that cannot be observed, fail closed.
+      try {
+        const after = contextWitness();
+        return Object.freeze({
+          status: same(before, after) ? 'refused' : 'unknown',
+          error,
+        });
+      } catch {
+        return Object.freeze({ status: 'unknown', error });
+      }
+    }
+    // A returned Base replace means commit completed. Never throw a
+    // presentation error back through the caller's rollback handler.
+    try { syncButtons(); } catch (_error) {
+      // Base's own history listener has already isolated presentation errors.
+      // Buttons can be refreshed by a later History event; not a rollback.
+    }
+    // If the postcommit state cannot be verified, it is UNKNOWN, not refused.
+    try {
+      const after = contextWitness();
+      if (!same(fromProject(after.project), next)
+        || !same(fromProject(after.baseline), next)
+        || after.history.canUndo || after.history.canRedo || after.history.size !== 0) {
+        return Object.freeze({ status: 'unknown' });
+      }
+    } catch {
+      return Object.freeze({ status: 'unknown' });
+    }
+    return Object.freeze({ status: 'committed' });
   };
 
   // Release the Base-owned session on page unmount; context switch uses
@@ -136,6 +177,7 @@ if (api?.snapshot && api?.replace && api?.root && shell
     snapshot: () => fromProject(session.snapshot()),
     baseline: () => fromProject(session.baselineSnapshot()),
     prepareContext,
+    contextWitness,
     resetForContext,
     captureSave,
     acknowledgeSave,
