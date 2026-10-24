@@ -405,9 +405,28 @@
 		return wrap;
 	}
 
+	// All Canvas mutation events are fenced BEFORE any field/button handler
+	// executes, including callbacks retained from a previous workflow.
+	const guardCanvasCard = (card, type = '', id = '') => {
+		if (type && id) {
+			card.dataset.cbAutomationsSelectionType = 'automations.' + type;
+			card.dataset.cbAutomationsSelectionId = id;
+		}
+		const selection = window.cbAutomationsBuilderSelection;
+		const origin = selection?.captureOrigin?.() || null;
+		const check = (event) => {
+			if (selection?.isCurrentOrigin?.(origin) === true) return;
+			event.preventDefault();
+			event.stopImmediatePropagation();
+		};
+		for (const type of ['click', 'input', 'change', 'keydown']) {
+			card.addEventListener(type, check, true);
+		}
+	};
 	function renderTrigger() {
 		triggerRoot.replaceChildren();
 		const card = el('div', { class: 'cb-automations-step' });
+		guardCanvasCard(card, 'trigger', state.trigger?.step_id || '');
 		card.append(capabilitySelect('trigger', state.trigger?.capability || null, (key) => {
 			if (!key) state.trigger = null;
 			else {
@@ -464,6 +483,7 @@
 			class: 'cb-automations-step cb-automations-repeatable-step',
 			'data-cb-design-motion-key': `${context}:${step.step_id}`,
 		});
+		guardCanvasCard(card, context, step.step_id);
 		const head = el('div', { class: 'cb-automations-step-head' });
 		head.append(el('code', {}, step.step_id));
 		const actions = el('span', { class: 'cb-automations-step-head__actions' });
@@ -544,6 +564,7 @@
 			class: 'cb-automations-step cb-automations-condition',
 			'data-cb-design-motion-key': `condition:${condition.condition_id}`,
 		});
+		guardCanvasCard(card, 'condition', condition.condition_id);
 		const head = el('div', { class: 'cb-automations-step-head' });
 		head.append(el('code', {}, condition.condition_id));
 		const actions = el('span', { class: 'cb-automations-step-head__actions' });
