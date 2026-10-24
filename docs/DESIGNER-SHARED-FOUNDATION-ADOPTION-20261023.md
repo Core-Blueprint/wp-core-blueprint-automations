@@ -17,6 +17,10 @@
 - `createDomainSession()` is created once in `admin-builder-history.js`; the new Layers module only reads the existing editor snapshot, never opens a second session.
 - Layer selection is a view-only intent bridged to the existing Inspector/card selection. Move/remove resolve canonical immutable step IDs through `cbAutomationsEditorSession.layerAction` and invoke the existing editor `renderAll()`/workflow command stream. Invalid IDs, busy saves and unsupported root-trigger operations fail closed.
 - The public `window.cbCore.designerExitGuard.register()` receives Automations' domain dirty predicate, verified Save adapter and UNKNOWN predicate. The consumer no longer intercepts the Base close button, Escape or `beforeunload` with a second guard.
+
+- **P0 browser History integration (2026-10-24):** Base `main@5e9d59a2...` rejects `schema_version: 1` inside the *public, non-Host* `createDomainSession()` because a verified native Host Registry context is absent. Automations' strict, consumer-owned `toProject()/fromProject()` now uses the Base-documented **domain-neutral generation 0** envelope. This is not a native Host project or a data migration: the persisted workflow remains `definition_version: 1`, all fields retain the existing consumer codec validation, and Save Receipt / CAS remain server authoritative. Base Host generation-1 rejection is unchanged.
+- Cross-repo regression `G1a-V21-A08` executes the real pinned Base `ProjectState` with the Automations projection, positively checks generation 0, and explicitly rejects unverified generation 1. Earlier tests checked only the public ESM export names and missed this runtime contract drift. Treat a green SOURCE suite as necessary but insufficient until this installed-browser behavior is tested.
+
 - Native Base Host profile admission is restricted to `base/mail` and `base/reports`; Automations **does not register** a private native profile.
 
 ## Known public-API gaps / deliberate holds
