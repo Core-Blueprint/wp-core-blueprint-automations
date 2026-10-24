@@ -20,6 +20,8 @@
 
 - **P0 browser History integration (2026-10-24):** Base `main@5e9d59a2...` rejects `schema_version: 1` inside the *public, non-Host* `createDomainSession()` because a verified native Host Registry context is absent. Automations' strict, consumer-owned `toProject()/fromProject()` now uses the Base-documented **domain-neutral generation 0** envelope. This is not a native Host project or a data migration: the persisted workflow remains `definition_version: 1`, all fields retain the existing consumer codec validation, and Save Receipt / CAS remain server authoritative. Base Host generation-1 rejection is unchanged.
 - Cross-repo regression `G1a-V21-A08` executes the real pinned Base `ProjectState` with the Automations projection, positively checks generation 0, and explicitly rejects unverified generation 1. Earlier tests checked only the public ESM export names and missed this runtime contract drift. Treat a green SOURCE suite as necessary but insufficient until this installed-browser behavior is tested.
+- **P0 module cache follow-up:** Browser evidence still showed generation-1 at the `createDomainSession()` boundary even though the packaged domain codec used generation 0. The History entrypoint carried a `?ver=` parameter, but its relative `./automations-domain-project.js` import had no independent version. WordPress now registers a separate `cb-automations-domain-project` module with `filemtime` cache-busting and History imports it by public module ID. SOURCE cannot prove which previously cached asset the staging browser executed; installed-asset parity and fresh browser Save remain mandatory.
+
 
 - Native Base Host profile admission is restricted to `base/mail` and `base/reports`; Automations **does not register** a private native profile.
 
