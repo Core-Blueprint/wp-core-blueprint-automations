@@ -172,22 +172,36 @@
 		return capability ? clone(capability.reference) : null;
 	}
 
-	function nextStepId(prefix) {
+	// An ID is an enduring reference, not an array position. Sequential IDs
+	// can be reused after Delete + Save + Reopen, unintentionally binding old
+	// step_output references to a different step. Allocate new high-entropy IDs
+	// instead; preserve all existing (including imported) identifiers unchanged.
+	function freshId(prefix) {
+		const crypto = window.crypto;
+		if (!crypto || typeof crypto.getRandomValues !== 'function') {
+			throw new Error('Secure workflow identifier generation is unavailable.');
+		}
 		const used = new Set([
 			state.trigger?.step_id,
 			...state.states.map((step) => step.step_id),
 			...state.actions.map((step) => step.step_id),
+			...state.conditions.map((condition) => condition.condition_id),
 		].filter(Boolean));
-		let index = 1;
-		while (used.has(`${prefix}_${index}`)) index += 1;
-		return `${prefix}_${index}`;
+		for (let attempt = 0; attempt < 8; attempt += 1) {
+			const bytes = new Uint8Array(16);
+			crypto.getRandomValues(bytes);
+			const id = prefix + '_' + Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+			if (!used.has(id)) return id;
+		}
+		throw new Error('A unique workflow identifier could not be allocated.');
+	}
+
+	function nextStepId(prefix) {
+		return freshId(prefix);
 	}
 
 	function nextConditionId() {
-		const used = new Set(state.conditions.map((condition) => condition.condition_id));
-		let index = 1;
-		while (used.has(`condition_${index}`)) index += 1;
-		return `condition_${index}`;
+		return freshId('condition');
 	}
 
 	function outputEntries(context, index = 0) {
@@ -398,7 +412,11 @@
 			if (!key) state.trigger = null;
 			else {
 				const reference = selectedReference(key);
-				if (reference) state.trigger = { step_id: 'trigger_1', capability: reference, bindings: {} };
+				if (reference) state.trigger = {
+					step_id: state.trigger?.step_id || nextStepId('trigger'),
+					capability: reference,
+					bindings: {},
+				};
 			}
 			renderAll();
 		}));
