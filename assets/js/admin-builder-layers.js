@@ -103,10 +103,18 @@ if (shell && host && hidden && editor?.snapshot && editor?.layerAction) {
 	shell.addEventListener('cb-automations:definitionchange', () => {
 		render();
 	}, { signal });
-	shell.addEventListener('cb-automations:contextloaded', () => {
-		selectedKey = '';
-		tree.reset();
-		render();
+	shell.addEventListener('cb-automations:contextloaded', (event) => {
+		let synchronized = false;
+		try {
+			selectedKey = '';
+			tree.reset();
+			render();
+			synchronized = true;
+		} catch (_error) {
+			// The committed Base History cannot be rolled back for a view error.
+		} finally {
+			event.detail?.acknowledgeView?.('layers', synchronized);
+		}
 	}, { signal });
 	window.addEventListener('pagehide', () => controller.abort(), { once: true });
 	render();
