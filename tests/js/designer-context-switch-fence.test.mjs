@@ -11,13 +11,15 @@ const clone = (value) => JSON.parse(JSON.stringify(value));
 const definition = () => ({ definition_version: 1, trigger: null, states: [], conditions: [], actions: [] });
 const workflowUrl = (id) => new URL('https://example.test/wp-admin/admin.php?page=core-blueprint-automations-workflows&workflow=' + id);
 
-function fixture({ nextDefinition = definition(), nextRevision = '3', nextCatalog = [], failEditor = false, failHistory = false, failHeading = false } = {}) {
+function fixture({ nextDefinition = definition(), nextRevision = '3', nextCatalog = [], failEditor = false, failHistory = false, failHeading = false, postCommitFault = false, uncertainCommit = false } = {}) {
   const pending = [];
   const events = [];
   const operations = [];
   const source = definition();
   let editor = clone(source);
   let historyDefinition = clone(source);
+  let historyBaseline = clone(source);
+  let historyStacks = { canUndo: false, canRedo: false, size: 0 };
   let throwEditor = failEditor;
   let throwHistory = failHistory;
   const id = { value: '1' }, revision = { value: '7' };
@@ -28,8 +30,10 @@ function fixture({ nextDefinition = definition(), nextRevision = '3', nextCatalo
   };
   const formFields = { '[name="workflow_id"]': id, '[name="revision"]': revision };
   const form = { querySelector: (key) => formFields[key] ?? null };
+  const notice = { textContent: '', hidden: true, setAttribute() {} };
   const root = {
     dataset: { cbDesignShellSaveState: 'idle', cbDesignShellSaveOutcomeUnknown: 'false' },
+    querySelector: () => notice,
     dispatchEvent: (event) => events.push(event.type),
   };
   let headingText = 'Original';
@@ -73,14 +77,30 @@ function fixture({ nextDefinition = definition(), nextRevision = '3', nextCatalo
     },
     cbAutomationsBuilderHistory: {
       snapshot: () => clone(historyDefinition),
+      contextWitness: () => ({
+        project: clone(historyDefinition),
+        baseline: clone(historyBaseline),
+        history: clone(historyStacks),
+      }),
       // vm.runInNewContext JSON.parse creates cross-realm records. Normalize at
       // this fixture-only boundary before invoking the real strict JSON codec.
       prepareContext: (next) => fromProject(toProject(clone(next))),
       resetForContext: (next) => {
         operations.push('history');
-        if (throwHistory) { throwHistory = false; throw new Error('History staging refused'); }
+        if (throwHistory) {
+          throwHistory = false;
+          return { status: 'refused', error: new Error('History staging refused') };
+        }
         assert.deepEqual(editor, next, 'History reset cannot precede editor projection');
         historyDefinition = clone(next);
+        historyBaseline = clone(next);
+        historyStacks = { canUndo: false, canRedo: false, size: 0 };
+        if (uncertainCommit) return { status: 'unknown' };
+        if (postCommitFault) {
+          try { throw new Error('History button update failed'); }
+          catch { /* Real adapter isolates presentation failures after commit. */ }
+        }
+        return { status: 'committed' };
       },
     },
     history: { state: null, replaceState: () => operations.push('browser-url') },
@@ -99,8 +119,9 @@ function fixture({ nextDefinition = definition(), nextRevision = '3', nextCatalo
   const respond = (index, target, ok = true) => pending[index]({ ok, text: async () => String(target) });
   return {
     select, respond, pending, events, operations, id, revision, name, activation,
-    authority, definitionControl, contextDataNode, root,
+    authority, definitionControl, contextDataNode, root, notice,
     get editor() { return clone(editor); }, get history() { return clone(historyDefinition); },
+    get witness() { return window.cbAutomationsBuilderHistory.contextWitness(); },
     get heading() { return headingText; },
     edit() {
       const changed = { ...editor, actions: [] };
@@ -109,6 +130,7 @@ function fixture({ nextDefinition = definition(), nextRevision = '3', nextCatalo
       }, bindings: {} });
       editor = clone(changed);
       historyDefinition = clone(changed); // Editor changes update Base Domain Session.
+      historyStacks = { canUndo: true, canRedo: false, size: 1 };
       definitionControl.value = JSON.stringify(changed);
     },
   };
@@ -264,4 +286,66 @@ test('A2-13: DOM application failure after editor render rolls back metadata and
   assert.deepEqual(x.history, definition());
   assert.equal(x.events.includes('cb-automations:contextloaded'), false);
   assert.equal(x.operations.includes('history'), false);
+});
+
+test('R1-01: editor precommit fault preserves Undo/Redo, baseline, selection witness and original metadata', async () => {
+  const x = fixture({ failEditor: true });
+  x.edit();
+  const before = x.witness;
+  const request = x.select(2); x.respond(0, 2);
+  await assert.rejects(request, /Editor render failed/);
+  assert.deepEqual(x.witness, before);
+  assert.equal(x.name.value, 'Original');
+  assert.equal(x.id.value, '1');
+  assert.deepEqual(x.editor, before.project);
+});
+
+test('R1-02: refused History commit preserves previous Undo/Redo and context', async () => {
+  const x = fixture({ failHistory: true });
+  x.edit();
+  const before = x.witness;
+  const request = x.select(2); x.respond(0, 2);
+  await assert.rejects(request, /History staging refused/);
+  assert.deepEqual(x.witness, before);
+  assert.equal(x.root.dataset.cbDesignShellSaveOutcomeUnknown, 'false');
+  assert.equal(x.id.value, '1');
+  assert.deepEqual(x.editor, before.project);
+});
+
+test('R1-03: History postcommit button failure never rolls back committed workflow', async () => {
+  const x = fixture({ postCommitFault: true });
+  const request = x.select(2); x.respond(0, 2);
+  assert.equal((await request).workflowId, 2);
+  assert.equal(x.id.value, '2');
+  assert.equal(x.name.value, 'Workflow 2');
+  assert.deepEqual(x.editor, x.history);
+  assert.deepEqual(x.events.filter((v) => v === 'cb-automations:contextloaded').length, 1);
+  assert.equal(x.operations.filter((v) => v === 'editor').length, 1);
+  assert.equal(x.root.dataset.cbDesignShellSaveOutcomeUnknown, 'false');
+});
+
+test('R1-04: uncertain postcommit status blocks Save without an old-editor/new-History split', async () => {
+  const x = fixture({ uncertainCommit: true });
+  const request = x.select(2); x.respond(0, 2);
+  await assert.rejects(request, /Reload before saving/);
+  assert.equal(x.id.value, '2', 'never restore old workflow metadata after uncertain commit');
+  assert.deepEqual(x.editor, x.history, 'new editor stays matched with potentially committed History');
+  assert.equal(x.root.dataset.cbDesignShellSaveOutcomeUnknown, 'true');
+  assert.equal(x.root.dataset.cbDesignShellSaveState, 'unknown');
+  assert.match(x.notice.textContent, /Reload the editor before saving/);
+  assert.equal(x.events.includes('cb-automations:contextloaded'), false);
+});
+
+test('R1-05: Base committed History remains authoritative even if postcommit notification fails', async () => {
+  const x = fixture();
+  const previousDispatch = x.root.dispatchEvent;
+  x.root.dispatchEvent = (event) => {
+    if (event.type === 'cb-automations:contextloaded') throw new Error('Inspector callback failed');
+    return previousDispatch(event);
+  };
+  const request = x.select(2); x.respond(0, 2);
+  assert.equal((await request).workflowId, 2);
+  assert.equal(x.id.value, '2');
+  assert.deepEqual(x.editor, x.history);
+  assert.equal(x.root.dataset.cbDesignShellSaveOutcomeUnknown, 'true');
 });
