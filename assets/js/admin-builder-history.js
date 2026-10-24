@@ -146,6 +146,8 @@ if (api?.snapshot && api?.replace && api?.root && shell
       try {
         controller = createDesignerSelectionController({
           typed: 'domain', session, ...renderAdapters,
+          shell: { activatePanel: (id) =>
+            shell.querySelector('[data-cb-design-shell-tab="' + id + '"]')?.click() },
           openInspectorOnInsert: false,
         });
         // Subscribe AFTER Base controller to guarantee last-in-order flush.
