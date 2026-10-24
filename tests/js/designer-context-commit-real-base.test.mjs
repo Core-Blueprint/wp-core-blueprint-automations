@@ -71,6 +71,8 @@ history.execute(apply(next));
 assert.equal(history.status().canUndo, true);
 assert.equal(history.undo(), true);
 assert.equal(history.status().canRedo, true);
+// Keep an actual node selection, not just the empty default snapshot.
+editor.selection.select([]);
 const before = {
   project: project.snapshot(), baseline: history.baselineSnapshot(),
   status: history.status(), selection: editor.selection.snapshot(),
@@ -90,6 +92,8 @@ assert.ok(same(project.snapshot(), next));
 assert.equal(history.undo(), true);
 assert.ok(same(project.snapshot(), original));
 // The successful replacement is Base's single irreversible commit.
+// This callback models a throwing History-button presenter. Base isolates it.
+history.subscribeHistory(() => { throw new Error('History button refresh failed'); });
 history.replace(next, { source: 'context', contextChanged: true, resetSelection: true });
 assert.ok(same(project.snapshot(), next));
 assert.ok(same(history.baselineSnapshot(), next));
@@ -101,6 +105,7 @@ try { throw new Error('Button refresh failed'); } catch (_) {}
 assert.ok(same(project.snapshot(), next));
 assert.equal(history.status().canUndo, false);
 assert.equal(history.status().canRedo, false);
+assert.equal(editor.selection.snapshot().paths.length, 0, 'committed context clears selection');
 `;
   execFileSync(process.execPath, [
     '--no-warnings', '--experimental-vm-modules', '--input-type=module', '--eval', code,
