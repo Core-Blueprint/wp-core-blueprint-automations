@@ -23,12 +23,17 @@ test('AU1-A01: nested G1a wrapper roundtrips canonical empty and populated defin
   for (const definition of [empty(), populated()]) {
     const project = toProject(definition);
     assert.deepEqual(Object.keys(project).sort(), ['design_type', 'root', 'schema_version']);
-    assert.equal(project.schema_version, 1);
+    assert.equal(project.schema_version, 0, 'only verified Host sessions accept stable generation 1');
     assert.equal(project.design_type, 'automations.workflow');
     assert.deepEqual(project.root.children, []);
     assert.equal(project.root.type, 'automations.workflow');
     assert.equal(project.root.provider, 'core-blueprint-automations');
     assert.deepEqual(fromProject(project), definition);
+    assert.throws(
+      () => fromProject({ ...project, schema_version: 1 }),
+      /consumer domain project wrapper/i,
+      'consumer can never impersonate a verified Host generation-1 project',
+    );
     assert.ok(Object.isFrozen(project.root.properties.definition));
     assert.notStrictEqual(fromProject(project), definition);
   }
