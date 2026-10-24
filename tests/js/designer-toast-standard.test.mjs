@@ -136,6 +136,12 @@ test('TOAST-A02: exact Base F02 owns Modal, Toast and fail-closed Exit Guard; co
   const allowed = await guard.requestTransition(target, () => { applied++; return true; });
   assert.equal(allowed.status, 'applied');
   assert.equal(applied, 1, 'Base authorizes exactly one clean context transition');
+
+  app.cbCore.modal.show = undefined;
+  assert.equal(await guard.request(target, () => { exitCount++; return true; }), false,
+    'missing public Base Modal must refuse close');
+  assert.equal(exitCount, 1, 'no exit is dispatched without authoritative Modal');
+  assert.deepEqual(toasts.at(-1), ['error', 'Unavailable']);
 });
 
 test('TOAST-A03: persistent conflict recovery moved to Settings, never transient toolbar', () => {
