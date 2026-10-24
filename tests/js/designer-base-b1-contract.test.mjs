@@ -26,7 +26,8 @@ test('A2-B1-02: Base owns Save/Discard/Cancel approval and synchronous one-dispa
   assert.match(exit, /transitionDispatch\.delete\(shell\)/);
   assert.match(exit, /const result = await target/);
   assert.match(context, /guard\.requestTransition\(shell, apply\)/);
-  assert.match(context, /respondWith\(promise\)/);
+  assert.match(context, /const respondWith = \(promise\) =>/);
+  assert.match(context, /responsePromise = Promise\.resolve\(promise\)/);
   assert.match(context, /root\.dispatchEvent\(new CustomEvent\(REQUEST_EVENT/);
   assert.match(context, /if \(outcome\?\.status === 'applied'\)/);
 });
