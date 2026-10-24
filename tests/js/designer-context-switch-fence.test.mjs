@@ -13,7 +13,7 @@ const clone = (value) => JSON.parse(JSON.stringify(value));
 const definition = () => ({ definition_version: 1, trigger: null, states: [], conditions: [], actions: [] });
 const workflowUrl = (id) => new URL('https://example.test/wp-admin/admin.php?page=core-blueprint-automations-workflows&workflow=' + id);
 
-function fixture({ nextDefinition = definition(), nextRevision = '3', nextCatalog = [], failEditor = false, failHistory = false, failHeading = false, postCommitFault = false, uncertainCommit = false } = {}) {
+function fixture({ nextDefinition = definition(), nextRevision = '3', nextCatalog = [], failEditor = false, failHistory = false, failHeading = false, postCommitFault = false, uncertainCommit = false, failingView = null, missingView = null } = {}) {
   const pending = [];
   const events = [];
   const operations = [];
@@ -54,7 +54,9 @@ function fixture({ nextDefinition = definition(), nextRevision = '3', nextCatalo
     },
   };
   for (const view of ['inspector', 'layers', 'stages']) {
+    if (view === missingView) continue;
     root.addEventListener('cb-automations:contextloaded', (event) => {
+      if (view === failingView) throw new Error(view + ' view listener failed');
       event.detail?.acknowledgeView?.(view, true);
     });
   }
@@ -359,28 +361,21 @@ test('R1-04: uncertain postcommit status blocks Save without an old-editor/new-H
   assert.equal(x.events.includes('cb-automations:contextloaded'), false);
 });
 
-test('R1-05: an exception INSIDE an event listener is not caught by dispatchEvent and cannot falsify view integrity', async () => {
-  const x = fixture();
-  // A genuine registered listener, not an overridden failing dispatcher.
-  // Browser-style dispatch returns normally even when this listener throws.
-  x.root.addEventListener('cb-automations:contextloaded', () => {
-    throw new Error('Critical view listener failed');
-  });
+test('R1-05: an exception INSIDE a critical listener is swallowed by dispatch but missing confirmation fences Save', async () => {
+  const x = fixture({ failingView: 'inspector' });
+  // A registered contextloaded listener throws; dispatchEvent returns normally.
+  // The missing inspector acknowledgement is the reliable failure witness.
   const request = x.select(2); x.respond(0, 2);
   assert.equal((await request).workflowId, 2);
-  assert.equal(x.swallowedListenerErrors.length, 1, 'dispatcher did NOT throw into switchContext');
+  assert.equal(x.swallowedListenerErrors.length, 1, 'listener exception is NOT rethrown into switchContext');
   assert.equal(x.id.value, '2');
   assert.deepEqual(x.editor, x.history);
-  // The three critical views really acknowledged, so an unrelated listener
-  // cannot pretend the History was rolled back or veto the committed context.
-  assert.equal(x.root.dataset.cbDesignShellSaveOutcomeUnknown, 'false');
+  assert.equal(x.root.dataset.cbDesignShellSaveOutcomeUnknown, 'true');
+  assert.match(x.notice.textContent, /Reload the editor before saving/);
 });
 
 test('R1-06: missing critical view acknowledgement fails closed after Base commit', async () => {
-  const x = fixture();
-  x.root.addEventListener('cb-automations:contextloaded', (event) => {
-    event.detail.acknowledgeView('inspector', false);
-  });
+  const x = fixture({ missingView: 'layers' });
   const request = x.select(2); x.respond(0, 2);
   assert.equal((await request).workflowId, 2);
   assert.equal(x.id.value, '2');
