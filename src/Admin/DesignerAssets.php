@@ -14,6 +14,7 @@ final class DesignerAssets {
 	private const INSPECTOR_HANDLE = 'cb-automations-admin-builder-inspector';
 	private const SAVE_HANDLE      = 'cb-automations-admin-builder-save';
 	private const HISTORY_MODULE   = 'cb-automations-admin-builder-history';
+	private const DOMAIN_PROJECT_MODULE = 'cb-automations-domain-project';
 	private const LAYERS_MODULE    = 'cb-automations-admin-builder-layers';
 
 	private static bool $initialized = false;
@@ -47,6 +48,7 @@ final class DesignerAssets {
 		$inspector      = CB_AUTOMATIONS_DIR . 'assets/js/admin-builder-inspector.js';
 		$save           = CB_AUTOMATIONS_DIR . 'assets/js/admin-builder-save.js';
 		$history        = CB_AUTOMATIONS_DIR . 'assets/js/admin-builder-history.js';
+		$domain_project = CB_AUTOMATIONS_DIR . 'assets/js/automations-domain-project.js';
 		$layers         = CB_AUTOMATIONS_DIR . 'assets/js/admin-builder-layers.js';
 
 		wp_enqueue_script(
@@ -140,7 +142,11 @@ final class DesignerAssets {
 		wp_enqueue_style( 'cb-automations-admin-builder-finish', CB_AUTOMATIONS_URL . 'assets/css/admin-builder-finish.css', [ 'cb-automations-admin-builder-authoring' ], is_file( $finish_css ) ? (string) filemtime( $finish_css ) : CB_AUTOMATIONS_VERSION );
 
 		wp_enqueue_script_module( 'cb-automations-admin-designer-shell', CB_AUTOMATIONS_URL . 'assets/js/admin-designer-shell.js', [ '@cb-core/design-editor', '@cb-core/modal', '@cb-core/toast' ], is_file( $js ) ? (string) filemtime( $js ) : CB_AUTOMATIONS_VERSION );
-		wp_enqueue_script_module( self::HISTORY_MODULE, CB_AUTOMATIONS_URL . 'assets/js/admin-builder-history.js', [ '@cb-core/design-editor', 'cb-automations-admin-designer-shell' ], is_file( $history ) ? (string) filemtime( $history ) : CB_AUTOMATIONS_VERSION );
+		// Import this consumer-owned domain codec through WordPress' versioned
+		// script-module registry. A bare relative import would retain a stale,
+		// unversioned browser cache entry after RC2 package replacement.
+		wp_enqueue_script_module( self::DOMAIN_PROJECT_MODULE, CB_AUTOMATIONS_URL . 'assets/js/automations-domain-project.js', [], is_file( $domain_project ) ? (string) filemtime( $domain_project ) : CB_AUTOMATIONS_VERSION );
+		wp_enqueue_script_module( self::HISTORY_MODULE, CB_AUTOMATIONS_URL . 'assets/js/admin-builder-history.js', [ '@cb-core/design-editor', 'cb-automations-admin-designer-shell', self::DOMAIN_PROJECT_MODULE ], is_file( $history ) ? (string) filemtime( $history ) : CB_AUTOMATIONS_VERSION );
 		wp_enqueue_script_module( self::LAYERS_MODULE, CB_AUTOMATIONS_URL . 'assets/js/admin-builder-layers.js', [ '@cb-core/design-editor', self::HISTORY_MODULE ], is_file( $layers ) ? (string) filemtime( $layers ) : CB_AUTOMATIONS_VERSION );
 	}
 
