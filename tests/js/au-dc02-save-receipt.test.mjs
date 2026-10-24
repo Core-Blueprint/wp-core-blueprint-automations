@@ -23,7 +23,7 @@ const response = (options = {}) => ({
   }),
 });
 
-async function simulate(serverResponse, { rebaseFails = false, initialName = 'Example', changeNameDuringSave = null, repeatAfterResult = false } = {}) {
+async function simulate(serverResponse, { rebaseFails = false, initialName = 'Example', changeNameDuringSave = null, repeatAfterResult = false, submitKind = 'primary' } = {}) {
   const events = [];
   const notifications = [];
   const fields = {
@@ -50,6 +50,7 @@ async function simulate(serverResponse, { rebaseFails = false, initialName = 'Ex
   const form = new HTMLFormElement();
   const root = new Element();
   const save = new HTMLButtonElement();
+  const alias = new HTMLButtonElement();
   save.textContent = 'Save';
   const status = new Element();
   const recovery = new Element();
@@ -72,7 +73,7 @@ async function simulate(serverResponse, { rebaseFails = false, initialName = 'Ex
     '[data-cb-automations-definition]': new HTMLInputElement(definition),
   };
   form.querySelector = (selector) => inputs[selector] ?? null;
-  form.querySelectorAll = () => [];
+  form.querySelectorAll = (selector) => selector === '[data-cb-automations-save-alias]' ? [alias] : [];
   root.querySelector = (selector) => ({
     '[data-cb-design-shell-primary-action]': save,
     '[data-cb-design-shell-status]': status,
@@ -117,9 +118,22 @@ async function simulate(serverResponse, { rebaseFails = false, initialName = 'Ex
     HTMLSelectElement, HTMLElement: Element, CustomEvent, FormData, TextEncoder,
     Uint8Array, URL, console });
   assert.equal(typeof form.submitHandler, 'function', 'actual Save script must register its handler');
-  await form.submitHandler({ submitter: save, preventDefault() {} });
-  if (repeatAfterResult) await form.submitHandler({ submitter: save, preventDefault() {} });
+  const submittedBy = submitKind === 'alias' ? alias : submitKind === 'unknown' ? new HTMLButtonElement()
+    : ['enter', 'requestSubmit'].includes(submitKind) ? null : save;
+  const makeEvent = () => ({
+    ...(submitKind === 'missing' ? {} : { submitter: submittedBy }),
+    prevented: false,
+    preventDefault() { this.prevented = true; },
+  });
+  const submitEvent = makeEvent();
+  await form.submitHandler(submitEvent);
+  let secondEvent = null;
+  if (repeatAfterResult) {
+    secondEvent = makeEvent();
+    await form.submitHandler(secondEvent);
+  }
   return { events, notifications, statusText: status.textContent, recovery, root,
+    submitPrevented: submitEvent.prevented, repeatPrevented: secondEvent?.prevented,
     saveDisabled: save.disabled,
     writeCount, rebases, revision: inputs['[name="revision"]'].value,
     name: inputs['[name="name"]'].value, heading: heading.textContent };
@@ -255,4 +269,43 @@ test('AU-DC02-J09: UNKNOWN Save remains disabled and cannot issue a second write
   assert.equal(v.events.at(-1)?.state, 'unknown');
   assert.equal(v.root.dataset.cbDesignShellSaveOutcomeUnknown, 'true');
   assert.equal(v.notifications.length, 1, 'one Base-owned outcome Toast');
+});
+
+
+// A1-A: the JS-mounted Designer owns ALL form submit events, including the
+// no-button Enter/requestSubmit path. No native POST may bypass Base checkpoints.
+test('A1-A-J10: primary, alias, Enter and requestSubmit() share one verified writer', async () => {
+  for (const submitKind of ['primary', 'alias', 'enter', 'requestSubmit', 'missing']) {
+    const v = await simulate(response(), { submitKind });
+    assert.equal(v.submitPrevented, true, submitKind + ' must prevent native POST');
+    assert.equal(v.writeCount, 1, submitKind + ' must issue one authorized POST');
+    assert.equal(v.rebases, 1, submitKind + ' must acknowledge one Base checkpoint');
+    assert.equal(v.revision, '9');
+    assert.equal(v.events.at(-1)?.state, 'saved');
+    assert.equal(v.notifications.length, 1, 'Base owns exactly one success notification');
+  }
+});
+
+test('A1-A-J11: unknown explicit submitter fails closed without native POST or second writer', async () => {
+  const v = await simulate(response(), { submitKind: 'unknown', repeatAfterResult: true });
+  assert.equal(v.submitPrevented, true);
+  assert.equal(v.repeatPrevented, true);
+  assert.equal(v.writeCount, 0);
+  assert.equal(v.rebases, 0);
+  assert.equal(v.revision, '8');
+  assert.equal(v.notifications.length, 0);
+});
+
+test('A1-A-J12: implicit Save with uncertain response remains fenced without retry', async () => {
+  const v = await simulate(new Error('Response lost after write'), {
+    submitKind: 'requestSubmit',
+    repeatAfterResult: true,
+  });
+  assert.equal(v.submitPrevented, true);
+  assert.equal(v.repeatPrevented, true);
+  assert.equal(v.writeCount, 1);
+  assert.equal(v.rebases, 0);
+  assert.equal(v.saveDisabled, true);
+  assert.equal(v.events.at(-1)?.state, 'unknown');
+  assert.equal(v.notifications.length, 1);
 });
