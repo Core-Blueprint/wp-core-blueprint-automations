@@ -91,7 +91,7 @@ test('G1a-V21-A07: actual pinned Base ESM exports match the consumer named impor
   );
   assert.ok(matches, 'Designer must import the public Base module');
   const consumerNames = matches[1].split(',').map((name) => name.trim()).filter(Boolean);
-  assert.deepEqual(consumerNames, ['createDomainSession', 'animateLayoutChange']);
+  assert.deepEqual(consumerNames, ['createDomainSession', 'createDesignerSelectionController', 'animateLayoutChange']);
   assert.match(historySource, /\banimateLayoutChange\(api\.root,/);
   assert.doesNotMatch(historySource, /\bmotion\.animateLayoutChange\(/);
 
