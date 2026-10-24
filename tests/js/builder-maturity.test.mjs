@@ -84,7 +84,9 @@ test('Automation Builder keeps canonical persistence, shared-shell ownership and
 	assert.match(shell, /exitGuard\.register\(root, \{/);
 	assert.match(shell, /window\.history\.replaceState\(/);
 	assert.match(inspector, /setAttribute\('role', 'group'\)/);
-	assert.match(save, /aliases\.includes\(event\.submitter\)/);
+	assert.match(save, /aliases\.includes\(submitter\)/);
+	assert.match(save, /event\.preventDefault\(\)/);
+	assert.match(save, /submitter != null && submitter !== save/);
 	assert.match(template, /data-cb-automations-save-alias/);
 	assert.doesNotMatch(save, /health\.append\(|health\.querySelector\('\.cb-automations-panel-heading/);
 	assert.match(save, /let saving = false/);
