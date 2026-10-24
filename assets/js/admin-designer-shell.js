@@ -243,9 +243,21 @@ if (root) {
 				definition: normalized(JSON.stringify(nextDefinition)),
 				name: incomingName.value, activation: incomingActivation.value, rebind: false,
 			};
-			// Postcommit observers can fail, but cannot revoke committed Base History.
-			// A broken dependent view requires reload and blocks further Saves.
+			// dispatchEvent() does not propagate listener exceptions. Critical
+			// consumer views therefore explicitly acknowledge their synchronous
+			// postcommit refresh. Missing, duplicate or failed acknowledgements
+			// cannot be mistaken for successful view synchronization.
+			const views = new Map([
+				['inspector', null], ['layers', null], ['stages', null],
+			]);
 			let notificationFailed = false;
+			const acknowledgeView = (view, ok) => {
+				if (!views.has(view) || views.get(view) !== null) {
+					notificationFailed = true;
+					return;
+				}
+				views.set(view, ok === true);
+			};
 			try {
 				root.dispatchEvent(new CustomEvent('cb-automations:validation-saved', {
 					bubbles: true, detail: Object.freeze({ valid: issues.length === 0, issues }),
@@ -253,10 +265,13 @@ if (root) {
 			} catch { notificationFailed = true; }
 			try {
 				root.dispatchEvent(new CustomEvent('cb-automations:contextloaded', {
-					bubbles: true, detail: Object.freeze({ workflowId: id, definition: nextDefinition }),
+					bubbles: true,
+					detail: Object.freeze({ workflowId: id, definition: nextDefinition, acknowledgeView }),
 				}));
 			} catch { notificationFailed = true; }
-			if (notificationFailed) fenceUncertainContext();
+			if (notificationFailed || [...views.values()].some((ok) => ok !== true)) {
+				fenceUncertainContext();
+			}
 			try { window.history.replaceState(window.history.state, '', url.href); } catch { /* Browser URL is not the data commit. */ }
 			return Object.freeze({ workflowId: id });
 		};
