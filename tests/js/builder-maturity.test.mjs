@@ -48,13 +48,23 @@ test('Automation Builder keeps canonical persistence, shared-shell ownership and
 	assert.match(shell, /switchContext\(url\)/);
 	assert.match(shell, /cb-automations:contextloaded/);
 
-	assert.match(inspector, /dataset\.cbBuilderSelectable/);
+	// B2 selection authority uses exact typed, stable entity identities,
+	// never DOM indexes or a consumer-owned selectable marker.
+	assert.match(inspector, /dataset\.cbAutomationsSelectionType/);
+	assert.match(inspector, /dataset\.cbAutomationsSelectionId/);
+	assert.match(inspector, /recordForRef = \(ref, project\)/);
+	assert.match(inspector, /matches\.length !== 1/);
+	assert.match(inspector, /selection\.select\(ref, origin\)/);
+	assert.match(inspector, /selection\.registerView\('inspector'/);
+	assert.match(inspector, /selection\.registerView\('canvas'/);
+	assert.doesNotMatch(inspector, /dataset\.cbBuilderSelectable/);
 	assert.match(inspector, /Selected step|selectedStep/);
 	assert.match(inspector, /GET DATA/);
 	assert.match(inspector, /ONLY IF/);
-	assert.match(inspector, /key: `state:\$\{value\?\.step_id \|\| index\}`/);
-	assert.match(inspector, /key: `condition:\$\{value\?\.condition_id \|\| index\}`/);
-	assert.match(inspector, /key: `action:\$\{value\?\.step_id \|\| index\}`/);
+	assert.match(inspector, /'automations\.trigger': \['trigger', 'step_id'/);
+	assert.match(inspector, /'automations\.state': \['states', 'step_id'/);
+	assert.match(inspector, /'automations\.action': \['actions', 'step_id'/);
+	assert.match(inspector, /'automations\.condition': \['conditions', 'condition_id'/);
 	assert.match(inspector, /panelBody = panel\?\.querySelector\('\.cb-core-design-shell__panel-body'\)/);
 	assert.match(inspector, /panelBody\.replaceChildren\(\)/);
 	assert.match(inspector, /inspectorApi\.createIdentity\(/);
