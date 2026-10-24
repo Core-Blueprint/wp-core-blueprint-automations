@@ -136,7 +136,7 @@ function fixture({ nextDefinition = definition(), nextRevision = '3', nextCatalo
     contextError: (_key, fallback) => new Error(fallback),
     fetch: () => new Promise((resolve) => pending.push(resolve)),
     DOMParser: class { parseFromString(body) { return responseFor(Number(body)); } },
-    document, CustomEvent: class { constructor(type) { this.type = type; } },
+    document, CustomEvent: class { constructor(type, options = {}) { this.type = type; this.detail = options.detail; } },
     baseline: {}, URL,
   });
   const select = (n) => switchContext(workflowUrl(n));
