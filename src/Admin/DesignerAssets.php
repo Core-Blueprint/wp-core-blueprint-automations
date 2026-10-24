@@ -164,10 +164,10 @@ final class DesignerAssets {
 			&& is_callable( [ DesignEditorAssets::class, 'enqueue_designer_mode' ] )
 			&& defined( DesignEditorAssets::class . '::MODULE_ID' )
 			&& defined( DesignEditorAssets::class . '::SHELL_STYLE' )
-			// No v1/low-level-history fallback: a public, same-build Domain Session
-			// v2 is required before this Designer can safely bind Undo/Save.
+			// B2 typed Selection requires the same installed Base ESM and API v3.
+			// Never fall back to legacy local Layers/Inspector selection.
 			&& defined( DesignEditorAssets::class . '::DOMAIN_SESSION_API' )
-			&& constant( DesignEditorAssets::class . '::DOMAIN_SESSION_API' ) >= 2
+			&& constant( DesignEditorAssets::class . '::DOMAIN_SESSION_API' ) >= 3
 			// Base B1 owns context authorization. Older Exit Guard contracts fail closed.
 			&& defined( DesignEditorAssets::class . '::DESIGNER_EXIT_GUARD_API' )
 			&& constant( DesignEditorAssets::class . '::DESIGNER_EXIT_GUARD_API' ) >= 2;
