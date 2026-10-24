@@ -116,9 +116,14 @@ if (api?.snapshot && api?.replace && api?.root && shell
     return result;
   };
 
+  const prepareContext = (definition) => fromProject(toProject(definition));
+
   const resetForContext = (definition) => {
-    // Base replacement invalidates outstanding save tokens and history.
-    session.replace(toProject(definition), { source: 'context', contextChanged: true });
+    const next = prepareContext(definition);
+    // Caller has already rendered the prepared workflow. If a stale form or
+    // a failed editor render remains, never commit a mismatched Base baseline.
+    if (!same(api.snapshot(), next)) throw new Error('Workflow form and context baseline disagree.');
+    session.replace(toProject(next), { source: 'context', contextChanged: true, resetSelection: true });
     syncButtons();
   };
 
@@ -130,6 +135,7 @@ if (api?.snapshot && api?.replace && api?.root && shell
     status: () => session.historyStatus(),
     snapshot: () => fromProject(session.snapshot()),
     baseline: () => fromProject(session.baselineSnapshot()),
+    prepareContext,
     resetForContext,
     captureSave,
     acknowledgeSave,
