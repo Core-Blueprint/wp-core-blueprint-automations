@@ -92,7 +92,9 @@ function fixture({ nextDefinition = definition(), nextRevision = '3', nextCatalo
       changed.actions.push({ step_id: 'action_1', capability: {
         kind: 'action', provider: 'core-blueprint-work', id: 'action.run', schema_version: '1',
       }, bindings: {} });
-      editor = clone(changed); definitionControl.value = JSON.stringify(changed);
+      editor = clone(changed);
+      historyDefinition = clone(changed); // Editor changes update Base Domain Session.
+      definitionControl.value = JSON.stringify(changed);
     },
   };
 }
