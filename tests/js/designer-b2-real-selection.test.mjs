@@ -63,9 +63,9 @@ const project = (ids) => {
   return runInContext('JSON.parse(' + JSON.stringify(JSON.stringify(value)) + ')', vmContext);
 };
 const ref = (id) => Object.freeze({ kind: 'entity', type: 'automations.action', id });
-const resolver = runInContext(`(ref, current) => ref.kind === 'entity'
- && ref.type === 'automations.action'
- && current.root.properties.definition.actions.filter(item => item.step_id === ref.id).length === 1`, vmContext);
+const resolver = runInContext("(ref, current) => ref.kind === 'entity'" +
+ " && ref.type === 'automations.action'" +
+ " && current.root.properties.definition.actions.filter(item => item.step_id === ref.id).length === 1", vmContext);
 const session = createDomainSession({
   project: project(['shared']),
   resolveSelectionEntity: resolver,
