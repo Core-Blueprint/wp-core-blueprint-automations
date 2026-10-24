@@ -73,7 +73,9 @@ function fixture({ nextDefinition = definition(), nextRevision = '3', nextCatalo
     },
     cbAutomationsBuilderHistory: {
       snapshot: () => clone(historyDefinition),
-      prepareContext: (next) => fromProject(toProject(next)),
+      // vm.runInNewContext JSON.parse creates cross-realm records. Normalize at
+      // this fixture-only boundary before invoking the real strict JSON codec.
+      prepareContext: (next) => fromProject(toProject(clone(next))),
       resetForContext: (next) => {
         operations.push('history');
         if (throwHistory) { throwHistory = false; throw new Error('History staging refused'); }
