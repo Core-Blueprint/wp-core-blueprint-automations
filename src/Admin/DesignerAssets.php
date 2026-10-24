@@ -32,8 +32,16 @@ final class DesignerAssets {
 		if (
 			! MenuGroupRegistry::is_page_hook( AutomationsPage::SLUG, $hook )
 			|| AutomationsPage::requested_workflow_id() <= 0
-			|| ! self::base_editor_available()
 		) {
+			return;
+		}
+		if ( ! self::base_editor_available() ) {
+			// Fail closed with a translated administrator-facing explanation.
+			add_action( 'admin_notices', static function (): void {
+				echo '<div class="notice notice-error"><p>';
+				echo esc_html__( 'Workflow switching is not available. Reload the editor.', 'core-blueprint-automations' );
+				echo '</p></div>';
+			} );
 			return;
 		}
 
