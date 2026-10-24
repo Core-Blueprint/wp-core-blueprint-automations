@@ -69,7 +69,9 @@ if (api?.snapshot && api?.replace && api?.root && shell
   let renderedEpoch = session.selection().contextEpoch;
   let boundCanvasOrigin = null;
   let disposed = false;
-  const notice = shell.querySelector('[data-cb-design-shell-persistent-notice]');
+  // The Automation Builder already exposes this translated, accessible
+  // persistent warning; no second notification system is created.
+  const notice = status;
   const fenceView = () => {
     shell.dataset.cbDesignShellSaveOutcomeUnknown = 'true';
     shell.dataset.cbDesignShellSaveState = 'unknown';
