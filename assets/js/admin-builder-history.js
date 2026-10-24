@@ -5,7 +5,7 @@
  * canonical workflow commands, the redacted authoring projection and server CAS.
  * Never import or reproduce Base's internal history engine.
  */
-import { createDomainSession, animateLayoutChange } from '@cb-core/design-editor';
+import { createDomainSession, createDesignerSelectionController, animateLayoutChange } from '@cb-core/design-editor';
 import { toProject, fromProject, workflowCommands } from 'cb-automations-domain-project';
 
 const api = window.cbAutomationsEditorSession;
@@ -18,6 +18,23 @@ if (api?.snapshot && api?.replace && api?.root && shell
     && undo instanceof HTMLButtonElement && redo instanceof HTMLButtonElement
     && typeof createDomainSession === 'function') {
   const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+  const workflowId = () => String(shell.closest('form')?.querySelector('[name="workflow_id"]')?.value || '');
+  const types = Object.freeze({
+    'automations.trigger': ['trigger', 'step_id'],
+    'automations.state': ['states', 'step_id'],
+    'automations.action': ['actions', 'step_id'],
+    'automations.condition': ['conditions', 'condition_id'],
+  });
+  // Pure and synchronous: the project from Base is the sole membership input.
+  const resolveSelectionEntity = (ref, project) => {
+    if (!ref || ref.kind !== 'entity' || !Object.hasOwn(types, ref.type)) return false;
+    const [collection, field] = types[ref.type];
+    const definition = fromProject(project);
+    const values = collection === 'trigger'
+      ? (definition.trigger ? [definition.trigger] : [])
+      : definition[collection];
+    return values.filter((item) => item?.[field] === ref.id).length === 1;
+  };
   let applying = false;
   // Base shell is initialized in presentation-only mode by the existing
   // workspace. The single Base domain session below remains the sole history
@@ -25,6 +42,7 @@ if (api?.snapshot && api?.replace && api?.root && shell
   const session = createDomainSession({
     project: toProject(api.snapshot()),
     validateProject: (project) => { fromProject(project); },
+    resolveSelectionEntity,
     historyLimit: 100,
     onChange: (project) => {
       // Rendering an Undo/Redo must not create a second history entry.
@@ -38,6 +56,133 @@ if (api?.snapshot && api?.replace && api?.root && shell
       }
     },
   });
+
+  // One lifecycle-managed adapter registry, NOT a second Selection store.
+  // A new epoch is never shown before the final Base History notification,
+  // including contextChanged with structurally equal DesignProjects.
+  const views = new Map();
+  const viewResults = new Map();
+  let controller = null;
+  let renderedEpoch = session.selection().contextEpoch;
+  let boundCanvasOrigin = null;
+  let pendingEpoch = null;
+  let disposed = false;
+  const notice = shell.querySelector('[data-cb-design-shell-persistent-notice]');
+  const fenceView = () => {
+    shell.dataset.cbDesignShellSaveOutcomeUnknown = 'true';
+    shell.dataset.cbDesignShellSaveState = 'unknown';
+    const message = 'Workflow selection could not be synchronized. Reload the editor before saving.';
+    if (notice) {
+      notice.hidden = false;
+      notice.textContent = message;
+      notice.setAttribute('role', 'alert');
+    }
+    try { shell.dispatchEvent(new CustomEvent('cb:design-shell:failure', {
+      bubbles: true, detail: Object.freeze({ phase: 'selection-integrity', message }),
+    })); } catch { /* The save fence remains authoritative. */ }
+  };
+  const captureOrigin = () => Object.freeze({
+    expectedEpoch: session.selection().contextEpoch,
+    workflowId: workflowId(),
+  });
+  const isCurrentOrigin = (origin) => Boolean(origin
+    && Number.isSafeInteger(origin.expectedEpoch)
+    && origin.expectedEpoch === session.selection().contextEpoch
+    && origin.workflowId !== '' && origin.workflowId === workflowId()
+    && shell.dataset.cbDesignShellSaveOutcomeUnknown !== 'true'
+    && shell.dataset.cbDesignShellSaveState !== 'unknown');
+  const renderView = (name, context) => {
+    if (context.selection.contextEpoch !== renderedEpoch) {
+      pendingEpoch = context.selection.contextEpoch;
+      return; // Never acknowledge an early B2 Selection projection.
+    }
+    const render = views.get(name);
+    let ok = false;
+    try {
+      if (typeof render !== 'function') throw new Error('Missing critical view adapter.');
+      if (name === 'layers') {
+        const origin = captureOrigin();
+        if (!boundCanvasOrigin || !same(boundCanvasOrigin, origin)) {
+          // Update stale Canvas DOM bindings after Base committed the epoch.
+          api.replace(api.snapshot(), { source: 'selection-binding' });
+          boundCanvasOrigin = origin;
+        }
+      }
+      ok = render(context) === true;
+    } catch (_error) {
+      // Base subscriber exception isolation cannot be a success witness.
+    } finally {
+      viewResults.set(name, ok);
+      if (!ok) fenceView();
+    }
+  };
+  const renderAdapters = Object.freeze({
+    renderLayers: (context) => renderView('layers', context),
+    renderInspector: (context) => renderView('inspector', context),
+    syncCanvas: (context) => renderView('canvas', context),
+  });
+  const registerView = (name, render) => {
+    if (disposed || controller || views.has(name)
+      || !['layers', 'inspector', 'canvas'].includes(name)
+      || typeof render !== 'function') {
+      fenceView();
+      return false;
+    }
+    views.set(name, render);
+    if (views.size === 3) {
+      try {
+        controller = createDesignerSelectionController({
+          typed: 'domain', session, ...renderAdapters,
+          openInspectorOnInsert: false,
+        });
+      } catch (_error) {
+        fenceView();
+        return false;
+      }
+    }
+    return true;
+  };
+  session.subscribeHistory(() => {
+    if (!controller) return;
+    const epoch = session.selection().contextEpoch;
+    if (epoch === renderedEpoch) return;
+    renderedEpoch = epoch;
+    pendingEpoch = null;
+    viewResults.clear();
+    // Base's public controller may have fired a Selection callback early
+    // when identical projects produced no projectEvent. This final refresh
+    // is the only visible view publication of that effective context commit.
+    try { controller.refresh(); } catch (_error) { fenceView(); }
+  });
+  const selectionApi = Object.freeze({
+    registerView,
+    captureOrigin,
+    isCurrentOrigin,
+    select: (ref, origin) => {
+      if (!controller || !isCurrentOrigin(origin)) return false;
+      try { return controller.select(ref, { expectedEpoch: origin.expectedEpoch, source: 'ui' }); }
+      catch { return false; }
+    },
+    clear: (origin) => {
+      if (!controller || !isCurrentOrigin(origin)) return false;
+      try { return controller.clear({ expectedEpoch: origin.expectedEpoch, source: 'ui' }); }
+      catch { return false; }
+    },
+    verified: (name) => viewResults.get(name) === true
+      && pendingEpoch === null
+      && renderedEpoch === session.selection().contextEpoch,
+    reportView: (name, ok) => {
+      if (!['layers', 'inspector', 'canvas'].includes(name) || ok !== true) {
+        fenceView();
+        return false;
+      }
+      return true;
+    },
+    ready: () => controller !== null && views.size === 3,
+  });
+  window.cbAutomationsBuilderSelection = selectionApi;
+  // Classic Inspector initializes before this ESM; it subscribes to this signal.
+  window.dispatchEvent(new CustomEvent('cb-automations:selection-ready'));
 
   const syncButtons = () => {
     const { canUndo, canRedo } = session.historyStatus();
@@ -168,9 +313,12 @@ if (api?.snapshot && api?.replace && api?.root && shell
     return Object.freeze({ status: 'committed' });
   };
 
-  // Release the Base-owned session on page unmount; context switch uses
-  // session.replace() above and retains this one session for the live page.
-  window.addEventListener('pagehide', () => session.dispose(), { once: true });
+  // Destroy views and their observers before the sole Base Domain Session.
+  window.addEventListener('pagehide', () => {
+    if (disposed) return;
+    disposed = true;
+    try { controller?.destroy(); } finally { session.dispose(); }
+  }, { once: true });
 
   window.cbAutomationsBuilderHistory = Object.freeze({
     status: () => session.historyStatus(),
