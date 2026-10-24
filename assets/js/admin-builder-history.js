@@ -244,6 +244,13 @@ if (api?.snapshot && api?.replace && api?.root && shell
   });
 
   const captureSave = () => {
+    // The existing Save writer may issue a Base checkpoint ONLY while the
+    // canonical B2 views are ready and no UI/context witness is uncertain.
+    if (!selectionApi.ready() || shell.dataset.cbDesignShellSaveOutcomeUnknown === 'true'
+      || shell.dataset.cbDesignShellSaveState === 'unknown'
+      || ['layers', 'inspector', 'canvas'].some((view) => !selectionApi.verified(view))) {
+      throw new Error('Designer selection is not verified. Reload before saving.');
+    }
     const checkpoint = session.captureSave();
     const submitted = fromProject(checkpoint.submittedProject);
     // The HTML form and Base project must describe the very same authoring
@@ -277,6 +284,7 @@ if (api?.snapshot && api?.replace && api?.root && shell
     project: session.snapshot(),
     baseline: session.baselineSnapshot(),
     history: session.historyStatus(),
+    selection: session.selection(),
   });
   const resetForContext = (definition) => {
     const next = prepareContext(definition);
@@ -321,6 +329,11 @@ if (api?.snapshot && api?.replace && api?.root && shell
     return Object.freeze({ status: 'committed' });
   };
 
+  // If Base isolates any project/Selection/History observer fault, its
+  // diagnostic is a separate trustworthy fail-closed signal.
+  const releaseDiagnostics = session.subscribeDiagnostics((diagnostic) => {
+    if (diagnostic?.code === 'CB_DESIGNER_OBSERVER_FAILED') fenceView();
+  });
   // Destroy views and their observers before the sole Base Domain Session.
   window.addEventListener('pagehide', () => {
     if (disposed) return;
@@ -330,6 +343,7 @@ if (api?.snapshot && api?.replace && api?.root && shell
         try { cleanup(); } catch (_error) { /* Proceed with teardown. */ }
       }
       releaseFinalHistory?.();
+      releaseDiagnostics();
       controller?.destroy();
     } finally { session.dispose(); }
   }, { once: true });
