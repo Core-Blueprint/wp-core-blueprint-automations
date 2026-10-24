@@ -21,7 +21,7 @@ const fixture = (fault = null) => {
   const origin = { expectedEpoch: 0, workflowId: '1' };
   const sync = runInNewContext(match[0] + '\nrenderView;', {
     views, viewResults, viewOrder: ['layers','inspector','canvas'],
-    flushStep: 0, renderedEpoch: 0, pendingEpoch: null,
+    flushStep: 0, renderedEpoch: 0,
     captureOrigin: () => origin, boundCanvasOrigin: origin,
     api: { replace: () => {throw Error('No editor render necessary');},snapshot:()=>({}) },
     same: (a,b) => JSON.stringify(a) === JSON.stringify(b),
@@ -61,11 +61,12 @@ test('A-B2-T08: missing and duplicate view acknowledgements never count as succe
   assert.equal(duplicate.fenced,true);
 });
 
-test('A-B2-T06/T08: same-project early next-epoch Selection must not render or acknowledge', () => {
-  const x=fixture();
-  for (const view of ['layers','inspector','canvas']){
-    x.sync(view,{selection:{contextEpoch:1,revision:2},project:{root:{}}});
-  }
-  assert.deepEqual(x.called,[]);
-  assert.equal(x.viewResults.size,0);
+test('A-B2-F02-T06: consumer never repeats a correlated final Base F02 flush', () => {
+  assert.doesNotMatch(history, /controller\.refresh\(/);
+  assert.match(history, /createDesignerSelectionController\(/);
+  const x = fixture();
+  for (const view of ['layers','inspector','canvas']) x.sync(view,viewContext);
+  assert.deepEqual(x.called, ['layers','inspector','canvas']);
+  assert.equal(x.fenced, false);
+  assert.deepEqual([...x.viewResults.values()], [true,true,true]);
 });
