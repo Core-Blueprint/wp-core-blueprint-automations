@@ -73,6 +73,8 @@ assert.equal(history.undo(), true);
 assert.equal(history.status().canRedo, true);
 // Keep an actual node selection, not just the empty default snapshot.
 editor.selection.select([]);
+assert.equal(editor.selection.snapshot().paths.length, 1, 'root selection must exist before failed transition');
+assert.deepEqual(JSON.parse(JSON.stringify(editor.selection.snapshot().paths[0])), [], 'root node path is []');
 const before = {
   project: project.snapshot(), baseline: history.baselineSnapshot(),
   status: history.status(), selection: editor.selection.snapshot(),
