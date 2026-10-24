@@ -33,11 +33,31 @@ function fixture({ nextDefinition = definition(), nextRevision = '3', nextCatalo
   const formFields = { '[name="workflow_id"]': id, '[name="revision"]': revision };
   const form = { querySelector: (key) => formFields[key] ?? null };
   const notice = { textContent: '', hidden: true, setAttribute() {} };
+  const listeners = new Map();
+  const swallowedListenerErrors = [];
   const root = {
     dataset: { cbDesignShellSaveState: 'idle', cbDesignShellSaveOutcomeUnknown: 'false' },
     querySelector: () => notice,
-    dispatchEvent: (event) => events.push(event.type),
+    addEventListener(type, callback) {
+      if (!listeners.has(type)) listeners.set(type, []);
+      listeners.get(type).push(callback);
+    },
+    dispatchEvent(event) {
+      events.push(event.type);
+      // DOM dispatchEvent() reports listener exceptions as uncaught. It does
+      // not rethrow them synchronously to the dispatching code.
+      for (const callback of listeners.get(event.type) || []) {
+        try { callback(event); }
+        catch (error) { swallowedListenerErrors.push(error); }
+      }
+      return true;
+    },
   };
+  for (const view of ['inspector', 'layers', 'stages']) {
+    root.addEventListener('cb-automations:contextloaded', (event) => {
+      event.detail?.acknowledgeView?.(view, true);
+    });
+  }
   let headingText = 'Original';
   let throwHeading = failHeading;
   const heading = {
@@ -122,6 +142,7 @@ function fixture({ nextDefinition = definition(), nextRevision = '3', nextCatalo
   return {
     select, respond, pending, events, operations, id, revision, name, activation,
     authority, definitionControl, contextDataNode, root, notice,
+    swallowedListenerErrors,
     get editor() { return clone(editor); }, get history() { return clone(historyDefinition); },
     get witness() { return window.cbAutomationsBuilderHistory.contextWitness(); },
     get heading() { return headingText; },
@@ -338,16 +359,32 @@ test('R1-04: uncertain postcommit status blocks Save without an old-editor/new-H
   assert.equal(x.events.includes('cb-automations:contextloaded'), false);
 });
 
-test('R1-05: Base committed History remains authoritative even if postcommit notification fails', async () => {
+test('R1-05: an exception INSIDE an event listener is not caught by dispatchEvent and cannot falsify view integrity', async () => {
   const x = fixture();
-  const previousDispatch = x.root.dispatchEvent;
-  x.root.dispatchEvent = (event) => {
-    if (event.type === 'cb-automations:contextloaded') throw new Error('Inspector callback failed');
-    return previousDispatch(event);
-  };
+  // A genuine registered listener, not an overridden failing dispatcher.
+  // Browser-style dispatch returns normally even when this listener throws.
+  x.root.addEventListener('cb-automations:contextloaded', () => {
+    throw new Error('Critical view listener failed');
+  });
+  const request = x.select(2); x.respond(0, 2);
+  assert.equal((await request).workflowId, 2);
+  assert.equal(x.swallowedListenerErrors.length, 1, 'dispatcher did NOT throw into switchContext');
+  assert.equal(x.id.value, '2');
+  assert.deepEqual(x.editor, x.history);
+  // The three critical views really acknowledged, so an unrelated listener
+  // cannot pretend the History was rolled back or veto the committed context.
+  assert.equal(x.root.dataset.cbDesignShellSaveOutcomeUnknown, 'false');
+});
+
+test('R1-06: missing critical view acknowledgement fails closed after Base commit', async () => {
+  const x = fixture();
+  x.root.addEventListener('cb-automations:contextloaded', (event) => {
+    event.detail.acknowledgeView('inspector', false);
+  });
   const request = x.select(2); x.respond(0, 2);
   assert.equal((await request).workflowId, 2);
   assert.equal(x.id.value, '2');
   assert.deepEqual(x.editor, x.history);
   assert.equal(x.root.dataset.cbDesignShellSaveOutcomeUnknown, 'true');
+  assert.match(x.notice.textContent, /Reload the editor before saving/);
 });
