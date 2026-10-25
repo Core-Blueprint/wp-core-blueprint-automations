@@ -2535,3 +2535,15 @@ msgstr "De workflow is gewijzigd sinds je de pagina opende. Controleer de huidig
 #: templates/admin/automations.php:37
 msgid "The activation change could not be verified. Review the current workflow before taking further action."
 msgstr "De wijziging van de activatiestatus kon niet worden geverifieerd. Controleer de huidige workflow voordat je verdere actie onderneemt."
+
+#: src/Admin/SchemaSetupController.php
+msgid "Automations runtime storage is unavailable. Disabled drafts can still be created, edited and saved, but execution is blocked."
+msgstr "Automations-runtimeopslag is niet beschikbaar. Uitgeschakelde concepten kunnen nog worden aangemaakt, bewerkt en opgeslagen, maar niet uitgevoerd."
+
+#: src/Admin/SchemaSetupController.php
+msgid "Check or repair verified Automations storage"
+msgstr "Geverifieerde Automations-opslag controleren of herstellen"
+
+#: src/Admin/SchemaSetupController.php
+msgid "Storage requires manual review. No tables were modified. Back up the database and inspect the existing installation."
+msgstr "Opslag vereist handmatige controle. Er zijn geen tabellen gewijzigd. Maak een databaseback-up en inspecteer de bestaande installatie."
