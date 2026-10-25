@@ -324,7 +324,7 @@ final class WorkflowRepository {
 		try {
 			$rows = $wpdb->get_results(
 				$wpdb->prepare(
-					"SELECT id, revision, activation_state FROM ${table} WHERE id IN (${tokens}) ORDER BY id ASC FOR UPDATE",
+					"SELECT id, revision, activation_state FROM {$table} WHERE id IN ({$tokens}) ORDER BY id ASC FOR UPDATE",
 					...$ids
 				),
 				ARRAY_A
@@ -358,7 +358,7 @@ final class WorkflowRepository {
 				}
 				$deleted = $wpdb->query(
 					$wpdb->prepare(
-						"DELETE FROM ${table} WHERE id = %d AND revision = %d AND activation_state = %s",
+						"DELETE FROM {$table} WHERE id = %d AND revision = %d AND activation_state = %s",
 						$id,
 						$revision,
 						ActivationState::Disabled->value
