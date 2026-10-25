@@ -5,6 +5,7 @@ namespace CB\Automations\Admin;
 
 use CB\Automations\Runtime\RunStatus;
 use CB\Automations\Organisation\FolderRepository;
+use CB\Automations\Persistence\Schema;
 use CB\Automations\Runtime\StepStatus;
 use CB\Automations\Template\WorkflowTemplateRegistry;
 use CB\Automations\Validation\ValidationResult;
@@ -45,6 +46,11 @@ final class AutomationsPage implements Page {
 				esc_html__( 'Forbidden', 'core-blueprint-automations' ),
 				[ 'response' => 403 ]
 			);
+		}
+
+		if ( ! Schema::authoring_ready() ) {
+			$this->render_unavailable();
+			return;
 		}
 
 		try {
@@ -110,8 +116,8 @@ final class AutomationsPage implements Page {
 			$folders = [];
 			$folder_filter = null;
 			$assignments = [];
-			if ( 'workflows' === $view ) {
-				FolderRepository::ensure_ready();
+			$folders_ready = FolderRepository::is_ready();
+			if ( 'workflows' === $view && $folders_ready ) {
 				$folders = FolderRepository::all();
 				$requested_folder = isset( $_GET['folder'] ) && is_scalar( $_GET['folder'] )
 					? sanitize_text_field( wp_unslash( (string) $_GET['folder'] ) ) : 'all';
@@ -123,7 +129,7 @@ final class AutomationsPage implements Page {
 			}
 			$sort = in_array( $sort, [ 'updated_desc', 'updated_asc', 'name_asc', 'name_desc' ], true ) ? $sort : 'updated_desc';
 			$listing = 'workflows' === $view ? $reader->index( $page, 25, $search, $status, $sort, $folder_filter ) : null;
-			if ( null !== $listing ) {
+			if ( null !== $listing && $folders_ready ) {
 				$assignments = FolderRepository::assignments(
 					array_map( static fn( array $item ): int => $item['record']->id(), $listing['items'] )
 				);
