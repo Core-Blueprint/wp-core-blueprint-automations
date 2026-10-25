@@ -2553,3 +2553,15 @@ msgstr "Der Workflow wurde seit dem Öffnen der Seite geändert. Prüfen Sie den
 #: templates/admin/automations.php:37
 msgid "The activation change could not be verified. Review the current workflow before taking further action."
 msgstr "Die Aktivierungsänderung konnte nicht überprüft werden. Prüfen Sie den aktuellen Workflow, bevor Sie weitere Maßnahmen ergreifen."
+
+#: src/Admin/SchemaSetupController.php
+msgid "Automations runtime storage is unavailable. Disabled drafts can still be created, edited and saved, but execution is blocked."
+msgstr "Der Automations-Laufzeitspeicher ist nicht verfügbar. Deaktivierte Entwürfe können weiterhin erstellt, bearbeitet und gespeichert, aber nicht ausgeführt werden."
+
+#: src/Admin/SchemaSetupController.php
+msgid "Check or repair verified Automations storage"
+msgstr "Verifizierten Automations-Speicher prüfen oder reparieren"
+
+#: src/Admin/SchemaSetupController.php
+msgid "Storage requires manual review. No tables were modified. Back up the database and inspect the existing installation."
+msgstr "Der Speicher erfordert eine manuelle Prüfung. Es wurden keine Tabellen verändert. Sichern Sie die Datenbank und prüfen Sie die bestehende Installation."
