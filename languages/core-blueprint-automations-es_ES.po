@@ -2554,3 +2554,15 @@ msgstr "El flujo de trabajo cambió desde que abriste la página. Revisa el fluj
 #: templates/admin/automations.php:37
 msgid "The activation change could not be verified. Review the current workflow before taking further action."
 msgstr "No se pudo verificar el cambio de activación. Revisa el flujo de trabajo actual antes de realizar otra acción."
+
+#: src/Admin/SchemaSetupController.php
+msgid "Automations runtime storage is unavailable. Disabled drafts can still be created, edited and saved, but execution is blocked."
+msgstr "El almacenamiento de ejecución de Automations no está disponible. Los borradores desactivados aún pueden crearse, editarse y guardarse, pero no ejecutarse."
+
+#: src/Admin/SchemaSetupController.php
+msgid "Check or repair verified Automations storage"
+msgstr "Comprobar o reparar el almacenamiento verificado de Automations"
+
+#: src/Admin/SchemaSetupController.php
+msgid "Storage requires manual review. No tables were modified. Back up the database and inspect the existing installation."
+msgstr "El almacenamiento requiere revisión manual. No se modificó ninguna tabla. Haga una copia de seguridad de la base de datos y revise la instalación existente."
