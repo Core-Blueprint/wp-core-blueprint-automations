@@ -58,3 +58,45 @@ if(!isset($fake->tables['wp_cb_automations_workflows']) || count($fake->tables)!
     throw new RuntimeException('Physical collision changed expected table count');
 }
 echo "A-INF-S1 behavioral installation: PASS (create-only, 9x, PRE_DDL CAS, barrier, race)\n";
+
+// A valid workflow table supports disabled draft authoring, even if runtime is partial.
+$fake->last_error = '';
+$fake->tables = [ 'wp_cb_automations_workflows' => $fixtures['wp_cb_automations_workflows'] ];
+$fake->optionsStore = [];
+if (!$schema::authoring_ready() || $schema::folders_ready() || $schema::ready()) {
+    throw new RuntimeException('Authoring incorrectly coupled to runtime tables');
+}
+if ($schema::can_repair()) { throw new RuntimeException('Unclaimed partial site must not run DDL'); }
+$fake->tables['wp_cb_automations_workflows']['engine'] = 'MyISAM';
+if ($schema::authoring_ready()) { throw new RuntimeException('Unsafe workflow table admitted authoring'); }
+
+// Missing metadata on nine physically verified tables can be attested on POST.
+$fake->tables = $fixtures;
+$fake->optionsStore = [];
+if (!$schema::authoring_ready() || !$schema::folders_ready() || $schema::ready() || !$schema::can_repair()) {
+    throw new RuntimeException('Missing marker should be eligible for positive table attestation');
+}
+if (!$schema::repair_verified() || !$schema::ready()) {
+    throw new RuntimeException('Physical attestation did not restore readiness');
+}
+
+// Interrupted first installation can add only missing tables, after positive checks.
+$fake->tables = array_slice($fixtures, 0, 7, true);
+$fake->optionsStore = [
+    'cb_automations_install_v1_claim' => json_encode([
+        'identity' => $claimIdentity->invoke(null, $site, $definitions),
+        'token' => str_repeat('3', 64),
+        'attempt' => 1,
+        'phase' => 'DDL_MAY_HAVE_STARTED',
+    ], JSON_THROW_ON_ERROR),
+];
+$fake->creates = 0;
+$fake->last_error = '';
+if (!$schema::can_repair() || !$schema::repair_verified() || $fake->creates !== 2 || !$schema::ready()) {
+    throw new RuntimeException('Explicit verified first-install repair did not complete safely');
+}
+$fake->tables = array_slice($fixtures, 0, 7, true);
+if ($schema::can_repair()) {
+    throw new RuntimeException('Missing tables from READY site must never be recreated');
+}
+echo "P0 physical authoring isolation and verified repair fixtures: PASS\n";
