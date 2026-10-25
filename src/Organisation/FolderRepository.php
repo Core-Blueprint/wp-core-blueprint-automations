@@ -12,8 +12,11 @@ final class FolderRepository {
 	public static function assignments_table(): string {
 		return Schema::assignments_table();
 	}
+	public static function is_ready(): bool {
+		return Schema::folders_ready();
+	}
 	public static function ensure_ready(): void {
-		if ( ! Schema::ready() ) {
+		if ( ! self::is_ready() ) {
 			throw new \RuntimeException( 'Canonical Automations schema is unavailable.' );
 		}
 	}
