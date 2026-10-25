@@ -228,6 +228,32 @@ final class Schema {
     }
     public static function ready(): bool { return self::READY === self::inspect(); }
 
+    /** Disabled drafts require only a verified physical workflow table. */
+    public static function authoring_ready(): bool {
+        try {
+            $id = self::identity();
+            $defs = self::definitions();
+            return self::matches_table(self::workflows_table(), $defs['workflows'], $id);
+        } catch (\Throwable) { return false; }
+    }
+
+    /** Folder organisation is optional and isolated from draft persistence. */
+    public static function folders_ready(): bool {
+        try {
+            $id = self::identity();
+            $defs = self::definitions();
+            return self::matches_table(self::folders_table(), $defs['folders'], $id)
+                && self::matches_table(self::assignments_table(), $defs['assignments'], $id);
+        } catch (\Throwable) { return false; }
+    }
+
+    /** Explicit installation also works after a ZIP update without activation. */
+    public static function can_install_new(): bool {
+        try {
+            return self::ABSENT === self::inspect() && null === self::claim_raw(self::identity());
+        } catch (\Throwable) { return false; }
+    }
+
     private static function inspect_strict(): string {
         global $wpdb;
         $identity = self::identity();
@@ -377,6 +403,74 @@ final class Schema {
             throw new \RuntimeException('Installation claim was not uniquely verified.');
         }
         return $after;
+    }
+
+    /**
+     * Existing physical tables must match exactly. Partial repair is only
+     * possible for a positively identified interrupted FIRST installation.
+     * Missing tables after a previously complete install may contain lost data.
+     */
+    public static function can_repair(): bool {
+        try {
+            if (!in_array(self::inspect(), [self::PARTIAL, self::DRIFTED], true)) { return false; }
+            $id = self::identity();
+            $defs = self::definitions();
+            $existing = self::existing_tables($id);
+            if ([] === $existing) { return false; }
+            $marker = self::option_raw(self::MARKER, $id['options']);
+            $claimRaw = self::claim_raw($id);
+            if (null !== $claimRaw) {
+                $claim = self::decode_claim($claimRaw);
+                if ($claim['identity'] !== self::claim_identity($id, $defs)
+                    || $claim['phase'] !== 'DDL_MAY_HAVE_STARTED') { return false; }
+            }
+            if (count($existing) < count($defs) && (null !== $marker || null === $claimRaw)) {
+                return false;
+            }
+            foreach ($defs as $key => $sql) {
+                if (in_array(self::table_name($key), $existing, true)
+                    && !self::matches_table(self::table_name($key), $sql, $id)) { return false; }
+            }
+            return true;
+        } catch (\Throwable) { return false; }
+    }
+
+    /** Authorized nonce POST only. No DROP, ALTER or unverified DDL retry. */
+    public static function repair_verified(): bool {
+        global $wpdb;
+        if (!self::can_repair()) { return false; }
+        try {
+            $id = self::identity();
+            $defs = self::definitions();
+            foreach ($defs as $key => $sql) {
+                if (in_array(self::table_name($key), self::existing_tables($id), true)) { continue; }
+                if (self::identity() !== $id || !self::can_repair()) { return false; }
+                if (false === $wpdb->query($sql) || !empty($wpdb->last_error)) { return false; }
+                if (!self::matches_table(self::table_name($key), $sql, $id)) { return false; }
+            }
+            if (count(self::existing_tables($id)) !== count($defs)) { return false; }
+            foreach ($defs as $key => $sql) {
+                if (!self::matches_table(self::table_name($key), $sql, $id)) { return false; }
+            }
+            $wanted = self::fingerprint($defs);
+            $before = self::option_raw(self::MARKER, $id['options']);
+            if ($before === $wanted) { return self::ready(); }
+            if (null === $before) {
+                if (true !== add_option(self::MARKER, $wanted, '', false)) { return self::ready(); }
+            } else {
+                $options = $id['options'];
+                $changed = $wpdb->query($wpdb->prepare(
+                    "UPDATE `{$options}` SET option_value = %s WHERE option_name = %s AND option_value = %s",
+                    $wanted, self::MARKER, $before
+                ));
+                if (1 !== $changed || !empty($wpdb->last_error)) { return false; }
+            }
+            if (function_exists('wp_cache_delete')) {
+                wp_cache_delete(self::MARKER, 'options');
+                wp_cache_delete('alloptions', 'options');
+            }
+            return self::option_raw(self::MARKER, $id['options']) === $wanted && self::ready();
+        } catch (\Throwable) { return false; }
     }
 
     /** Only expose POST reauthorization for verified, exclusively PRE_DDL claims. */
