@@ -2551,3 +2551,15 @@ msgstr "Il workflow è cambiato dopo l’apertura della pagina. Controlla il wor
 #: templates/admin/automations.php:37
 msgid "The activation change could not be verified. Review the current workflow before taking further action."
 msgstr "Non è stato possibile verificare la modifica dell’attivazione. Controlla il workflow attuale prima di procedere."
+
+#: src/Admin/SchemaSetupController.php
+msgid "Automations runtime storage is unavailable. Disabled drafts can still be created, edited and saved, but execution is blocked."
+msgstr "L'archiviazione di esecuzione di Automations non è disponibile. Le bozze disattivate possono ancora essere create, modificate e salvate, ma non eseguite."
+
+#: src/Admin/SchemaSetupController.php
+msgid "Check or repair verified Automations storage"
+msgstr "Controlla o ripara l'archiviazione verificata di Automations"
+
+#: src/Admin/SchemaSetupController.php
+msgid "Storage requires manual review. No tables were modified. Back up the database and inspect the existing installation."
+msgstr "L'archiviazione richiede una verifica manuale. Nessuna tabella è stata modificata. Esegui un backup del database ed esamina l'installazione esistente."
