@@ -24,7 +24,7 @@ $plugin = $read( 'src/Plugin.php' );
 $wakeup = $read( 'src/Runtime/WorkerWakeup.php' );
 
 foreach ( [
-	[ $folder, 'Schema::ready()' ],
+	[ $folder, 'Schema::folders_ready()' ],
 	[ $folder, 'self::folders_table()' ],
 	[ $folder, 'self::assignments_table()' ],
 	[ $folder, 'ON DUPLICATE KEY UPDATE folder_id = VALUES(folder_id)' ],
@@ -44,7 +44,7 @@ foreach ( [
 	[ $workflow, "NOT EXISTS (SELECT 1 FROM {\$links} f" ],
 	[ $workflow, "EXISTS (SELECT 1 FROM {\$links} f" ],
 	[ $workflow, '$args[] = $folder_id' ],
-	[ $page, 'FolderRepository::ensure_ready();' ],
+	[ $page, 'FolderRepository::is_ready();' ],
 	[ $page, "'assignments' => \$assignments" ],
 	[ $view, 'name="folder"' ],
 	[ $view, 'name="folder_id"' ],
