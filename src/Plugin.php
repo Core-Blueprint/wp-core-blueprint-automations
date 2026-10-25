@@ -42,19 +42,21 @@ final class Plugin {
 		if ( is_admin() ) {
 			SchemaSetupController::init();
 		}
-		if ( ! Schema::ready() ) {
-			self::$boot_error = 'persistence';
-			return;
-		}
-
-		self::$runtime_booted = true;
+		// Capability discovery and disabled draft authoring do not use the queue.
 		StoredTemplateRepository::register();
 		WordPressProvider::init();
 		StarterTemplates::init();
 		TemplateLibraryBridge::init();
-		RuntimeWorker::init();
-		TriggerIntake::init();
 		WorkflowTransferController::init_maintenance();
+
+		// Never register runtime workers or trigger intake without full execution readiness.
+		if ( Requirements::execution_ready() ) {
+			self::$runtime_booted = true;
+			RuntimeWorker::init();
+			TriggerIntake::init();
+		} else {
+			self::$boot_error = 'execution';
+		}
 
 		if ( ! is_admin() || ! Requirements::admin_ready() ) {
 			return;
