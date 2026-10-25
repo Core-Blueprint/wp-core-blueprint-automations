@@ -2565,3 +2565,59 @@ msgstr "Verifizierten Automations-Speicher prüfen oder reparieren"
 #: src/Admin/SchemaSetupController.php
 msgid "Storage requires manual review. No tables were modified. Back up the database and inspect the existing installation."
 msgstr "Der Speicher erfordert eine manuelle Prüfung. Es wurden keine Tabellen verändert. Sichern Sie die Datenbank und prüfen Sie die bestehende Installation."
+
+#: templates/admin/automations.php
+msgid "Workflow deleted. Run history is retained."
+msgstr "Workflow gelöscht. Der Ausführungsverlauf bleibt erhalten."
+
+#: templates/admin/automations.php
+msgid "Selected workflows deleted. Run history is retained."
+msgstr "Ausgewählte Workflows gelöscht. Der Ausführungsverlauf bleibt erhalten."
+
+#: templates/admin/automations.php
+msgid "Disable active workflows before deleting. Nothing was deleted."
+msgstr "Deaktivieren Sie aktive Workflows vor dem Löschen. Es wurde nichts gelöscht."
+
+#: templates/admin/automations.php
+msgid "A selected workflow changed or no longer exists. Nothing was deleted. Reload and review."
+msgstr "Ein ausgewählter Workflow wurde geändert oder existiert nicht mehr. Es wurde nichts gelöscht. Laden Sie die Seite neu und prüfen Sie Ihre Auswahl."
+
+#: templates/admin/automations.php
+msgid "Select between 1 and 25 workflows on the current page."
+msgstr "Wählen Sie 1 bis 25 Workflows auf der aktuellen Seite aus."
+
+#: templates/admin/automations.php
+msgid "Confirm permanent deletion first."
+msgstr "Bestätigen Sie zuerst das endgültige Löschen."
+
+#: templates/admin/automations.php
+msgid "Deletion could not be verified. Reload and review before trying again."
+msgstr "Das Löschen konnte nicht bestätigt werden. Laden Sie die Seite neu und überprüfen Sie sie vor einem erneuten Versuch."
+
+#: templates/admin/automations.php
+msgid "Permanently delete selected disabled workflows. Run history is retained."
+msgstr "Ausgewählte deaktivierte Workflows endgültig löschen. Der Ausführungsverlauf bleibt erhalten."
+
+#: templates/admin/automations.php
+msgid "Delete selected"
+msgstr "Ausgewählte löschen"
+
+#: templates/admin/automations.php
+msgid "Select all disabled workflows on this page"
+msgstr "Alle deaktivierten Workflows auf dieser Seite auswählen"
+
+#: templates/admin/automations.php
+msgid "Select workflow %s"
+msgstr "Workflow %s auswählen"
+
+#: templates/admin/automations.php
+msgid "Permanently delete this disabled workflow? This cannot be undone."
+msgstr "Diesen deaktivierten Workflow endgültig löschen? Dies kann nicht rückgängig gemacht werden."
+
+#: templates/admin/automations.php
+msgid "Only disabled workflows can be deleted."
+msgstr "Nur deaktivierte Workflows können gelöscht werden."
+
+#: templates/admin/automations.php
+msgid "Delete"
+msgstr "Löschen"

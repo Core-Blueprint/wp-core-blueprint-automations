@@ -2566,3 +2566,59 @@ msgstr "Verificar ou reparar o armazenamento Automations validado"
 #: src/Admin/SchemaSetupController.php
 msgid "Storage requires manual review. No tables were modified. Back up the database and inspect the existing installation."
 msgstr "O armazenamento exige uma análise manual. Nenhuma tabela foi alterada. Faça uma cópia de segurança da base de dados e verifique a instalação existente."
+
+#: templates/admin/automations.php
+msgid "Workflow deleted. Run history is retained."
+msgstr "Fluxo de trabalho eliminado. O histórico de execuções é mantido."
+
+#: templates/admin/automations.php
+msgid "Selected workflows deleted. Run history is retained."
+msgstr "Fluxos de trabalho selecionados eliminados. O histórico de execuções é mantido."
+
+#: templates/admin/automations.php
+msgid "Disable active workflows before deleting. Nothing was deleted."
+msgstr "Desative os fluxos de trabalho ativos antes de os eliminar. Nada foi eliminado."
+
+#: templates/admin/automations.php
+msgid "A selected workflow changed or no longer exists. Nothing was deleted. Reload and review."
+msgstr "Um fluxo de trabalho selecionado foi alterado ou já não existe. Nada foi eliminado. Recarregue a página e reveja a seleção."
+
+#: templates/admin/automations.php
+msgid "Select between 1 and 25 workflows on the current page."
+msgstr "Selecione entre 1 e 25 fluxos de trabalho na página atual."
+
+#: templates/admin/automations.php
+msgid "Confirm permanent deletion first."
+msgstr "Confirme primeiro a eliminação permanente."
+
+#: templates/admin/automations.php
+msgid "Deletion could not be verified. Reload and review before trying again."
+msgstr "Não foi possível verificar a eliminação. Recarregue a página e confirme o resultado antes de tentar novamente."
+
+#: templates/admin/automations.php
+msgid "Permanently delete selected disabled workflows. Run history is retained."
+msgstr "Eliminar permanentemente os fluxos de trabalho desativados selecionados. O histórico de execuções é mantido."
+
+#: templates/admin/automations.php
+msgid "Delete selected"
+msgstr "Eliminar selecionados"
+
+#: templates/admin/automations.php
+msgid "Select all disabled workflows on this page"
+msgstr "Selecionar todos os fluxos de trabalho desativados nesta página"
+
+#: templates/admin/automations.php
+msgid "Select workflow %s"
+msgstr "Selecionar fluxo de trabalho %s"
+
+#: templates/admin/automations.php
+msgid "Permanently delete this disabled workflow? This cannot be undone."
+msgstr "Eliminar permanentemente este fluxo de trabalho desativado? Esta ação não pode ser anulada."
+
+#: templates/admin/automations.php
+msgid "Only disabled workflows can be deleted."
+msgstr "Só é possível eliminar fluxos de trabalho desativados."
+
+#: templates/admin/automations.php
+msgid "Delete"
+msgstr "Eliminar"

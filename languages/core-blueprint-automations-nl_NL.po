@@ -2547,3 +2547,59 @@ msgstr "Geverifieerde Automations-opslag controleren of herstellen"
 #: src/Admin/SchemaSetupController.php
 msgid "Storage requires manual review. No tables were modified. Back up the database and inspect the existing installation."
 msgstr "Opslag vereist handmatige controle. Er zijn geen tabellen gewijzigd. Maak een databaseback-up en inspecteer de bestaande installatie."
+
+#: templates/admin/automations.php
+msgid "Workflow deleted. Run history is retained."
+msgstr "Workflow verwijderd. De uitvoeringsgeschiedenis blijft bewaard."
+
+#: templates/admin/automations.php
+msgid "Selected workflows deleted. Run history is retained."
+msgstr "Geselecteerde workflows verwijderd. De uitvoeringsgeschiedenis blijft bewaard."
+
+#: templates/admin/automations.php
+msgid "Disable active workflows before deleting. Nothing was deleted."
+msgstr "Schakel actieve workflows eerst uit voordat je ze verwijdert. Er is niets verwijderd."
+
+#: templates/admin/automations.php
+msgid "A selected workflow changed or no longer exists. Nothing was deleted. Reload and review."
+msgstr "Een geselecteerde workflow is gewijzigd of bestaat niet meer. Er is niets verwijderd. Herlaad de pagina en controleer je selectie."
+
+#: templates/admin/automations.php
+msgid "Select between 1 and 25 workflows on the current page."
+msgstr "Selecteer 1 tot 25 workflows op de huidige pagina."
+
+#: templates/admin/automations.php
+msgid "Confirm permanent deletion first."
+msgstr "Bevestig eerst dat je definitief wilt verwijderen."
+
+#: templates/admin/automations.php
+msgid "Deletion could not be verified. Reload and review before trying again."
+msgstr "De verwijdering kon niet worden geverifieerd. Herlaad de pagina en controleer voordat je het opnieuw probeert."
+
+#: templates/admin/automations.php
+msgid "Permanently delete selected disabled workflows. Run history is retained."
+msgstr "Geselecteerde uitgeschakelde workflows definitief verwijderen. De uitvoeringsgeschiedenis blijft bewaard."
+
+#: templates/admin/automations.php
+msgid "Delete selected"
+msgstr "Geselecteerde verwijderen"
+
+#: templates/admin/automations.php
+msgid "Select all disabled workflows on this page"
+msgstr "Selecteer alle uitgeschakelde workflows op deze pagina"
+
+#: templates/admin/automations.php
+msgid "Select workflow %s"
+msgstr "Selecteer workflow %s"
+
+#: templates/admin/automations.php
+msgid "Permanently delete this disabled workflow? This cannot be undone."
+msgstr "Deze uitgeschakelde workflow definitief verwijderen? Dit kan niet ongedaan worden gemaakt."
+
+#: templates/admin/automations.php
+msgid "Only disabled workflows can be deleted."
+msgstr "Alleen uitgeschakelde workflows kunnen worden verwijderd."
+
+#: templates/admin/automations.php
+msgid "Delete"
+msgstr "Verwijderen"
