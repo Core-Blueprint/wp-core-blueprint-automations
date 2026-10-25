@@ -380,3 +380,13 @@
  .cb-automations-workspace__folder-row { align-items: stretch; flex-direction: column; }
  .cb-automations-workspace__folder-assign { min-width: 240px; }
 }
+
+/* W3.2: compact selection toolbar, valid standalone forms, safe disabled-state cues. */
+.cb-automations-workspace__bulk-delete { display: flex; align-items: center; justify-content: flex-end; gap: var(--cb-space-3); flex-wrap: wrap; margin: 0 0 var(--cb-space-3); }
+.cb-automations-workspace__bulk-delete label { display: inline-flex; align-items: center; gap: var(--cb-space-2); font-size: var(--cb-fs-xs); color: var(--cb-text-muted); }
+.cb-automations-workspace__table .cb-automations-workspace__select-col { width: 42px; min-width: 42px; text-align: center; padding-inline: var(--cb-space-2); }
+.cb-automations-workspace__table td:nth-child(2) { width: 31%; }
+.cb-automations-workspace__table td:first-child { width: 42px; }
+.cb-automations-workspace__actions .cb-automations-workspace__delete { color: var(--cb-danger); }
+.cb-automations-workspace__delete:disabled { opacity: .45; cursor: not-allowed; }
+@media (max-width: 782px) { .cb-automations-workspace__bulk-delete { justify-content: flex-start; } }
