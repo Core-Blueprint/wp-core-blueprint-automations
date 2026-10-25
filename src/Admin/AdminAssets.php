@@ -41,6 +41,14 @@ final class AdminAssets {
 				[ 'cb-automations-admin' ],
 				is_file( $overview_css ) ? (string) filemtime( $overview_css ) : CB_AUTOMATIONS_VERSION
 			);
+			$bulk_js = CB_AUTOMATIONS_DIR . 'assets/js/admin-workflow-delete.js';
+			wp_enqueue_script(
+				'cb-automations-admin-workflow-delete',
+				CB_AUTOMATIONS_URL . 'assets/js/admin-workflow-delete.js',
+				[],
+				is_file( $bulk_js ) ? (string) filemtime( $bulk_js ) : CB_AUTOMATIONS_VERSION,
+				true
+			);
 			return;
 		}
 

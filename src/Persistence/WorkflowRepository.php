@@ -290,6 +290,94 @@ final class WorkflowRepository {
 		return 1 === $result;
 	}
 
+
+	/**
+	 * Permanently delete 1–25 disabled workflows atomically.
+	 *
+	 * All IDs, revisions and disabled states are locked and checked before
+	 * the first DELETE. Historical runs retain their immutable snapshots.
+	 *
+	 * @param array<int,int> $expected Workflow ID => render-time revision.
+	 * @return 'deleted'|'not_found'|'conflict'|'enabled'
+	 */
+	public static function delete_disabled_batch( array $expected ): string {
+		if ( ! Schema::authoring_ready() || ! Schema::folders_ready() ) {
+			throw PersistenceFailure::schema();
+		}
+		if ( count( $expected ) < 1 || count( $expected ) > 25 ) {
+			throw new \InvalidArgumentException( 'Invalid workflow delete selection.' );
+		}
+		foreach ( $expected as $id => $revision ) {
+			if ( ! is_int( $id ) || $id < 1 || ! is_int( $revision ) || $revision < 1 ) {
+				throw new \InvalidArgumentException( 'Invalid workflow delete cursor.' );
+			}
+		}
+		ksort( $expected, SORT_NUMERIC );
+		global $wpdb;
+		$table = Schema::table();
+		$assignments = Schema::assignments_table();
+		$ids = array_keys( $expected );
+		$tokens = implode( ', ', array_fill( 0, count( $ids ), '%d' ) );
+		if ( false === $wpdb->query( 'START TRANSACTION' ) ) {
+			throw PersistenceFailure::database( 'begin workflow deletion' );
+		}
+		try {
+			$rows = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT id, revision, activation_state FROM ${table} WHERE id IN (${tokens}) ORDER BY id ASC FOR UPDATE",
+					...$ids
+				),
+				ARRAY_A
+			);
+			if ( ! is_array( $rows ) || '' !== (string) $wpdb->last_error ) {
+				throw PersistenceFailure::database( 'verify deletion targets' );
+			}
+			if ( count( $rows ) !== count( $expected ) ) {
+				$wpdb->query( 'ROLLBACK' );
+				return 'not_found';
+			}
+			foreach ( $rows as $row ) {
+				$id = (int) ( $row['id'] ?? 0 );
+				if ( ! isset( $expected[ $id ] ) ) {
+					throw PersistenceFailure::database( 'verify deletion identity' );
+				}
+				if ( ActivationState::Enabled->value === (string) ( $row['activation_state'] ?? '' ) ) {
+					$wpdb->query( 'ROLLBACK' );
+					return 'enabled';
+				}
+				if ( ActivationState::Disabled->value !== (string) ( $row['activation_state'] ?? '' )
+					|| $expected[ $id ] !== (int) ( $row['revision'] ?? 0 ) ) {
+					$wpdb->query( 'ROLLBACK' );
+					return 'conflict';
+				}
+			}
+			foreach ( $expected as $id => $revision ) {
+				// Assignment cleanup is transactional. No run, receipt or job tables are changed.
+				if ( false === $wpdb->delete( $assignments, [ 'workflow_id' => $id ], [ '%d' ] ) ) {
+					throw PersistenceFailure::database( 'remove workflow folder assignment' );
+				}
+				$deleted = $wpdb->query(
+					$wpdb->prepare(
+						"DELETE FROM ${table} WHERE id = %d AND revision = %d AND activation_state = %s",
+						$id,
+						$revision,
+						ActivationState::Disabled->value
+					)
+				);
+				if ( 1 !== $deleted ) {
+					throw PersistenceFailure::database( 'delete verified workflow' );
+				}
+			}
+			if ( false === $wpdb->query( 'COMMIT' ) ) {
+				throw PersistenceFailure::database( 'commit workflow deletion' );
+			}
+			return 'deleted';
+		} catch ( \Throwable $error ) {
+			$wpdb->query( 'ROLLBACK' );
+			throw $error;
+		}
+	}
+
 	/** @param array<int,array<string,mixed>> $rows @return WorkflowRecord[] */
 	private static function hydrate_rows( array $rows ): array {
 		$records = [];

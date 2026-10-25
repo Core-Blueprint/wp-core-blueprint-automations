@@ -71,6 +71,7 @@ final class Plugin {
 		WorkflowFolderController::init();
 		WorkflowTransferController::init();
 		WorkflowActivationController::init();
+		WorkflowDeletionController::init();
 		AdminAssets::init();
 		RunsAssets::init();
 		DesignerAssets::init();
