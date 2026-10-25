@@ -23,7 +23,7 @@ test('W3.2 Select All selects only disabled workflows, tracks changes and preven
 			return { '[data-cb-workflow-select-all]': all, '[data-cb-workflow-bulk-submit]': button, '[data-cb-workflow-bulk-confirm]': confirm }[selector];
 		},
 		querySelectorAll(selector) {
-			if (selector === '[data-cb-workflow-select]') return [a, b];
+			if (selector === '[data-cb-workflow-select]:not(:disabled)') return [a, b];
 			return [];
 		},
 	};

@@ -89,7 +89,7 @@ final class FolderRepository {
 		$folders = self::folders_table(); $assignments = self::assignments_table();
 		if ( false === $wpdb->query( 'START TRANSACTION' ) ) { throw new \RuntimeException( 'Transaction unavailable.' ); }
 		try {
-			$workflow = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$workflows} WHERE id = %d LIMIT 1", $workflow_id ) );
+			$workflow = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$workflows} WHERE id = %d LIMIT 1 FOR UPDATE", $workflow_id ) );
 			if ( null === $workflow ) { $wpdb->query( 'ROLLBACK' ); return false; }
 			if ( 0 === $folder_id ) {
 				$result = $wpdb->delete( $assignments, [ 'workflow_id' => $workflow_id ], [ '%d' ] );

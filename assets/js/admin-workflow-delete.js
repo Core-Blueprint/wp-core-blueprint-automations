@@ -3,7 +3,7 @@
 	const root = document.querySelector('.cb-automations-workspace');
 	if (!root) return;
 	const selectAll = root.querySelector('[data-cb-workflow-select-all]');
-	const boxes = Array.from(root.querySelectorAll('[data-cb-workflow-select]'));
+	const boxes = Array.from(root.querySelectorAll('[data-cb-workflow-select]:not(:disabled)'));
 	const bulkButton = root.querySelector('[data-cb-workflow-bulk-submit]');
 	const confirmation = root.querySelector('[data-cb-workflow-bulk-confirm]');
 	const sync = () => {
