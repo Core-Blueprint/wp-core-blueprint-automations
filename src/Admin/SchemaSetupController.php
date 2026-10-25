@@ -29,7 +29,7 @@ final class SchemaSetupController {
 			? __( 'Automations runtime storage is unavailable. Disabled drafts can still be created, edited and saved, but execution is blocked.', 'core-blueprint-automations' )
 			: __( 'Automations storage is not ready. Workflow editing and execution are disabled.', 'core-blueprint-automations' );
 
-		echo '<div class="notice notice-warning"><p>' . esc_html( $message ) . '</p>';
+		echo '<div class="notice notice-warning"><p>' . esc_html( $message ) . '</p><p><code>' . esc_html( Schema::inspect() ) . '</code></p>';
 		$can_install = Schema::can_install_new() || Schema::can_reauthorize();
 		$can_repair = Schema::can_repair();
 		if ( $can_install || $can_repair ) {
