@@ -17,7 +17,9 @@ final class Lifecycle {
 		// A failed new-only schema setup is a HOLD, never deactivation: the
 		// WordPress-admin POST reauthorization route must remain reachable.
 		try {
-			Schema::install_new();
+			if ( ! Schema::install_new() ) {
+				error_log( '[Core Blueprint Automations] Existing storage needs verified administrator review.' );
+			}
 		} catch ( \Throwable $error ) {
 			error_log( '[Core Blueprint Automations] Persistence setup is on HOLD.' );
 		}
