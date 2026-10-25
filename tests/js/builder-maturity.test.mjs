@@ -180,7 +180,7 @@ test('Designer close and unload authority belong to the public Base Exit Guard',
 	assert.doesNotMatch(source, /const requestExit = async|chooseExitAction = async/);
 	assert.doesNotMatch(source, /allowConfirmedExit|window\.addEventListener\('beforeunload'\)|window\.addEventListener\('keydown'/);
 	assert.doesNotMatch(source, /launchRoot\?\.addEventListener\('click',[\s\S]*?data-cb-design-shell-close/);
-	assert.match(source, /createDesignerShell\(root, \{ defaultPanel: 'settings', defaultPanels: \{ palette: 'elements' \} \}\)/);
+	assert.match(source, /createDesignerShell\(root, \{ defaultPanel: 'settings', defaultPanels: \{ palette: 'stages' \} \}\)/);
 });
 
 test('Automations supplies a bounded Base Exit Guard adapter with verified Save and UNKNOWN fencing', async () => {
