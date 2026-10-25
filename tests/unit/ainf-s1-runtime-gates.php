@@ -3,10 +3,10 @@ declare(strict_types=1);
 $r=dirname(__DIR__,2);
 foreach ([
 'src/Support/Requirements.php'=>['Schema::ready()', 'execution_ready'],
-'src/Plugin.php'=>['Schema::ready()', 'RuntimeWorker::init()', 'TriggerIntake::init()'],
-'src/Workflow/WorkflowService.php'=>['Schema::ready()'],
-'src/Persistence/WorkflowRepository.php'=>['Schema::ready()'],
-'src/Organisation/FolderRepository.php'=>['Schema::ready()'],
+'src/Plugin.php'=>['Requirements::execution_ready()', 'RuntimeWorker::init()', 'TriggerIntake::init()', 'WorkflowController::init()'],
+'src/Workflow/WorkflowService.php'=>['Schema::authoring_ready()'],
+'src/Persistence/WorkflowRepository.php'=>['Schema::authoring_ready()'],
+'src/Organisation/FolderRepository.php'=>['Schema::folders_ready()'],
 'src/Runtime/OperatorRecoveryService.php'=>['Schema::ready()'],
 ] as $f=>$parts){$s=file_get_contents($r.'/'.$f);foreach($parts as $p){if(!str_contains($s,$p)){throw new RuntimeException("Unfenced $f missing $p");}}}
 // Direct folder mutators must independently enforce readiness, not only POST controllers.
