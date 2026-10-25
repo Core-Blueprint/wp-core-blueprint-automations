@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { readFileSync, existsSync } from 'node:fs';
 import { runInNewContext } from 'node:vm';
+import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
 
 const read = (path) => readFileSync(new URL('../../' + path, import.meta.url), 'utf8');
@@ -165,6 +166,11 @@ test('DSA-07: Stages is translated in the Automations domain for all six locales
 test('DSA-08: real pinned Base F02 layout keeps translated Stages and Layers distinct', () => {
   const baseDir = process.env.CB_BASE_DESIGNER_F02_REPO
     || join(process.env.HOME || '', 'Downloads/wp-core-blueprint-f02-pairing');
+  assert.equal(
+    execFileSync('git', ['-C', baseDir, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
+    '11622c6224862b0b414352b0fda6e895e2cf153c',
+    'stage-label regression requires exact accepted Base F02 SOURCE',
+  );
   const baseLayoutPath = join(baseDir, 'assets/js/features/designer-layout.js');
   assert.ok(existsSync(baseLayoutPath), 'exact paired Base F02 layout must be available');
   const baseLayout = readFileSync(baseLayoutPath, 'utf8');
