@@ -10,6 +10,7 @@ use CB\Automations\Admin\RecoveryCapability;
 use CB\Automations\Admin\RunHistoryCapability;
 use CB\Automations\Admin\RunsAssets;
 use CB\Automations\Admin\WorkflowActivationController;
+use CB\Automations\Admin\SchemaSetupController;
 use CB\Automations\Admin\WorkflowController;
 use CB\Automations\Admin\WorkflowFolderController;
 use CB\Automations\Admin\WorkflowTransferController;
@@ -37,11 +38,12 @@ final class Plugin {
 			return;
 		}
 
-		try {
-			Schema::maybe_upgrade();
-		} catch ( \Throwable $error ) {
+		// Always expose the privileged, site-scoped setup controller on HOLD.
+		if ( is_admin() ) {
+			SchemaSetupController::init();
+		}
+		if ( ! Schema::ready() ) {
 			self::$boot_error = 'persistence';
-			error_log( '[Core Blueprint Automations] Persistence initialization failed: ' . $error->getMessage() );
 			return;
 		}
 

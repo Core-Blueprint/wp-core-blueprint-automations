@@ -18,7 +18,7 @@ require_once dirname( __DIR__, 2 ) . '/src/Support/Requirements.php';
 
 use CB\Automations\Support\Requirements;
 
-if ( ! Requirements::bootstrap_ready() ) {
+if ( ! Requirements::runtime_ready() ) {
 	fwrite( STDERR, "Bootstrap-safe requirements unexpectedly failed.\n" );
 	exit( 1 );
 }

@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 /**
- * W3.1 source and boundary contracts. Real dbDelta/WordPress UI is a separate
+ * W3.1 source and boundary contracts. Real physical WordPress UI is a separate
  * installation acceptance gate; no database is mutated in this test.
  */
 $root = dirname( __DIR__, 2 );
@@ -24,8 +24,7 @@ $plugin = $read( 'src/Plugin.php' );
 $wakeup = $read( 'src/Runtime/WorkerWakeup.php' );
 
 foreach ( [
-	[ $folder, "private const OPTION = 'cb_automations_folders_schema_version'" ],
-	[ $folder, 'dbDelta(' ],
+	[ $folder, 'Schema::ready()' ],
 	[ $folder, 'self::folders_table()' ],
 	[ $folder, 'self::assignments_table()' ],
 	[ $folder, 'ON DUPLICATE KEY UPDATE folder_id = VALUES(folder_id)' ],
@@ -58,7 +57,7 @@ foreach ( [
 		throw new RuntimeException( 'Missing W3.1 safety contract: ' . $needle );
 	}
 }
-if ( str_contains( $folder, 'wp_schedule_single_event(' )
+if ( str_contains( $folder, 'dbDelta(' ) || str_contains( $folder, 'cb_automations_folders_schema_version' ) || str_contains( $folder, 'wp_schedule_single_event(' )
 	|| str_contains( $folder, 'WorkflowRepository::update(' )
 	|| str_contains( $folder, 'definition_json' )
 	|| str_contains( $folder, 'activation_state' )

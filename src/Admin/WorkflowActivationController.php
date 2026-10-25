@@ -25,6 +25,16 @@ final class WorkflowActivationController {
 	}
 
 	public static function toggle(): void {
+		// WordPress admin_post_ also dispatches GET, HEAD and other methods.
+		// Reject before looking up any workflow or parsing any submitted fields.
+		if ( 'POST' !== ( $_SERVER['REQUEST_METHOD'] ?? null ) ) {
+			wp_die(
+				esc_html__( 'This action requires HTTP POST.', 'core-blueprint-automations' ),
+				esc_html__( 'Method not allowed', 'core-blueprint-automations' ),
+				[ 'response' => 405 ]
+			);
+		}
+
 		if ( ! current_user_can( AutomationsPage::CAPABILITY ) ) {
 			wp_die(
 				esc_html__( 'You do not have permission to manage Automations.', 'core-blueprint-automations' ),
@@ -55,31 +65,58 @@ final class WorkflowActivationController {
 			);
 		}
 
+		// Exact render-time revision is mandatory, and must remain a PHP integer
+		// without JS-Number rounding, scalar coercion, overflow or implied refresh.
+		$revision_input = isset( $_POST['expected_revision'] ) && is_string( $_POST['expected_revision'] )
+			? wp_unslash( $_POST['expected_revision'] ) : '';
+		$expected_revision = 0;
+		if ( 1 === preg_match( '/^[1-9][0-9]*$/D', $revision_input ) ) {
+			$parsed = filter_var( $revision_input, FILTER_VALIDATE_INT, [
+				'options' => [ 'min_range' => 1, 'max_range' => PHP_INT_MAX - 1 ],
+			] );
+			$expected_revision = false === $parsed ? 0 : $parsed;
+		}
+		if ( $expected_revision < 1 ) {
+			self::redirect( 'invalid' );
+		}
+
+		// This read checks what the operator actually saw, but is not a lock.
+		// WorkflowService performs the authoritative SQL WHERE revision CAS.
 		try {
 			$service = new WorkflowService();
-			$record  = $service->find( $id );
-			if ( null === $record ) {
-				self::redirect( 'not_found' );
-			}
+			$record = $service->find( $id );
+		} catch ( \Throwable $error ) {
+			error_log( '[Core Blueprint Automations] Workflow activation read failed: ' . $error->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			self::redirect( 'storage_failed' );
+		}
+		if ( null === $record ) {
+			self::redirect( 'not_found' );
+		}
+		if ( $record->revision() !== $expected_revision ) {
+			self::redirect( 'conflict' );
+		}
+		if ( $record->activation_state() === $target ) {
+			self::redirect( 'invalid' );
+		}
 
+		try {
 			$result = $service->save(
 				$record->id(),
-				$record->revision(),
+				$expected_revision,
 				$record->name(),
 				$target,
 				$record->definition(),
 				get_current_user_id(),
 				false
 			);
-
-			self::redirect( self::notice_for_result( $result, $target ) );
-		} catch ( PersistenceFailure $error ) {
-			error_log( '[Core Blueprint Automations] Workflow activation persistence failure: ' . $error->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- bounded diagnostic without workflow data.
-			self::redirect( 'storage_failed' );
+			$notice = self::notice_for_result( $result, $target );
 		} catch ( \Throwable $error ) {
-			error_log( '[Core Blueprint Automations] Workflow activation failed: ' . $error->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- bounded diagnostic without workflow data.
-			self::redirect( 'failed' );
+			// Save might already have reached SQL commit. Neither success nor
+			// definitive failure is provable; never repeat the operator's POST.
+			error_log( '[Core Blueprint Automations] Workflow activation result unverified: ' . $error->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			$notice = 'activation_unverified';
 		}
+		self::redirect( $notice );
 	}
 
 	public static function nonce_action( int $workflow_id ): string {
@@ -103,6 +140,7 @@ final class WorkflowActivationController {
 			WorkflowSaveResult::SAVED => ActivationState::Enabled === $requested_state ? 'enabled' : 'disabled',
 			WorkflowSaveResult::PERSISTENCE_BLOCKED => 'persistence_blocked',
 			WorkflowSaveResult::CONFLICT => 'conflict',
+			WorkflowSaveResult::READBACK_UNVERIFIED => 'activation_unverified',
 			default => 'failed',
 		};
 	}

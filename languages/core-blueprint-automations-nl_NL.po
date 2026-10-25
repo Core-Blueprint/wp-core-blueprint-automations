@@ -1542,12 +1542,6 @@ msgstr ""
 msgid "The workflow contains data that cannot be persisted safely."
 msgstr "De workflow bevat gegevens die niet veilig kunnen worden opgeslagen."
 
-#: templates/admin/automations.php:33
-msgid "The workflow changed in another request. Reload and retry."
-msgstr ""
-"De workflow is via een ander verzoek gewijzigd. Laad opnieuw en probeer het "
-"nogmaals."
-
 #: templates/admin/automations.php:34
 msgid "Workflow not found."
 msgstr "Workflow niet gevonden."
@@ -2509,3 +2503,35 @@ msgstr "Opslaan als sjabloon"
 #: src/Admin/DesignerAssets.php
 msgid "Review latest version in a new tab"
 msgstr "Nieuwste versie in een nieuw tabblad bekijken"
+
+#: src/Admin/SchemaSetupController.php:23
+msgid "Automations storage is not ready. Workflow editing and execution are disabled."
+msgstr "De opslag voor Automations is niet gereed. Workflows bewerken en uitvoeren is uitgeschakeld."
+
+#: src/Admin/SchemaSetupController.php:28
+msgid "Retry clean installation before database creation"
+msgstr "Schone installatie opnieuw proberen vóór het aanmaken van databasetabellen"
+
+#: src/Admin/SchemaSetupController.php:35
+msgid "POST required."
+msgstr "POST is vereist."
+
+#: src/Admin/SchemaSetupController.php:38
+msgid "Not authorized."
+msgstr "Niet gemachtigd."
+
+#: src/Admin/WorkflowActivationController.php:32
+msgid "This action requires HTTP POST."
+msgstr "Voor deze actie is HTTP POST vereist."
+
+#: src/Admin/WorkflowActivationController.php:33
+msgid "Method not allowed"
+msgstr "Methode niet toegestaan"
+
+#: templates/admin/automations.php:36
+msgid "The workflow changed since you opened the page. Review the current workflow before changing its status."
+msgstr "De workflow is gewijzigd sinds je de pagina opende. Controleer de huidige workflow voordat je de status aanpast."
+
+#: templates/admin/automations.php:37
+msgid "The activation change could not be verified. Review the current workflow before taking further action."
+msgstr "De wijziging van de activatiestatus kon niet worden geverifieerd. Controleer de huidige workflow voordat je verdere actie onderneemt."

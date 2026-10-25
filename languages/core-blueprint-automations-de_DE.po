@@ -1548,12 +1548,6 @@ msgid "The workflow contains data that cannot be persisted safely."
 msgstr ""
 "Der Workflow enthält Daten, die nicht sicher gespeichert werden können."
 
-#: templates/admin/automations.php:33
-msgid "The workflow changed in another request. Reload and retry."
-msgstr ""
-"Der Workflow wurde durch eine andere Anfrage geändert. Lade die Seite neu "
-"und versuche es erneut."
-
 #: templates/admin/automations.php:34
 msgid "Workflow not found."
 msgstr "Workflow nicht gefunden."
@@ -2527,3 +2521,35 @@ msgstr "Als Vorlage speichern"
 #: src/Admin/DesignerAssets.php
 msgid "Review latest version in a new tab"
 msgstr "Neueste Version in einem neuen Tab öffnen"
+
+#: src/Admin/SchemaSetupController.php:23
+msgid "Automations storage is not ready. Workflow editing and execution are disabled."
+msgstr "Der Automations-Datenspeicher ist nicht bereit. Das Bearbeiten und Ausführen von Workflows ist deaktiviert."
+
+#: src/Admin/SchemaSetupController.php:28
+msgid "Retry clean installation before database creation"
+msgstr "Saubere Installation vor dem Erstellen der Datenbanktabellen erneut versuchen"
+
+#: src/Admin/SchemaSetupController.php:35
+msgid "POST required."
+msgstr "POST ist erforderlich."
+
+#: src/Admin/SchemaSetupController.php:38
+msgid "Not authorized."
+msgstr "Nicht autorisiert."
+
+#: src/Admin/WorkflowActivationController.php:32
+msgid "This action requires HTTP POST."
+msgstr "Diese Aktion erfordert HTTP POST."
+
+#: src/Admin/WorkflowActivationController.php:33
+msgid "Method not allowed"
+msgstr "Methode nicht zulässig"
+
+#: templates/admin/automations.php:36
+msgid "The workflow changed since you opened the page. Review the current workflow before changing its status."
+msgstr "Der Workflow wurde seit dem Öffnen der Seite geändert. Prüfen Sie den aktuellen Workflow, bevor Sie seinen Status ändern."
+
+#: templates/admin/automations.php:37
+msgid "The activation change could not be verified. Review the current workflow before taking further action."
+msgstr "Die Aktivierungsänderung konnte nicht überprüft werden. Prüfen Sie den aktuellen Workflow, bevor Sie weitere Maßnahmen ergreifen."

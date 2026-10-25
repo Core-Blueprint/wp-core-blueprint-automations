@@ -6,6 +6,7 @@ namespace CB\Automations\Runtime;
 use CB\Automations\Binding\Binding;
 use CB\Automations\Persistence\OperatorRecoveryRepository;
 use CB\Automations\Persistence\RunRepository;
+use CB\Automations\Persistence\Schema;
 use CB\Automations\Workflow\Step;
 
 defined( 'ABSPATH' ) || exit;
@@ -18,6 +19,7 @@ final class OperatorRecoveryService {
 		OperatorRecoveryDecision $decision,
 		int $operator_user_id
 	): RunStatus {
+		if ( ! Schema::ready() ) { throw new OperatorRecoveryFailure( 'recovery.schema_unavailable' ); }
 		if ( $run_id < 1 || $attempt < 1 || $operator_user_id < 1 || 1 !== preg_match( '/^[a-z][a-z0-9_]{0,63}$/D', $node_id ) ) {
 			throw new \InvalidArgumentException( 'Invalid automation operator recovery request.' );
 		}

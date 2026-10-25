@@ -26,7 +26,6 @@ if ( defined( 'CB_AUTOMATIONS_FILE' ) ) {
 }
 
 define( 'CB_AUTOMATIONS_VERSION', '1.0.0-rc2' );
-define( 'CB_AUTOMATIONS_DB_VERSION', '2' );
 define( 'CB_AUTOMATIONS_REQUIRED_API', '1.0' );
 define( 'CB_AUTOMATIONS_FILE', __FILE__ );
 define( 'CB_AUTOMATIONS_DIR', plugin_dir_path( __FILE__ ) );

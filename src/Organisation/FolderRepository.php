@@ -6,50 +6,16 @@ defined( 'ABSPATH' ) || exit;
 
 /** Additive admin-only organisation. Execution engine state is never mutated. */
 final class FolderRepository {
-	private const VERSION = '1';
-	private const OPTION = 'cb_automations_folders_schema_version';
-	private static bool $ready = false;
 	public static function folders_table(): string {
-		global $wpdb;
-		return $wpdb->prefix . 'cb_automations_folders';
+		return Schema::folders_table();
 	}
 	public static function assignments_table(): string {
-		global $wpdb;
-		return $wpdb->prefix . 'cb_automations_folder_assignments';
+		return Schema::assignments_table();
 	}
 	public static function ensure_ready(): void {
-		if ( self::$ready ) { return; }
-		global $wpdb;
-		$folders = self::folders_table();
-		$assignments = self::assignments_table();
-		$version_current = self::VERSION === (string) get_option( self::OPTION, '' );
-		if ( ! $version_current ) {
-			require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-			$charset = $wpdb->get_charset_collate();
-			dbDelta( "CREATE TABLE {$folders} (
-				id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-				name varchar(191) NOT NULL,
-				created_at datetime(6) NOT NULL,
-				updated_at datetime(6) NOT NULL,
-				PRIMARY KEY  (id),
-				UNIQUE KEY name (name)
-			) ENGINE=InnoDB {$charset};" );
-			dbDelta( "CREATE TABLE {$assignments} (
-				workflow_id bigint(20) unsigned NOT NULL,
-				folder_id bigint(20) unsigned NOT NULL,
-				PRIMARY KEY  (workflow_id),
-				KEY folder_id (folder_id)
-			) ENGINE=InnoDB {$charset};" );
+		if ( ! Schema::ready() ) {
+			throw new \RuntimeException( 'Canonical Automations schema is unavailable.' );
 		}
-		foreach ( [ $folders, $assignments ] as $table ) {
-			$found = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table ) ) );
-			$state = $wpdb->get_row( $wpdb->prepare( 'SHOW TABLE STATUS LIKE %s', $wpdb->esc_like( $table ) ), ARRAY_A );
-			if ( $table !== $found || ! is_array( $state ) || 'innodb' !== strtolower( (string) ( $state['Engine'] ?? '' ) ) ) {
-				throw new \RuntimeException( 'Workflow folders database schema is unavailable.' );
-			}
-		}
-		if ( ! $version_current ) { update_option( self::OPTION, self::VERSION, false ); }
-		self::$ready = true;
 	}
 	/** @return list<array{id:int,name:string}> */
 	public static function all(): array {
@@ -65,6 +31,7 @@ final class FolderRepository {
 		return $name;
 	}
 	public static function create( string $name ): int {
+		self::ensure_ready();
 		global $wpdb;
 		$table = self::folders_table();
 		$count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- trusted table.
@@ -77,6 +44,7 @@ final class FolderRepository {
 		return (int) $wpdb->insert_id;
 	}
 	public static function rename( int $id, string $name ): bool {
+		self::ensure_ready();
 		global $wpdb;
 		if ( $id < 1 ) { return false; }
 		$result = $wpdb->update( self::folders_table(),
@@ -93,6 +61,7 @@ final class FolderRepository {
 	}
 	/** Atomic folder deletion unfiles workflows, never deletes them. */
 	public static function delete( int $id ): bool {
+		self::ensure_ready();
 		global $wpdb;
 		if ( $id < 1 ) { return false; }
 		$folders = self::folders_table(); $assignments = self::assignments_table();
@@ -110,6 +79,7 @@ final class FolderRepository {
 	}
 	/** Folder id 0 removes an assignment. Both operations preserve workflow revisions. */
 	public static function assign( int $workflow_id, int $folder_id ): bool {
+		self::ensure_ready();
 		global $wpdb;
 		if ( $workflow_id < 1 || $folder_id < 0 ) { return false; }
 		$workflows = Schema::workflows_table();

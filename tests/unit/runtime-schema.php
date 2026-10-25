@@ -18,8 +18,8 @@ if ( false === $schema || false === $run_repository || false === $history_reposi
 
 $failures = [];
 
-if ( ! str_contains( $bootstrap, "define( 'CB_AUTOMATIONS_DB_VERSION', '2' );" ) ) {
-	$failures[] = 'AU2 runtime persistence must use one schema upgrade from v1 to v2.';
+if ( str_contains( $bootstrap, 'CB_AUTOMATIONS_DB_VERSION' ) ) {
+    $failures[] = 'Historical schema-version bootstrap retained.';
 }
 
 foreach ( [
@@ -67,11 +67,8 @@ foreach ( [ $run_repository, $history_repository, $recovery_repository ] as $run
 	}
 }
 
-if ( ! str_contains( $schema, "'2' === CB_AUTOMATIONS_DB_VERSION && '2' !== \$current" ) || ! str_contains( $schema, 'migrate_pre_v2_to_v2' ) ) {
-	$failures[] = 'Schema does not fail-safe every pre-v2 dataset into the single v2 runtime schema.';
-}
-if ( ! str_contains( $schema, "'activation_state' => 'disabled'" ) || ! str_contains( $schema, "'execution_principal_user_id' => 0" ) ) {
-	$failures[] = 'Existing workflows are not fail-safe disabled with principal 0 during migration to v2.';
+if ( str_contains( $schema, 'migrate_pre_v2_to_v2' ) || str_contains( $schema, 'upgrade_from(' ) ) {
+    $failures[] = 'Historical runtime schema migration retained.';
 }
 if ( str_contains( $schema, "created_by' => execution_principal" ) || str_contains( $schema, "updated_by' => execution_principal" ) ) {
 	$failures[] = 'Execution authority must never be inferred from creator/updater metadata.';
@@ -93,4 +90,4 @@ if ( [] !== $failures ) {
 	exit( 1 );
 }
 
-fwrite( STDOUT, "Runtime schema v2: PASS\n" );
+fwrite( STDOUT, "Runtime clean-v1 schema: PASS\n" );

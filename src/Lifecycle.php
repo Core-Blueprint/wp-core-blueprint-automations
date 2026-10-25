@@ -14,11 +14,12 @@ final class Lifecycle {
 			self::fail_activation( Requirements::activation_message() );
 		}
 
+		// A failed new-only schema setup is a HOLD, never deactivation: the
+		// WordPress-admin POST reauthorization route must remain reachable.
 		try {
-			Schema::activate();
+			Schema::install_new();
 		} catch ( \Throwable $error ) {
-			error_log( '[Core Blueprint Automations] Persistence schema initialization failed: ' . $error->getMessage() );
-			self::fail_activation( 'Core Blueprint Automations could not initialize its persistence schema.' );
+			error_log( '[Core Blueprint Automations] Persistence setup is on HOLD.' );
 		}
 	}
 

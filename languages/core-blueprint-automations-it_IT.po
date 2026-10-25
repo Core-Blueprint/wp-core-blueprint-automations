@@ -1548,12 +1548,6 @@ msgstr ""
 "Il flusso di lavoro contiene dati che non possono essere salvati in modo "
 "sicuro."
 
-#: templates/admin/automations.php:33
-msgid "The workflow changed in another request. Reload and retry."
-msgstr ""
-"Il flusso di lavoro è stato modificato da un’altra richiesta. Ricarica la "
-"pagina e riprova."
-
 #: templates/admin/automations.php:34
 msgid "Workflow not found."
 msgstr "Flusso di lavoro non trovato."
@@ -2525,3 +2519,35 @@ msgstr "Salva come modello"
 #: src/Admin/DesignerAssets.php
 msgid "Review latest version in a new tab"
 msgstr "Visualizza la versione più recente in una nuova scheda"
+
+#: src/Admin/SchemaSetupController.php:23
+msgid "Automations storage is not ready. Workflow editing and execution are disabled."
+msgstr "L’archiviazione di Automations non è pronta. La modifica e l’esecuzione dei workflow sono disabilitate."
+
+#: src/Admin/SchemaSetupController.php:28
+msgid "Retry clean installation before database creation"
+msgstr "Riprovare l’installazione iniziale prima di creare le tabelle del database"
+
+#: src/Admin/SchemaSetupController.php:35
+msgid "POST required."
+msgstr "È richiesto POST."
+
+#: src/Admin/SchemaSetupController.php:38
+msgid "Not authorized."
+msgstr "Non autorizzato."
+
+#: src/Admin/WorkflowActivationController.php:32
+msgid "This action requires HTTP POST."
+msgstr "Questa azione richiede HTTP POST."
+
+#: src/Admin/WorkflowActivationController.php:33
+msgid "Method not allowed"
+msgstr "Metodo non consentito"
+
+#: templates/admin/automations.php:36
+msgid "The workflow changed since you opened the page. Review the current workflow before changing its status."
+msgstr "Il workflow è cambiato dopo l’apertura della pagina. Controlla il workflow attuale prima di modificarne lo stato."
+
+#: templates/admin/automations.php:37
+msgid "The activation change could not be verified. Review the current workflow before taking further action."
+msgstr "Non è stato possibile verificare la modifica dell’attivazione. Controlla il workflow attuale prima di procedere."

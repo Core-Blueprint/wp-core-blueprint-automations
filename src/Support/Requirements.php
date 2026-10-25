@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace CB\Automations\Support;
 
 use CB\Automations\Runtime\Vault;
+use CB\Automations\Persistence\Schema;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -45,15 +46,6 @@ final class Requirements {
 		return [] === self::issues();
 	}
 
-	/** Compatibility aliases retained for the existing activation lifecycle/tests. */
-	public static function bootstrap_issues(): array {
-		return self::issues();
-	}
-
-	public static function bootstrap_ready(): bool {
-		return self::runtime_ready();
-	}
-
 	/** @return string[] Automations product-runtime issue IDs. */
 	public static function product_issues(): array {
 		if ( ! self::runtime_ready() ) {
@@ -83,11 +75,6 @@ final class Requirements {
 		return self::runtime_ready() && [] === self::product_issues();
 	}
 
-	/** Legacy diagnostic name retained; this reports combined Bootstrap + product-runtime issues. */
-	public static function runtime_issues(): array {
-		return array_values( array_unique( array_merge( self::issues(), self::product_issues() ) ) );
-	}
-
 	/** @return string[] Stable machine-readable execution issue IDs. */
 	public static function execution_issues(): array {
 		if ( ! self::runtime_ready() ) {
@@ -97,6 +84,9 @@ final class Requirements {
 		$issues = self::product_issues();
 		if ( [] !== $issues ) {
 			return $issues;
+		}
+		if ( ! Schema::ready() ) {
+			$issues[] = 'schema-unavailable';
 		}
 		if ( ! Vault::available() ) {
 			$issues[] = 'runtime-crypto-unavailable';

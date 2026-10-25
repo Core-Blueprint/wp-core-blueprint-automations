@@ -7,6 +7,8 @@ use CB\Automations\Admin\EditorSaveBoundary;
 use CB\Automations\Discovery\CapabilityCatalog;
 use CB\Automations\Discovery\CapabilitySource;
 use CB\Automations\Persistence\WorkflowRecord;
+use CB\Automations\Persistence\Schema;
+use CB\Automations\Persistence\PersistenceFailure;
 use CB\Automations\Persistence\WorkflowRepository;
 use CB\Automations\Support\Requirements;
 use CB\Automations\Validation\ValidationResult;
@@ -28,6 +30,7 @@ final class WorkflowService {
 	}
 
 	public function create( string $name, Definition $definition, int $user_id ): int {
+		if ( ! Schema::ready() ) { throw PersistenceFailure::schema(); }
 		$validation = $this->validator->validate( $definition );
 		if ( ! PersistencePolicy::allows( $validation ) ) {
 			throw new \DomainException( 'Workflow definition contains sensitive literal data that cannot be persisted safely.' );
@@ -55,6 +58,7 @@ final class WorkflowService {
 		bool $rebind_execution_principal = false
 	): WorkflowSaveResult {
 		$validation = $this->validator->validate( $definition );
+		if ( ! Schema::ready() ) { return WorkflowSaveResult::persistence_blocked( $validation ); }
 		if ( ! EditorIntegerSafety::is_browser_safe( $definition ) ) {
 			return WorkflowSaveResult::precision_blocked( $validation );
 		}

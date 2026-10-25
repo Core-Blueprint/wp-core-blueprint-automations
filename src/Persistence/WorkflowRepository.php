@@ -15,6 +15,7 @@ defined( 'ABSPATH' ) || exit;
 
 final class WorkflowRepository {
 	public static function create( string $name, Definition $definition, int $user_id ): int {
+		if ( ! Schema::ready() ) { throw PersistenceFailure::schema(); }
 		global $wpdb;
 
 		$name = self::normalize_name( $name );
@@ -243,6 +244,7 @@ final class WorkflowRepository {
 		int $execution_principal_user_id,
 		int $user_id
 	): bool {
+		if ( ! Schema::ready() ) { throw PersistenceFailure::schema(); }
 		global $wpdb;
 
 		if ( $id < 1 || $expected_revision < 1 || $execution_principal_user_id < 0 || $user_id < 0 ) {

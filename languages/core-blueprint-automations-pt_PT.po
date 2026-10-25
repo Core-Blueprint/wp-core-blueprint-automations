@@ -1548,12 +1548,6 @@ msgid "The workflow contains data that cannot be persisted safely."
 msgstr ""
 "O fluxo de trabalho contém dados que não podem ser guardados em segurança."
 
-#: templates/admin/automations.php:33
-msgid "The workflow changed in another request. Reload and retry."
-msgstr ""
-"O fluxo de trabalho foi alterado por outro pedido. Recarregue a página e "
-"tente novamente."
-
 #: templates/admin/automations.php:34
 msgid "Workflow not found."
 msgstr "Fluxo de trabalho não encontrado."
@@ -2528,3 +2522,35 @@ msgstr "Guardar como modelo"
 #: src/Admin/DesignerAssets.php
 msgid "Review latest version in a new tab"
 msgstr "Ver a versão mais recente num novo separador"
+
+#: src/Admin/SchemaSetupController.php:23
+msgid "Automations storage is not ready. Workflow editing and execution are disabled."
+msgstr "O armazenamento do Automations não está pronto. A edição e a execução de fluxos de trabalho estão desativadas."
+
+#: src/Admin/SchemaSetupController.php:28
+msgid "Retry clean installation before database creation"
+msgstr "Repetir a instalação inicial antes de criar as tabelas da base de dados"
+
+#: src/Admin/SchemaSetupController.php:35
+msgid "POST required."
+msgstr "É obrigatório utilizar POST."
+
+#: src/Admin/SchemaSetupController.php:38
+msgid "Not authorized."
+msgstr "Não autorizado."
+
+#: src/Admin/WorkflowActivationController.php:32
+msgid "This action requires HTTP POST."
+msgstr "Esta ação requer HTTP POST."
+
+#: src/Admin/WorkflowActivationController.php:33
+msgid "Method not allowed"
+msgstr "Método não permitido"
+
+#: templates/admin/automations.php:36
+msgid "The workflow changed since you opened the page. Review the current workflow before changing its status."
+msgstr "O fluxo de trabalho foi alterado desde que abriu a página. Reveja o fluxo de trabalho atual antes de alterar o seu estado."
+
+#: templates/admin/automations.php:37
+msgid "The activation change could not be verified. Review the current workflow before taking further action."
+msgstr "Não foi possível verificar a alteração da ativação. Reveja o fluxo de trabalho atual antes de realizar outra ação."

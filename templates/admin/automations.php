@@ -33,7 +33,8 @@ $notices = [
 	'saved_disabled_operator_denied' => [ 'warning', __( 'Your account does not have the required permissions.', 'core-blueprint-automations' ) ],
 	'saved_disabled_capability_unavailable' => [ 'warning', __( 'Workflow capability contracts cannot be verified.', 'core-blueprint-automations' ) ],
 	'persistence_blocked' => [ 'error', __( 'The workflow contains data that cannot be persisted safely.', 'core-blueprint-automations' ) ],
-	'conflict' => [ 'warning', __( 'The workflow changed in another request. Reload and retry.', 'core-blueprint-automations' ) ],
+	'conflict' => [ 'warning', __( 'The workflow changed since you opened the page. Review the current workflow before changing its status.', 'core-blueprint-automations' ) ],
+	'activation_unverified' => [ 'warning', __( 'The activation change could not be verified. Review the current workflow before taking further action.', 'core-blueprint-automations' ) ],
 	'not_found' => [ 'error', __( 'Workflow not found.', 'core-blueprint-automations' ) ],
 	'invalid' => [ 'error', __( 'Invalid workflow configuration.', 'core-blueprint-automations' ) ],
 	'invalid_name' => [ 'error', __( 'Enter an automation name between 1 and 191 characters.', 'core-blueprint-automations' ) ],
@@ -280,6 +281,7 @@ $notices = [
 										<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 											<input type="hidden" name="action" value="cb_automations_toggle_workflow" />
 											<input type="hidden" name="workflow_id" value="<?php echo esc_attr( (string) $record->id() ); ?>" />
+											<input type="hidden" name="expected_revision" value="<?php echo esc_attr( (string) $record->revision() ); ?>" />
 											<input type="hidden" name="activation_state" value="<?php echo esc_attr( $target ); ?>" />
 											<input type="hidden" name="_cb_automations_nonce" value="<?php echo esc_attr( wp_create_nonce( \CB\Automations\Admin\WorkflowActivationController::nonce_action( $record->id() ) ) ); ?>" />
 											<button type="submit" class="button button-small"><?php echo esc_html( $enabled ? __( 'Disable', 'core-blueprint-automations' ) : __( 'Enable', 'core-blueprint-automations' ) ); ?></button>

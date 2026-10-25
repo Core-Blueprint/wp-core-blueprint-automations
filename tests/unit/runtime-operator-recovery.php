@@ -17,11 +17,18 @@ if ( in_array( false, [ $schema, $repository, $service, $decision, $state_machin
 	throw new RuntimeException( 'Could not read AU2.9 operator recovery sources.' );
 }
 
-if ( ! str_contains( $bootstrap, "define( 'CB_AUTOMATIONS_DB_VERSION', '2' );" ) || str_contains( $bootstrap, "CB_AUTOMATIONS_DB_VERSION', '3'" ) ) {
-	throw new RuntimeException( 'AU2.9 must remain inside the single unpublished v2 schema upgrade.' );
+if ( str_contains( $bootstrap, 'CB_AUTOMATIONS_DB_VERSION' )
+	|| str_contains( $schema, 'migrate_pre_v2_to_v2' )
+	|| str_contains( $schema, 'upgrade_from(' )
+	|| ! str_contains( $schema, "private const MARKER = 'cb_automations_schema_v1'" )
+	|| ! str_contains( $schema, 'public static function inspect(): string' ) ) {
+	throw new RuntimeException( 'Operator recovery must use the sole clean-v1 readiness authority, never a development-schema upgrader.' );
 }
-if ( ! str_contains( $schema, 'cb_automations_run_recoveries' ) || ! str_contains( $schema, 'UNIQUE KEY run_node_attempt' ) ) {
-	throw new RuntimeException( 'Operator recovery ledger is missing from the complete v2 schema.' );
+if ( ! str_contains( $schema, "'recoveries' => 'cb_automations_run_recoveries'" )
+	|| ! str_contains( $schema, 'UNIQUE KEY run_node_attempt (run_id, node_id, attempt)' )
+	|| ! str_contains( $schema, 'ENGINE=InnoDB' )
+	|| ! str_contains( $service, 'OperatorRecoveryRepository::resolve(' ) ) {
+	throw new RuntimeException( 'Clean-v1 operator recovery ledger or run/node/attempt uniqueness was lost.' );
 }
 if ( str_contains( $state_machine, 'RunStatus::Indeterminate => in_array( $to, [ RunStatus::Queued' ) ) {
 	throw new RuntimeException( 'Indeterminate to Queued became a generic runtime transition.' );

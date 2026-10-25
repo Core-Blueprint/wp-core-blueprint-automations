@@ -5,7 +5,6 @@ namespace CB\Automations\Runtime;
 
 use CB\Automations\Capability\CapabilityKind;
 use CB\Automations\Workflow\Definition;
-use CB\Automations\Workflow\DefinitionCodec;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -30,18 +29,6 @@ final class TriggerKey {
 		}
 
 		return hash( 'sha256', implode( "\0", [ $provider, $trigger_id, $schema_version ] ) );
-	}
-
-	public static function from_encoded_json( string $json ): string {
-		try {
-			$decoded = json_decode( $json, true, 64, JSON_THROW_ON_ERROR );
-			if ( ! is_array( $decoded ) ) {
-				return '';
-			}
-			return self::for_definition( DefinitionCodec::decode( $decoded ) );
-		} catch ( \Throwable ) {
-			return '';
-		}
 	}
 
 	public static function is_valid( string $key ): bool {

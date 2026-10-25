@@ -62,7 +62,7 @@ final class WorkflowRecoveryPlanner {
         try {
             $validation = ( new WorkflowValidator( $snapshot['source'] ) )->validate( $stored );
             $privacy = $validation->has_code( 'privacy.sensitive_literal' )
-                || self::legacy_trigger_bindings( $stored );
+                || self::unsafe_trigger_bindings( $stored );
             $number = ! EditorIntegerSafety::is_browser_safe( $stored );
             $codes = [];
             if ( $privacy ) {
@@ -149,7 +149,7 @@ final class WorkflowRecoveryPlanner {
 
             $validation = ( new WorkflowValidator( $snapshot['source'] ) )->validate( $candidate );
             $pending_privacy = ! PersistencePolicy::allows( $validation )
-                || self::legacy_trigger_bindings( $candidate );
+                || self::unsafe_trigger_bindings( $candidate );
             $pending_integer = ! EditorIntegerSafety::is_browser_safe( $candidate );
             $pending_codes = [];
             if ( $pending_privacy ) {
@@ -214,7 +214,7 @@ final class WorkflowRecoveryPlanner {
         return true;
     }
 
-    private static function legacy_trigger_bindings( Definition $stored ): bool {
+    private static function unsafe_trigger_bindings( Definition $stored ): bool {
         return null !== $stored->trigger() && [] !== $stored->trigger()->bindings();
     }
 

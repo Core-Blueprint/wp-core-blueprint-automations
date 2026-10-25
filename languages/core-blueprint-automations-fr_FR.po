@@ -1551,12 +1551,6 @@ msgstr ""
 "Le flux de travail contient des données qui ne peuvent pas être enregistrées "
 "en toute sécurité."
 
-#: templates/admin/automations.php:33
-msgid "The workflow changed in another request. Reload and retry."
-msgstr ""
-"Le flux de travail a été modifié par une autre requête. Rechargez la page et "
-"réessayez."
-
 #: templates/admin/automations.php:34
 msgid "Workflow not found."
 msgstr "Flux de travail introuvable."
@@ -2530,3 +2524,35 @@ msgstr "Enregistrer comme modèle"
 #: src/Admin/DesignerAssets.php
 msgid "Review latest version in a new tab"
 msgstr "Consulter la dernière version dans un nouvel onglet"
+
+#: src/Admin/SchemaSetupController.php:23
+msgid "Automations storage is not ready. Workflow editing and execution are disabled."
+msgstr "Le stockage d’Automations n’est pas prêt. La modification et l’exécution des workflows sont désactivées."
+
+#: src/Admin/SchemaSetupController.php:28
+msgid "Retry clean installation before database creation"
+msgstr "Réessayer l’installation initiale avant la création des tables de la base de données"
+
+#: src/Admin/SchemaSetupController.php:35
+msgid "POST required."
+msgstr "La méthode POST est requise."
+
+#: src/Admin/SchemaSetupController.php:38
+msgid "Not authorized."
+msgstr "Non autorisé."
+
+#: src/Admin/WorkflowActivationController.php:32
+msgid "This action requires HTTP POST."
+msgstr "Cette action nécessite une requête HTTP POST."
+
+#: src/Admin/WorkflowActivationController.php:33
+msgid "Method not allowed"
+msgstr "Méthode non autorisée"
+
+#: templates/admin/automations.php:36
+msgid "The workflow changed since you opened the page. Review the current workflow before changing its status."
+msgstr "Le workflow a changé depuis l’ouverture de la page. Vérifiez le workflow actuel avant de modifier son état."
+
+#: templates/admin/automations.php:37
+msgid "The activation change could not be verified. Review the current workflow before taking further action."
+msgstr "Le changement d’activation n’a pas pu être vérifié. Vérifiez le workflow actuel avant toute autre action."

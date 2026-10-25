@@ -1479,10 +1479,6 @@ msgstr ""
 msgid "The workflow contains data that cannot be persisted safely."
 msgstr ""
 
-#: templates/admin/automations.php:33
-msgid "The workflow changed in another request. Reload and retry."
-msgstr ""
-
 #: templates/admin/automations.php:34
 msgid "Workflow not found."
 msgstr ""
@@ -2313,4 +2309,36 @@ msgstr ""
 
 #: src/Admin/DesignerAssets.php
 msgid "Review latest version in a new tab"
+msgstr ""
+
+#: src/Admin/SchemaSetupController.php:23
+msgid "Automations storage is not ready. Workflow editing and execution are disabled."
+msgstr ""
+
+#: src/Admin/SchemaSetupController.php:28
+msgid "Retry clean installation before database creation"
+msgstr ""
+
+#: src/Admin/SchemaSetupController.php:35
+msgid "POST required."
+msgstr ""
+
+#: src/Admin/SchemaSetupController.php:38
+msgid "Not authorized."
+msgstr ""
+
+#: src/Admin/WorkflowActivationController.php:32
+msgid "This action requires HTTP POST."
+msgstr ""
+
+#: src/Admin/WorkflowActivationController.php:33
+msgid "Method not allowed"
+msgstr ""
+
+#: templates/admin/automations.php:36
+msgid "The workflow changed since you opened the page. Review the current workflow before changing its status."
+msgstr ""
+
+#: templates/admin/automations.php:37
+msgid "The activation change could not be verified. Review the current workflow before taking further action."
 msgstr ""
