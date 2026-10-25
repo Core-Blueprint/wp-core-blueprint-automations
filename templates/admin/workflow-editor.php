@@ -167,10 +167,10 @@ if ( ! is_string( $definition_json ) ) {
 			<div class="cb-core-design-shell__workspace">
 				<aside class="cb-core-design-shell__palette cb-core-design-shell__palette--tabbed cb-core-design-shell__palette--composed cb-automations-stage-nav" aria-label="<?php esc_attr_e( 'Workflow stages', 'core-blueprint-automations' ); ?>">
 					<div class="cb-core-design-shell__tabs cb-core-design-shell__palette-tabs" role="tablist" aria-label="<?php esc_attr_e( 'Workflow', 'core-blueprint-automations' ); ?>">
-						<button type="button" class="cb-core-design-shell__tab is-active" role="tab" aria-selected="true" data-cb-design-shell-tab="elements" data-cb-design-shell-group="palette" data-cb-design-shell-palette-role="elements"><?php esc_html_e( 'Stages', 'core-blueprint-automations' ); ?></button>
+						<button type="button" class="cb-core-design-shell__tab is-active" role="tab" aria-selected="true" data-cb-design-shell-tab="stages" data-cb-design-shell-group="palette" data-cb-design-shell-palette-role="navigation"><?php esc_html_e( 'Stages', 'core-blueprint-automations' ); ?></button>
 						<button type="button" class="cb-core-design-shell__tab" role="tab" aria-selected="false" data-cb-design-shell-tab="layers" data-cb-design-shell-group="palette" data-cb-design-shell-palette-role="layers"><?php esc_html_e( 'Layers', 'core-blueprint' ); ?></button>
 					</div>
-					<section class="cb-core-design-shell__panel cb-core-design-shell__palette-panel" role="tabpanel" data-cb-design-shell-panel="elements" data-cb-design-shell-group="palette">
+					<section class="cb-core-design-shell__panel cb-core-design-shell__palette-panel" role="tabpanel" data-cb-design-shell-panel="stages" data-cb-design-shell-group="palette" data-cb-design-shell-palette-label="<?php echo esc_attr__( 'Stages', 'core-blueprint-automations' ); ?>">
 						<div class="cb-core-design-shell__panel-body" data-cb-automations-elements-panel></div>
 					</section>
 					<section class="cb-core-design-shell__panel cb-core-design-shell__palette-panel" role="tabpanel" data-cb-design-shell-panel="layers" data-cb-design-shell-group="palette" hidden>

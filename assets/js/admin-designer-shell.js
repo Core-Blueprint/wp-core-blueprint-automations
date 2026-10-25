@@ -388,7 +388,7 @@ if (root) {
 	applyPanelTitle(propertiesSidebar, propertiesLabel);
 	if (workflowTitle) workflowTitle.remove();
 
-	createDesignerShell(root, { defaultPanel: 'settings', defaultPanels: { palette: 'elements' } });
+	createDesignerShell(root, { defaultPanel: 'settings', defaultPanels: { palette: 'stages' } });
 	configureDesignerSidebar(root, {
 		roles: { inspector: 'inspector', settings: 'settings' },
 		activeRole: 'settings',

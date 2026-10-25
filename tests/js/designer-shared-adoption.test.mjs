@@ -15,18 +15,18 @@ const assets = read('src/Admin/DesignerAssets.php');
 
 test('DSA-01: Automations uses two Base-owned palette tabs and keeps Inspector/Settings', () => {
   assert.match(template, /cb-core-design-shell__palette--tabbed/);
-  assert.match(template, /data-cb-design-shell-group="palette" data-cb-design-shell-palette-role="elements"/);
-  assert.match(template, /data-cb-design-shell-palette-role="elements"><\?php esc_html_e\( 'Stages', 'core-blueprint-automations' \); \?><\/button>/);
+  assert.match(template, /data-cb-design-shell-group="palette" data-cb-design-shell-palette-role="navigation"/);
+  assert.match(template, /data-cb-design-shell-palette-role="navigation"><\?php esc_html_e\( 'Stages', 'core-blueprint-automations' \); \?><\/button>/);
   assert.doesNotMatch(template, /esc_html_e\( 'Elements', 'core-blueprint' \)/);
   assert.match(template, /data-cb-design-shell-group="palette" data-cb-design-shell-palette-role="layers"/);
-  assert.match(template, /data-cb-design-shell-panel="elements" data-cb-design-shell-group="palette"/);
+  assert.match(template, /data-cb-design-shell-panel="stages" data-cb-design-shell-group="palette" data-cb-design-shell-palette-label="<\?php echo esc_attr__\( 'Stages', 'core-blueprint-automations' \); \?>"/);
   assert.match(template, /data-cb-design-shell-panel="layers" data-cb-design-shell-group="palette"/);
   assert.match(template, /data-cb-automations-elements-panel/);
   assert.match(template, /data-cb-automations-layers-host/);
   assert.match(template, /data-cb-design-shell-sidebar-role="inspector"/);
   assert.match(template, /data-cb-design-shell-sidebar-role="settings"/);
   assert.match(shell, /stageHost\.append\(navigation\.element\)/);
-  assert.match(shell, /defaultPanels: \{ palette: 'elements' \}/);
+  assert.match(shell, /defaultPanels: \{ palette: 'stages' \}/);
   assert.doesNotMatch(template, /data-cb-design-shell-status/);
 });
 
@@ -159,4 +159,84 @@ test('DSA-07: Stages is translated in the Automations domain for all six locales
       `localized Stages label must be present and reviewed for ${locale}`,
     );
   }
+});
+
+
+test('DSA-08: real pinned Base F02 layout keeps translated Stages and Layers distinct', () => {
+  const baseDir = process.env.CB_BASE_DESIGNER_F02_REPO
+    || join(process.env.HOME || '', 'Downloads/wp-core-blueprint-f02-pairing');
+  const baseLayoutPath = join(baseDir, 'assets/js/features/designer-layout.js');
+  assert.ok(existsSync(baseLayoutPath), 'exact paired Base F02 layout must be available');
+  const baseLayout = readFileSync(baseLayoutPath, 'utf8');
+
+  // Drive the actual Base layout normalizer, not a copied label resolver.
+  class FakeElement {
+    constructor(dataset = {}, textContent = '') {
+      this.dataset = dataset;
+      this.textContent = textContent;
+      this.children = [];
+      this.classList = { add() {} };
+      this.lookups = new Map();
+    }
+    querySelector(selector) { return this.lookups.get(selector) ?? null; }
+    querySelectorAll(selector) { return this.lookups.get(selector) ?? []; }
+  }
+
+  const stagesTab = new FakeElement(
+    { cbDesignShellTab: 'stages', cbDesignShellPaletteRole: 'navigation' }, 'Stages');
+  const layersTab = new FakeElement(
+    { cbDesignShellTab: 'layers', cbDesignShellPaletteRole: 'layers' }, 'Layers');
+  const stagesPanel = new FakeElement(
+    { cbDesignShellPanel: 'stages', cbDesignShellPaletteLabel: 'Stages' });
+  const layersPanel = new FakeElement({ cbDesignShellPanel: 'layers' });
+  const tablist = new FakeElement();
+  tablist.children = [stagesTab, layersTab];
+  tablist.lookups.set('[data-cb-design-shell-tab]', [stagesTab, layersTab]);
+  const palette = new FakeElement();
+  palette.children = [tablist, stagesPanel, layersPanel];
+  palette.lookups.set(':scope > .cb-core-design-shell__tabs', tablist);
+  palette.lookups.set(':scope > [data-cb-design-shell-panel]', [stagesPanel, layersPanel]);
+  const workspace = new FakeElement();
+  const canvas = new FakeElement();
+  const sidebar = new FakeElement();
+  workspace.children = [palette, canvas, sidebar];
+  workspace.lookups.set(':scope > .cb-core-design-shell__palette', palette);
+  workspace.lookups.set(':scope > .cb-core-design-shell__canvas', canvas);
+  workspace.lookups.set(':scope > .cb-core-design-shell__sidebar', sidebar);
+  const shellRoot = new FakeElement();
+  shellRoot.lookups.set('.cb-core-design-shell__workspace', workspace);
+  shellRoot.lookups.set(
+    '.cb-core-design-shell__workspace > .cb-core-design-shell__palette', palette);
+  const launchRoot = new FakeElement();
+  launchRoot.lookups.set('[data-cb-design-shell]', shellRoot);
+  const document = {
+    documentElement: {},
+    readyState: 'complete',
+    querySelectorAll: selector => selector === '[data-cb-design-launch-root]' ? [launchRoot] : [],
+  };
+  const observers = [];
+  class FakeMutationObserver {
+    constructor(callback) { this.callback = callback; observers.push(this); }
+    observe() {}
+  }
+
+  runInNewContext(baseLayout, {
+    window: { cbCoreDesignerLaunch: {
+      paletteLabels: { navigation: 'Navigation', elements: 'Elements', layers: 'Layers' },
+    } },
+    document,
+    Element: FakeElement,
+    MutationObserver: FakeMutationObserver,
+    queueMicrotask: callback => callback(),
+  }, { timeout: 3000 });
+
+  assert.deepEqual([stagesTab.textContent, layersTab.textContent], ['Stages', 'Layers']);
+  assert.equal(stagesPanel.dataset.cbDesignShellPaletteRole, 'navigation');
+  assert.equal(layersPanel.dataset.cbDesignShellPaletteRole, 'layers');
+  assert.equal(stagesTab.dataset.cbDesignShellPaletteRole, 'navigation');
+  assert.equal(workspace.dataset.cbDesignShellLayout, 'canonical');
+  // A later Base normalization must not silently restore the global Elements label.
+  assert.equal(observers.length, 2);
+  observers[1].callback();
+  assert.deepEqual([stagesTab.textContent, layersTab.textContent], ['Stages', 'Layers']);
 });
