@@ -111,7 +111,9 @@ final class WorkflowEditorData {
 		$statuses = get_post_stati( [ 'internal' => false ], 'objects' );
 		$options = [];
 		foreach ( $statuses as $name => $status ) {
-			if ( ! is_string( $name ) || ! preg_match( '/^[a-z][a-z0-9_-]{0,31}$/D', $name )
+			// Match the audited WordPressAction status authority policy.
+			// A custom status may require provider-specific permissions.
+			if ( ! in_array( $name, [ 'draft', 'pending', 'publish', 'future', 'private' ], true )
 				|| ! is_object( $status ) ) {
 				continue;
 			}
