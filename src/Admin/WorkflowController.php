@@ -180,6 +180,10 @@ final class WorkflowController {
 	}
 
 	private static function guard( string $nonce_action ): void {
+		if ( 'POST' !== ( $_SERVER['REQUEST_METHOD'] ?? null ) ) {
+			wp_die( esc_html__( 'This action requires HTTP POST.', 'core-blueprint-automations' ), '', [ 'response' => 405 ] );
+		}
+
 		if ( ! current_user_can( AutomationsPage::CAPABILITY ) ) {
 			wp_die( esc_html__( 'You do not have permission to manage Automations.', 'core-blueprint-automations' ), esc_html__( 'Forbidden', 'core-blueprint-automations' ), [ 'response' => 403 ] );
 		}
