@@ -66,7 +66,7 @@ namespace {
     require_once dirname( __DIR__, 2 ) . '/src/Admin/TemplateManagementController.php';
     require_once dirname( __DIR__, 2 ) . '/src/Admin/WorkflowController.php';
 
-    $run = static function ( string $method, string $scenario, array $fields ): string {
+    $run = static function ( callable $method, string $scenario, array $fields ): string {
         $_SERVER['REQUEST_METHOD'] = 'POST';
         $_POST = [ '_cb_automations_nonce' => 'valid' ] + $fields;
         \CB\Automations\Template\StoredTemplateRepository::$mode = $scenario;
