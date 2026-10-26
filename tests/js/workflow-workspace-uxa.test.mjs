@@ -72,8 +72,8 @@ test('UX-A.1 keeps folder management alongside the title and reduces only workfl
 	assert.match(section, /name="action" value="cb_automations_folder_create"/);
 	assert.match(section, /name="action" value="cb_automations_folder_rename"/);
 	assert.match(section, /name="action" value="cb_automations_folder_delete"/);
-	assert.match(style, /cb-automations-workspace__panel--workflows \\{/);
-	assert.match(style, /cb-automations-workspace__panel-title/);
-	assert.match(style, /cb-automations-workspace__folder-manager\\[open\\]/);
-	assert.match(style, /cb-automations-workspace__panel--workflows \\.cb-automations-workspace__quick-filters/);
+	assert.ok(style.includes('.cb-automations-workspace__panel--workflows {'));
+	assert.ok(style.includes('.cb-automations-workspace__panel-title'));
+	assert.ok(style.includes('.cb-automations-workspace__folder-manager[open]'));
+	assert.ok(style.includes('.cb-automations-workspace__panel--workflows .cb-automations-workspace__quick-filters'));
 });
