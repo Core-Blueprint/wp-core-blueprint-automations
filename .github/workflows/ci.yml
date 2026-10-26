@@ -46,6 +46,9 @@ jobs:
       - name: Human condition builder regression
         run: node tests/js/condition-builder.test.mjs
 
+      - name: Single condition preview renderer regression
+        run: node --test tests/js/editor-condition-preview-owner.test.mjs
+
       - name: Shared Designer Shell regression
         run: node tests/js/designer-shell.test.mjs
 
