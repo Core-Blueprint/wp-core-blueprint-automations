@@ -45,7 +45,7 @@ $expectations = [
 	[ ! str_contains( $files['editor'], 'cb-automations-design-shell__identity' ), 'Legacy Automations Designer identity markup must remain removed.' ],
 	[ ! str_contains( $files['editor'], 'cb-core-wrap' ), 'Canonical Designer routes must not depend on the Core Admin wrapper for presentation.' ],
 	[ str_contains( $files['reader'], 'public function context_items(): array' ), 'Designer workflow switching must reuse the canonical admin read service.' ],
-	[ str_contains( $files['reader'], 'WorkflowRepository::list( 100, $offset )' ), 'Designer workflow context must reuse canonical workflow listing persistence.' ],
+	[ str_contains( $files['reader'], 'WorkflowRepository::list_context_metadata( 100, $offset )' ) && ! str_contains( $files['reader'], 'WorkflowRepository::list( 100, $offset )' ), 'Designer workflow context must use metadata-only persistence without hydrating other workflow definitions.' ],
 	[ str_contains( $files['editor'], 'AutomationsPage::url(' ), 'Designer workflow switching must reuse the canonical workflow route builder.' ],
 	[ str_contains( $files['editor'], 'data-cb-design-shell-undo' ), 'Undo must be declared in the server-rendered Designer toolbar.' ],
 	[ str_contains( $files['editor'], 'data-cb-design-shell-redo' ), 'Redo must be declared in the server-rendered Designer toolbar.' ],
