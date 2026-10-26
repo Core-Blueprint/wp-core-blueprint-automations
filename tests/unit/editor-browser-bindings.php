@@ -28,8 +28,15 @@ $action = step( 'action_1', reference( CapabilityKind::ACTION, $provider, 'fixtu
 $stored = DefinitionCodec::encode( definition( $trigger, [ $state ], [], [ $action ] ) );
 $original = $stored;
 
-// This is the privacy-sanitized definition, never raw private storage.
-$projection = EditorDefinitionProjection::project( $stored, [] );
+// Verify the current provider schema before treating ordinary literals as
+// browser-safe. An unknown provider cannot prove a literal is non-sensitive.
+$verified_action = capability( CapabilityKind::ACTION, $provider, 'fixture.action', [
+	'items' => field( 'array', false, false, 'string' ),
+	'label' => field( 'string', false, false ),
+], [] );
+$projection = EditorDefinitionProjection::project( $stored, [
+	'action:' . $provider . ':fixture.action' => $verified_action,
+] );
 assert_true( 0 === $projection['redacted'], 'Ordinary fixture should not be redacted.' );
 assert_true( [] === $projection['definition']['trigger']['bindings'], 'RED fixture: PHP encodes empty trigger bindings as a JSON list.' );
 assert_true( [] === $projection['definition']['states'][0]['bindings'], 'RED fixture: PHP encodes empty state bindings as a JSON list.' );
