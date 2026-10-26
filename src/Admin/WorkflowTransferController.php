@@ -151,6 +151,10 @@ final class WorkflowTransferController {
 	}
 
 	public static function export(): void {
+		if ( 'POST' !== ( $_SERVER['REQUEST_METHOD'] ?? null ) ) {
+			wp_die( esc_html__( 'This action requires HTTP POST.', 'core-blueprint-automations' ), '', [ 'response' => 405 ] );
+		}
+
 		$id = isset( $_POST['workflow_id'] ) && is_scalar( $_POST['workflow_id'] )
 			? absint( wp_unslash( (string) $_POST['workflow_id'] ) ) : 0;
 		if ( $id < 1 ) { self::redirect( 'export_unavailable' ); }
@@ -177,6 +181,10 @@ final class WorkflowTransferController {
 	}
 
 	private static function guard( string $nonce_action ): void {
+		if ( 'POST' !== ( $_SERVER['REQUEST_METHOD'] ?? null ) ) {
+			wp_die( esc_html__( 'This action requires HTTP POST.', 'core-blueprint-automations' ), '', [ 'response' => 405 ] );
+		}
+
 		if ( ! current_user_can( AutomationsPage::CAPABILITY ) ) {
 			wp_die( esc_html__( 'You do not have permission to manage Automations.', 'core-blueprint-automations' ), '', [ 'response' => 403 ] );
 		}
