@@ -79,7 +79,8 @@ final class EditorDefinitionProjection {
 				$left_literal    = 'literal' === ( $left['source'] ?? null );
 				$right_literal   = 'literal' === ( $right['source'] ?? null );
 
-				if ( ( $left_sensitive && $right_literal ) || ( $right_sensitive && $left_literal ) ) {
+				if ( ( $left_sensitive && $right_literal ) || ( $right_sensitive && $left_literal )
+					|| ( $left_literal && $right_literal ) ) {
 					++$redacted;
 					continue;
 				}
