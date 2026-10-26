@@ -143,3 +143,20 @@ Read-only GitHub source scan across all **109 remaining `src/**/*.php` files** a
 **R3 validation HOLD:** obtain exact new source SHA from GitHub branch, create isolated detached worktree, run new regression, entire existing **133 JavaScript tests plus the new test**, all PHP unit regressions, Base F02 pairing and i18n, release builder and checksum. Sandbox smoke specifically condition preview after editing unary/binary operators, switching context, save/reopen and undo/redo. No release acceptance or merge before verified receipt.
 
 **Deferred cleanup:** The old `reads_as` localization key in AdminAssets is no longer consumed by `admin-editor-polish.js`; remove its source string and synchronize canonical POT/PO in a dedicated future i18n change rather than destabilizing this narrow DOM-ownership patch. The R3 source should not introduce a second condition renderer or custom Base history.
+
+
+## R3 verification and R4 template admin error boundaries (2026-10-26)
+
+**R3 receipt:** operator validated `411a5f4b14f0110d50c3f09e7dbd50a4b7cd6807` on its isolated, clean detached worktree. PHP regressions PASS, JS **134/134 PASS** (including single-owner condition-preview test), six-locale i18n PASS, Base v1 contract PASS and ZIP integrity/checksum PASS. The R3 archive SHA-256 was `dd30a06361a19d06bd01b6d6fe6c03075dcc24ce015aecc94f87b80d7e4eb789`. The R3 sandbox visual acceptance is still open.
+
+**R4 finding:** WordPress native template storage and third-party template registration can throw. `TemplateManagementController::delete()` previously called `StoredTemplateRepository::remove()` without handling exceptions; `TemplateManagementController::export()` called `get()`, `definition()` and serialized the result before any catch; and `WorkflowController::create_from_template()` loaded templates before its existing try/catch. Those faults can produce uncaught admin errors despite the rest of the product using controlled notices. No claim that ordinary WordPress storage failures always throw; this is resilience to exceptions from DB/storage hooks and provider integrations.
+
+**R4 minimal behavior-preserving patch:**
+- Template delete catches unexpected exceptions and routes to existing `template_unavailable` notice, never claiming success without a confirmed return value.
+- Template export catches storage/encoding exceptions and refuses to send any download headers or JSON until the complete definition is ready.
+- Workflow creation from saved/registered template catches failure during source lookup and redirects to existing `template_unavailable` notice. The existing principal, disabled-by-default workflow creation, nonce and capability policies remain unchanged.
+- New `tests/unit/template-admin-error-boundary.php` invokes the real controllers under simulated WordPress hook/read/delete/provider failures and checks safe notices. The test is selected in CI but CI was not started.
+
+**R4 SOURCE HOLD until operator tests:** isolated worktree at the new GitHub branch SHA; run `php -l` on changed PHP files and the new test, `php tests/unit/template-admin-error-boundary.php`, full PHP loop, all JS tests, i18n, release build, ZIP integrity and checksum. Repeat template create/delete/export smoke in sandbox. The previous validated R3 archive stays available until acceptance.
+
+The next audit step should **not** invent a new template storage abstraction: R4 deliberately keeps canonical WordPress post APIs and existing repository boundaries. All nontrivial refactors require a demonstrated functional or maintenance benefit.
