@@ -78,17 +78,22 @@ final class WorkflowController {
 		if ( '' !== $source && ( StoredTemplateRepository::SOURCE_ID !== $source || Suite::EXTENSION_ID !== $provider ) ) {
 			self::redirect( [ 'notice' => 'template_unavailable' ] );
 		}
-		$saved_id = StoredTemplateRepository::saved_id( $template_id );
-		$definition = null;
-		$name = '';
-		if ( null !== $saved_id && StoredTemplateRepository::SOURCE_ID === $source ) {
-			$stored = StoredTemplateRepository::get( $saved_id, get_current_user_id() );
-			$definition = StoredTemplateRepository::definition( $saved_id, get_current_user_id() );
-			$name = null !== $stored ? $stored->post_title : '';
-		} elseif ( null === $saved_id ) {
-			$template = WorkflowTemplateRegistry::get( $provider, $template_id );
-			$definition = null !== $template ? $template->definition() : null;
-			$name = null !== $template ? $template->title() : '';
+		try {
+			$saved_id = StoredTemplateRepository::saved_id( $template_id );
+			$definition = null;
+			$name = '';
+			if ( null !== $saved_id && StoredTemplateRepository::SOURCE_ID === $source ) {
+				$stored = StoredTemplateRepository::get( $saved_id, get_current_user_id() );
+				$definition = StoredTemplateRepository::definition( $saved_id, get_current_user_id() );
+				$name = null !== $stored ? $stored->post_title : '';
+			} elseif ( null === $saved_id ) {
+				$template = WorkflowTemplateRegistry::get( $provider, $template_id );
+				$definition = null !== $template ? $template->definition() : null;
+				$name = null !== $template ? $template->title() : '';
+			}
+		} catch ( \Throwable ) {
+			// An unavailable template source must not become an uncaught admin error.
+			self::redirect( [ 'notice' => 'template_unavailable' ] );
 		}
 		if ( null === $definition || '' === $name ) {
 			self::redirect( [ 'notice' => 'template_unavailable' ] );
