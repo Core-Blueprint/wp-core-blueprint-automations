@@ -21,11 +21,11 @@ namespace {
 	require_once dirname( __DIR__, 2 ) . '/src/Admin/WorkflowEditorData.php';
 	$method = new \ReflectionMethod( \CB\Automations\Admin\WorkflowEditorData::class, 'post_status_options' );
 	$rows = $method->invoke( null );
-	if ( [ 'draft', 'publish', 'pending', 'future', 'private', 'company_review' ] !== array_column( $rows, 'value' ) ) {
+	if ( [ 'draft', 'publish', 'pending', 'future', 'private' ] !== array_column( $rows, 'value' ) ) {
 		throw new \RuntimeException( 'Missing or unsafe site-registered post statuses.' );
 	}
-	if ( 'Company review' !== $rows[5]['label'] ) {
-		throw new \RuntimeException( 'Post status labels were not normalized.' );
+	if ( in_array( 'company_review', array_column( $rows, 'value' ), true ) ) {
+		throw new \RuntimeException( 'Custom statuses without an audited authority contract must not be offered.' );
 	}
 	fwrite( STDOUT, "WordPress post status choices projection: PASS\n" );
 }
