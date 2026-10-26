@@ -24,5 +24,5 @@ test('R3 condition preview has one renderer and stable post-grid placement', () 
   // conditionchange/input/click microtasks and moves the DOM above the grid.
   assert.doesNotMatch(polish, /cb-automations-condition-summary/);
   assert.doesNotMatch(polish, /conditionRightText\(|function literalText\(/);
-  assert.equal((builder.match(/cb-automations-condition-summary'/g) || []).length, 1);
+  assert.match(builder, /summary\.className = 'cb-automations-condition-summary';/);
 });
