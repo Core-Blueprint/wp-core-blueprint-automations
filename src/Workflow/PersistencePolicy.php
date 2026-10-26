@@ -11,7 +11,8 @@ final class PersistencePolicy {
 	public const MAX_DEFINITION_BYTES = 262144;
 
 	public static function allows( ValidationResult $validation ): bool {
-		return ! $validation->has_code( 'privacy.sensitive_literal' );
+		return ! $validation->has_code( 'privacy.sensitive_literal' )
+			&& ! $validation->has_code( 'privacy.unverified_literal' );
 	}
 
 	public static function allows_encoded_definition( string $json ): bool {
