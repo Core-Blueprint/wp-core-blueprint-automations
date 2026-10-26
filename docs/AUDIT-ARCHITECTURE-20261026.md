@@ -123,3 +123,23 @@ Architecture priority:
 Read-only GitHub source scan across all **109 remaining `src/**/*.php` files** at the R2 feature branch: the declared namespace and top-level class/interface/enum/trait name match the PSR-4-equivalent source path, including root `CB\\Automations` classes. Result: **109/109 structural matches, 0 mismatches**. This is not a PHP runtime/autoload execution result and does not establish absence of stale/unreferenced classes. The bootstrap initializer resolution is separately covered by `tests/unit/runtime-bootstrap.php`.
 
 `admin-editor.js` remains the primary presentation-density candidate (~748 lines), but it owns concrete domain authoring controls and is already wired to public Base Selection/History; a file size alone does not justify another framework or a wholesale rewrite. More targeted duplication/reachability evidence is required before R3 source changes.
+
+
+## R2 validation receipt and R3 single-owner condition preview refactor (2026-10-26)
+
+**R2 validated by operator:** source `1dc753ed9417184e322470bee4859843c2a6720c` on clean detached worktree; PHP unit regressions PASS, JavaScript **133/133 PASS**, six-locale i18n PASS, Base v1 contract PASS, release ZIP integrity and checksum PASS. ZIP SHA-256 `46d9744e9c0c51f0d6969c0a47f75238a18c975b82de6407ef510dd18aecfd03`. No R2 sandbox acceptance yet provided.
+
+**R3 finding (actual duplicate UI ownership):**
+- `admin-editor-polish.js` rendered/moved `.cb-automations-condition-summary` **before** the condition grid, using generic lowercase operator labels and its own literal-format helpers.
+- `admin-condition-builder.js` separately rendered/moved the **same node after** the condition grid with schema-aware operator phrasing and unary/binary arity handling. Both registered definitionchange/change/input/click refreshes. The later-loaded condition-builder was authoritative but both could repeatedly rewrite and reposition the same DOM node.
+
+**R3 scope (no domain or runtime rewrite):**
+- Remove the duplicate preview constructor/updater and now-unused literal/condition text helpers from `admin-editor-polish.js` (31 fewer lines).
+- Preserve the polish layer's step titles, input labels, technical/advanced details.
+- Keep `admin-condition-builder.js` as the only preview renderer and preserve existing CSS, translation sources, event ownership and Base integration.
+- New focused source-ownership regression `tests/js/editor-condition-preview-owner.test.mjs` checks the real modules and unary-aware after-grid placement. Add to explicit CI selection; CI not triggered.
+- Static authoring-side regex checks over fetched new sources passed (not a substitute for `node --test` or sandbox browser validation).
+
+**R3 validation HOLD:** obtain exact new source SHA from GitHub branch, create isolated detached worktree, run new regression, entire existing **133 JavaScript tests plus the new test**, all PHP unit regressions, Base F02 pairing and i18n, release builder and checksum. Sandbox smoke specifically condition preview after editing unary/binary operators, switching context, save/reopen and undo/redo. No release acceptance or merge before verified receipt.
+
+**Deferred cleanup:** The old `reads_as` localization key in AdminAssets is no longer consumed by `admin-editor-polish.js`; remove its source string and synchronize canonical POT/PO in a dedicated future i18n change rather than destabilizing this narrow DOM-ownership patch. The R3 source should not introduce a second condition renderer or custom Base history.
