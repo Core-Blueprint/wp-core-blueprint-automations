@@ -86,26 +86,35 @@ final class TemplateManagementController {
 	public static function delete(): void {
 		$id = self::requested_id( 'template_id' );
 		$actor = self::authorize( 'delete', $id );
-		if ( ! StoredTemplateRepository::remove( $id, $actor ) ) {
-			self::go( [ 'template_manage' => 'saved-' . $id, 'notice' => 'template_unavailable' ] );
+		try {
+			$removed = StoredTemplateRepository::remove( $id, $actor );
+		} catch ( \Throwable ) {
+			$removed = false;
 		}
-		self::go( [ 'notice' => 'template_removed' ] );
+		self::go( $removed
+			? [ 'notice' => 'template_removed' ]
+			: [ 'template_manage' => 'saved-' . $id, 'notice' => 'template_unavailable' ]
+		);
 	}
 
 	public static function export(): void {
 		$id = self::requested_id( 'template_id' );
 		$actor = self::authorize( 'export', $id );
-		$post = StoredTemplateRepository::get( $id, $actor );
-		$definition = StoredTemplateRepository::definition( $id, $actor );
-		if ( null === $post || null === $definition ) {
-			self::go( [ 'template_manage' => 'saved-' . $id, 'notice' => 'template_unavailable' ] );
+		$data = null;
+		try {
+			$post = StoredTemplateRepository::get( $id, $actor );
+			$definition = StoredTemplateRepository::definition( $id, $actor );
+			if ( null !== $post && null !== $definition ) {
+				$data = wp_json_encode( [
+					'format' => 'core-blueprint-automations-template',
+					'version' => 1,
+					'title' => $post->post_title,
+					'definition' => DefinitionCodec::encode( $definition ),
+				] );
+			}
+		} catch ( \Throwable ) {
+			// Provider and WordPress storage hooks may fail; do not stream partial JSON.
 		}
-		$data = wp_json_encode( [
-			'format' => 'core-blueprint-automations-template',
-			'version' => 1,
-			'title' => $post->post_title,
-			'definition' => DefinitionCodec::encode( $definition ),
-		] );
 		if ( ! is_string( $data ) ) {
 			self::go( [ 'template_manage' => 'saved-' . $id, 'notice' => 'template_unavailable' ] );
 		}
