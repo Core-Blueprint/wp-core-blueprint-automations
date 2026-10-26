@@ -119,5 +119,17 @@ namespace {
             throw new \RuntimeException( 'Failed template source read was not handled safely.' );
         }
     }
+    $provider = $run(
+        [ \CB\Automations\Admin\WorkflowController::class, 'create_from_template' ],
+        'provider_throws',
+        [
+            'template_provider' => 'core-blueprint-automations',
+            'template_id' => 'wordpress.welcome.user',
+        ]
+    );
+    if ( ! str_contains( $provider, 'notice=template_unavailable' ) ) {
+        throw new \RuntimeException( 'Failed provider-template lookup was not handled safely.' );
+    }
+
     echo "WordPress template action read/delete failure handling: PASS\n";
 }
