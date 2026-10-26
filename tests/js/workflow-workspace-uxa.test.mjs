@@ -77,3 +77,14 @@ test('UX-A.1 keeps folder management alongside the title and reduces only workfl
 	assert.ok(style.includes('.cb-automations-workspace__folder-manager[open]'));
 	assert.ok(style.includes('.cb-automations-workspace__panel--workflows .cb-automations-workspace__quick-filters'));
 });
+
+test('UX-A.1 expanded folder panel stays inside workflow card width', () => {
+	const rule = style.match(/\.cb-automations-workspace__panel--workflows \.cb-automations-workspace__folder-manager\[open\] \{([^}]+)\}/);
+	assert.ok(rule, 'scoped expanded folder rule missing');
+	assert.match(rule[1], /box-sizing:\s*border-box\s*;/);
+	assert.match(rule[1], /flex:\s*0 0 100%\s*;/);
+	assert.match(rule[1], /min-width:\s*0\s*;/);
+	assert.match(rule[1], /width:\s*100%\s*;/);
+	assert.match(rule[1], /max-width:\s*100%\s*;/);
+	assert.match(rule[1], /margin-left:\s*0\s*;/);
+});
