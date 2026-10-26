@@ -61,3 +61,26 @@ Do not split physical schema authority or Base session ownership prematurely. Fi
 - PHP/JS executable suites: NOT RUN in this agent environment (GitHub connector access only).
 - ZIP, checksum and installation: NOT BUILT / NOT RUN.
 - Golden acceptance: OPEN.
+
+
+## Validation receipt and audit follow-up | 2026-10-26
+
+Operator-provided local evidence on commit `0e24097ede88baeb77e1d7721aa3ffb61f9902ae`:
+- `php -l src/Plugin.php`: PASS.
+- `php -l tests/unit/runtime-bootstrap.php`: PASS.
+- `php tests/unit/runtime-bootstrap.php`: PASS.
+- Standalone PHP tests over `tests/unit/*.php`: all reported PASS (loop stops at first failure).
+- W3.2 controller/repository tests: PASS. Logged "Uncertain COMMIT" is the deliberately injected negative case.
+- i18n: six catalog locales PASS, canonical tooling 1.1.1.
+- Full JS suite initially 124/129 PASS due solely to an incorrect *local F02 checkout path*.
+- The operator subsequently selected the existing read-only `wp-core-blueprint-f02-automations-pin-20261025` checkout at the tests' exact SHA `11622c6224862b0b414352b0fda6e895e2cf153c`; full JS suite: **133 tests, 133 PASS, 0 FAIL**.
+- No live WordPress browser, InnoDB or release-ZIP evidence is established by the above.
+
+Source housekeeping after this receipt (not yet covered by a new full operator run):
+- Added explicit W3.2 controller, repository and JavaScript tests to the existing GitHub CI test selection. **CI NOT TRIGGERED**.
+- Added root `.gitignore` for generated `/dist/`, without deleting or overwriting existing operator artifacts.
+
+Architecture priority:
+- `WorkflowRecoveryPlanner` is an AU-R1A *pure recovery planning* facility; AU-R1B's privileged service is documented as separately gated. Production entrypoints inspected so far (Plugin, workflow controllers/service, admin read/editor, runtime recovery controller/service) do not call it. **Do not declare it globally unused until a complete `src/` call-site scan**, and do not conflate it with the active runtime operator recovery service.
+- `WorkflowValidator` and `WorkflowRecoveryPlanner` have single coherent domain purposes despite large size. A line-count-only split would create abstractions without proving value.
+- Next: prove all production references and exact execution boundary before a deliberate pre-v1 clean-break decision (integrate or remove the dormant AU-R1A path); then tackle editor presentation separation only with equivalent tests.
