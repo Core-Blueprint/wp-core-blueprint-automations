@@ -46,6 +46,19 @@ assert_true( ! str_contains( $known_json, 'private-binding' ), 'Unknown input fi
 assert_true( ! str_contains( $known_json, 'private-condition' ), 'Known sensitive output exposed a literal.' );
 assert_true( isset( $known['definition']['actions'][0]['bindings']['project_id'] ), 'Non-literal references must be preserved.' );
 
+$drifted = definition( null, [], [], [ step(
+	'action_1', reference( CapabilityKind::ACTION, $provider, 'project.create', '2' ),
+	[ 'legacy_project_id' => Binding::literal( 98765 ) ]
+) ] );
+$drifted_projection = EditorDefinitionProjection::project( DefinitionCodec::encode( $drifted ), [
+	'action:' . $provider . ':project.create' => $action,
+] );
+assert_true( 1 === $drifted_projection['redacted'], 'Schema-drifted binding must be redacted.' );
+assert_true(
+	! str_contains( json_encode( $drifted_projection['definition'], JSON_THROW_ON_ERROR ), '98765' ),
+	'An old schema version must not trust a newer provider description.'
+);
+
 $safe = definition( null, [], [], [ step(
 	'action_1', reference( CapabilityKind::ACTION, $provider, 'project.create' ),
 	[ 'legacy_project_id' => Binding::literal( 123 ) ]
