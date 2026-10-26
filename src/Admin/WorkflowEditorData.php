@@ -104,14 +104,17 @@ final class WorkflowEditorData {
 
 	/**
 	 * @return list<array{value:string,label:string}>
-	 * Registered non-internal WordPress status options for semantic post-status
-	 * literal inputs. This remains a UX hint, not an execution authorization.
+	 * Supported native WordPress status options for semantic post-status
+	 * literals. Custom statuses need an explicit authority contract first.
+	 * The picker is a UX hint; WordPressAction independently authorizes.
 	 */
 	private static function post_status_options(): array {
 		$statuses = get_post_stati( [ 'internal' => false ], 'objects' );
 		$options = [];
 		foreach ( $statuses as $name => $status ) {
-			if ( ! is_string( $name ) || ! preg_match( '/^[a-z][a-z0-9_-]{0,31}$/D', $name )
+			// Match the audited WordPressAction status authority policy.
+			// A custom status may require provider-specific permissions.
+			if ( ! in_array( $name, [ 'draft', 'pending', 'publish', 'future', 'private' ], true )
 				|| ! is_object( $status ) ) {
 				continue;
 			}

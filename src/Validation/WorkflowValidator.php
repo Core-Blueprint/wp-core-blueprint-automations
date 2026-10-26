@@ -37,6 +37,11 @@ final class WorkflowValidator {
 			}
 			if ( [] !== $trigger->bindings() ) {
 				$issues[] = new ValidationIssue( 'binding.trigger_has_bindings', 'trigger.bindings' );
+				foreach ( $trigger->bindings() as $field => $binding ) {
+					if ( Binding::SOURCE_LITERAL === $binding->source() ) {
+						$issues[] = new ValidationIssue( 'privacy.unverified_literal', 'trigger.bindings.' . $field );
+					}
+				}
 			}
 		}
 
@@ -179,6 +184,13 @@ final class WorkflowValidator {
 	): void {
 		$target = $resolved[ $step->step_id() ] ?? null;
 		if ( null === $target ) {
+			// Without a verified provider schema no literal's sensitivity can
+			// be established, even when the draft will remain disabled.
+			foreach ( $step->bindings() as $field => $binding ) {
+				if ( Binding::SOURCE_LITERAL === $binding->source() ) {
+					$issues[] = new ValidationIssue( 'privacy.unverified_literal', $path . '.bindings.' . $field );
+				}
+			}
 			return;
 		}
 
@@ -195,6 +207,9 @@ final class WorkflowValidator {
 			$binding_path = $path . '.bindings.' . $field;
 			if ( ! isset( $schema[ $field ] ) ) {
 				$issues[] = new ValidationIssue( 'binding.input_unknown', $binding_path, [ 'field' => $field ] );
+				if ( Binding::SOURCE_LITERAL === $binding->source() ) {
+					$issues[] = new ValidationIssue( 'privacy.unverified_literal', $binding_path );
+				}
 				continue;
 			}
 
@@ -239,24 +254,30 @@ final class WorkflowValidator {
 		array $resolved,
 		array &$issues
 	): void {
+		// Resolve both sides before operator handling: even malformed operators
+		// must not make potentially private, unverifiable literals persistable.
+		$right = $condition->right();
+		$left_type = $this->resolve_operand_type( $condition->left(), $path . '.left', $consumer_order, $steps_by_id, $order_by_id, $resolved, $issues );
+		$right_type = null;
+		if ( null !== $right ) {
+			$right_type = $this->resolve_operand_type( $right, $path . '.right', $consumer_order, $steps_by_id, $order_by_id, $resolved, $issues );
+			if ( ( null === $left_type && Binding::SOURCE_LITERAL === $right->source() )
+				|| ( null === $right_type && Binding::SOURCE_LITERAL === $condition->left()->source() )
+				|| ( Binding::SOURCE_LITERAL === $condition->left()->source() && Binding::SOURCE_LITERAL === $right->source() ) ) {
+				$issues[] = new ValidationIssue( 'privacy.unverified_literal', $path );
+			}
+		}
+
 		$operator = OperatorCatalog::get( $condition->operator() );
 		if ( null === $operator ) {
 			$issues[] = new ValidationIssue( 'condition.operator_unsupported', $path . '.operator', [ 'operator' => $condition->operator() ] );
 			return;
 		}
-
-		$right = $condition->right();
 		if ( 1 === $operator['arity'] && null !== $right ) {
 			$issues[] = new ValidationIssue( 'condition.arity_mismatch', $path . '.right' );
 		}
 		if ( 2 === $operator['arity'] && null === $right ) {
 			$issues[] = new ValidationIssue( 'condition.arity_mismatch', $path . '.right' );
-		}
-
-		$left_type = $this->resolve_operand_type( $condition->left(), $path . '.left', $consumer_order, $steps_by_id, $order_by_id, $resolved, $issues );
-		$right_type = null;
-		if ( null !== $right ) {
-			$right_type = $this->resolve_operand_type( $right, $path . '.right', $consumer_order, $steps_by_id, $order_by_id, $resolved, $issues );
 		}
 
 		if (

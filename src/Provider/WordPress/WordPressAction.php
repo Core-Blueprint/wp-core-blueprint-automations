@@ -118,11 +118,9 @@ final class WordPressAction {
 			return self::denied();
 		}
 		$status = isset( $input['post_status'] ) ? sanitize_key( (string) $input['post_status'] ) : 'draft';
-		if ( 'publish' === $status ) {
-			$publish_cap = isset( $type->cap->publish_posts ) ? (string) $type->cap->publish_posts : 'publish_posts';
-			if ( ! user_can( $principal, $publish_cap ) ) {
-				return self::denied();
-			}
+		$status_error = self::post_status_error( $status, $type, $principal );
+		if ( null !== $status_error ) {
+			return $status_error;
 		}
 
 		$data = [
@@ -173,15 +171,13 @@ final class WordPressAction {
 			return self::denied();
 		}
 		$status = sanitize_key( (string) ( $input['post_status'] ?? '' ) );
-		if ( '' === $status || null === get_post_status_object( $status ) ) {
-			return self::invalid( 'post_status' );
+		$type = get_post_type_object( $post->post_type );
+		if ( ! $type ) {
+			return self::invalid( 'post_type' );
 		}
-		if ( 'publish' === $status ) {
-			$type = get_post_type_object( $post->post_type );
-			$cap = $type && isset( $type->cap->publish_posts ) ? (string) $type->cap->publish_posts : 'publish_posts';
-			if ( ! user_can( $context->principal_user_id(), $cap ) ) {
-				return self::denied();
-			}
+		$status_error = self::post_status_error( $status, $type, $context->principal_user_id() );
+		if ( null !== $status_error ) {
+			return $status_error;
 		}
 		$result = wp_update_post( [ 'ID' => $post_id, 'post_status' => $status ], true );
 		return is_wp_error( $result ) ? self::failed( 'post_status' ) : [];
@@ -366,6 +362,26 @@ final class WordPressAction {
 			);
 		}
 		return [ 'sent' => true ];
+	}
+
+	/**
+	 * Supported native statuses only. Custom status policies may require
+	 * provider-specific capabilities that WordPress cannot infer here.
+	 * Never bypass the post type's publish authority for private/future posts.
+	 */
+	private static function post_status_error( string $status, object $type, int $principal ): ?\WP_Error {
+		if ( ! in_array( $status, [ 'draft', 'pending', 'publish', 'future', 'private' ], true )
+			|| null === get_post_status_object( $status ) ) {
+			return self::invalid( 'post_status' );
+		}
+		if ( in_array( $status, [ 'draft', 'pending' ], true ) ) {
+			return null;
+		}
+		$publish_cap = $type->cap->publish_posts ?? null;
+		if ( ! is_string( $publish_cap ) || '' === $publish_cap || ! user_can( $principal, $publish_cap ) ) {
+			return self::denied();
+		}
+		return null;
 	}
 
 	private static function can_manage_taxonomy( string $taxonomy, InvocationContext $context ): bool {

@@ -47,23 +47,18 @@ final class EditorDefinitionProjection {
 				}
 
 				$capability = self::definition_for_step( $step, $capabilities );
-				if ( null === $capability ) {
-					continue;
-				}
-
-				$schema = $capability->input_schema();
+				$schema = null === $capability ? [] : $capability->input_schema();
 				foreach ( $step['bindings'] as $field => $binding ) {
-					if (
-						! is_string( $field )
-						|| ! is_array( $binding )
-						|| 'literal' !== ( $binding['source'] ?? null )
-						|| true !== ( $schema[ $field ]['sensitive'] ?? false )
-					) {
+					if ( ! is_string( $field ) || ! is_array( $binding )
+						|| 'literal' !== ( $binding['source'] ?? null ) ) {
 						continue;
 					}
-
-					unset( $step['bindings'][ $field ] );
-					++$redacted;
+					// Missing provider/input schema has unknown sensitivity.
+					// Never expose the old literal or count its omission as a delete.
+					if ( ! isset( $schema[ $field ] ) || true === ( $schema[ $field ]['sensitive'] ?? false ) ) {
+						unset( $step['bindings'][ $field ] );
+						++$redacted;
+					}
 				}
 			}
 			unset( $step );
@@ -84,7 +79,8 @@ final class EditorDefinitionProjection {
 				$left_literal    = 'literal' === ( $left['source'] ?? null );
 				$right_literal   = 'literal' === ( $right['source'] ?? null );
 
-				if ( ( $left_sensitive && $right_literal ) || ( $right_sensitive && $left_literal ) ) {
+				if ( ( $left_sensitive && $right_literal ) || ( $right_sensitive && $left_literal )
+					|| ( $left_literal && $right_literal ) ) {
 					++$redacted;
 					continue;
 				}
@@ -123,8 +119,10 @@ final class EditorDefinitionProjection {
 				continue;
 			}
 			foreach ( $capability->output_schema() as $field => $schema ) {
-				if ( is_string( $field ) && true === ( $schema['sensitive'] ?? false ) ) {
-					$map[ $step['step_id'] . ':' . $field ] = true;
+				if ( is_string( $field ) ) {
+					// Every declared field carries verified sensitivity metadata.
+					// An absent field/step defaults to unsafe at read time.
+					$map[ $step['step_id'] . ':' . $field ] = true === ( $schema['sensitive'] ?? false );
 				}
 			}
 		}
@@ -142,7 +140,10 @@ final class EditorDefinitionProjection {
 			is_string( $reference['provider'] ?? null ) ? $reference['provider'] : '',
 			is_string( $reference['id'] ?? null ) ? $reference['id'] : ''
 		);
-		return $capabilities[ $key ] ?? null;
+		$current = $capabilities[ $key ] ?? null;
+		return $current instanceof CapabilityDefinition
+			&& ( $reference['schema_version'] ?? null ) === $current->reference()->schema_version()
+			? $current : null;
 	}
 
 	/** @param array<string,mixed> $binding @param array<string,bool> $sensitive_output */
@@ -152,7 +153,7 @@ final class EditorDefinitionProjection {
 		}
 		$step_id = is_string( $binding['step_id'] ?? null ) ? $binding['step_id'] : '';
 		$field   = is_string( $binding['field'] ?? null ) ? $binding['field'] : '';
-		return true === ( $sensitive_output[ $step_id . ':' . $field ] ?? false );
+		return true === ( $sensitive_output[ $step_id . ':' . $field ] ?? true );
 	}
 
 	private static function identity_key( string $kind, string $provider, string $id ): string {

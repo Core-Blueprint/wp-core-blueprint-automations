@@ -63,16 +63,12 @@ final class WorkflowAdminReadService {
 		$items  = [];
 
 		while ( $offset < $total ) {
-			$batch = WorkflowRepository::list( 100, $offset );
+			$batch = WorkflowRepository::list_context_metadata( 100, $offset );
 			if ( [] === $batch ) {
 				break;
 			}
-
-			foreach ( $batch as $record ) {
-				$items[] = [
-					'id'   => $record->id(),
-					'name' => $record->name(),
-				];
+			foreach ( $batch as $metadata ) {
+				$items[] = $metadata;
 			}
 
 			$count = count( $batch );
