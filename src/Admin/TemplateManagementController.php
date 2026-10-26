@@ -20,6 +20,10 @@ final class TemplateManagementController {
 	}
 
 	private static function authorize( string $operation, int $id ): int {
+		if ( 'POST' !== ( $_SERVER['REQUEST_METHOD'] ?? null ) ) {
+			wp_die( esc_html__( 'This action requires HTTP POST.', 'core-blueprint-automations' ), '', [ 'response' => 405 ] );
+		}
+
 		if ( ! current_user_can( AutomationsPage::CAPABILITY ) || get_current_user_id() < 1 ) {
 			wp_die( esc_html__( 'Forbidden', 'core-blueprint-automations' ), '', [ 'response' => 403 ] );
 		}
