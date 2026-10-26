@@ -49,6 +49,9 @@ jobs:
       - name: Shared Designer Shell regression
         run: node tests/js/designer-shell.test.mjs
 
+      - name: Workflow delete UI regression
+        run: node --test tests/js/workflow-delete-ui.test.mjs
+
       - name: Automation Builder maturity regression
         run: node tests/js/builder-maturity.test.mjs
 
@@ -60,6 +63,12 @@ jobs:
 
       - name: Admin product surface regression
         run: php tests/unit/admin-product-surface.php
+
+      - name: Workflow delete controller security and uncertainty regression
+        run: php tests/unit/workflow-delete-controller-w32.php
+
+      - name: Workflow delete transactional persistence regression
+        run: php tests/unit/workflow-delete-repository-w32.php
 
       - name: Public Base admin page requirements regression
         run: php tests/unit/base-public-admin-pages.php
