@@ -10,6 +10,7 @@ use CB\Automations\Admin\RecoveryCapability;
 use CB\Automations\Admin\RunHistoryCapability;
 use CB\Automations\Admin\RunsAssets;
 use CB\Automations\Admin\WorkflowActivationController;
+use CB\Automations\Admin\WorkflowDeletionController;
 use CB\Automations\Admin\SchemaSetupController;
 use CB\Automations\Admin\WorkflowController;
 use CB\Automations\Admin\WorkflowFolderController;
