@@ -456,3 +456,57 @@
 @media (max-width:782px) {
  .cb-automations-workspace__table tbody :is(.cb-automations-workspace__trigger-cell,.cb-automations-workspace__folder-cell,.cb-automations-workspace__updated-cell)::before { content:attr(data-label) ": "; color:var(--cb-text); font-weight:var(--cb-fw-semibold); }
 }
+
+/* UX-A.1: denser workflow header. Folder controls keep their existing forms. */
+.cb-automations-workspace__panel--workflows {
+	padding: var(--cb-space-4) !important;
+}
+.cb-automations-workspace__panel--workflows .cb-automations-workspace__panel-heading {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: var(--cb-space-2) var(--cb-space-3);
+	margin-bottom: var(--cb-space-3);
+}
+.cb-automations-workspace__panel-title {
+	display: flex;
+	align-items: baseline;
+	flex-wrap: wrap;
+	gap: var(--cb-space-1) var(--cb-space-3);
+	min-width: 0;
+}
+.cb-automations-workspace__panel-title h2,
+.cb-automations-workspace__panel-title .description {
+	margin: 0;
+}
+.cb-automations-workspace__panel-title .description {
+	color: var(--cb-text-muted);
+	font-size: var(--cb-fs-sm);
+}
+.cb-automations-workspace__panel--workflows .cb-automations-workspace__folder-manager {
+	margin: 0 0 0 auto;
+}
+.cb-automations-workspace__panel--workflows .cb-automations-workspace__folder-manager[open] {
+	flex: 1 0 100%;
+	margin-left: 0;
+}
+.cb-automations-workspace__panel--workflows .cb-automations-workspace__folder-manager[open] > summary {
+	width: max-content;
+	max-width: 100%;
+	margin-left: auto;
+}
+.cb-automations-workspace__panel--workflows .cb-automations-workspace__quick-filters {
+	margin-bottom: var(--cb-space-2);
+}
+.cb-automations-workspace__panel--workflows .cb-automations-workspace__filters {
+	margin-bottom: var(--cb-space-3);
+}
+@media (max-width: 782px) {
+	.cb-automations-workspace__panel--workflows {
+		padding: var(--cb-space-3) !important;
+	}
+	.cb-automations-workspace__panel-title {
+		align-items: center;
+	}
+}

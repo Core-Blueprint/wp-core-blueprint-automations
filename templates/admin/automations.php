@@ -170,14 +170,13 @@ $notices = [
 			<?php endif; ?>
 		</section>
 	<?php else : ?>
-		<section class="cb-core-panel cb-automations-workspace__panel">
+		<section class="cb-core-panel cb-automations-workspace__panel cb-automations-workspace__panel--workflows">
 			<div class="cb-automations-workspace__panel-heading">
-				<div>
+				<div class="cb-automations-workspace__panel-title">
 					<h2><?php esc_html_e( 'Workflows', 'core-blueprint-automations' ); ?></h2>
 					<p class="description"><?php printf( esc_html( _n( '%d matching workflow', '%d matching workflows', $listing['total'], 'core-blueprint-automations' ) ), (int) $listing['total'] ); ?></p>
 				</div>
-			</div>
-			<details class="cb-automations-workspace__folder-manager">
+				<details class="cb-automations-workspace__folder-manager">
 				<summary><?php esc_html_e( 'Manage folders', 'core-blueprint-automations' ); ?></summary>
 				<div class="cb-automations-workspace__folder-body">
 					<p class="description"><?php esc_html_e( 'Folders organise workflows only. They never change triggers, execution or permissions.', 'core-blueprint-automations' ); ?></p>
@@ -211,7 +210,8 @@ $notices = [
 						</div>
 					<?php endforeach; ?>
 				</div>
-			</details>
+				</details>
+			</div>
 			<nav class="cb-automations-workspace__quick-filters" aria-label="<?php esc_attr_e( 'Status', 'core-blueprint-automations' ); ?>">
 				<?php foreach ( [ 'all' => __( 'All statuses', 'core-blueprint-automations' ), 'enabled' => __( 'Enabled', 'core-blueprint-automations' ), 'disabled' => __( 'Disabled', 'core-blueprint-automations' ) ] as $filter_status => $filter_label ) : ?>
 					<?php $filter_count = 'all' === $filter_status ? array_sum( $status_counts ) : $status_counts[ $filter_status ]; ?>

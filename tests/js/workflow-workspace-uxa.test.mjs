@@ -60,3 +60,20 @@ test('UX-A bulk toolbar is hidden until selection and keeps delete confirmation'
 	assert.match(view, /data-cb-workflow-bulk-confirm/);
 	assert.match(view, /data-cb-workflow-select form="cb-automations-bulk-delete"/);
 });
+
+test('UX-A.1 keeps folder management alongside the title and reduces only workflow header spacing', () => {
+	const section = view.slice(view.indexOf('cb-automations-workspace__panel--workflows'));
+	const title = section.indexOf('class="cb-automations-workspace__panel-title"');
+	const manager = section.indexOf('<details class="cb-automations-workspace__folder-manager">');
+	const headingEnd = section.indexOf('</details>\n\t\t\t</div>');
+	const filters = section.indexOf('<nav class="cb-automations-workspace__quick-filters"');
+	assert.ok(title >= 0 && title < manager && manager < headingEnd && headingEnd < filters);
+	assert.equal((section.match(/<details class="cb-automations-workspace__folder-manager">/g) || []).length, 1);
+	assert.match(section, /name="action" value="cb_automations_folder_create"/);
+	assert.match(section, /name="action" value="cb_automations_folder_rename"/);
+	assert.match(section, /name="action" value="cb_automations_folder_delete"/);
+	assert.match(style, /cb-automations-workspace__panel--workflows \\{/);
+	assert.match(style, /cb-automations-workspace__panel-title/);
+	assert.match(style, /cb-automations-workspace__folder-manager\\[open\\]/);
+	assert.match(style, /cb-automations-workspace__panel--workflows \\.cb-automations-workspace__quick-filters/);
+});
