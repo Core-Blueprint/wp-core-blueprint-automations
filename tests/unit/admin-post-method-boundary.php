@@ -83,7 +83,8 @@ namespace {
     // gates in all four shared-guard controllers.
     $_SERVER['REQUEST_METHOD'] = 'POST';
     $_POST = [ '_cb_automations_nonce' => 'valid' ];
-    foreach ( array_slice( $guards, 0, 4 ) as [ $class, $method, $args ] ) {
+    foreach ( $guards as [ $class, $method, $args ] ) {
+        if ( 'export' === $method || 'recover' === $method ) { continue; }
         $GLOBALS['capability_checks'] = 0;
         $GLOBALS['nonce_checks'] = 0;
         $result = ( new \ReflectionMethod( $class, $method ) )->invoke( null, ...$args );
