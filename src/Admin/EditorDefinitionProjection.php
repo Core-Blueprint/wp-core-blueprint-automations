@@ -139,7 +139,10 @@ final class EditorDefinitionProjection {
 			is_string( $reference['provider'] ?? null ) ? $reference['provider'] : '',
 			is_string( $reference['id'] ?? null ) ? $reference['id'] : ''
 		);
-		return $capabilities[ $key ] ?? null;
+		$current = $capabilities[ $key ] ?? null;
+		return $current instanceof CapabilityDefinition
+			&& ( $reference['schema_version'] ?? null ) === $current->reference()->schema_version()
+			? $current : null;
 	}
 
 	/** @param array<string,mixed> $binding @param array<string,bool> $sensitive_output */
