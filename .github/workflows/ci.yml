@@ -70,6 +70,9 @@ jobs:
       - name: Admin POST method and authorization boundary
         run: php tests/unit/admin-post-method-boundary.php
 
+      - name: Template admin storage failure and error boundary
+        run: php tests/unit/template-admin-error-boundary.php
+
       - name: Workflow delete controller security and uncertainty regression
         run: php tests/unit/workflow-delete-controller-w32.php
 
