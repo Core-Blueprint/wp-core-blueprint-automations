@@ -64,6 +64,9 @@ jobs:
       - name: Admin product surface regression
         run: php tests/unit/admin-product-surface.php
 
+      - name: Admin POST method and authorization boundary
+        run: php tests/unit/admin-post-method-boundary.php
+
       - name: Workflow delete controller security and uncertainty regression
         run: php tests/unit/workflow-delete-controller-w32.php
 
