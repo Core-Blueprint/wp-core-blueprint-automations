@@ -84,3 +84,18 @@ Architecture priority:
 - `WorkflowRecoveryPlanner` is an AU-R1A *pure recovery planning* facility; AU-R1B's privileged service is documented as separately gated. Production entrypoints inspected so far (Plugin, workflow controllers/service, admin read/editor, runtime recovery controller/service) do not call it. **Do not declare it globally unused until a complete `src/` call-site scan**, and do not conflate it with the active runtime operator recovery service.
 - `WorkflowValidator` and `WorkflowRecoveryPlanner` have single coherent domain purposes despite large size. A line-count-only split would create abstractions without proving value.
 - Next: prove all production references and exact execution boundary before a deliberate pre-v1 clean-break decision (integrate or remove the dormant AU-R1A path); then tackle editor presentation separation only with equivalent tests.
+
+
+## Refactor R1 | AU-R1A dormant code clean-break (implementation pending operator validation)
+
+**Decision:** remove the never-integrated `src/Workflow/Recovery/WorkflowRecoveryPlanner.php` and its dedicated test `tests/unit/workflow-recovery-planner.php` from the active v1 branch. Source reachability checked with an operator-side exact grep across `src/` and `tests/`: the only class reference in `src/` was its own declaration; all other references were in tests. This is a pre-launch clean break, not removal of an active entrypoint. The removed source is recoverable from Git history if a future authorized AU-R1B workflow remediation project is approved.
+
+**Preserved:**
+- Active **run** recovery: `Admin/OperatorRecoveryController.php` and `Runtime/OperatorRecoveryService.php` remain untouched. The planner was about **workflow definition** remediation, not indeterminate-run operator recovery.
+- Editor read-only recovery route remains unchanged; no destructive or automatic cleanup was introduced.
+- Existing editor redaction, privacy persistence policy, authorization, storage and runtime safety checks remain untouched. Their active tests remain in `tests/unit/editor-save-boundary.php`, `tests/unit/privacy-policy.php` and other runtime suites.
+- `tests/unit/ainf-s1-no-legacy.php` now asserts the dormant planner cannot reappear in the v1 runtime tree.
+
+**Not proven yet:** full PHP suite, 133 JS tests, six-locale i18n, fresh ZIP, checksum, installed sandbox. Previous PASS was established on commit `d6099d84624a2f4bbcf7442d0727785dd8bbfd8d` **before** this controlled source removal. The exact new branch HEAD and all evidence must be refreshed after the patch.
+
+**Follow-up architecture audit:** identify genuinely duplicated active responsibilities in the editor, validation and persistence modules. Do not split their files based only on size.
