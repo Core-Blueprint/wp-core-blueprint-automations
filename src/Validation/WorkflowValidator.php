@@ -262,7 +262,8 @@ final class WorkflowValidator {
 		if ( null !== $right ) {
 			$right_type = $this->resolve_operand_type( $right, $path . '.right', $consumer_order, $steps_by_id, $order_by_id, $resolved, $issues );
 			if ( ( null === $left_type && Binding::SOURCE_LITERAL === $right->source() )
-				|| ( null === $right_type && Binding::SOURCE_LITERAL === $condition->left()->source() ) ) {
+				|| ( null === $right_type && Binding::SOURCE_LITERAL === $condition->left()->source() )
+				|| ( Binding::SOURCE_LITERAL === $condition->left()->source() && Binding::SOURCE_LITERAL === $right->source() ) ) {
 				$issues[] = new ValidationIssue( 'privacy.unverified_literal', $path );
 			}
 		}
