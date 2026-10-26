@@ -1609,10 +1609,6 @@ msgid "Templates"
 msgstr "Vorlagen"
 
 #: templates/admin/automations.php:62
-msgid "New automation"
-msgstr "Neue Automatisierung"
-
-#: templates/admin/automations.php:62
 msgid "Import JSON"
 msgstr "JSON importieren"
 

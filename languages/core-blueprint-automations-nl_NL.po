@@ -1603,10 +1603,6 @@ msgid "Templates"
 msgstr "Sjablonen"
 
 #: templates/admin/automations.php:62
-msgid "New automation"
-msgstr "Nieuwe automatisering"
-
-#: templates/admin/automations.php:62
 msgid "Import JSON"
 msgstr "JSON importeren"
 
