@@ -116,3 +116,10 @@ Architecture priority:
 **R2 verification HOLD:** all R1 evidence predates this new hardening. Run the new PHP test, entire unit suite, 133 JS tests, i18n, release build/ZIP checksum, verify exact R2 SHA and clean worktree, then sandbox smoke. Do not merge or trigger CI without user GO.
 
 **Next architecture candidates:** the active editor modules (~748 lines of canonical authoring behavior in `admin-editor.js`, plus presentation polish) should be evaluated for repeated DOM metadata projections and redundant event ownership, but split only when tests prove behavior-preserving benefit. Shared Base shell/history/selection must remain unmodified.
+
+
+### Structural namespace sweep (R2)
+
+Read-only GitHub source scan across all **109 remaining `src/**/*.php` files** at the R2 feature branch: the declared namespace and top-level class/interface/enum/trait name match the PSR-4-equivalent source path, including root `CB\\Automations` classes. Result: **109/109 structural matches, 0 mismatches**. This is not a PHP runtime/autoload execution result and does not establish absence of stale/unreferenced classes. The bootstrap initializer resolution is separately covered by `tests/unit/runtime-bootstrap.php`.
+
+`admin-editor.js` remains the primary presentation-density candidate (~748 lines), but it owns concrete domain authoring controls and is already wired to public Base Selection/History; a file size alone does not justify another framework or a wholesale rewrite. More targeted duplication/reachability evidence is required before R3 source changes.
