@@ -99,3 +99,20 @@ Architecture priority:
 **Not proven yet:** full PHP suite, 133 JS tests, six-locale i18n, fresh ZIP, checksum, installed sandbox. Previous PASS was established on commit `d6099d84624a2f4bbcf7442d0727785dd8bbfd8d` **before** this controlled source removal. The exact new branch HEAD and all evidence must be refreshed after the patch.
 
 **Follow-up architecture audit:** identify genuinely duplicated active responsibilities in the editor, validation and persistence modules. Do not split their files based only on size.
+
+
+## R1 sandbox acceptance and R2 admin request-method boundary (2026-10-26)
+
+**R1 validated baseline:** operator confirmed PHP suite PASS, JavaScript **133/133 PASS**, Base F02 pairing PASS, six-locale i18n PASS, installable ZIP integrity/checksum PASS and stable sandbox behavior. Built on clean detached worktree at source `5dd3ddfa0f48730652b845daa9de54e948b18715`. R1 artifact SHA-256: `ec4c394f781e7fbc783956bde80bd94294ef0dcd181332647dc804669faedaf2`.
+
+**R2 finding:** native WordPress `admin_post_*` hooks dispatch regardless of the HTTP request verb. The mutation/transfer endpoints checked capabilities and POST-derived nonces, but several guards lacked an explicit HTTP method boundary. This is an inconsistent security contract and undesirable 403/302 behavior for non-POST requests; **it is not evidence of a successful CSRF or permissions bypass** because POST nonces and capability checks were already enforced.
+
+**R2 implementation (feature branch only):**
+- Require exact `POST` before auth/nonce/storage for WorkflowController, WorkflowFolderController, TemplateManagementController, WorkflowTransferController and OperatorRecoveryController.
+- WorkflowTransferController::export() additionally checks the verb **before** extracting the POST-scoped ID, so even malformed non-POST exports consistently receive 405.
+- Reuse the existing localized "This action requires HTTP POST." message; no new translations, abstraction layers or runtime dependencies.
+- Add `tests/unit/admin-post-method-boundary.php`: actual production guard methods + workflow export entrypoint, six rejected HTTP verbs, 405 before authorization/nonce calls, and successful POST authorization for the four reusable guards. Selected explicitly in CI without starting any workflows.
+
+**R2 verification HOLD:** all R1 evidence predates this new hardening. Run the new PHP test, entire unit suite, 133 JS tests, i18n, release build/ZIP checksum, verify exact R2 SHA and clean worktree, then sandbox smoke. Do not merge or trigger CI without user GO.
+
+**Next architecture candidates:** the active editor modules (~748 lines of canonical authoring behavior in `admin-editor.js`, plus presentation polish) should be evaluated for repeated DOM metadata projections and redundant event ownership, but split only when tests prove behavior-preserving benefit. Shared Base shell/history/selection must remain unmodified.
