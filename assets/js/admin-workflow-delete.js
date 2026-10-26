@@ -6,9 +6,13 @@
 	const boxes = Array.from(root.querySelectorAll('[data-cb-workflow-select]:not(:disabled)'));
 	const bulkButton = root.querySelector('[data-cb-workflow-bulk-submit]');
 	const confirmation = root.querySelector('[data-cb-workflow-bulk-confirm]');
+	const toolbar = root.querySelector('[data-cb-workflow-bulk-toolbar]');
+	const selectedCount = root.querySelector('[data-cb-workflow-selection-count]');
 	const sync = () => {
 		const count = boxes.filter((box) => box.checked).length;
 		if (bulkButton) bulkButton.disabled = count === 0;
+		if (toolbar) toolbar.hidden = count === 0;
+		if (selectedCount) selectedCount.textContent = String(count);
 		if (selectAll) {
 			selectAll.checked = count > 0 && count === boxes.length;
 			selectAll.indeterminate = count > 0 && count < boxes.length;

@@ -6,6 +6,7 @@ namespace CB\Automations\Admin;
 use CB\Automations\Runtime\RunStatus;
 use CB\Automations\Organisation\FolderRepository;
 use CB\Automations\Persistence\Schema;
+use CB\Automations\Persistence\WorkflowRepository;
 use CB\Automations\Runtime\StepStatus;
 use CB\Automations\Template\WorkflowTemplateRegistry;
 use CB\Automations\Validation\ValidationResult;
@@ -129,6 +130,10 @@ final class AutomationsPage implements Page {
 			}
 			$sort = in_array( $sort, [ 'updated_desc', 'updated_asc', 'name_asc', 'name_desc' ], true ) ? $sort : 'updated_desc';
 			$listing = 'workflows' === $view ? $reader->index( $page, 25, $search, $status, $sort, $folder_filter ) : null;
+			$status_counts = null === $listing ? [] : [
+				'enabled' => WorkflowRepository::count_index( $search, 'enabled', $folder_filter ),
+				'disabled' => WorkflowRepository::count_index( $search, 'disabled', $folder_filter ),
+			];
 			if ( null !== $listing && $folders_ready ) {
 				$assignments = FolderRepository::assignments(
 					array_map( static fn( array $item ): int => $item['record']->id(), $listing['items'] )
@@ -142,6 +147,7 @@ final class AutomationsPage implements Page {
 					'status'    => $status,
 					'sort'      => $sort,
 					'listing'   => $listing,
+					'status_counts' => $status_counts,
 					'folders' => $folders,
 					'folder_filter' => $folder_filter,
 					'assignments' => $assignments,

@@ -49,6 +49,14 @@ final class AdminAssets {
 				is_file( $bulk_js ) ? (string) filemtime( $bulk_js ) : CB_AUTOMATIONS_VERSION,
 				true
 			);
+			$menu_js = CB_AUTOMATIONS_DIR . 'assets/js/admin-workflow-menu.js';
+			wp_enqueue_script(
+				'cb-automations-admin-workflow-menu',
+				CB_AUTOMATIONS_URL . 'assets/js/admin-workflow-menu.js',
+				[],
+				is_file( $menu_js ) ? (string) filemtime( $menu_js ) : CB_AUTOMATIONS_VERSION,
+				true
+			);
 			return;
 		}
 
