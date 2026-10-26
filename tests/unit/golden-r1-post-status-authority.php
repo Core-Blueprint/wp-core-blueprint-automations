@@ -40,6 +40,7 @@ namespace {
 		return in_array( $status, [ 'draft', 'pending', 'publish', 'future', 'private', 'trash', 'custom_review' ], true )
 			? (object) [ 'name' => $status ] : null;
 	}
+	function is_wp_error( mixed $value ): bool { return $value instanceof WP_Error; }
 	function sanitize_key( string $value ): string { return preg_replace( '/[^a-z0-9_-]/', '', strtolower( $value ) ) ?? ''; }
 	function wp_slash( array $value ): array { return $value; }
 	function wp_insert_post( array $data, bool $wp_error ): int {
