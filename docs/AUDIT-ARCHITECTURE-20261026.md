@@ -160,3 +160,26 @@ Read-only GitHub source scan across all **109 remaining `src/**/*.php` files** a
 **R4 SOURCE HOLD until operator tests:** isolated worktree at the new GitHub branch SHA; run `php -l` on changed PHP files and the new test, `php tests/unit/template-admin-error-boundary.php`, full PHP loop, all JS tests, i18n, release build, ZIP integrity and checksum. Repeat template create/delete/export smoke in sandbox. The previous validated R3 archive stays available until acceptance.
 
 The next audit step should **not** invent a new template storage abstraction: R4 deliberately keeps canonical WordPress post APIs and existing repository boundaries. All nontrivial refactors require a demonstrated functional or maintenance benefit.
+
+
+## R4 independent operator validation receipt and release readiness (2026-10-26)
+
+**R4 SOURCE PASS** on exact source `c8bef47eb682a43452ad71714b0694898053d0a8`, checked out in clean detached worktree `cb-automations-r4-verified-20261026`. Operator evidence:
+- `php -l` all three changed controller/test paths: PASS.
+- New `php tests/unit/template-admin-error-boundary.php`: PASS.
+- Standalone PHP unit/regression loop over `tests/unit/*.php`: PASS, including admin POST, storage isolation, CAS, privacy, deletion, runtime and WordPress-native template boundary.
+- Full JavaScript: **134/134 PASS, 0 failed**, Base F02 companion pinned.
+- Canonical six-language i18n tooling 1.1.1: PASS.
+- `bash tools/build-release`: PASS; archive entries/integrity: PASS; `sha256sum -c`: PASS.
+- Archive path: `/home/chris/Downloads/cb-automations-r4-verified-20261026/dist/core-blueprint-automations-1.0.0-rc2.zip`.
+- R4 ZIP SHA-256: `b5c846a50a58180d26887c5af1753e74164badbc8cce54e8b4464edbc18fc8b1`.
+- Final `git rev-parse HEAD`: exact R4 source SHA; `git status --short --branch`: clean detached HEAD.
+- **Installed R4 sandbox acceptance not yet reported.** R1 is the latest explicitly confirmed stable sandbox. Keep them distinct.
+
+### Subsequent read-only scope and residual risks
+
+Inspected workflow folder CRUD/assignment, workflow index/context reads, run history read services, run history listing and WordPress-native template storage/scrubbing. No additional demonstrated P0/P1 runtime defect was established from this limited review; existing regressions cover their ordinary paths. This is **not** a claim that complete live database/storage fault injection or the full Golden acceptance has passed.
+
+Potential follow-up (P2, design/behavior review rather than an immediate patch): folder delete/assign transactions issue `ROLLBACK` after any thrown exception, even a failed/lost `COMMIT` acknowledgement. The controller renders the ordinary `folder_failed` notice although the commit outcome could be uncertain. Before addressing this, define a clear WordPress-native operator reconciliation message and simulate the post-commit uncertainty, preserving the current reliable behavior. No merge, CI run, migration or new runtime functionality authorized.
+
+**Golden closure recommendation:** freeze new discretionary refactors; install the accepted R4 release archive on the sandbox; perform short representative product tests covering workflow creation/save/reopen, condition preview (including unary conditions), context switch/Undo/Redo, template create/delete/export, disabled single/bulk deletion, folder assignment and Runs recovery. If stable, request explicit GO for featurebranch-to-main reconciliation, with its independent SHA and release governance. Keep this documentation-only receipt out of release ZIP: `tools/build-release` packages only `core-blueprint-automations.php`, `uninstall.php`, `src/`, `assets/`, `templates/` and `languages/`.
