@@ -21,6 +21,10 @@ final class OperatorRecoveryController {
 	}
 
 	public static function recover(): void {
+		if ( 'POST' !== ( $_SERVER['REQUEST_METHOD'] ?? null ) ) {
+			wp_die( esc_html__( 'This action requires HTTP POST.', 'core-blueprint-automations' ), '', [ 'response' => 405 ] );
+		}
+
 		if ( ! current_user_can( RecoveryCapability::CAPABILITY ) ) {
 			wp_die(
 				esc_html__( 'You do not have permission to recover automation runs.', 'core-blueprint-automations' ),
