@@ -210,44 +210,13 @@
 		}
 	}
 
-	function literalText(wrap) {
-		const control = wrap?.querySelector('.cb-automations-literal input, .cb-automations-literal textarea, .cb-automations-literal select');
-		if (!control) return '';
-		if (control instanceof HTMLSelectElement) return control.selectedOptions[0]?.textContent?.trim() || control.value;
-		if (control instanceof HTMLTextAreaElement) return control.value.split(/\r?\n/).filter(Boolean).join(', ');
-		return control.value;
-	}
-
-	function conditionRightText(grid) {
-		const rightWrap = grid?.children?.[2];
-		if (!rightWrap) return '';
-		const source = rightWrap.querySelector('.cb-automations-binding-source');
-		if (!source) return '';
-		if (source.value === 'literal') return literalText(rightWrap);
-		return source.selectedOptions[0]?.textContent?.trim() || '';
-	}
-
 	function polishConditions() {
 		const container = root.querySelector('[data-cb-automations-conditions]');
 		const cards = Array.from(container?.children || []).filter((card) => card instanceof HTMLElement && card.classList.contains('cb-automations-condition'));
 		cards.forEach((card, index) => {
 			const conditionId = stepIdFromCard(card, `condition_${index + 1}`);
 			setStepTitle(card, `${strings.condition || 'Condition'} ${index + 1}`);
-			const grid = card.querySelector('.cb-automations-condition-grid');
-			if (!grid) return;
-			const selects = grid.querySelectorAll(':scope > div > select');
-			const left = selects[0]?.selectedOptions[0]?.textContent?.trim() || '';
-			const operator = selects[1]?.selectedOptions[0]?.textContent?.trim() || '';
-			const right = conditionRightText(grid);
-			let summary = card.querySelector('.cb-automations-condition-summary');
-			if (!summary) {
-				summary = el('div', { class: 'cb-automations-condition-summary' });
-				grid.insertAdjacentElement('beforebegin', summary);
-			}
-			summary.replaceChildren(
-				el('span', { class: 'cb-automations-condition-summary__label' }, strings.reads_as || 'Reads as'),
-				el('strong', {}, [left, operator.toLowerCase(), right].filter(Boolean).join(' '))
-			);
+			// The condition builder owns the human-readable preview and its placement.
 			ensureConditionDetails(card, conditionId);
 		});
 	}
