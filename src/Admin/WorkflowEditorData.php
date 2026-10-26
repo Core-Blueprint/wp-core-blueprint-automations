@@ -104,8 +104,9 @@ final class WorkflowEditorData {
 
 	/**
 	 * @return list<array{value:string,label:string}>
-	 * Registered non-internal WordPress status options for semantic post-status
-	 * literal inputs. This remains a UX hint, not an execution authorization.
+	 * Supported native WordPress status options for semantic post-status
+	 * literals. Custom statuses need an explicit authority contract first.
+	 * The picker is a UX hint; WordPressAction independently authorizes.
 	 */
 	private static function post_status_options(): array {
 		$statuses = get_post_stati( [ 'internal' => false ], 'objects' );
