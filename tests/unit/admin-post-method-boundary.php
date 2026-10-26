@@ -52,6 +52,7 @@ namespace {
     $guards = [
         [ \CB\Automations\Admin\WorkflowController::class, 'guard', [ 'workflow-action' ] ],
         [ \CB\Automations\Admin\WorkflowTransferController::class, 'guard', [ 'transfer-action' ] ],
+        [ \CB\Automations\Admin\WorkflowTransferController::class, 'export', [] ],
         [ \CB\Automations\Admin\WorkflowFolderController::class, 'guard', [ 'create' ] ],
         [ \CB\Automations\Admin\TemplateManagementController::class, 'authorize', [ 'save', 7 ] ],
         [ \CB\Automations\Admin\OperatorRecoveryController::class, 'recover', [] ],
