@@ -54,6 +54,8 @@ test('UX-A action popover is positioned beside the target including bottom-edge 
 
 test('UX-A bulk toolbar is hidden until selection and keeps delete confirmation', () => {
 	assert.match(view, /data-cb-workflow-bulk-toolbar hidden/);
+	assert.match(view, /data-cb-workflow-clear-selection/);
+	assert.match(controller, /clearSelection.addEventListener\('click'/);
 	assert.match(controller, /toolbar.hidden = count === 0/);
 	assert.match(view, /data-cb-workflow-bulk-confirm/);
 	assert.match(view, /data-cb-workflow-select form="cb-automations-bulk-delete"/);

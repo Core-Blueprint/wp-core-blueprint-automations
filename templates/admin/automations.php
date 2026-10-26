@@ -244,6 +244,7 @@ $notices = [
 			<?php if ( [] !== $listing['items'] ) : ?>
 				<form id="cb-automations-bulk-delete" class="cb-automations-workspace__bulk-delete" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-cb-workflow-bulk-delete data-cb-workflow-bulk-toolbar hidden>
 					<strong class="cb-automations-workspace__selection-count" data-cb-workflow-selection-count aria-live="polite"></strong>
+					<button type="button" class="button" data-cb-workflow-clear-selection><?php esc_html_e( 'Clear selection', 'core-blueprint-automations' ); ?></button>
 					<input type="hidden" name="action" value="cb_automations_delete_workflows" />
 					<?php wp_nonce_field( 'cb_automations_delete_workflows', '_cb_automations_nonce' ); ?>
 					<label><input type="checkbox" name="confirm_delete" value="1" required data-cb-workflow-bulk-confirm /> <?php esc_html_e( 'Permanently delete selected disabled workflows. Run history is retained.', 'core-blueprint-automations' ); ?></label>

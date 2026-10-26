@@ -8,6 +8,7 @@
 	const confirmation = root.querySelector('[data-cb-workflow-bulk-confirm]');
 	const toolbar = root.querySelector('[data-cb-workflow-bulk-toolbar]');
 	const selectedCount = root.querySelector('[data-cb-workflow-selection-count]');
+	const clearSelection = root.querySelector('[data-cb-workflow-clear-selection]');
 	const sync = () => {
 		const count = boxes.filter((box) => box.checked).length;
 		if (bulkButton) bulkButton.disabled = count === 0;
@@ -24,6 +25,10 @@
 		sync();
 	});
 	boxes.forEach((box) => box.addEventListener('change', sync));
+	if (clearSelection) clearSelection.addEventListener('click', () => {
+		boxes.forEach((box) => { box.checked = false; });
+		sync();
+	});
 	sync();
 	root.querySelectorAll('form[data-cb-workflow-delete-confirm]').forEach((form) => {
 		form.addEventListener('submit', (event) => {
