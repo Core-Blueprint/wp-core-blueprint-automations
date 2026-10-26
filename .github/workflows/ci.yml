@@ -28,146 +28,19 @@ jobs:
           php-version: ${{ matrix.php }}
           coverage: none
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Prepare immutable Base contract fixtures
+        run: bash tools/prepare-base-fixtures --prepare
+
       - name: PHP syntax
-        run: find . -type f -name '*.php' -print0 | xargs -0 -n1 php -l
+        run: find . -type f -name '*.php' -not -path './.cb-base-fixtures/*' -print0 | xargs -0 -r -n1 php -l
 
-      - name: Admin editor JavaScript syntax
-        run: find assets/js -maxdepth 1 -type f -name '*.js' -print0 | sort -z | xargs -0 -n1 node --check
+      - name: JavaScript runtime syntax
+        run: find assets/js -type f -name '*.js' -print0 | sort -z | xargs -0 -r -n1 node --check
 
-      - name: Capability picker regression
-        run: node tests/js/capability-picker.test.mjs
-
-      - name: Editor binding compatibility regression
-        run: node tests/js/editor-binding-compatibility.test.mjs
-
-      - name: Validation recovery regression
-        run: node tests/js/validation-recovery.test.mjs
-
-      - name: Human condition builder regression
-        run: node tests/js/condition-builder.test.mjs
-
-      - name: Single condition preview renderer regression
-        run: node --test tests/js/editor-condition-preview-owner.test.mjs
-
-      - name: Shared Designer Shell regression
-        run: node tests/js/designer-shell.test.mjs
-
-      - name: Workflow delete UI regression
-        run: node --test tests/js/workflow-delete-ui.test.mjs
-
-      - name: Automation Builder maturity regression
-        run: node tests/js/builder-maturity.test.mjs
-
-      - name: Workflow Designer Golden integration contracts
-        run: node tests/js/designer-golden-contract.test.mjs
-
-      - name: Bootstrap requirements regression
-        run: php tests/unit/bootstrap-requirements.php
-
-      - name: Admin product surface regression
-        run: php tests/unit/admin-product-surface.php
-
-      - name: Admin POST method and authorization boundary
-        run: php tests/unit/admin-post-method-boundary.php
-
-      - name: Template admin storage failure and error boundary
-        run: php tests/unit/template-admin-error-boundary.php
-
-      - name: Workflow delete controller security and uncertainty regression
-        run: php tests/unit/workflow-delete-controller-w32.php
-
-      - name: Workflow delete transactional persistence regression
-        run: php tests/unit/workflow-delete-repository-w32.php
-
-      - name: Public Base admin page requirements regression
-        run: php tests/unit/base-public-admin-pages.php
-
-      - name: AU2 runtime bootstrap boundary
-        run: php tests/unit/runtime-bootstrap.php
-
-      - name: AU2 execution authority policy
-        run: php tests/unit/execution-authority.php
-
-      - name: AU2 runtime schema v2
-        run: php tests/unit/runtime-schema.php
-
-      - name: AU2 Runtime Vault
-        run: php tests/unit/runtime-vault.php
-
-      - name: AU2 queue state machine
-        run: php tests/unit/queue-state-machine.php
-
-      - name: AU2 queue datetime hydration contract
-        run: php tests/unit/job-datetime-contract.php
-
-      - name: AU2 trigger intake and fan-out
-        run: php tests/unit/runtime-intake.php
-
-      - name: AU2 G1 intake concurrency proof
-        run: php tests/unit/runtime-g1.php
-
-      - name: AU2 State execution slice
-        run: php tests/unit/runtime-state-execution.php
-
-      - name: AU2 Condition execution slice
-        run: php tests/unit/runtime-condition-execution.php
-
-      - name: AU2 Action execution slice
-        run: php tests/unit/runtime-action-execution.php
-
-      - name: AU2 durable run pipeline
-        run: php tests/unit/runtime-run-pipeline.php
-
-      - name: Golden LMS to Certificates runtime
-        run: php tests/unit/golden-runtime.php
-
-      - name: AU2 crash and recovery fencing
-        run: php tests/unit/runtime-crash-recovery.php
-
-      - name: AU2 G2 adversarial runtime matrix
-        run: php tests/unit/runtime-g2.php
-
-      - name: AU2 metadata-only run observability
-        run: php tests/unit/runtime-observability.php
-
-      - name: AU2.9 operator recovery
-        run: php tests/unit/runtime-operator-recovery.php
-
-      - name: AU2.9 operator Runs access closure
-        run: php tests/unit/runtime-operator-access.php
-
-      - name: Workflow definition invariants
-        run: php tests/unit/definition-invariants.php
-
-      - name: Workflow core regression matrix
-        run: php tests/unit/workflow-core.php
-
-      - name: Hostile codec regression matrix
-        run: php tests/unit/codec-hostile.php
-
-      - name: Privacy persistence regression
-        run: php tests/unit/privacy-policy.php
-
-      - name: Editor privacy projection regression
-        run: php tests/unit/editor-projection.php
-
-      - name: Independent proof workflows
-        run: php tests/unit/proof-workflows.php
-
-      - name: Golden provider workflow
-        run: php tests/unit/golden-provider-set.php
-
-      - name: Demo provider registration contract
-        run: php tests/unit/demo-provider-contract.php
-
-      - name: AU3 WordPress provider schemas
-        run: php tests/unit/wordpress-provider-schemas.php
-
-      - name: AU3 WordPress hook and security contract
-        run: php tests/unit/wordpress-provider-contract.php
-
-      - name: AU3 workflow template foundation
-        run: php tests/unit/workflow-template-contract.php
-
-      - name: Architecture regression guard
-        run: php tests/unit/architecture.php
+      - name: Full PHP and JavaScript regression matrix
+        run: bash tools/test-regressions

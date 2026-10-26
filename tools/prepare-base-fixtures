@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd -P)"
+FIXTURES_ROOT="$(printenv CB_AUTOMATIONS_BASE_FIXTURES_DIR || true)"
+if [[ -z "$FIXTURES_ROOT" ]]; then
+  FIXTURES_ROOT="$ROOT/.cb-base-fixtures"
+fi
+
+BASE_REMOTE="https://github.com/Core-Blueprint/wp-core-blueprint.git"
+BASE_B1="ff8d62acf0360025ac23482c08017d99104abe9b"
+BASE_B2="9ce68f14c12ceac88d20aa692be8a5bb064c56aa"
+BASE_F02="11622c6224862b0b414352b0fda6e895e2cf153c"
+BASE_V2="5e9d59a2f7ffe384873a6c0650822bbb0e7eb557"
+
+fail() {
+  printf 'Base fixture gate: FAIL: %s\n' "$*" >&2
+  exit 1
+}
+
+expected_sha() {
+  case "$1" in
+    b1) printf '%s' "$BASE_B1" ;;
+    b2) printf '%s' "$BASE_B2" ;;
+    f02) printf '%s' "$BASE_F02" ;;
+    *) fail "unrecognized fixture key: $1" ;;
+  esac
+}
+
+verify() {
+  local key dir actual top expected
+  for key in b1 b2 f02; do
+    dir="$FIXTURES_ROOT/$key"
+    expected="$(expected_sha "$key")"
+    [[ -d "$dir" ]] || fail "missing $key checkout at $dir (run tools/prepare-base-fixtures --prepare)"
+    [[ ! -L "$dir" ]] || fail "$key checkout must not be a symlink: $dir"
+    actual="$(git -C "$dir" rev-parse --verify HEAD 2>/dev/null)" ||
+      fail "$key is not a valid Git checkout: $dir"
+    [[ "$actual" == "$expected" ]] ||
+      fail "$key SOURCE mismatch: expected $expected, got $actual"
+    top="$(git -C "$dir" rev-parse --show-toplevel 2>/dev/null)" ||
+      fail "$key has no Git working tree"
+    [[ "$(cd "$dir" && pwd -P)" == "$(cd "$top" && pwd -P)" ]] ||
+      fail "$key path is not a Git worktree root"
+    [[ -z "$(git -C "$dir" status --porcelain --untracked-files=all)" ]] ||
+      fail "$key checkout has local modifications: $dir"
+  done
+
+  # The Domain Session v2 test reads this ancestor with git show, without a
+  # fourth historical checkout. A shallow/incomplete F02 history must fail.
+  GIT_NO_LAZY_FETCH=1 git -C "$FIXTURES_ROOT/f02" cat-file -e "$BASE_V2^{commit}" 2>/dev/null ||
+    fail "F02 history does not include required Domain Session v2 commit $BASE_V2"
+  GIT_NO_LAZY_FETCH=1 git -C "$FIXTURES_ROOT/f02" cat-file -e "$BASE_V2:assets/js/design/editor.js" 2>/dev/null ||
+    fail "required Domain Session v2 editor source is unavailable"
+  printf 'Base fixture gate: PASS (B1, B2, F02, Domain Session v2 ancestry)\n'
+}
+
+prepare() {
+  local key dir expected existing=0
+  # An entirely provisioned user workspace is reused without any network call.
+  for key in b1 b2 f02; do
+    dir="$FIXTURES_ROOT/$key"
+    if [[ -e "$dir" || -L "$dir" ]]; then
+      existing=$((existing + 1))
+    fi
+  done
+  if [[ "$existing" -eq 3 ]]; then
+    verify
+    return
+  fi
+  [[ "$existing" -eq 0 ]] ||
+    fail "partial fixture directory detected; refusing to overwrite existing checkout(s)"
+  [[ ! -e "$FIXTURES_ROOT/_base-source" && ! -L "$FIXTURES_ROOT/_base-source" ]] ||
+    fail "incomplete provisioning source already exists; inspect it before retrying"
+
+  mkdir -p "$FIXTURES_ROOT"
+  # Public Base main contains every accepted pin. Fetch full history and
+  # blobs during explicit preparation; verification must never lazy-fetch.
+  git clone --quiet --no-checkout --single-branch --branch main \
+    "$BASE_REMOTE" "$FIXTURES_ROOT/_base-source"
+
+  for key in b1 b2 f02; do
+    expected="$(expected_sha "$key")"
+    git -C "$FIXTURES_ROOT/_base-source" cat-file -e "$expected^{commit}" ||
+      fail "Base clone does not contain required $key commit $expected"
+    git -C "$FIXTURES_ROOT/_base-source" worktree add --quiet --detach \
+      "$FIXTURES_ROOT/$key" "$expected"
+  done
+  verify
+}
+
+[[ "$#" -eq 1 ]] || fail "usage: tools/prepare-base-fixtures --prepare|--verify"
+command -v git >/dev/null 2>&1 || fail "Git is required"
+case "$1" in
+  --prepare) prepare ;;
+  --verify) verify ;;
+  *) fail "usage: tools/prepare-base-fixtures --prepare|--verify" ;;
+esac

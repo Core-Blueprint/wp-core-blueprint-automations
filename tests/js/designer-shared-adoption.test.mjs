@@ -45,14 +45,15 @@ test('DSA-02: one canonical Base Domain Session, no second renderer or private i
   assert.match(history, /session\.rebase\(/);
   assert.match(history, /session\.subscribeHistory\(/);
   const baseDir = process.env.CB_BASE_DESIGNER_REPO;
-  if (baseDir) {
-    const exported = join(baseDir, 'assets/js/design/editor.js');
-    assert.ok(existsSync(exported), 'pinned Base source must exist when explicitly supplied');
-    const base = readFileSync(exported, 'utf8');
-    assert.match(base, /createDesignerLayerTree/);
-    assert.match(base, /createDesignerShell/);
-    assert.match(base, /createDomainSession/);
-  }
+  assert.ok(baseDir, 'verified Base F02 checkout is mandatory for full regression coverage');
+  assert.equal(execFileSync('git', ['-C', baseDir, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
+    '11622c6224862b0b414352b0fda6e895e2cf153c');
+  const exported = join(baseDir, 'assets/js/design/editor.js');
+  assert.ok(existsSync(exported), 'pinned Base source must exist');
+  const base = readFileSync(exported, 'utf8');
+  assert.match(base, /createDesignerLayerTree/);
+  assert.match(base, /createDesignerShell/);
+  assert.match(base, /createDomainSession/);
 });
 
 test('DSA-03: Layers and Inspector project one canonical typed Domain Selection', () => {
@@ -124,23 +125,22 @@ test('DSA-06: pinned Base B1 owns context menu and guarded dispatch; Automations
   assert.match(shell, /save: async \(\) => \{/);
   assert.doesNotMatch(shell, /allowConfirmedExit|const requestExit = async|window\.addEventListener\('beforeunload'/);
   const baseDir = process.env.CB_BASE_DESIGNER_REPO;
-  if (baseDir) {
-    const guardPath = join(baseDir, 'assets/js/features/designer-exit-guard.js');
-    const launchPath = join(baseDir, 'assets/js/features/designer-launch.js');
-    const layerPath = join(baseDir, 'assets/js/design/shell/layers.js');
-    for (const path of [guardPath, launchPath, layerPath]) {
-      assert.ok(existsSync(path), 'pinned Base B1 source must provide the shared Designer contract');
-    }
-    const guard = readFileSync(guardPath, 'utf8');
-    const launch = readFileSync(launchPath, 'utf8');
-    const layer = readFileSync(layerPath, 'utf8');
-    assert.match(guard, /window\.cbCore\.designerExitGuard = Object\.freeze\(\{ observe, register, request, requestTransition, canTransition/);
-    assert.match(guard, /const unresolved = \(shell, adapter\)/);
-    assert.match(launch, /designerExitGuard\?\.isTransitionDispatchAuthorized\?\.\(shell\)/);
-    assert.match(launch, /const bindSaveState = \(shell, save\)/);
-    assert.match(layer, /row\.addEventListener\('contextmenu'/);
-    assert.match(layer, /row\.addEventListener\('dragstart'/);
+  assert.ok(baseDir, 'verified Base F02 checkout is mandatory for shared Designer checks');
+  const guardPath = join(baseDir, 'assets/js/features/designer-exit-guard.js');
+  const launchPath = join(baseDir, 'assets/js/features/designer-launch.js');
+  const layerPath = join(baseDir, 'assets/js/design/shell/layers.js');
+  for (const path of [guardPath, launchPath, layerPath]) {
+    assert.ok(existsSync(path), 'pinned Base source must provide the shared Designer contract');
   }
+  const guard = readFileSync(guardPath, 'utf8');
+  const launch = readFileSync(launchPath, 'utf8');
+  const layer = readFileSync(layerPath, 'utf8');
+  assert.match(guard, /window\.cbCore\.designerExitGuard = Object\.freeze\(\{ observe, register, request, requestTransition, canTransition/);
+  assert.match(guard, /const unresolved = \(shell, adapter\)/);
+  assert.match(launch, /designerExitGuard\?\.isTransitionDispatchAuthorized\?\.\(shell\)/);
+  assert.match(launch, /const bindSaveState = \(shell, save\)/);
+  assert.match(layer, /row\.addEventListener\('contextmenu'/);
+  assert.match(layer, /row\.addEventListener\('dragstart'/);
 });
 
 test('DSA-07: Stages is translated in the Automations domain for all six locales', () => {
