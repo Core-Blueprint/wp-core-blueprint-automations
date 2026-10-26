@@ -451,3 +451,8 @@
  .cb-automations-workspace__table tbody .cb-automations-workspace__folder-cell { grid-column:2 / 4; grid-row:4; color:var(--cb-text-muted); }
  .cb-automations-workspace__table tbody .cb-automations-workspace__updated-cell { display:block; grid-column:2 / 4; grid-row:5; color:var(--cb-text-muted); white-space:normal; font-size:var(--cb-fs-xs); }
 }
+
+/* Mobile cards retain explicit descriptions for fields beyond name and status. */
+@media (max-width:782px) {
+ .cb-automations-workspace__table tbody :is(.cb-automations-workspace__trigger-cell,.cb-automations-workspace__folder-cell,.cb-automations-workspace__updated-cell)::before { content:attr(data-label) ": "; color:var(--cb-text); font-weight:var(--cb-fw-semibold); }
+}
