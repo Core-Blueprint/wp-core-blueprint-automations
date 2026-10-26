@@ -56,6 +56,30 @@ if ( str_contains( $plugin, 'core_blueprint_automation_trigger_emitted' ) ) {
 	$failures[] = 'AU2.0A must not subscribe to trigger delivery.';
 }
 
+// Every product service booted by Plugin::boot() must resolve to an actual
+// namespaced source file. A missing 'use' statement is invisible to php -l.
+$boot_imports = [];
+foreach ( explode( "\n", $plugin ) as $line ) {
+	if ( ! str_starts_with( $line, 'use CB\\Automations\\' ) || ! str_ends_with( trim( $line ), ';' ) ) {
+		continue;
+	}
+	$qualified = substr( trim( $line ), 4, -1 );
+	$separator = strrpos( $qualified, '\\' );
+	if ( false !== $separator ) {
+		$boot_imports[ substr( $qualified, $separator + 1 ) ] = $qualified;
+	}
+}
+
+preg_match_all( '/^\s*([A-Z][A-Za-z0-9_]*)::init(?:_maintenance)?\(\);/m', $plugin, $boot_calls );
+foreach ( array_unique( $boot_calls[1] ) as $short_name ) {
+	$qualified = $boot_imports[ $short_name ] ?? 'CB\\Automations\\' . $short_name;
+	$relative  = substr( $qualified, strlen( 'CB\\Automations\\' ) );
+	$source    = $root . '/src/' . str_replace( '\\', '/', $relative ) . '.php';
+	if ( ! is_file( $source ) ) {
+		$failures[] = "Boot initializer {$short_name} does not resolve to a source class.";
+	}
+}
+
 if ( [] !== $failures ) {
 	foreach ( $failures as $failure ) {
 		fwrite( STDERR, $failure . PHP_EOL );
