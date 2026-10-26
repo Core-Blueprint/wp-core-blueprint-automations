@@ -81,6 +81,42 @@ final class WorkflowRepository {
 		return self::hydrate( $row );
 	}
 
+	/**
+	 * Designer context names only. Corrupt JSON in another workflow must never
+	 * block selecting a healthy workflow, and no definitions are hydrated here.
+	 *
+	 * @return list<array{id:int,name:string}>
+	 */
+	public static function list_context_metadata( int $limit = 100, int $offset = 0 ): array {
+		global $wpdb;
+		$limit = max( 1, min( 100, $limit ) );
+		$offset = max( 0, $offset );
+		$table = Schema::table();
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT id, name FROM {$table}
+				 ORDER BY updated_at DESC, id DESC
+				 LIMIT %d OFFSET %d",
+				$limit,
+				$offset
+			),
+			ARRAY_A
+		);
+		if ( ! is_array( $rows ) || ( [] === $rows && '' !== (string) $wpdb->last_error ) ) {
+			throw PersistenceFailure::database( 'list Designer context metadata' );
+		}
+		$items = [];
+		foreach ( $rows as $row ) {
+			$id = is_array( $row ) ? (int) ( $row['id'] ?? 0 ) : 0;
+			$name = is_array( $row ) ? (string) ( $row['name'] ?? '' ) : '';
+			if ( $id < 1 || '' === trim( $name ) ) {
+				throw PersistenceFailure::definition();
+			}
+			$items[] = [ 'id' => $id, 'name' => $name ];
+		}
+		return $items;
+	}
+
 	/** @return WorkflowRecord[] */
 	public static function list( int $limit = 50, int $offset = 0 ): array {
 		global $wpdb;
