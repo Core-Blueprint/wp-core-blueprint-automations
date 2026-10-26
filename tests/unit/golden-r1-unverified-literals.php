@@ -59,6 +59,13 @@ assert_code( $condition_result, 'capability.schema_mismatch', 'Test fixture must
 assert_code( $condition_result, 'privacy.unverified_literal', 'Unknown condition operand sensitivity must block adjacent literal.' );
 assert_true( ! PersistencePolicy::allows( $condition_result ), 'Unverified condition literal could persist.' );
 
+$constant_condition = definition( null, [], [
+	condition( 'condition_1', Binding::literal( 'unclassified-left' ), 'equals', Binding::literal( 'unclassified-right' ) ),
+], [] );
+$constant_result = ( new WorkflowValidator( $known ) )->validate( $constant_condition );
+assert_code( $constant_result, 'privacy.unverified_literal', 'Unclassified two-literal condition cannot prove privacy.' );
+assert_true( ! PersistencePolicy::allows( $constant_result ), 'Two-literal condition bypassed the privacy boundary.' );
+
 $safe_literal = definition( null, [], [], [
 	step( 'action_1', reference( CapabilityKind::ACTION, $provider, 'project.create' ), [
 		'legacy_project_id' => Binding::literal( 123 ),
