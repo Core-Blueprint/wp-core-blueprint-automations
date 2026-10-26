@@ -59,6 +59,13 @@ assert_true(
 	'An old schema version must not trust a newer provider description.'
 );
 
+$constant_definition = definition( null, [], [
+	condition( 'condition_1', Binding::literal( 'unclassified-left' ), 'equals', Binding::literal( 'unclassified-right' ) ),
+], [] );
+$constant_projection = EditorDefinitionProjection::project( DefinitionCodec::encode( $constant_definition ), [] );
+assert_true( 1 === $constant_projection['redacted'], 'Unclassified condition literals must be redacted.' );
+assert_true( [] === $constant_projection['definition']['conditions'], 'Unclassified condition leaked into the browser.' );
+
 $safe = definition( null, [], [], [ step(
 	'action_1', reference( CapabilityKind::ACTION, $provider, 'project.create' ),
 	[ 'legacy_project_id' => Binding::literal( 123 ) ]
