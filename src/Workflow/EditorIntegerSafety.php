@@ -19,8 +19,8 @@ defined( 'ABSPATH' ) || exit;
 final class EditorIntegerSafety {
     private const MAX_SAFE_INTEGER = 9007199254740991;
 
-    public static function is_browser_safe( Definition $definition ): bool {
-        return self::value_safe( DefinitionCodec::encode( $definition ) );
+    public static function is_browser_safe( Definition|GraphDefinition $definition ): bool {
+        return self::value_safe( DefinitionDocumentCodec::encode( $definition ) );
     }
 
     private static function value_safe( mixed $value ): bool {
