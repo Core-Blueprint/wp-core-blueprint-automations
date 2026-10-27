@@ -23,6 +23,10 @@ final class RunRepository {
 			throw new \InvalidArgumentException( 'Invalid automation run snapshot identity.' );
 		}
 
+		// Only Standard v1 may enter the existing immutable run snapshot pipeline.
+		if ( ! $workflow->definition() instanceof \CB\Automations\Workflow\Definition ) {
+			throw PersistenceFailure::definition();
+		}
 		$encoded = DefinitionCodec::encode( $workflow->definition() );
 		try {
 			$definition_json = json_encode(
