@@ -73,6 +73,11 @@ final class AutomationsPage implements Page {
 					return;
 				}
 
+				// No Advanced UI exists in ADV-02A; never pass v2 to Standard editor.
+				if ( $detail['record']->definition() instanceof \CB\Automations\Workflow\GraphDefinition ) {
+					$this->render_unavailable();
+					return;
+				}
 				if ( self::requires_contract_recovery( $detail['validation'] ) ) {
 					$this->template( 'workflow-review.php', [ 'detail' => $detail ] );
 					return;
