@@ -23,7 +23,7 @@ final class WorkflowSaveReceipt {
 		int $expected_revision,
 		string $submitted_name,
 		ActivationState $accepted_state,
-		Definition $accepted_definition,
+		Definition|GraphDefinition $accepted_definition,
 		int $execution_principal_user_id,
 		int $actor_user_id
 	): ?array {
@@ -38,8 +38,8 @@ final class WorkflowSaveReceipt {
 			|| $readback->activation_state() !== $accepted_state
 			|| $readback->execution_principal_user_id() !== $execution_principal_user_id
 			|| $readback->updated_by() !== $actor_user_id
-			|| $readback->trigger_key() !== TriggerKey::for_definition( $accepted_definition )
-			|| DefinitionCodec::encode( $readback->definition() ) !== DefinitionCodec::encode( $accepted_definition )
+			|| $readback->trigger_key() !== ( $accepted_definition instanceof Definition ? TriggerKey::for_definition( $accepted_definition ) : '' )
+			|| DefinitionDocumentCodec::encode( $readback->definition() ) !== DefinitionDocumentCodec::encode( $accepted_definition )
 		) {
 			return null;
 		}
