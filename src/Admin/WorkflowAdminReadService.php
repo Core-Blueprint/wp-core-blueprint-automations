@@ -9,14 +9,20 @@ use CB\Automations\Persistence\WorkflowRepository;
 use CB\Automations\Validation\ValidationResult;
 use CB\Automations\Validation\ValidationState;
 use CB\Automations\Validation\WorkflowValidator;
+use CB\Automations\Validation\GraphValidator;
+use CB\Automations\Validation\ValidationIssue;
+use CB\Automations\Workflow\GraphDefinition;
 
 defined( 'ABSPATH' ) || exit;
 
 final class WorkflowAdminReadService {
 	private WorkflowValidator $validator;
+	private GraphValidator $graph_validator;
 
 	public function __construct( ?CapabilityCatalog $catalog = null ) {
-		$this->validator = new WorkflowValidator( $catalog ?? new CapabilityCatalog() );
+		$source = $catalog ?? new CapabilityCatalog();
+		$this->validator = new WorkflowValidator( $source );
+		$this->graph_validator = new GraphValidator( $source );
 	}
 
 	/**
@@ -35,7 +41,7 @@ final class WorkflowAdminReadService {
 
 		$items = [];
 		foreach ( WorkflowRepository::query_index( $per_page, $offset, $search, $status, $sort, $folder_id ) as $record ) {
-			$validation = $this->validator->validate( $record->definition() );
+			$validation = $this->validate_record( $record );
 			$items[]    = [
 				'record'     => $record,
 				'validation' => $validation,
@@ -88,11 +94,18 @@ final class WorkflowAdminReadService {
 			return null;
 		}
 
-		$validation = $this->validator->validate( $record->definition() );
+		$validation = $this->validate_record( $record );
 		return [
 			'record'     => $record,
 			'validation' => $validation,
 			'state'      => ValidationState::from_result( $validation ),
 		];
+	}
+	private function validate_record( WorkflowRecord $record ): ValidationResult {
+		if ( $record->definition() instanceof GraphDefinition ) {
+			$result = $this->graph_validator->validate( $record->definition() );
+			return new ValidationResult( [ ...$result->issues(), new ValidationIssue( 'graph.execution_unavailable', 'definition_version' ) ] );
+		}
+		return $this->validator->validate( $record->definition() );
 	}
 }
