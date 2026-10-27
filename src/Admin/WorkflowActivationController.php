@@ -92,6 +92,9 @@ final class WorkflowActivationController {
 		if ( null === $record ) {
 			self::redirect( 'not_found' );
 		}
+		if ( $record->definition() instanceof \CB\Automations\Workflow\GraphDefinition ) {
+			self::redirect( 'invalid' ); // V2 may not be activated or status-toggled in ADV-02A.
+		}
 		if ( $record->revision() !== $expected_revision ) {
 			self::redirect( 'conflict' );
 		}
