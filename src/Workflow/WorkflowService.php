@@ -13,25 +13,30 @@ use CB\Automations\Persistence\WorkflowRepository;
 use CB\Automations\Support\Requirements;
 use CB\Automations\Validation\ValidationResult;
 use CB\Automations\Validation\WorkflowValidator;
+use CB\Automations\Validation\GraphValidator;
 
 defined( 'ABSPATH' ) || exit;
 
 final class WorkflowService {
 	private WorkflowValidator $validator;
+	private GraphValidator $graph_validator;
 	private CapabilitySource $source;
 
 	public function __construct( ?CapabilitySource $source = null ) {
 		$this->source = $source ?? new CapabilityCatalog();
 		$this->validator = new WorkflowValidator( $this->source );
+		$this->graph_validator = new GraphValidator( $this->source );
 	}
 
-	public function validate( Definition $definition ): ValidationResult {
-		return $this->validator->validate( $definition );
+	public function validate( Definition|GraphDefinition $definition ): ValidationResult {
+		return $definition instanceof Definition
+			? $this->validator->validate( $definition )
+			: $this->graph_validator->validate( $definition );
 	}
 
-	public function create( string $name, Definition $definition, int $user_id ): int {
+	public function create( string $name, Definition|GraphDefinition $definition, int $user_id ): int {
 		if ( ! Schema::authoring_ready() ) { throw PersistenceFailure::schema(); }
-		$validation = $this->validator->validate( $definition );
+		$validation = $this->validate( $definition );
 		if ( ! PersistencePolicy::allows( $validation ) ) {
 			throw new \DomainException( 'Workflow definition contains sensitive literal data that cannot be persisted safely.' );
 		}
@@ -53,11 +58,11 @@ final class WorkflowService {
 		int $expected_revision,
 		string $name,
 		ActivationState $activation_state,
-		Definition $definition,
+		Definition|GraphDefinition $definition,
 		int $user_id,
 		bool $rebind_execution_principal = false
 	): WorkflowSaveResult {
-		$validation = $this->validator->validate( $definition );
+		$validation = $this->validate( $definition );
 		if ( ! Schema::authoring_ready() ) { return WorkflowSaveResult::persistence_blocked( $validation ); }
 		if ( ! EditorIntegerSafety::is_browser_safe( $definition ) ) {
 			return WorkflowSaveResult::precision_blocked( $validation );
@@ -71,6 +76,18 @@ final class WorkflowService {
 			return WorkflowSaveResult::conflict( $validation );
 		}
 
+		// Never switch definition versions through Save. V2 stays disabled.
+		if ( get_class( $definition ) !== get_class( $current->definition() ) ) {
+			return WorkflowSaveResult::persistence_blocked( $validation );
+		}
+		if ( $definition instanceof GraphDefinition && (
+			ActivationState::Disabled !== $activation_state
+			|| ActivationState::Disabled !== $current->activation_state()
+			|| $rebind_execution_principal
+		) ) {
+			return WorkflowSaveResult::persistence_blocked( $validation );
+		}
+
 		// The incoming browser definition is only the authorable projection.
 		// Never interpret deliberately redacted stored fields as user deletions.
 		// Block the entire write rather than re-persist prohibited literals.
@@ -78,11 +95,13 @@ final class WorkflowService {
 			return WorkflowSaveResult::precision_blocked( $validation );
 		}
 
-		$editor_candidate = EditorSaveBoundary::reconcile(
-			$current->definition(),
-			$definition,
-			$this->source
-		);
+		$editor_candidate = $definition instanceof GraphDefinition
+			? $definition // No Advanced browser projection exists in ADV-02A.
+			: EditorSaveBoundary::reconcile(
+				$current->definition(),
+				$definition,
+				$this->source
+			);
 		if ( null === $editor_candidate ) {
 			return WorkflowSaveResult::persistence_blocked( $validation );
 		}
