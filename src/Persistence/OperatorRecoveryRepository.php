@@ -89,7 +89,7 @@ final class OperatorRecoveryRepository {
 			),
 			ARRAY_A
 		);
-		if ( ! is_array( $rows ) ) {
+		if ( ! is_array( $rows ) || '' !== (string) $wpdb->last_error ) {
 			throw PersistenceFailure::database( 'load automation operator recovery history' );
 		}
 

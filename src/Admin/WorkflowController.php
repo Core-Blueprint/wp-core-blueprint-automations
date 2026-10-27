@@ -55,10 +55,10 @@ final class WorkflowController {
 		} catch ( InvalidArgumentException $error ) {
 			self::redirect( [ 'notice' => 'invalid_name' ] );
 		} catch ( PersistenceFailure $error ) {
-			error_log( '[Core Blueprint Automations] Workflow create persistence failure: ' . $error->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- bounded diagnostic without workflow data.
+			error_log( '[Core Blueprint Automations] Workflow create persistence failure.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- bounded diagnostic without workflow data.
 			self::redirect( [ 'notice' => 'storage_failed' ] );
 		} catch ( \Throwable $error ) {
-			error_log( '[Core Blueprint Automations] Workflow create failed: ' . $error->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- bounded diagnostic without workflow data.
+			error_log( '[Core Blueprint Automations] Workflow create failed.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- bounded diagnostic without workflow data.
 			self::redirect( [ 'notice' => 'failed' ] );
 		}
 	}
@@ -108,10 +108,10 @@ final class WorkflowController {
 			);
 			self::redirect( [ 'workflow' => $id, 'notice' => 'created_template' ] );
 		} catch ( PersistenceFailure $error ) {
-			error_log( '[Core Blueprint Automations] Template workflow create persistence failure: ' . $error->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- bounded diagnostic without workflow data.
+			error_log( '[Core Blueprint Automations] Template workflow create persistence failure.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- bounded diagnostic without workflow data.
 			self::redirect( [ 'notice' => 'storage_failed' ] );
 		} catch ( \Throwable $error ) {
-			error_log( '[Core Blueprint Automations] Template workflow create failed: ' . $error->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- bounded diagnostic without workflow data.
+			error_log( '[Core Blueprint Automations] Template workflow create failed.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- bounded diagnostic without workflow data.
 			self::redirect( [ 'notice' => 'failed' ] );
 		}
 	}
@@ -175,11 +175,11 @@ final class WorkflowController {
 		} catch ( InvalidArgumentException $error ) {
 			self::reject_or_redirect( [ 'workflow' => $id, 'notice' => 'invalid_name' ], 400 );
 		} catch ( PersistenceFailure $error ) {
-			error_log( '[Core Blueprint Automations] Workflow save persistence failure: ' . $error->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- bounded diagnostic without workflow data.
+			error_log( '[Core Blueprint Automations] Workflow save persistence failure.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- bounded diagnostic without workflow data.
 			self::reject_or_redirect( [ 'workflow' => $id, 'notice' => 'storage_failed' ], 500 );
 		} catch ( \Throwable $error ) {
 			// Never log the submitted definition: it may contain operator-entered literals.
-			error_log( '[Core Blueprint Automations] Workflow save failed: ' . $error->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- bounded diagnostic without workflow data.
+			error_log( '[Core Blueprint Automations] Workflow save failed.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- bounded diagnostic without workflow data.
 			self::reject_or_redirect( [ 'workflow' => $id, 'notice' => 'failed' ], 500 );
 		}
 	}

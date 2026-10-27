@@ -57,7 +57,7 @@ final class WorkflowDeletionController {
 			$outcome = WorkflowRepository::delete_disabled_batch( $expected );
 		} catch ( \Throwable $error ) {
 			// The COMMIT acknowledgement may have been lost. Never auto-retry a deletion.
-			error_log( '[Core Blueprint Automations] Workflow deletion could not be verified: ' . $error->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			error_log( '[Core Blueprint Automations] Workflow deletion could not be verified.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 			self::redirect( 'delete_unverified' );
 		}
 		self::redirect( match ( $outcome ) {
