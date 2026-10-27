@@ -15,6 +15,9 @@ defined( 'ABSPATH' ) || exit;
 final class WorkflowEditorData {
 	/** @return array<string,mixed> */
 	public static function build( WorkflowRecord $record, ValidationResult $validation, ?CapabilityCatalog $catalog = null ): array {
+		if ( ! $record->definition() instanceof \CB\Automations\Workflow\Definition ) {
+			throw new \UnexpectedValueException( 'Advanced drafts cannot be opened in the Standard editor.' );
+		}
 		// Defence in depth: never return an unsafe number in the browser data,
 		// even if another caller bypasses the admin page's read-only gate.
 		if ( ! \CB\Automations\Workflow\EditorIntegerSafety::is_browser_safe( $record->definition() ) ) {
