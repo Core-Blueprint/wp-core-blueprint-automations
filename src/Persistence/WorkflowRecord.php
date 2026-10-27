@@ -5,6 +5,7 @@ namespace CB\Automations\Persistence;
 
 use CB\Automations\Workflow\ActivationState;
 use CB\Automations\Workflow\Definition;
+use CB\Automations\Workflow\GraphDefinition;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -13,7 +14,7 @@ final readonly class WorkflowRecord {
 		private int $id,
 		private string $name,
 		private ActivationState $activation_state,
-		private Definition $definition,
+		private Definition|GraphDefinition $definition,
 		private int $revision,
 		private int $execution_principal_user_id,
 		private string $trigger_key,
@@ -26,7 +27,7 @@ final readonly class WorkflowRecord {
 	public function id(): int { return $this->id; }
 	public function name(): string { return $this->name; }
 	public function activation_state(): ActivationState { return $this->activation_state; }
-	public function definition(): Definition { return $this->definition; }
+	public function definition(): Definition|GraphDefinition { return $this->definition; }
 	public function revision(): int { return $this->revision; }
 	public function execution_principal_user_id(): int { return $this->execution_principal_user_id; }
 	public function trigger_key(): string { return $this->trigger_key; }

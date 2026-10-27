@@ -110,7 +110,10 @@ final class GraphDefinitionCodec {
 			return;
 		}
 		if ( 'if_else' === $type ) {
-			self::keys( $value, [ 'left', 'operator', 'right' ] );
+			self::keys( $value, [ 'left', 'operator', 'right', 'merge_id' ] );
+			if ( ! self::id( $value['merge_id'] ) ) {
+				throw new UnexpectedValueException( 'Advanced condition requires an explicit merge id.' );
+			}
 			$left = is_array( $value['left'] ) ? Binding::from_array( $value['left'] ) : null;
 			$right = null === $value['right'] ? null
 				: ( is_array( $value['right'] ) ? Binding::from_array( $value['right'] ) : null );

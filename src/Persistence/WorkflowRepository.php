@@ -8,13 +8,15 @@ use CB\Automations\Organisation\FolderRepository;
 use CB\Automations\Workflow\ActivationState;
 use CB\Automations\Workflow\Definition;
 use CB\Automations\Workflow\DefinitionCodec;
+use CB\Automations\Workflow\GraphDefinition;
+use CB\Automations\Workflow\DefinitionDocumentCodec;
 use CB\Automations\Workflow\PersistencePolicy;
 use JsonException;
 
 defined( 'ABSPATH' ) || exit;
 
 final class WorkflowRepository {
-	public static function create( string $name, Definition $definition, int $user_id ): int {
+	public static function create( string $name, Definition|GraphDefinition $definition, int $user_id ): int {
 		if ( ! Schema::authoring_ready() ) { throw PersistenceFailure::schema(); }
 		global $wpdb;
 
@@ -26,7 +28,7 @@ final class WorkflowRepository {
 		$table = Schema::table();
 		$now   = current_time( 'mysql', true );
 		$json  = self::encode_definition( $definition );
-		$trigger_key = TriggerKey::for_definition( $definition );
+		$trigger_key = $definition instanceof Definition ? TriggerKey::for_definition( $definition ) : '';
 
 		$result = $wpdb->insert(
 			$table,
@@ -92,8 +94,10 @@ final class WorkflowRepository {
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT id, name FROM {$table}
+				 WHERE definition_version = %d
 				 ORDER BY updated_at DESC, id DESC
 				 LIMIT %d OFFSET %d",
+				Definition::VERSION,
 				$limit,
 				$offset
 			),
@@ -236,11 +240,12 @@ final class WorkflowRepository {
 			$wpdb->prepare(
 				"SELECT id, name, activation_state, definition_version, definition_json, revision, execution_principal_user_id, trigger_key, created_by, updated_by, created_at, updated_at
 				 FROM {$table}
-				 WHERE activation_state = %s AND trigger_key = %s
+				 WHERE activation_state = %s AND trigger_key = %s AND definition_version = %d
 				 ORDER BY id ASC
 				 LIMIT %d OFFSET %d",
 				ActivationState::Enabled->value,
 				$trigger_key,
+				Definition::VERSION,
 				$limit,
 				$offset
 			),
@@ -273,7 +278,7 @@ final class WorkflowRepository {
 		int $expected_revision,
 		string $name,
 		ActivationState $activation_state,
-		Definition $definition,
+		Definition|GraphDefinition $definition,
 		int $execution_principal_user_id,
 		int $user_id
 	): bool {
@@ -284,11 +289,14 @@ final class WorkflowRepository {
 			throw new \InvalidArgumentException( 'Invalid workflow update cursor.' );
 		}
 
+		if ( $definition instanceof GraphDefinition && ActivationState::Disabled !== $activation_state ) {
+			throw new \InvalidArgumentException( 'Advanced draft cannot be activated.' );
+		}
 		$name  = self::normalize_name( $name );
 		$table = Schema::table();
 		$json  = self::encode_definition( $definition );
 		$now   = current_time( 'mysql', true );
-		$trigger_key = TriggerKey::for_definition( $definition );
+		$trigger_key = $definition instanceof Definition ? TriggerKey::for_definition( $definition ) : '';
 
 		$result = $wpdb->query(
 			$wpdb->prepare(
@@ -302,7 +310,7 @@ final class WorkflowRepository {
 				     revision = revision + 1,
 				     updated_by = %d,
 				     updated_at = %s
-				 WHERE id = %d AND revision = %d",
+				 WHERE id = %d AND revision = %d AND definition_version = %d",
 				$name,
 				$activation_state->value,
 				$definition->definition_version(),
@@ -312,7 +320,8 @@ final class WorkflowRepository {
 				$user_id,
 				$now,
 				$id,
-				$expected_revision
+				$expected_revision,
+				$definition->definition_version()
 			)
 		);
 
@@ -437,7 +446,7 @@ final class WorkflowRepository {
 			|| $principal < 0
 			|| ! TriggerKey::is_valid( $trigger_key )
 			|| null === $state
-			|| Definition::VERSION !== (int) ( $row['definition_version'] ?? 0 )
+			|| ! in_array( (int) ( $row['definition_version'] ?? 0 ), [ Definition::VERSION, GraphDefinition::VERSION ], true )
 		) {
 			throw PersistenceFailure::definition();
 		}
@@ -451,12 +460,17 @@ final class WorkflowRepository {
 			if ( ! is_array( $decoded ) ) {
 				throw new JsonException( 'Workflow definition root must be an object.' );
 			}
-			$definition = DefinitionCodec::decode( $decoded );
+			$definition = DefinitionDocumentCodec::decode( $decoded );
+			if ( $definition->definition_version() !== (int) $row['definition_version'] ) {
+				throw PersistenceFailure::definition();
+			}
 		} catch ( \Throwable ) {
 			throw PersistenceFailure::definition();
 		}
 
-		if ( TriggerKey::for_definition( $definition ) !== $trigger_key ) {
+		if ( $definition instanceof GraphDefinition
+			? ( ActivationState::Disabled !== $state || '' !== $trigger_key )
+			: TriggerKey::for_definition( $definition ) !== $trigger_key ) {
 			throw PersistenceFailure::definition();
 		}
 
@@ -477,8 +491,8 @@ final class WorkflowRepository {
 		);
 	}
 
-	private static function encode_definition( Definition $definition ): string {
-		$json = wp_json_encode( DefinitionCodec::encode( $definition ) );
+	private static function encode_definition( Definition|GraphDefinition $definition ): string {
+		$json = wp_json_encode( DefinitionDocumentCodec::encode( $definition ) );
 		if ( ! is_string( $json ) || ! PersistencePolicy::allows_encoded_definition( $json ) ) {
 			throw PersistenceFailure::definition();
 		}
