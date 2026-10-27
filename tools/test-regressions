@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd -P)"
+FIXTURES_ROOT="$(printenv CB_AUTOMATIONS_BASE_FIXTURES_DIR || true)"
+if [[ -z "$FIXTURES_ROOT" ]]; then
+  FIXTURES_ROOT="$ROOT/.cb-base-fixtures"
+fi
+
+fail() {
+  printf 'Automations regression gate: FAIL: %s\n' "$*" >&2
+  exit 1
+}
+
+[[ "$#" -eq 0 ]] || fail "usage: tools/test-regressions"
+for executable in git php node find sort awk; do
+  command -v "$executable" >/dev/null 2>&1 ||
+    fail "required executable is missing: $executable"
+done
+
+cd "$ROOT"
+bash "$ROOT/tools/prepare-base-fixtures" --verify
+
+# Do not accept inherited, mismatched or optional Base paths. All cross-repo
+# tests receive the same three verified fixtures and their complete F02 history.
+export CB_BASE_DESIGNER_B1_REPO="$FIXTURES_ROOT/b1"
+export CB_BASE_DESIGNER_B2_REPO="$FIXTURES_ROOT/b2"
+export CB_BASE_DESIGNER_F02_REPO="$FIXTURES_ROOT/f02"
+export CB_BASE_DESIGNER_REPO="$FIXTURES_ROOT/f02"
+
+mapfile -d '' php_tests < <(find "$ROOT/tests/unit" -maxdepth 1 -type f -name '*.php' -print0 | LC_ALL=C sort -z)
+mapfile -d '' js_tests < <(find "$ROOT/tests/js" -maxdepth 1 -type f -name '*.test.mjs' -print0 | LC_ALL=C sort -z)
+[[ "${#php_tests[@]}" -gt 0 ]] || fail "no PHP regression files discovered"
+[[ "${#js_tests[@]}" -gt 0 ]] || fail "no JavaScript regression files discovered"
+printf 'Automations regression discovery: PHP=%s JavaScript=%s\n' "${#php_tests[@]}" "${#js_tests[@]}"
+
+for file in "${php_tests[@]}"; do
+  printf 'PHP regression: %s\n' "${file#"$ROOT"/}"
+  php "$file"
+done
+
+printf 'PHP regression gate: PASS (%s files)\n' "${#php_tests[@]}"
+# TAP's final summary must contain nonzero executed tests, no failed tests,
+# and no skipped/todo tests. The Node runner exit code is also authoritative.
+node --test --test-reporter=tap "${js_tests[@]}" | awk -v discovered="${#js_tests[@]}" '
+  { print; fflush() }
+  /^# tests [0-9]+$/ { tests=$3 }
+  /^# pass [0-9]+$/ { passed=$3 }
+  /^# fail [0-9]+$/ { failed=$3 }
+  /^# skipped [0-9]+$/ { skipped=$3 }
+  /^# todo [0-9]+$/ { todo=$3 }
+  END {
+    if (tests < discovered || passed != tests || failed != 0 || skipped != 0 || todo != 0) {
+      printf "JavaScript regression gate: FAIL (files=%d tests=%d pass=%d fail=%d skipped=%d todo=%d)\n", discovered, tests, passed, failed, skipped, todo > "/dev/stderr"
+      exit 1
+    }
+    printf "JavaScript regression gate: PASS (%d files, %d tests)\n", discovered, tests
+  }
+'
