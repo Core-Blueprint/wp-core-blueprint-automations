@@ -109,8 +109,10 @@ adv_check( $validator->validate( $definition )->is_valid(), 'Valid exclusive mer
 adv_check( GraphDefinitionCodec::encode( $definition ) === $valid, 'Valid graph roundtrip differs.' );
 
 $cycle = adv_fixture();
-$cycle['graph']['edges'][6]['to'] = 'state';
-$cycle['graph']['edges'][6]['to_port'] = 'in';
+$cycle['graph']['nodes'][] = [ 'id' => 'loop_a', 'type' => 'state', 'config' => [] ];
+$cycle['graph']['nodes'][] = [ 'id' => 'loop_b', 'type' => 'state', 'config' => [] ];
+$cycle['graph']['edges'][] = adv_edge( 'edge_8', 'loop_a', 'next', 'loop_b', 'in' );
+$cycle['graph']['edges'][] = adv_edge( 'edge_9', 'loop_b', 'next', 'loop_a', 'in' );
 adv_check( $validator->validate( GraphDefinitionCodec::decode( $cycle ) )->has_code( 'graph.cycle' ), 'Cycle was not rejected.' );
 
 $bad_merge = adv_fixture();
