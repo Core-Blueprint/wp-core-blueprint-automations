@@ -55,6 +55,9 @@ final class WorkflowTransferCodec {
 	}
 
 	public static function export_json( WorkflowRecord $workflow ): string {
+		if ( ! $workflow->definition() instanceof Definition ) {
+			throw new \UnexpectedValueException( 'Advanced draft export is unavailable.' );
+		}
 		$document = [
 			'format' => self::FORMAT,
 			'format_version' => self::FORMAT_VERSION,
