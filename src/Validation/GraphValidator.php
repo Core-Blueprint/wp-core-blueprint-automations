@@ -60,12 +60,19 @@ final class GraphValidator {
 						$add( 'capability.missing', 'graph.nodes.' . $index . '.config.capability' );
 					} else {
 						$capabilities[ $id ] = $current;
+						foreach ( $current->input_schema() as $field => $schema ) {
+							if ( ! empty( $schema['required'] ) && ! array_key_exists( $field, $config['bindings'] ) ) {
+								$add( 'binding.required_missing', 'graph.nodes.' . $index . '.config.bindings.' . $field );
+							}
+						}
 						foreach ( $config['bindings'] as $field => $binding ) {
 							$schema = $current->input_schema()[ $field ] ?? null;
 							if ( ! is_array( $schema ) ) {
 								$add( 'binding.unknown_field', 'graph.nodes.' . $index . '.config.bindings.' . $field );
 							} elseif ( 'literal' === $binding['source'] && ! empty( $schema['sensitive'] ) ) {
 								$add( 'privacy.sensitive_literal', 'graph.nodes.' . $index . '.config.bindings.' . $field );
+							} elseif ( 'literal' === $binding['source'] && ! self::literal_matches( $binding['value'], $schema ) ) {
+								$add( 'binding.type_mismatch', 'graph.nodes.' . $index . '.config.bindings.' . $field );
 							}
 						}
 					}
@@ -232,14 +239,50 @@ final class GraphValidator {
 					$add( 'binding.source_not_guaranteed', 'graph.nodes.' . $id . '.config.' . $field );
 					continue;
 				}
-				if ( isset( $capabilities[ $producer ] )
-					&& ! array_key_exists( $binding['field'], $capabilities[ $producer ]->output_schema() ) ) {
-					$add( 'binding.field_missing', 'graph.nodes.' . $id . '.config.' . $field );
+				if ( isset( $capabilities[ $producer ] ) ) {
+					$source_schema = $capabilities[ $producer ]->output_schema()[ $binding['field'] ] ?? null;
+					if ( ! is_array( $source_schema ) ) {
+						$add( 'binding.field_missing', 'graph.nodes.' . $id . '.config.' . $field );
+					} elseif ( isset( $capabilities[ $id ] ) ) {
+						$target_schema = $capabilities[ $id ]->input_schema()[ $field ] ?? null;
+						if ( is_array( $target_schema ) && ! self::compatible_schema( $source_schema, $target_schema ) ) {
+							$add( 'binding.type_mismatch', 'graph.nodes.' . $id . '.config.' . $field );
+						}
+					}
 				}
 			}
 		}
 		// Nothing in v2 is eligible for activation until ADV-02B/C is accepted.
 		return new ValidationResult( $issues );
+	}
+
+
+	private static function literal_matches( mixed $value, array $schema ): bool {
+		$type = $schema['type'] ?? null;
+		return match ( $type ) {
+			'string' => is_string( $value ),
+			'integer' => is_int( $value ),
+			'number' => is_int( $value ) || ( is_float( $value ) && is_finite( $value ) ),
+			'boolean' => is_bool( $value ),
+			'array' => is_array( $value ) && array_is_list( $value )
+				&& array_reduce( $value, static function ( bool $ok, mixed $item ) use ( $schema ): bool {
+					$inner = $schema['items'] ?? null;
+					return $ok && is_string( $inner ) && self::literal_matches( $item, [ 'type' => $inner ] );
+				}, true ),
+			default => false,
+		};
+	}
+
+	private static function compatible_schema( array $source, array $target ): bool {
+		$source_type = $source['type'] ?? null;
+		$target_type = $target['type'] ?? null;
+		$source_semantic = $source['semantic_type'] ?? null;
+		$target_semantic = $target['semantic_type'] ?? null;
+		if ( null !== $target_semantic && $source_semantic !== $target_semantic ) return false;
+		if ( 'number' === $target_type && 'integer' === $source_type ) return true;
+		if ( $source_type !== $target_type || ! is_string( $source_type ) ) return false;
+		if ( 'array' === $source_type ) return ( $source['items'] ?? null ) === ( $target['items'] ?? null );
+		return true;
 	}
 
 	/** All outgoing paths must reach the specified merge before reaching End. */
