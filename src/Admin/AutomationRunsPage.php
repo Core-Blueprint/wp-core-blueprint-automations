@@ -62,7 +62,7 @@ final class AutomationRunsPage implements Page {
 				: 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only filtering.
 			$this->template( 'runs.php', [ 'listing' => $reader->index( $page, $workflow_id ) ] );
 		} catch ( \Throwable $error ) {
-			error_log( '[Core Blueprint Automations] Run history page read failed: ' . $error->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- bounded operational diagnostic.
+			error_log( '[Core Blueprint Automations] Run history page read failed.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- bounded operational diagnostic.
 			$this->render_unavailable();
 		}
 	}

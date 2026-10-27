@@ -25,7 +25,7 @@ final class FolderRepository {
 		global $wpdb;
 		$table = self::folders_table();
 		$rows = $wpdb->get_results( "SELECT id, name FROM {$table} ORDER BY name ASC, id ASC LIMIT 1000", ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- trusted identifier.
-		if ( ! is_array( $rows ) ) { throw new \RuntimeException( 'Could not list folders.' ); }
+		if ( ! is_array( $rows ) || '' !== (string) $wpdb->last_error ) { throw new \RuntimeException( 'Could not list folders.' ); }
 		return array_map( static fn( array $row ): array => [ 'id' => (int) $row['id'], 'name' => (string) $row['name'] ], $rows );
 	}
 	public static function normalize_name( string $submitted ): string {
@@ -37,8 +37,9 @@ final class FolderRepository {
 		self::ensure_ready();
 		global $wpdb;
 		$table = self::folders_table();
-		$count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- trusted table.
-		if ( $count >= 1000 ) { throw new \RuntimeException( 'Maximum number of folders reached.' ); }
+		$count = $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- trusted table.
+		if ( null === $count || '' !== (string) $wpdb->last_error ) { throw new \RuntimeException( 'Could not count folders.' ); }
+		if ( (int) $count >= 1000 ) { throw new \RuntimeException( 'Maximum number of folders reached.' ); }
 		$now = current_time( 'mysql', true );
 		$result = $wpdb->insert( $table, [
 			'name' => self::normalize_name( $name ), 'created_at' => $now, 'updated_at' => $now,
@@ -60,7 +61,9 @@ final class FolderRepository {
 		global $wpdb;
 		if ( $id < 1 ) { return false; }
 		$table = self::folders_table();
-		return 1 === (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE id = %d", $id ) );
+		$count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE id = %d", $id ) );
+		if ( null === $count || '' !== (string) $wpdb->last_error ) { throw new \RuntimeException( 'Could not verify folder existence.' ); }
+		return 1 === (int) $count;
 	}
 	/** Atomic folder deletion unfiles workflows, never deletes them. */
 	public static function delete( int $id ): bool {
@@ -71,6 +74,7 @@ final class FolderRepository {
 		if ( false === $wpdb->query( 'START TRANSACTION' ) ) { throw new \RuntimeException( 'Transaction unavailable.' ); }
 		try {
 			$locked = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$folders} WHERE id = %d FOR UPDATE", $id ) );
+			if ( '' !== (string) $wpdb->last_error ) { throw new \RuntimeException( 'Could not verify folder lock.' ); }
 			if ( null === $locked ) { $wpdb->query( 'ROLLBACK' ); return false; }
 			if ( false === $wpdb->delete( $assignments, [ 'folder_id' => $id ], [ '%d' ] )
 				|| 1 !== $wpdb->delete( $folders, [ 'id' => $id ], [ '%d' ] ) ) {
@@ -90,12 +94,14 @@ final class FolderRepository {
 		if ( false === $wpdb->query( 'START TRANSACTION' ) ) { throw new \RuntimeException( 'Transaction unavailable.' ); }
 		try {
 			$workflow = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$workflows} WHERE id = %d LIMIT 1 FOR UPDATE", $workflow_id ) );
+			if ( '' !== (string) $wpdb->last_error ) { throw new \RuntimeException( 'Could not verify workflow lock.' ); }
 			if ( null === $workflow ) { $wpdb->query( 'ROLLBACK' ); return false; }
 			if ( 0 === $folder_id ) {
 				$result = $wpdb->delete( $assignments, [ 'workflow_id' => $workflow_id ], [ '%d' ] );
 			} else {
 				$locked = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$folders} WHERE id = %d FOR UPDATE", $folder_id ) );
-				if ( null === $locked ) { $wpdb->query( 'ROLLBACK' ); return false; }
+				if ( '' !== (string) $wpdb->last_error ) { throw new \RuntimeException( 'Could not verify folder lock.' ); }
+			if ( null === $locked ) { $wpdb->query( 'ROLLBACK' ); return false; }
 				$result = $wpdb->query( $wpdb->prepare(
 					"INSERT INTO {$assignments} (workflow_id, folder_id) VALUES (%d, %d)
 					ON DUPLICATE KEY UPDATE folder_id = VALUES(folder_id)",
@@ -117,7 +123,7 @@ final class FolderRepository {
 		$rows = $wpdb->get_results( $wpdb->prepare(
 			"SELECT workflow_id, folder_id FROM {$table} WHERE workflow_id IN ({$tokens})", ...$ids
 		), ARRAY_A );
-		if ( ! is_array( $rows ) ) { throw new \RuntimeException( 'Could not load folder assignments.' ); }
+		if ( ! is_array( $rows ) || '' !== (string) $wpdb->last_error ) { throw new \RuntimeException( 'Could not load folder assignments.' ); }
 		$out = [];
 		foreach ( $rows as $row ) { $out[ (int) $row['workflow_id'] ] = (int) $row['folder_id']; }
 		return $out;

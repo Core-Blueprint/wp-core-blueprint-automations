@@ -159,7 +159,7 @@ final class AutomationsPage implements Page {
 				]
 			);
 		} catch ( \Throwable $error ) {
-			error_log( '[Core Blueprint Automations] Admin page read failed: ' . $error->getMessage() );
+			error_log( '[Core Blueprint Automations] Admin page read failed.' );
 			$this->render_unavailable();
 		}
 	}

@@ -68,10 +68,10 @@ final class OperatorRecoveryController {
 		} catch ( OperatorRecoveryFailure $error ) {
 			self::redirect( $run_id, $error->machine_code() );
 		} catch ( PersistenceFailure $error ) {
-			error_log( '[Core Blueprint Automations] Operator recovery persistence failure: ' . $error->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- bounded diagnostic without runtime values.
+			error_log( '[Core Blueprint Automations] Operator recovery persistence failure.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- bounded diagnostic without runtime values.
 			self::redirect( $run_id, 'storage_failed' );
 		} catch ( \Throwable $error ) {
-			error_log( '[Core Blueprint Automations] Operator recovery failed: ' . $error->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- bounded diagnostic without runtime values.
+			error_log( '[Core Blueprint Automations] Operator recovery failed.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- bounded diagnostic without runtime values.
 			self::redirect( $run_id, 'failed' );
 		}
 	}

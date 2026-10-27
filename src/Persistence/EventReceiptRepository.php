@@ -187,7 +187,7 @@ final class EventReceiptRepository {
 				$limit
 			)
 		);
-		if ( ! is_array( $rows ) ) {
+		if ( ! is_array( $rows ) || '' !== (string) $wpdb->last_error ) {
 			throw PersistenceFailure::database( 'find automation receipts missing jobs' );
 		}
 		$ids = array_map( 'intval', $rows );

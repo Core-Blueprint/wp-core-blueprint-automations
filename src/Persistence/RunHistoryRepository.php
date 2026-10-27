@@ -29,7 +29,7 @@ final class RunHistoryRepository {
 			$sql = $wpdb->prepare( "SELECT {$fields} FROM {$table} ORDER BY id DESC LIMIT %d OFFSET %d", $limit, $offset );
 		}
 		$rows = $wpdb->get_results( $sql, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- query is fully prepared above.
-		if ( ! is_array( $rows ) ) {
+		if ( ! is_array( $rows ) || '' !== (string) $wpdb->last_error ) {
 			throw PersistenceFailure::database( 'list automation run history' );
 		}
 		return array_map( [ self::class, 'hydrate_run' ], $rows );
@@ -90,7 +90,7 @@ final class RunHistoryRepository {
 			),
 			ARRAY_A
 		);
-		if ( ! is_array( $rows ) ) {
+		if ( ! is_array( $rows ) || '' !== (string) $wpdb->last_error ) {
 			throw PersistenceFailure::database( 'load automation step history' );
 		}
 		return array_map( [ self::class, 'hydrate_step' ], $rows );

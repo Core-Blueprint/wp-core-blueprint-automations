@@ -86,7 +86,7 @@ final class WorkflowActivationController {
 			$service = new WorkflowService();
 			$record = $service->find( $id );
 		} catch ( \Throwable $error ) {
-			error_log( '[Core Blueprint Automations] Workflow activation read failed: ' . $error->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			error_log( '[Core Blueprint Automations] Workflow activation read failed.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 			self::redirect( 'storage_failed' );
 		}
 		if ( null === $record ) {
@@ -113,7 +113,7 @@ final class WorkflowActivationController {
 		} catch ( \Throwable $error ) {
 			// Save might already have reached SQL commit. Neither success nor
 			// definitive failure is provable; never repeat the operator's POST.
-			error_log( '[Core Blueprint Automations] Workflow activation result unverified: ' . $error->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			error_log( '[Core Blueprint Automations] Workflow activation result unverified.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 			$notice = 'activation_unverified';
 		}
 		self::redirect( $notice );
