@@ -6,6 +6,8 @@ declare(strict_types=1);
 require_once __DIR__ . '/adv02b-checkpoint-planner.php';
 
 use CB\Automations\Runtime\GraphCheckpointJournal;
+use CB\Automations\Runtime\GraphCheckpointPlanner;
+use CB\Automations\Workflow\GraphDefinitionCodec;
 
 function journal_expect( bool $condition, string $label ): void {
 	if ( ! $condition ) {
