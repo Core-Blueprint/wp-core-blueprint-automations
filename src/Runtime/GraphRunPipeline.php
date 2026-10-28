@@ -22,7 +22,7 @@ defined( 'ABSPATH' ) || exit;
  * acknowledged journal; the worker supplies only its durable run job.
  */
 final class GraphRunPipeline {
-	private const MAX_TRANSITIONS = 513;
+	private const MAX_TRANSITIONS = 515;
 	private const ERROR_UNKNOWN_ACTION = 'runtime.action_outcome_unknown';
 
 	/** Identify v2 without invoking the Standard v1 RunRepository::find hydrator. */

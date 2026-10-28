@@ -28,9 +28,9 @@ final class GraphSandboxAdmission {
 	 * @param array<string,mixed> $trigger_payload A deliberate operator fixture.
 	 * @return int Durable run id. The same admission UUID is idempotent.
 	 */
-	public static function enqueue( int $workflow_id, string $admission_uuid, array $trigger_payload ): int {
+	public static function enqueue( int $workflow_id, string $admission_uuid, array $trigger_payload, int $principal_id ): int {
 		GraphRuntimeGate::require_cli();
-		if ( ! Requirements::execution_ready() || $workflow_id < 1 || ! self::uuid( $admission_uuid ) ) {
+		if ( ! Requirements::execution_ready() || $workflow_id < 1 || $principal_id < 1 || ! self::uuid( $admission_uuid ) ) {
 			throw new \InvalidArgumentException( 'Invalid Advanced sandbox admission or unavailable runtime.' );
 		}
 		try {
@@ -59,9 +59,14 @@ final class GraphSandboxAdmission {
 				|| ( $workflow['trigger_key'] ?? null ) !== '' ) {
 				throw PersistenceFailure::definition();
 			}
-			$principal = (int) ( $workflow['execution_principal_user_id'] ?? 0 );
-			if ( $principal < 1 || ! ( get_userdata( $principal ) instanceof \WP_User ) ) {
-				throw new \UnexpectedValueException( 'Advanced execution principal is not configured.' );
+			$stored_principal = (int) ( $workflow['execution_principal_user_id'] ?? 0 );
+			$principal = $principal_id;
+			// Disabled Advanced drafts may not yet have a configured principal.
+			// The sandbox actor must name the execution principal explicitly;
+			// if the draft already has one, it may not be overridden.
+			if ( ( $stored_principal > 0 && $stored_principal !== $principal )
+				|| ! ( get_userdata( $principal ) instanceof \WP_User ) ) {
+				throw new \UnexpectedValueException( 'Advanced sandbox principal is missing or conflicts with the draft.' );
 			}
 			$raw = (string) $workflow['definition_json'];
 			try {
@@ -121,13 +126,14 @@ final class GraphSandboxAdmission {
 			$receipt_id = (int) $wpdb->insert_id;
 			$runs = Schema::runs_table();
 			$existing = $wpdb->get_row( $wpdb->prepare(
-				"SELECT id, definition_hash, workflow_revision FROM {$runs}
+				"SELECT id, definition_hash, workflow_revision, execution_principal_user_id FROM {$runs}
 				 WHERE event_receipt_id = %d AND workflow_id = %d FOR UPDATE", $receipt_id, $workflow_id
 			), ARRAY_A );
 			$hash = hash( 'sha256', $raw );
 			if ( is_array( $existing ) ) {
 				if ( (int) ( $existing['id'] ?? 0 ) < 1
 					|| (int) ( $existing['workflow_revision'] ?? 0 ) !== (int) $workflow['revision']
+					|| (int) ( $existing['execution_principal_user_id'] ?? 0 ) !== $principal
 					|| ! hash_equals( $hash, (string) ( $existing['definition_hash'] ?? '' ) ) ) {
 					throw new \UnexpectedValueException( 'Sandbox admission key belongs to a different workflow revision.' );
 				}

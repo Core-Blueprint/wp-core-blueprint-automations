@@ -13,7 +13,7 @@
 
 ## Explicit sandbox pilot (WP-CLI only)
 
-`GraphSandboxAdmission::enqueue(int $workflow_id, string $admission_uuid, array $trigger_payload): int` is callable **only** from WP-CLI with an authenticated `manage_options` actor, when the sandbox gate is enabled. It accepts an existing **disabled** v2 workflow with a configured current execution principal, a graph validated against live Base capabilities and an exact typed trigger payload. It checks provider authorization for each State/Action before admitting the run.
+`GraphSandboxAdmission::enqueue(int $workflow_id, string $admission_uuid, array $trigger_payload, int $principal_id): int` is callable **only** from WP-CLI with an authenticated `manage_options` actor, when the sandbox gate is enabled. It accepts an existing **disabled** v2 workflow with an explicitly named execution principal (matching the stored one when already configured), a graph validated against live Base capabilities and an exact typed trigger payload. It checks provider authorization for each State/Action before admitting the run.
 
 The method creates a *synthetic, terminal* event receipt (not a real emitted Base event), immutable v2 run, encrypted journal + trigger context and durable run job in **one DB transaction**. It never enables the workflow or changes its `trigger_key`. The UUID is the operator's durable idempotency key. Reusing it for the same workflow revision yields the existing run rather than invoking Actions again; do not reuse with a different trigger payload. A lost SQL COMMIT acknowledgment is **UNKNOWN**: inspect persisted run/receipt before trying another UUID.
 
@@ -28,9 +28,9 @@ The method creates a *synthetic, terminal* event receipt (not a real emitted Bas
 
    Never put this flag in production. A second explicit CLI authorization is required for run creation.
 
-2. Prepare a valid v2 **disabled** workflow and assign a real execution principal with the required provider permissions. There is no general Advanced UI activation in C5. Confirm the exact trigger schema, including required fields and types.
+2. Prepare a valid v2 **disabled** workflow and identify a real execution principal with the required provider permissions. There is no general Advanced UI activation in C5. Confirm the exact trigger schema, including required fields and types.
 
-3. Supply the actual path, administrator username, workflow ID, and **operator-created UUID**. The payload below is only an illustrative schema-dependent example; adjust it to match the registered Base trigger exactly:
+3. Supply the actual path, administrator username, workflow ID, execution principal user ID, and **operator-created UUID**. The payload below is only an illustrative schema-dependent example; adjust it to match the registered Base trigger exactly:
 
    ```bash
    WP_ROOT="$HOME/Projects/wordpress-test-site-1/wordpress"
@@ -38,13 +38,14 @@ The method creates a *synthetic, terminal* event receipt (not a real emitted Bas
    $id = \CB\Automations\Runtime\GraphSandboxAdmission::enqueue(
        123,
        "11111111-1111-4111-8111-111111111111",
-       [ "id" => 1 ]
+       [ "id" => 1 ],
+       456 // Explicit execution principal ID, not the CLI actor by default.
    );
    WP_CLI::log( "Advanced sandbox run ID: " . $id );
    '
    ```
 
-   **Do not paste and execute this sample unchanged**: workflow ID, operator, UUID and trigger payload must be deliberate, valid sandbox values. If WP-CLI/WordPress reports that the actor is unauthorized, do not bypass the gate.
+   **Do not paste and execute this sample unchanged**: workflow ID, operator, execution principal ID, UUID and trigger payload must be deliberate, valid sandbox values. If WP-CLI/WordPress reports that the actor is unauthorized, do not bypass the gate.
 
 4. Use the normal one-shot WP-Cron worker or run its *existing* hook on the sandbox. Observe the run in the existing history and inspect step attempts. Verify Standard v1 still works, both IF/ELSE directions, State error, Action `indeterminate` and restart. Restore/disable the sandbox flag after the test.
 
