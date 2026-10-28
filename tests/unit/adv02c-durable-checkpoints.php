@@ -246,6 +246,22 @@ c2_reject(
 $wpdb->fail_context = false;
 c2_assert( $baseline === [ $wpdb->run, $wpdb->steps, $wpdb->context, $wpdb->writes ], 'Failed Vault-context write did not roll back.' );
 
+$wpdb->fail_commit = true;
+c2_reject(
+	static fn () => GraphCheckpointStore::commit_branch( 21, $lease, $catalog, 'graph:1' ),
+	'C2 treated an unconfirmed transaction commit as acknowledged.'
+);
+$wpdb->fail_commit = false;
+c2_assert( $baseline === [ $wpdb->run, $wpdb->steps, $wpdb->context, $wpdb->writes ], 'Unconfirmed commit was not left in a safe recovery state.' );
+
+$wpdb->run['run_cursor'] = 'graph:0';
+c2_reject(
+	static fn () => GraphCheckpointStore::commit_branch( 21, $lease, $catalog, 'graph:0' ),
+	'C2 accepted a cursor that disagrees with the encrypted journal length.'
+);
+$wpdb->run['run_cursor'] = 'graph:1';
+c2_assert( $baseline === [ $wpdb->run, $wpdb->steps, $wpdb->context, $wpdb->writes ], 'Journal/cursor mismatch altered persisted state.' );
+
 $wpdb->fail_step = true;
 c2_reject(
 	static fn () => GraphCheckpointStore::commit_branch( 21, $lease, $catalog, 'graph:1' ),
