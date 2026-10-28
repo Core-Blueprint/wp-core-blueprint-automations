@@ -14,6 +14,8 @@ require_once __DIR__ . '/adv02c-checkpoint-journal.php';
 
 use CB\Automations\Persistence\GraphCheckpointStore;
 use CB\Automations\Runtime\GraphCheckpointJournal;
+use CB\Automations\Runtime\GraphCheckpointPlanner;
+use CB\Automations\Workflow\GraphDefinitionCodec;
 use CB\Automations\Runtime\JobRecord;
 use CB\Automations\Runtime\JobStatus;
 use CB\Automations\Runtime\JobSubjectType;
