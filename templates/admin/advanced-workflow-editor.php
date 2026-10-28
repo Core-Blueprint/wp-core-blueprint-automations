@@ -88,14 +88,18 @@ if ( ! is_string( $payload ) ) {
 					<section class="cb-advanced-route-preview">
 						<h2>Test Workflow</h2>
 						<p class="description">Simulate the route of the saved workflow. No actions or providers execute.</p>
-						<label class="cb-advanced-field">
-							<span>Sample node outputs (JSON)</span>
-							<textarea data-cb-advanced-preview-fixtures rows="3" spellcheck="false" placeholder='{}'>{}</textarea>
-						</label>
+						<details class="cb-advanced-preview-fixtures">
+							<summary>Advanced sample outputs (JSON)</summary>
+							<label class="cb-advanced-field">
+								<span>Sample node outputs (JSON)</span>
+								<textarea data-cb-advanced-preview-fixtures rows="4" spellcheck="false" placeholder='{}'>{}</textarea>
+							</label>
+						</details>
 						<input type="hidden" data-cb-advanced-preview-nonce value="<?php echo esc_attr( wp_create_nonce( 'cb_automations_preview_advanced' ) ); ?>" />
 						<input type="hidden" data-cb-advanced-preview-action value="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" />
 						<div class="cb-advanced-preview-actions">
 							<button type="button" class="button" data-cb-advanced-preview-examples>Generate samples</button>
+							<button type="button" class="button" data-cb-advanced-preview-toggle>Flip Boolean samples</button>
 							<button type="button" class="button" data-cb-advanced-preview-run>Test route</button>
 						</div>
 						<div class="cb-advanced-route-preview__result" data-cb-advanced-preview-result role="status" aria-live="polite"></div>

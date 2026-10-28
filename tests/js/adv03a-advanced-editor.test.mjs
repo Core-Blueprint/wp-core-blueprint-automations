@@ -154,3 +154,12 @@ test('ADV-03C fullscreen scrollbar polish retains scroll fallback', () => {
   assert.match(stylesheet, /::-webkit-scrollbar/);
   assert.match(stylesheet, /\.cb-advanced-editor-canvas-scroll \{[^}]*overflow: auto/s);
 });
+
+test('ADV-03B preview offers simple Boolean branch switching and hides expert JSON by default', () => {
+  assert.match(advancedTemplate, /<details class="cb-advanced-preview-fixtures">/);
+  assert.match(advancedTemplate, /data-cb-advanced-preview-toggle/);
+  assert.match(source, /previewToggle\?\.addEventListener\('click'/);
+  assert.match(source, /field\?\.sensitive \|\| field\?\.type !== 'boolean'/);
+  assert.match(source, /fields\[name\] = !fields\[name\]/);
+  assert.match(stylesheet, /\.cb-advanced-preview-actions/);
+});

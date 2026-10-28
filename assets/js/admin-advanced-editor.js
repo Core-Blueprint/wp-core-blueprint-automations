@@ -15,6 +15,7 @@
 	const previewResult = root.querySelector('[data-cb-advanced-preview-result]');
 	const previewFixture = root.querySelector('[data-cb-advanced-preview-fixtures]');
 	const previewExamples = root.querySelector('[data-cb-advanced-preview-examples]');
+	const previewToggle = root.querySelector('[data-cb-advanced-preview-toggle]');
 	const previewNonce = root.querySelector('[data-cb-advanced-preview-nonce]');
 	const previewAction = root.querySelector('[data-cb-advanced-preview-action]');
 	if (!(documentField instanceof HTMLInputElement) || !scene || !layer || !wires || !inspector) return;
@@ -704,6 +705,38 @@
 		}
 		previewFixture.value = JSON.stringify(samples, null, 2);
 		if (previewResult) previewResult.textContent = 'Review sample outputs, then test the saved route.';
+	});
+	// A one-click alternate branch fixture avoids requiring JSON authoring
+	// for the common IF/ELSE Boolean decision case.
+	previewToggle?.addEventListener('click', () => {
+		if (!previewFixture) return;
+		let samples;
+		try {
+			samples = JSON.parse(previewFixture.value || '{}');
+			if (!samples || typeof samples !== 'object' || Array.isArray(samples)) throw new TypeError();
+		} catch {
+			if (previewResult) previewResult.textContent = 'Sample JSON is invalid.';
+			return;
+		}
+		let toggled = 0;
+		for (const node of draft.graph.nodes) {
+			if (!['trigger', 'state', 'action'].includes(node.type)) continue;
+			const cap = configCap(node);
+			const fields = samples[node.id];
+			if (!cap || !fields || typeof fields !== 'object' || Array.isArray(fields)) continue;
+			for (const [name, field] of Object.entries(cap.output_schema || {})) {
+				if (field?.sensitive || field?.type !== 'boolean'
+					|| !Object.hasOwn(fields, name) || typeof fields[name] !== 'boolean') continue;
+				fields[name] = !fields[name];
+				toggled++;
+			}
+		}
+		if (toggled) {
+			previewFixture.value = JSON.stringify(samples, null, 2);
+			if (previewResult) previewResult.textContent = 'Boolean samples switched. Test the route again.';
+		} else if (previewResult) {
+			previewResult.textContent = 'No Boolean sample outputs are available to switch.';
+		}
 	});
 	previewButton?.addEventListener('click', async () => {
 		if (!previewResult || !previewFixture || !previewNonce || !previewAction) return;

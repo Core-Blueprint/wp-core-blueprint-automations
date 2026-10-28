@@ -209,3 +209,16 @@
 .cb-advanced-editor-shell.is-fullscreen .cb-advanced-editor-canvas-scroll::-webkit-scrollbar {
 	display: none;
 }
+
+.cb-advanced-preview-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--cb-space-2);
+	margin-block: var(--cb-space-3);
+}
+.cb-advanced-preview-fixtures { margin-block: var(--cb-space-3); }
+.cb-advanced-preview-fixtures summary {
+	cursor: pointer;
+	font-size: var(--cb-fs-sm);
+	color: var(--cb-text-strong);
+}
