@@ -17,6 +17,7 @@ namespace CB\Automations\Workflow {
 }
 namespace CB\Automations\Runtime {
 	final class GraphRuntimeGate { public static bool $enabled = true; public static function enabled(): bool { return self::$enabled; } }
+	final class GraphActionRecoveryFence { public static function before_vault( int $run, RunExecutionLease $lease ): ?RunStatus { $GLOBALS['c6_preflight'] = ( $GLOBALS['c6_preflight'] ?? 0 ) + 1; return null; } }
 	final class JobRecord {
 		public function subject_id(): int { return 21; }
 		public function id(): int { return 90; }

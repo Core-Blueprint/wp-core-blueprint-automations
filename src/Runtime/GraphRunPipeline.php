@@ -57,6 +57,12 @@ final class GraphRunPipeline {
 		$catalog = new CapabilityCatalog();
 		for ( $i = 0; $i < self::MAX_TRANSITIONS; $i++ ) {
 			$lease->renew();
+			// A reclaimed run must inspect started Actions before opening Vault.
+			// Never reinterpret an unknown external mutation as a safe retry.
+			$recovered = GraphActionRecoveryFence::before_vault( $run_id, $lease );
+			if ( null !== $recovered ) {
+				return $recovered;
+			}
 			$state = self::projection( $run_id, $lease, $catalog );
 			if ( $state['status']->halts_automatic_execution() ) {
 				return $state['status'];
