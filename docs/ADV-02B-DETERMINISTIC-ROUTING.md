@@ -1,6 +1,6 @@
 # ADV-02B — Deterministic Graph Routing (isolated Batch B1)
 
-**Status:** SOURCE IMPLEMENTED / OPERATOR REGRESSION PENDING  
+**Status:** B1 SOURCE REGRESSION/BUILD PASS (operator 2026-10-28); B2 SOURCE IMPLEMENTED / REGRESSION PENDING  
 **Base:** ADV-02A `f34f1f269d3c23d3f2bdab7703d75d837c40e4a8` (unmerged, operator sandbox STABIEL)  
 **Branch:** `feature/automations-adv02b-deterministic-graph-20261028`
 
@@ -18,6 +18,14 @@ Advanced needs a deterministic way to select exactly one output port from an IF/
 - No new tables, no modifications to Standard v1 phase runners or activation, no direct WordPress/Base action or state invocations.
 - `tests/unit/adv02b-graph-route-planner.php` provides positive and negative route/regression evidence.
 
+## B2 implemented — typed pre-invocation boundary
+
+- `GraphNodeIntentPlanner` plans one **State** or **Action** with the exact current capability reference and resolved input bindings.
+- Before producing an intent it rechecks semantic graph validation, provider status and capability identity. It rejects malformed, missing or type-incompatible dynamic inputs without coercion.
+- No real provider execution, jobs, persistence, execution-principal authorization, Vault read/write, or workflow activation is performed. Intent output may include sensitive runtime values and MUST NOT be logged or returned to an admin endpoint.
+- `tests/unit/adv02b-node-intent.php` covers typed input, required bindings, schema mismatch, secret literal, unknown node, unavailable provider and isolation from the live worker.
+- This is **pre-invocation planning only**, not proof that a State or Action has completed; evidence of completion requires ADV-02C durable acknowledgement.
+
 ## Not implemented yet — mandatory for actual execution
 
 **ADV-02B remaining:** integrate graph node capability execution into a controlled Advanced-only runtime path after runtime authority and acknowledgement contracts are specified; verify action invocation ordering and error semantics using an isolated provider, not only supplied output projections.
@@ -30,6 +38,7 @@ Until these gates pass, GraphDefinition v2 remains disabled and never enters `Ru
 
 ```sh
 php tests/unit/adv02b-graph-route-planner.php
+php tests/unit/adv02b-node-intent.php
 php tests/unit/adv02a-graph-validator.php
 php tests/unit/adv02a-draft-repository.php
 bash tools/prepare-base-fixtures --verify
