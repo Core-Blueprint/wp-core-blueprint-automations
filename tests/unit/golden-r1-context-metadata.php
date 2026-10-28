@@ -34,7 +34,7 @@ namespace {
 		}
 		public function get_results( string $sql, string $mode ): array {
 			if ( ARRAY_A !== $mode || str_contains( $sql, 'definition_json' )
-				|| ! preg_match( '/SELECT id, name\s+FROM wp_cb_automations_workflows\s+ORDER BY updated_at DESC, id DESC\s+LIMIT %d OFFSET %d/s', $sql ) ) {
+				|| ! preg_match( '/SELECT id, name\s+FROM wp_cb_automations_workflows\s+WHERE definition_version = %d\s+ORDER BY updated_at DESC, id DESC\s+LIMIT %d OFFSET %d/s', $sql ) ) {
 				throw new \RuntimeException( 'Context list must select stable metadata only.' );
 			}
 			++$this->read_count;
@@ -55,8 +55,8 @@ namespace {
 	if ( [ [ 'id' => 12, 'name' => 'First' ], [ 'id' => 11, 'name' => 'Second' ] ] !== $rows ) {
 		throw new \RuntimeException( 'Context metadata projection or ordering changed.' );
 	}
-	if ( [ 100, 0 ] !== $GLOBALS['wpdb']->parameters ) {
-		throw new \RuntimeException( 'Context list pagination must be bounded and use placeholders.' );
+	if ( [ 1, 100, 0 ] !== $GLOBALS['wpdb']->parameters ) {
+		throw new \RuntimeException( 'Context list must select only Standard v1 with bounded pagination.' );
 	}
 
 	$reader = ( new \ReflectionClass( \CB\Automations\Admin\WorkflowAdminReadService::class ) )->newInstanceWithoutConstructor();
