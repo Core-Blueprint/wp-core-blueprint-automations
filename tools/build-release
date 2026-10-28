@@ -34,9 +34,9 @@ REQUIRED_API="$(define_value "$ENTRY" 'CB_AUTOMATIONS_REQUIRED_API')"
 [[ "$REQUIRES_PHP" == '8.4' ]] || fail "Requires PHP must be 8.4, found ${REQUIRES_PHP:-missing}"
 [[ "$REQUIRED_API" == '1.0' ]] || fail "CB_AUTOMATIONS_REQUIRED_API must be 1.0, found ${REQUIRED_API:-missing}"
 
-# Packaging does not execute WP-CLI. Keep it a runtime/test harness dependency,
-# not an artificial requirement for a reproducible WordPress installation ZIP.
-for command in php python3 msgfmt node zip unzip sha256sum; do
+# WordPress i18n tooling uses WP-CLI internally during package validation.
+# This is an engineering/build requirement, never a customer setup step.
+for command in php python3 wp msgfmt node zip unzip sha256sum; do
   command -v "$command" >/dev/null 2>&1 || fail "missing required command: $command"
 done
 
