@@ -45,6 +45,43 @@ final class DesignerAssets {
 			return;
 		}
 
+		// The Advanced canvas is a separate, typed v2 surface. Never mount the
+		// Standard Domain Session, Save adapter or its JavaScript on v2 drafts.
+		try {
+			$record = \CB\Automations\Persistence\WorkflowRepository::find( AutomationsPage::requested_workflow_id() );
+			if ( null !== $record && $record->definition() instanceof \CB\Automations\Workflow\GraphDefinition ) {
+				// R3 ESM imports require both optional public Base capabilities
+				// from the SAME installed Base package. Fail closed, never import
+				// unavailable named exports into the fullscreen Designer.
+				if ( ! self::base_canvas_available() ) {
+					add_action( 'admin_notices', static function (): void {
+						echo '<div class="notice notice-error"><p>';
+						echo esc_html( 'Advanced canvas interactions require the matching Core Blueprint Base development build.' );
+						echo '</p></div>';
+					} );
+					return;
+				}
+				DesignEditorAssets::enqueue_designer_mode( __( 'Automation Builder', 'core-blueprint-automations' ) );
+				$advanced_css = CB_AUTOMATIONS_DIR . 'assets/css/admin-advanced-editor.css';
+				$advanced_js = CB_AUTOMATIONS_DIR . 'assets/js/admin-advanced-editor.js';
+				wp_enqueue_style( 'cb-automations-advanced-editor', CB_AUTOMATIONS_URL . 'assets/css/admin-advanced-editor.css',
+					[ 'cb-automations-admin' ], is_file( $advanced_css ) ? (string) filemtime( $advanced_css ) : CB_AUTOMATIONS_VERSION );
+				wp_enqueue_script( 'cb-automations-advanced-editor', CB_AUTOMATIONS_URL . 'assets/js/admin-advanced-editor.js',
+					[], is_file( $advanced_js ) ? (string) filemtime( $advanced_js ) : CB_AUTOMATIONS_VERSION, true );
+				$advanced_shell = CB_AUTOMATIONS_DIR . 'assets/js/admin-advanced-designer-shell.js';
+				wp_enqueue_script_module(
+					'cb-automations-advanced-designer-shell',
+					CB_AUTOMATIONS_URL . 'assets/js/admin-advanced-designer-shell.js',
+					[ '@cb-core/design-editor' ],
+					is_file( $advanced_shell ) ? (string) filemtime( $advanced_shell ) : CB_AUTOMATIONS_VERSION
+				);
+				return;
+			}
+		} catch ( \Throwable ) {
+			// A broken v2 read must not cause a partial Standard editor mount.
+			return;
+		}
+
 		DesignEditorAssets::enqueue_designer_mode( __( 'Automation Builder', 'core-blueprint-automations' ) );
 		UIAssets::enqueue_modals( 'core' );
 
@@ -156,6 +193,13 @@ final class DesignerAssets {
 		wp_enqueue_script_module( self::DOMAIN_PROJECT_MODULE, CB_AUTOMATIONS_URL . 'assets/js/automations-domain-project.js', [], is_file( $domain_project ) ? (string) filemtime( $domain_project ) : CB_AUTOMATIONS_VERSION );
 		wp_enqueue_script_module( self::HISTORY_MODULE, CB_AUTOMATIONS_URL . 'assets/js/admin-builder-history.js', [ '@cb-core/design-editor', 'cb-automations-admin-designer-shell', self::DOMAIN_PROJECT_MODULE ], is_file( $history ) ? (string) filemtime( $history ) : CB_AUTOMATIONS_VERSION );
 		wp_enqueue_script_module( self::LAYERS_MODULE, CB_AUTOMATIONS_URL . 'assets/js/admin-builder-layers.js', [ '@cb-core/design-editor', self::HISTORY_MODULE ], is_file( $layers ) ? (string) filemtime( $layers ) : CB_AUTOMATIONS_VERSION );
+	}
+
+	private static function base_canvas_available(): bool {
+		return defined( DesignEditorAssets::class . '::CANVAS_NAVIGATION_API' )
+			&& constant( DesignEditorAssets::class . '::CANVAS_NAVIGATION_API' ) >= 1
+			&& defined( DesignEditorAssets::class . '::DESIGNER_CONTEXT_MENU_API' )
+			&& constant( DesignEditorAssets::class . '::DESIGNER_CONTEXT_MENU_API' ) >= 1;
 	}
 
 	private static function base_editor_available(): bool {

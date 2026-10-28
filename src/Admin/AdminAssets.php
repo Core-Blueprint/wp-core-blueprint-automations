@@ -60,6 +60,17 @@ final class AdminAssets {
 			return;
 		}
 
+		// Advanced UI has its own typed authoring surface. The Standard
+		// editing scripts must never initialize against an Advanced graph.
+		try {
+			$record = \CB\Automations\Persistence\WorkflowRepository::find( AutomationsPage::requested_workflow_id() );
+			if ( null !== $record && $record->definition() instanceof \CB\Automations\Workflow\GraphDefinition ) {
+				return;
+			}
+		} catch ( \Throwable ) {
+			return;
+		}
+
 		$picker_css    = CB_AUTOMATIONS_DIR . 'assets/css/admin-capability-picker.css';
 		$polish_css    = CB_AUTOMATIONS_DIR . 'assets/css/admin-editor-polish.css';
 		$recovery_css  = CB_AUTOMATIONS_DIR . 'assets/css/admin-validation-recovery.css';

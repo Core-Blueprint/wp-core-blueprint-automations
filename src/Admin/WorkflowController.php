@@ -11,6 +11,8 @@ use CB\Automations\Validation\ValidationState;
 use CB\Automations\Workflow\ActivationState;
 use CB\Automations\Workflow\Definition;
 use CB\Automations\Workflow\DefinitionCodec;
+use CB\Automations\Workflow\GraphDefinition;
+use CB\Automations\Workflow\GraphDefinitionCodec;
 use CB\Automations\Workflow\ExecutionAuthorityDecision;
 use CB\Automations\Workflow\PersistencePolicy;
 use CB\Automations\Workflow\WorkflowSaveResult;
@@ -45,7 +47,28 @@ final class WorkflowController {
 			: '';
 
 		try {
-			$definition = Definition::from_values( null, [], [], [] );
+			$mode = isset( $_POST['mode'] ) && is_scalar( $_POST['mode'] )
+				? sanitize_key( wp_unslash( (string) $_POST['mode'] ) ) : 'standard';
+			if ( ! in_array( $mode, [ 'standard', 'advanced' ], true ) ) {
+				throw new InvalidArgumentException( 'Unsupported workflow mode.' );
+			}
+			$definition = 'advanced' === $mode
+				? GraphDefinition::from_values(
+					[
+						'nodes' => [
+							[ 'id' => 'trigger', 'type' => 'trigger', 'config' => [] ],
+							[ 'id' => 'end', 'type' => 'end', 'config' => [] ],
+						],
+						'edges' => [
+							[ 'id' => 'edge', 'from' => 'trigger', 'from_port' => 'next', 'to' => 'end', 'to_port' => 'in' ],
+						],
+					],
+					[ 'nodes' => [
+						'trigger' => [ 'x' => 140, 'y' => 220 ],
+						'end' => [ 'x' => 720, 'y' => 220 ],
+					] ]
+				)
+				: Definition::from_values( null, [], [], [] );
 			if ( null === $definition ) {
 				throw new \RuntimeException( 'Could not create empty workflow definition.' );
 			}
@@ -150,7 +173,9 @@ final class WorkflowController {
 			if ( ! is_array( $decoded ) ) {
 				throw new UnexpectedValueException( 'Workflow definition root must be an object.' );
 			}
-			$definition = DefinitionCodec::decode( $decoded );
+			$definition = 2 === ( $decoded['definition_version'] ?? null )
+				? GraphDefinitionCodec::decode( $decoded )
+				: DefinitionCodec::decode( $decoded );
 		} catch ( JsonException | UnexpectedValueException $error ) {
 			self::reject_or_redirect( [ 'workflow' => $id, 'notice' => 'invalid' ], 400 );
 		}

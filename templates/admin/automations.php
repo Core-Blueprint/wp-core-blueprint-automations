@@ -94,6 +94,12 @@ $notices = [
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="cb-core-form-row cb-automations-create-form">
 				<input type="hidden" name="action" value="cb_automations_create_workflow" />
 				<?php wp_nonce_field( 'cb_automations_create_workflow', '_cb_automations_nonce' ); ?>
+				<label for="cb-automation-mode">Mode
+					<select id="cb-automation-mode" name="mode" required>
+						<option value="standard">Standard</option>
+						<option value="advanced">Advanced</option>
+					</select>
+				</label>
 				<label for="cb-automation-name"><?php esc_html_e( 'Automation name', 'core-blueprint-automations' ); ?></label>
 				<input id="cb-automation-name" name="name" type="text" class="regular-text" maxlength="191" required />
 				<button type="submit" class="button button-primary cb-core-button cb-core-button--primary"><?php esc_html_e( 'Create automation', 'core-blueprint-automations' ); ?></button>
@@ -292,8 +298,8 @@ $notices = [
 								<td class="cb-automations-workspace__menu-cell">
 									<button type="button" class="cb-automations-workspace__menu-trigger" popovertarget="<?php echo esc_attr( $menu_id ); ?>" aria-label="<?php echo esc_attr( __( 'Actions', 'core-blueprint-automations' ) . ': ' . $record->name() ); ?>"><span aria-hidden="true">&#8942;</span></button>
 									<div id="<?php echo esc_attr( $menu_id ); ?>" class="cb-automations-workspace__action-menu" popover="auto" role="group" aria-label="<?php echo esc_attr( __( 'Actions', 'core-blueprint-automations' ) . ': ' . $record->name() ); ?>" data-cb-workflow-actions>
-										<?php if ( $record->definition() instanceof \CB\Automations\Workflow\Definition ) : ?>
 										<a href="<?php echo esc_url( \CB\Automations\Admin\AutomationsPage::url( [ 'workflow' => $record->id() ] ) ); ?>"><?php esc_html_e( 'Edit', 'core-blueprint-automations' ); ?></a>
+										<?php if ( $record->definition() instanceof \CB\Automations\Workflow\Definition ) : ?>
 										<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 											<input type="hidden" name="action" value="cb_automations_toggle_workflow" />
 											<input type="hidden" name="workflow_id" value="<?php echo esc_attr( (string) $record->id() ); ?>" />
@@ -308,7 +314,7 @@ $notices = [
 											<?php wp_nonce_field( 'cb_automations_export_workflow_' . $record->id(), '_cb_automations_nonce' ); ?>
 											<button type="submit"><?php esc_html_e( 'Export JSON', 'core-blueprint-automations' ); ?></button>
 										</form>
-										<?php endif; // Standard-only Edit, Activate and Export actions. ?>
+										<?php endif; // Standard-only activation and export actions. ?>
 										<?php if ( [] !== $folders ) : ?>
 											<form class="cb-automations-workspace__menu-folder" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 												<input type="hidden" name="action" value="cb_automations_folder_assign" />
