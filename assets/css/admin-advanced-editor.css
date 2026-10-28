@@ -200,3 +200,12 @@
 .cb-advanced-node.is-not-on-route { opacity: .48; }
 .cb-advanced-edge.is-simulated { stroke-width: 3.5; }
 .cb-advanced-edge.is-not-on-route { opacity: .27; }
+
+// Keep wheel, trackpad, touch and keyboard scroll fallback available while
+// removing intrusive browser scrollbars in the fullscreen graph workspace.
+.cb-advanced-editor-shell.is-fullscreen .cb-advanced-editor-canvas-scroll {
+	scrollbar-width: none;
+}
+.cb-advanced-editor-shell.is-fullscreen .cb-advanced-editor-canvas-scroll::-webkit-scrollbar {
+	display: none;
+}

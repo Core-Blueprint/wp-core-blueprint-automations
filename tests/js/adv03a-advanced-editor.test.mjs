@@ -147,3 +147,10 @@ test('ADV-03B clearly labels and highlights a simulated route without persisting
   assert.match(stylesheet, /\.cb-advanced-node\.is-not-on-route/);
   assert.doesNotMatch(source, /draft\.simulatedRoute\s*=/);
 });
+
+test('ADV-03C fullscreen scrollbar polish retains scroll fallback', () => {
+  assert.match(stylesheet, /\.cb-advanced-editor-shell\.is-fullscreen \.cb-advanced-editor-canvas-scroll \{/);
+  assert.match(stylesheet, /scrollbar-width: none/);
+  assert.match(stylesheet, /::-webkit-scrollbar/);
+  assert.match(stylesheet, /\.cb-advanced-editor-canvas-scroll \{[^}]*overflow: auto/s);
+});
