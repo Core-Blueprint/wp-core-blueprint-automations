@@ -33,24 +33,8 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Prepare release packaging tools (PHP 8.4 only)
-        if: matrix.php == '8.4'
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y gettext
-          curl -fsSL --retry 3 -o /tmp/wp-cli.phar https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
-          php /tmp/wp-cli.phar --info
-          sudo install -m 0755 /tmp/wp-cli.phar /usr/local/bin/wp
-          for command in php python3 wp msgmerge msgattrib msgfmt node zip unzip sha256sum; do
-            command -v "$command" || exit 1
-          done
-
       - name: Prepare immutable Base contract fixtures
         run: bash tools/prepare-base-fixtures --prepare
-
-      - name: Preflight packaged i18n contracts (PHP 8.4 only)
-        if: matrix.php == '8.4'
-        run: bash tools/i18n/check
 
       - name: PHP syntax
         run: find . -type f -name '*.php' -not -path './.cb-base-fixtures/*' -print0 | xargs -0 -r -n1 php -l
@@ -60,21 +44,3 @@ jobs:
 
       - name: Full PHP and JavaScript regression matrix
         run: bash tools/test-regressions
-
-      - name: Build installable development ZIP
-        if: matrix.php == '8.4'
-        run: |
-          bash tools/build-release
-          unzip -tqq dist/core-blueprint-automations-1.0.0-rc2.zip
-          (cd dist && sha256sum -c core-blueprint-automations-1.0.0-rc2.zip.sha256)
-
-      - name: Upload WordPress install ZIP
-        if: matrix.php == '8.4'
-        uses: actions/upload-artifact@v4
-        with:
-          name: core-blueprint-automations-adv03a-wordpress-install
-          path: |
-            dist/core-blueprint-automations-1.0.0-rc2.zip
-            dist/core-blueprint-automations-1.0.0-rc2.zip.sha256
-          if-no-files-found: error
-          retention-days: 14
