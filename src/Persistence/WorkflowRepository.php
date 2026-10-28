@@ -16,6 +16,8 @@ use JsonException;
 defined( 'ABSPATH' ) || exit;
 
 final class WorkflowRepository {
+	// Standard Designer context must remain independent of Definition autoloading.
+	private const STANDARD_CONTEXT_DEFINITION_VERSION = 1;
 	public static function create( string $name, Definition|GraphDefinition $definition, int $user_id ): int {
 		if ( ! Schema::authoring_ready() ) { throw PersistenceFailure::schema(); }
 		global $wpdb;
@@ -97,7 +99,7 @@ final class WorkflowRepository {
 				 WHERE definition_version = %d
 				 ORDER BY updated_at DESC, id DESC
 				 LIMIT %d OFFSET %d",
-				Definition::VERSION,
+				self::STANDARD_CONTEXT_DEFINITION_VERSION,
 				$limit,
 				$offset
 			),
