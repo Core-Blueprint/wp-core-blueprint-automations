@@ -60,6 +60,7 @@ cd "$HOME/Downloads/wp-core-blueprint-automations"
 export CB_AUTOMATIONS_BASE_FIXTURES_DIR="$HOME/Downloads/cb-automations-base-pins"
 php tests/unit/adv02c-sandbox-routing.php
 php tests/unit/adv02c-worker-execution.php
+php tests/unit/adv02c-sandbox-admission.php
 bash tools/prepare-base-fixtures --verify
 bash tools/test-regressions
 bash tools/i18n/check

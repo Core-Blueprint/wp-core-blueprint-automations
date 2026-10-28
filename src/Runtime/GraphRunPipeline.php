@@ -39,7 +39,8 @@ final class GraphRunPipeline {
 			if ( '' !== (string) $wpdb->last_error ) {
 				throw PersistenceFailure::database( 'identify automation run definition' );
 			}
-			throw PersistenceFailure::definition();
+			// Preserve Standard's existing missing-run worker recovery path.
+			return false;
 		}
 		if ( ! in_array( (string) $version, [ '1', '2' ], true ) ) {
 			throw PersistenceFailure::definition();
