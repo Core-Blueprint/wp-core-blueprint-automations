@@ -170,6 +170,29 @@
 		current = id;
 		mark(); rebuild();
 	};
+	const duplicateNode = (id) => {
+		const original = find(id);
+		if (!original || ['trigger', 'end'].includes(original.type) || draft.graph.nodes.length >= 512) return false;
+		const newId = uid('n');
+		const config = clone(original.config);
+		// A duplicated branch must be paired with its own Merge. Retaining the
+		// original pair could introduce invalid path ancestry.
+		if (original.type === 'if_else') {
+			for (const key of Object.keys(config)) delete config[key];
+		}
+		const index = draft.graph.nodes.findIndex(node => node.id === id);
+		draft.graph.nodes.splice(index + 1, 0, {id: newId, type: original.type, config});
+		const point = coords(id, index);
+		draft.layout.nodes[newId] = {
+			x: Math.min(1400 - 184, Math.max(0, point.x + 36)),
+			y: Math.min(900 - 110, Math.max(0, point.y + 36)),
+		};
+		// Edges are NOT duplicated; each typed port has exclusive occupancy.
+		selectedEdge = null;
+		current = newId;
+		mark(); rebuild();
+		return true;
+	};
 	const removeNode = (id) => {
 		const node = find(id);
 		if (!node || node.type === 'trigger' || node.type === 'end') return;
@@ -539,7 +562,10 @@
 		const node = find(target.id);
 		return node ? [
 			{id: 'configure', label: 'Configure'},
-			...(['trigger', 'end'].includes(node.type) ? [] : [{id: 'remove', label: 'Delete node'}]),
+			...(['trigger', 'end'].includes(node.type) ? [] : [
+				{id: 'duplicate', label: 'Duplicate node', disabled: draft.graph.nodes.length >= 512},
+				{id: 'remove', label: 'Delete node'},
+			]),
 		] : [];
 	};
 	const canInvokeMenu = ({actionId, target}) => getMenuItems({target})
@@ -559,6 +585,8 @@
 			current = target.id;
 			rebuild();
 			root.querySelector('[data-cb-advanced-inspector]')?.focus?.({preventScroll: true});
+		} else if (actionId === 'duplicate') {
+			duplicateNode(target.id);
 		} else if (actionId === 'remove') {
 			// Until graph History is adopted, require confirmation for deletion.
 			if (window.confirm('Delete this node and its connected graph references?')) {

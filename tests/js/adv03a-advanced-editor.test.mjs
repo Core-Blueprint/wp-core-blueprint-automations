@@ -96,3 +96,12 @@ test('ADV-03A-R4 visual input and output ports support pointer and keyboard conn
   assert.match(advancedTemplate, /role="group" aria-label="Workflow connections"/);
   assert.match(source, /event\.key === 'Delete' \|\| event\.key === 'Backspace'/);
 });
+
+test('ADV-03C duplicating nodes uses a new ID, safe branch config and no cloned edges', () => {
+  assert.match(source, /const duplicateNode = \(id\) =>/);
+  assert.match(source, /const newId = uid\('n'\)/);
+  assert.match(source, /if \(original\.type === 'if_else'\)/);
+  assert.match(source, /Edges are NOT duplicated/);
+  assert.match(source, /\{id: 'duplicate', label: 'Duplicate node'/);
+  assert.match(source, /duplicateNode\(target\.id\)/);
+});
