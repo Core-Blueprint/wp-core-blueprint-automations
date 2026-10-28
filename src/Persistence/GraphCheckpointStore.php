@@ -6,6 +6,7 @@ namespace CB\Automations\Persistence;
 use CB\Automations\Discovery\CapabilitySource;
 use CB\Automations\Runtime\GraphCheckpointJournal;
 use CB\Automations\Runtime\GraphCheckpointPlanner;
+use CB\Automations\Runtime\GraphProviderOutputGuard;
 use CB\Automations\Runtime\NodeType;
 use CB\Automations\Runtime\RunExecutionLease;
 use CB\Automations\Runtime\RunStatus;
@@ -130,6 +131,7 @@ final class GraphCheckpointStore {
 					throw new \UnexpectedValueException( 'Advanced completion does not match the pending node.' );
 				}
 				self::lock_matching_attempt( $run_id, $attempt, $projection['intent'], $node_id, $kind );
+				GraphProviderOutputGuard::require_valid( $catalog, $projection['intent']['capability'], $output );
 				$next = $journal->record_completion( $definition, $planner, $node_id, $kind, $output, $trigger_outputs );
 				RunStepRepository::succeed( $attempt );
 			} else {
