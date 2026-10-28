@@ -70,7 +70,12 @@
 	let current = draft.graph.nodes[0]?.id || null;
 	let changed = false;
 	let saving = false;
-	const mark = () => { changed = true; if (dirtyLabel) dirtyLabel.textContent = 'Unsaved changes'; };
+	root.dataset.cbAdvancedDirty = 'false';
+	const mark = () => {
+		changed = true;
+		root.dataset.cbAdvancedDirty = 'true';
+		if (dirtyLabel) dirtyLabel.textContent = 'Unsaved changes';
+	};
 	const coords = (id, index = 0) => {
 		const p = draft.layout.nodes[id];
 		if (p && Number.isFinite(p.x) && Number.isFinite(p.y)) return p;
@@ -352,7 +357,11 @@
 		if (new Blob([documentField.value]).size > 262144 || !documentField.checkValidity()) {
 			event.preventDefault(); window.alert('The workflow definition cannot be saved safely.'); return;
 		}
+		// A validated, intentional native WordPress POST is a navigation, not
+		// an unapproved Designer close. Keep the shared Exit Guard armed for
+		// every other navigation until the form passes all local guards.
 		saving = true;
+		root.dataset.cbAdvancedDirty = 'false';
 	});
 	window.addEventListener('beforeunload', event => { if (changed && !saving) { event.preventDefault(); event.returnValue = ''; } });
 	nameField?.addEventListener('input', mark);
