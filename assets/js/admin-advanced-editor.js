@@ -68,6 +68,18 @@
 	};
 	const find = (id) => draft.graph.nodes.find(node => node.id === id);
 	let current = draft.graph.nodes[0]?.id || null;
+	// Base owns both transient viewport transformation and context-menu chrome.
+	// These are optional consumer adapters; no parallel graph session is created.
+	let canvasNavigation = null;
+	let contextMenu = null;
+	let releaseMenuTargets = [];
+	let insertionPoint = null;
+	const releaseTargets = () => {
+		for (const release of releaseMenuTargets.splice(0)) release();
+	};
+	const canvasPoint = (event) => canvasNavigation
+		? canvasNavigation.clientToCanvas({clientX: event.clientX, clientY: event.clientY})
+		: {x: event.clientX, y: event.clientY};
 	let changed = false;
 	let saving = false;
 	root.dataset.cbAdvancedDirty = 'false';
@@ -82,6 +94,14 @@
 		const fresh = {x: 80 + index * 210, y: 90 + (index % 3) * 155};
 		draft.layout.nodes[id] = fresh;
 		return fresh;
+	};
+	const contentBounds = () => {
+		const positions = draft.graph.nodes.map((node, index) => coords(node.id, index));
+		const minX = positions.length ? Math.min(...positions.map(p => p.x)) : 0;
+		const minY = positions.length ? Math.min(...positions.map(p => p.y)) : 0;
+		const maxX = positions.length ? Math.max(...positions.map(p => p.x + 184)) : 1400;
+		const maxY = positions.length ? Math.max(...positions.map(p => p.y + 110)) : 900;
+		return {x: minX, y: minY, width: Math.max(1, maxX - minX), height: Math.max(1, maxY - minY)};
 	};
 	const configCap = (node) => capabilities.find(item => item.available && eqRef(item.reference, node.config?.capability));
 	const typeOptions = (kind) => capabilities.filter(cap => cap.reference?.kind === kind && cap.available)
@@ -102,12 +122,17 @@
 		draft.graph.edges.push({id: uid('e'), from, from_port: fromPort, to, to_port: toPort});
 		mark(); rebuild(); return true;
 	};
-	const addNode = (type) => {
+	const addNode = (type, position = null) => {
 		if (!Object.hasOwn(labels, type) || draft.graph.nodes.length >= 512) return;
 		if ((type === 'trigger' || type === 'end') && draft.graph.nodes.some(node => node.type === type)) return;
 		const id = uid('n');
 		draft.graph.nodes.push({id, type, config: {}});
-		coords(id, draft.graph.nodes.length - 1);
+		if (position && Number.isFinite(position.x) && Number.isFinite(position.y)) {
+			draft.layout.nodes[id] = {
+				x: Math.round(Math.max(0, Math.min(1400 - 184, position.x))),
+				y: Math.round(Math.max(0, Math.min(900 - 110, position.y))),
+			};
+		} else coords(id, draft.graph.nodes.length - 1);
 		current = id;
 		mark(); rebuild();
 	};
@@ -129,6 +154,7 @@
 		mark(); rebuild();
 	};
 	const draw = () => {
+		releaseTargets();
 		layer.replaceChildren(); wires.replaceChildren();
 		for (const edge of draft.graph.edges) {
 			const a = find(edge.from), b = find(edge.to);
@@ -161,12 +187,16 @@
 			const detail = make('span', 'cb-advanced-node-details', configCap(node)?.label || (occupied(node.config) ? 'Configured' : 'Not configured'));
 			const idlabel = make('span', 'cb-advanced-node-id', node.id.slice(0, 16));
 			card.append(title, detail, idlabel); layer.append(card);
+			card.dataset.cbDesignCanvasObject = 'node';
+			if (contextMenu) releaseMenuTargets.push(contextMenu.registerTarget(card, {kind: 'node', id: node.id}));
 			title.addEventListener('pointerdown', event => {
 				if (event.button !== 0) return;
-				const origin = {x: event.clientX, y: event.clientY, left: point.x, top: point.y};
+				const start = canvasPoint(event);
+				const origin = {x: start.x, y: start.y, left: point.x, top: point.y};
 				const move = e => {
-					const nx = Math.round(Math.max(0, Math.min(1400 - 184, origin.left + e.clientX - origin.x)));
-					const ny = Math.round(Math.max(0, Math.min(900 - 110, origin.top + e.clientY - origin.y)));
+					const now = canvasPoint(e);
+					const nx = Math.round(Math.max(0, Math.min(1400 - 184, origin.left + now.x - origin.x)));
+					const ny = Math.round(Math.max(0, Math.min(900 - 110, origin.top + now.y - origin.y)));
 					point.x = nx; point.y = ny;
 					card.style.left = nx + 'px'; card.style.top = ny + 'px';
 					for (const edge of wires.querySelectorAll('path')) edge.setAttribute('opacity', '.2');
@@ -344,6 +374,75 @@
 		}
 		if (node.type !== 'trigger' && node.type !== 'end') inspector.append(button('Remove node', () => removeNode(node.id), true));
 	};
+	const canvasActions = Object.freeze({
+		add_trigger: 'trigger', add_state: 'state', add_if_else: 'if_else',
+		add_action: 'action', add_merge: 'exclusive_merge', add_end: 'end',
+	});
+	const canvasItems = () => [
+		{id: 'fit', label: 'Fit to Screen'},
+		...Object.entries(canvasActions).map(([id, type]) => ({
+			id, label: 'Add ' + labels[type],
+			disabled: draft.graph.nodes.length >= 512
+				|| (['trigger', 'end'].includes(type) && draft.graph.nodes.some(node => node.type === type)),
+		})),
+	];
+	const getMenuItems = ({target}) => {
+		if (target.kind === 'canvas') return canvasItems();
+		if (target.kind !== 'node') return [];
+		const node = find(target.id);
+		return node ? [
+			{id: 'configure', label: 'Configure'},
+			...(['trigger', 'end'].includes(node.type) ? [] : [{id: 'remove', label: 'Delete node'}]),
+		] : [];
+	};
+	const canInvokeMenu = ({actionId, target}) => getMenuItems({target})
+		.some(item => item.id === actionId && !item.disabled);
+	const invokeMenu = ({actionId, target}) => {
+		if (!canInvokeMenu({actionId, target})) return;
+		if (target.kind === 'canvas') {
+			if (actionId === 'fit') { canvasNavigation?.fitToScreen(); return; }
+			if (Object.hasOwn(canvasActions, actionId)) {
+				addNode(canvasActions[actionId], insertionPoint);
+				insertionPoint = null;
+			}
+			return;
+		}
+		if (target.kind !== 'node' || !find(target.id)) return;
+		if (actionId === 'configure') {
+			current = target.id;
+			rebuild();
+			root.querySelector('[data-cb-advanced-inspector]')?.focus?.({preventScroll: true});
+		} else if (actionId === 'remove') {
+			// Until graph History is adopted, require confirmation for deletion.
+			if (window.confirm('Delete this node and its connected graph references?')) removeNode(target.id);
+		}
+	};
+	// The classic graph renderer exposes only a bounded adapter to the Base ESM
+	// composition. The menu is never an authorization or mutation authority.
+	root.cbAutomationsAdvancedGraph = Object.freeze({
+		contextKey: () => 'workflow:' + String(form.querySelector('[name="workflow_id"]')?.value || ''),
+		getContentBounds: contentBounds,
+		getMenuItems,
+		canInvokeMenu,
+		invokeMenu,
+		connectControllers({navigation, menu}) {
+			canvasNavigation = navigation;
+			contextMenu = menu;
+			const viewport = root.querySelector('[data-cb-design-canvas-viewport]');
+			viewport?.addEventListener('contextmenu', event => {
+				if (event.target.closest?.('[data-cb-design-canvas-object]')) {
+					insertionPoint = null;
+					return;
+				}
+				insertionPoint = canvasPoint(event);
+			}, true);
+			viewport?.addEventListener('keydown', event => {
+				if (event.key === 'F10' && event.shiftKey) insertionPoint = null;
+			});
+			rebuild();
+		},
+	});
+	root.dispatchEvent(new CustomEvent('cb:automations-advanced:ready'));
 	root.querySelectorAll('[data-cb-advanced-add]').forEach(el => {
 		el.addEventListener('click', () => { try { addNode(el.dataset.cbAdvancedAdd); } catch (e) { window.alert(e.message); } });
 	});

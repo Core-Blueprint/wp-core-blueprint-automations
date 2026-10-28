@@ -90,6 +90,7 @@
 	background-color: var(--cb-surface-0);
 	background-image: radial-gradient(circle, color-mix(in srgb, var(--cb-text-muted) 30%, transparent) 1px, transparent 1px);
 	background-size: 22px 22px;
+	transform-origin: 0 0; /* Base owns the actual transient transform. */
 }
 .cb-advanced-editor-scene svg { position: absolute; inset: 0; width: 1400px; height: 900px; pointer-events: none; overflow: visible; }
 .cb-advanced-edge { fill: none; stroke: var(--cb-accent); stroke-width: 2.4; stroke-linecap: round; }

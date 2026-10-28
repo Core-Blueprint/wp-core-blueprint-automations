@@ -61,3 +61,24 @@ test('ADV-03A-R2 Base theme: canonical semantic dark/light tokens, no white cust
   assert.doesNotMatch(stylesheet, /position:\s*fixed\b/);
   assert.match(stylesheet, /\.cb-advanced-editor-shell\[hidden\]\s*\{\s*display:\s*none/);
 });
+
+test('ADV-03A-R3 uses only public Base CN-1 and CM-1 controllers', () => {
+  assert.match(shellAdapter, /import \{ createDesignerCanvasNavigation, createDesignerContextMenu \} from '@cb-core\/design-editor'/);
+  assert.match(shellAdapter, /createDesignerCanvasNavigation\(/);
+  assert.match(shellAdapter, /createDesignerContextMenu\(/);
+  for (const name of ['CANVAS_NAVIGATION_API', 'DESIGNER_CONTEXT_MENU_API']) assert.ok(assets.includes(name));
+  for (const marker of ['data-cb-design-canvas-viewport', 'data-cb-design-canvas-scene', 'data-cb-design-canvas-background', 'data-cb-advanced-fit']) {
+    assert.ok(advancedTemplate.includes(marker), marker);
+  }
+  assert.doesNotMatch(shellAdapter, /assets\/js\/design\/shell\/|\/canvas-navigation\.js|\/context-menu\.js/);
+});
+test('ADV-03A-R3 preserves scaled canvas geometry and consumer graph authority', () => {
+  assert.match(source, /canvasNavigation\.clientToCanvas\(/);
+  assert.match(source, /getContentBounds: contentBounds/);
+  assert.match(source, /registerTarget\(card, \{kind: 'node', id: node\.id\}\)/);
+  assert.match(source, /const canInvokeMenu = /);
+  assert.match(source, /window\.confirm\(/);
+  assert.match(shellAdapter, /canvasNavigation\.fitToScreen\(/);
+  assert.doesNotMatch(source, /createDesignerCanvasNavigation|createDesignerContextMenu|createDomainSession/);
+  assert.doesNotMatch(source, /duplicateNode\(|duplicate_node/);
+});

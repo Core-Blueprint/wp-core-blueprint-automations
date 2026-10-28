@@ -50,6 +50,17 @@ final class DesignerAssets {
 		try {
 			$record = \CB\Automations\Persistence\WorkflowRepository::find( AutomationsPage::requested_workflow_id() );
 			if ( null !== $record && $record->definition() instanceof \CB\Automations\Workflow\GraphDefinition ) {
+				// R3 ESM imports require both optional public Base capabilities
+				// from the SAME installed Base package. Fail closed, never import
+				// unavailable named exports into the fullscreen Designer.
+				if ( ! self::base_canvas_available() ) {
+					add_action( 'admin_notices', static function (): void {
+						echo '<div class="notice notice-error"><p>';
+						echo esc_html( 'Advanced canvas interactions require the matching Core Blueprint Base development build.' );
+						echo '</p></div>';
+					} );
+					return;
+				}
 				DesignEditorAssets::enqueue_designer_mode( __( 'Automation Builder', 'core-blueprint-automations' ) );
 				$advanced_css = CB_AUTOMATIONS_DIR . 'assets/css/admin-advanced-editor.css';
 				$advanced_js = CB_AUTOMATIONS_DIR . 'assets/js/admin-advanced-editor.js';
@@ -182,6 +193,13 @@ final class DesignerAssets {
 		wp_enqueue_script_module( self::DOMAIN_PROJECT_MODULE, CB_AUTOMATIONS_URL . 'assets/js/automations-domain-project.js', [], is_file( $domain_project ) ? (string) filemtime( $domain_project ) : CB_AUTOMATIONS_VERSION );
 		wp_enqueue_script_module( self::HISTORY_MODULE, CB_AUTOMATIONS_URL . 'assets/js/admin-builder-history.js', [ '@cb-core/design-editor', 'cb-automations-admin-designer-shell', self::DOMAIN_PROJECT_MODULE ], is_file( $history ) ? (string) filemtime( $history ) : CB_AUTOMATIONS_VERSION );
 		wp_enqueue_script_module( self::LAYERS_MODULE, CB_AUTOMATIONS_URL . 'assets/js/admin-builder-layers.js', [ '@cb-core/design-editor', self::HISTORY_MODULE ], is_file( $layers ) ? (string) filemtime( $layers ) : CB_AUTOMATIONS_VERSION );
+	}
+
+	private static function base_canvas_available(): bool {
+		return defined( DesignEditorAssets::class . '::CANVAS_NAVIGATION_API' )
+			&& constant( DesignEditorAssets::class . '::CANVAS_NAVIGATION_API' ) >= 1
+			&& defined( DesignEditorAssets::class . '::DESIGNER_CONTEXT_MENU_API' )
+			&& constant( DesignEditorAssets::class . '::DESIGNER_CONTEXT_MENU_API' ) >= 1;
 	}
 
 	private static function base_editor_available(): bool {

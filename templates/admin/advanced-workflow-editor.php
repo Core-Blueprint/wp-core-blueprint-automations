@@ -53,6 +53,7 @@ if ( ! is_string( $payload ) ) {
 		<div class="cb-core-design-shell cb-advanced-editor-shell" data-cb-design-shell data-cb-advanced-root hidden>
 			<div class="cb-core-design-shell__toolbar cb-advanced-editor-toolbar">
 			<button type="button" class="button cb-core-button" data-cb-design-shell-fullscreen data-cb-design-shell-fullscreen-enter-label="<?php esc_attr_e( 'Open focus mode', 'core-blueprint-automations' ); ?>" data-cb-design-shell-fullscreen-exit-label="<?php esc_attr_e( 'Exit focus mode', 'core-blueprint-automations' ); ?>" aria-pressed="false"><span data-cb-design-shell-fullscreen-label><?php esc_html_e( 'Open focus mode', 'core-blueprint-automations' ); ?></span></button>
+				<button type="button" class="button cb-core-button" data-cb-advanced-fit>Fit to Screen</button>
 				<button type="submit" class="button button-primary cb-core-button cb-core-button--primary" data-cb-design-shell-primary-action data-cb-advanced-save><?php esc_html_e( 'Save automation', 'core-blueprint-automations' ); ?></button>
 			</div>
 			<div class="cb-core-design-shell__workspace cb-core-design-shell__workspace--collapsible cb-advanced-editor-workspace">
@@ -68,10 +69,10 @@ if ( ! is_string( $payload ) ) {
 					<p class="description">Drag nodes to arrange them. Select a node to edit its capability or connect its output to another node.</p>
 				</aside>
 				<main class="cb-core-design-shell__canvas cb-advanced-editor-canvas" aria-label="Advanced workflow canvas">
-					<div class="cb-advanced-editor-canvas-scroll" tabindex="0">
-						<div class="cb-advanced-editor-scene" data-cb-advanced-scene>
+					<div class="cb-advanced-editor-canvas-scroll" data-cb-design-canvas-viewport tabindex="0" aria-label="Workflow canvas navigation">
+						<div class="cb-advanced-editor-scene" data-cb-advanced-scene data-cb-design-canvas-scene>
 							<svg aria-hidden="true" data-cb-advanced-wires viewBox="0 0 1400 900" preserveAspectRatio="xMinYMin meet"></svg>
-							<div data-cb-advanced-nodes></div>
+							<div data-cb-advanced-nodes data-cb-design-canvas-background></div>
 						</div>
 					</div>
 				</main>
