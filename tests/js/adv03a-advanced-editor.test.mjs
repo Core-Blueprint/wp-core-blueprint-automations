@@ -82,3 +82,9 @@ test('ADV-03A-R3 preserves scaled canvas geometry and consumer graph authority',
   assert.doesNotMatch(source, /createDesignerCanvasNavigation|createDesignerContextMenu|createDomainSession/);
   assert.doesNotMatch(source, /duplicateNode\(|duplicate_node/);
 });
+
+test('ADV-03A-R3 context actions preserve keyboard focus on configure and delete', () => {
+  assert.match(advancedTemplate, /data-cb-advanced-inspector tabindex="-1"/);
+  assert.match(source, /removeNode\(target\.id\);/);
+  assert.match(source, /\?\.focus\(\{preventScroll: true\}\)/);
+});

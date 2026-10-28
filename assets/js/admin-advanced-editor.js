@@ -414,7 +414,10 @@
 			root.querySelector('[data-cb-advanced-inspector]')?.focus?.({preventScroll: true});
 		} else if (actionId === 'remove') {
 			// Until graph History is adopted, require confirmation for deletion.
-			if (window.confirm('Delete this node and its connected graph references?')) removeNode(target.id);
+			if (window.confirm('Delete this node and its connected graph references?')) {
+				removeNode(target.id);
+				root.querySelector('[data-cb-design-canvas-viewport]')?.focus({preventScroll: true});
+			}
 		}
 	};
 	// The classic graph renderer exposes only a bounded adapter to the Base ESM

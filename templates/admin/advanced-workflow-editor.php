@@ -82,7 +82,7 @@ if ( ! is_string( $payload ) ) {
 					</label>
 					<span class="cb-advanced-editor-unsaved" data-cb-advanced-dirty aria-live="polite"></span>
 					<h2><?php esc_html_e( 'Inspector', 'core-blueprint-automations' ); ?></h2>
-					<div data-cb-advanced-inspector><p class="description"><?php esc_html_e( 'Select a workflow step to inspect its context.', 'core-blueprint-automations' ); ?></p></div>
+					<div data-cb-advanced-inspector tabindex="-1"><p class="description"><?php esc_html_e( 'Select a workflow step to inspect its context.', 'core-blueprint-automations' ); ?></p></div>
 					<section class="cb-advanced-editor-validation" aria-live="polite">
 						<h2><?php esc_html_e( 'Workflow health', 'core-blueprint-automations' ); ?></h2>
 						<p class="description">Checks refresh after saving and reopening the draft. Activation remains disabled.</p>
