@@ -204,6 +204,19 @@ c2_reject(
 );
 c2_assert( $before === $wpdb->writes, 'Rejected branch altered durable state.' );
 
+$untrusted_before = [ $wpdb->run, $wpdb->steps, $wpdb->context, $wpdb->writes ];
+c2_reject(
+	static fn () => GraphCheckpointStore::commit_completion(
+		21, $lease, $catalog, 'graph:0', new RunStepAttempt( 50, 1 ),
+		'state', 'state', [ 'decision' => 'true', 'label' => 'Wrong type' ]
+	),
+	'C3 output schema guard accepted a mismatched provider result.'
+);
+c2_assert(
+	$untrusted_before === [ $wpdb->run, $wpdb->steps, $wpdb->context, $wpdb->writes ],
+	'C3 schema rejection did not rollback the step, journal and cursor.'
+);
+
 $next = GraphCheckpointStore::commit_completion(
 	21, $lease, $catalog, 'graph:0', new RunStepAttempt( 50, 1 ),
 	'state', 'state', [ 'decision' => true, 'label' => 'Approved' ]
