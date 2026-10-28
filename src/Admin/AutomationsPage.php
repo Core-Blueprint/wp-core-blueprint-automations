@@ -73,9 +73,13 @@ final class AutomationsPage implements Page {
 					return;
 				}
 
-				// No Advanced UI exists in ADV-02A; never pass v2 to Standard editor.
+				// Advanced v2 has its own authoring projection and cannot enter
+				// the Standard Base Domain Session or activation route.
 				if ( $detail['record']->definition() instanceof \CB\Automations\Workflow\GraphDefinition ) {
-					$this->render_unavailable();
+					$this->template( 'advanced-workflow-editor.php', [
+						'detail' => $detail,
+						'editor_data' => AdvancedEditorData::build( $detail['record'] ),
+					] );
 					return;
 				}
 				if ( self::requires_contract_recovery( $detail['validation'] ) ) {
