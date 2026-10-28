@@ -49,7 +49,7 @@ test('ADV-03A-R2 Base contract: Base exclusively owns fullscreen, launch and exi
   assert.match(assets, /admin-advanced-designer-shell\.js/);
   assert.match(assets, /wp_enqueue_script_module\(/);
   assert.match(assets, /'@cb-core\/design-editor'/);
-  assert.match(source, /root\.dataset\.cbAdvancedDirty = 'true'/);
+  assert.match(source, /root\.dataset\.cbAdvancedDirty = changed \? 'true' : 'false'/);
   assert.match(source, /root\.dataset\.cbAdvancedDirty = 'false'/);
 });
 
@@ -63,7 +63,7 @@ test('ADV-03A-R2 Base theme: canonical semantic dark/light tokens, no white cust
 });
 
 test('ADV-03A-R3 uses only public Base CN-1 and CM-1 controllers', () => {
-  assert.match(shellAdapter, /import \{ createDesignerCanvasNavigation, createDesignerContextMenu \} from '@cb-core\/design-editor'/);
+  assert.match(shellAdapter, /import \{ createDesignerCanvasNavigation, createDesignerContextMenu, createDomainSession \} from '@cb-core\/design-editor'/);
   assert.match(shellAdapter, /createDesignerCanvasNavigation\(/);
   assert.match(shellAdapter, /createDesignerContextMenu\(/);
   for (const name of ['CANVAS_NAVIGATION_API', 'DESIGNER_CONTEXT_MENU_API']) assert.ok(assets.includes(name));
@@ -122,4 +122,18 @@ test('ADV-03B creates only non-sensitive schema-shaped local simulation samples'
   assert.match(source, /previewExamples\?\.addEventListener\('click'/);
   assert.match(source, /if \(field\?\.sensitive\) continue/);
   assert.match(source, /previewFixture\.value = JSON\.stringify\(samples, null, 2\)/);
+});
+
+test('ADV-03C history uses public Base domain session and no parallel undo engine', () => {
+  assert.match(shellAdapter, /historySession = createDomainSession\(/);
+  assert.match(shellAdapter, /historySession\.subscribeHistory\(/);
+  assert.match(shellAdapter, /historySession\?\.dispose\(\)/);
+  assert.match(advancedTemplate, /data-cb-advanced-undo disabled/);
+  assert.match(advancedTemplate, /data-cb-advanced-redo disabled/);
+  assert.match(assets, /DOMAIN_SESSION_API/);
+  assert.match(source, /historySession\.execute\(\{/);
+  assert.match(source, /historySession\.undo\(\)/);
+  assert.match(source, /historySession\.redo\(\)/);
+  assert.match(source, /restoreHistory\(rootData\)/);
+  assert.doesNotMatch(source, /const undoStack|const redoStack|new CommandHistory/);
 });

@@ -199,7 +199,9 @@ final class DesignerAssets {
 		return defined( DesignEditorAssets::class . '::CANVAS_NAVIGATION_API' )
 			&& constant( DesignEditorAssets::class . '::CANVAS_NAVIGATION_API' ) >= 1
 			&& defined( DesignEditorAssets::class . '::DESIGNER_CONTEXT_MENU_API' )
-			&& constant( DesignEditorAssets::class . '::DESIGNER_CONTEXT_MENU_API' ) >= 1;
+			&& constant( DesignEditorAssets::class . '::DESIGNER_CONTEXT_MENU_API' ) >= 1
+			&& defined( DesignEditorAssets::class . '::DOMAIN_SESSION_API' )
+			&& constant( DesignEditorAssets::class . '::DOMAIN_SESSION_API' ) >= 3;
 	}
 
 	private static function base_editor_available(): bool {

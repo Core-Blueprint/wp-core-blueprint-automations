@@ -78,6 +78,7 @@
 	// These are optional consumer adapters; no parallel graph session is created.
 	let canvasNavigation = null;
 	let contextMenu = null;
+	let historySession = null;
 	let releaseMenuTargets = [];
 	let insertionPoint = null;
 	let pendingPort = null;
@@ -90,13 +91,27 @@
 	const canvasPoint = (event) => canvasNavigation
 		? canvasNavigation.clientToCanvas({clientX: event.clientX, clientY: event.clientY})
 		: {x: event.clientX, y: event.clientY};
+	const savedDefinition = JSON.stringify(draft);
+	const savedName = nameField?.value || '';
 	let changed = false;
 	let saving = false;
 	root.dataset.cbAdvancedDirty = 'false';
+	// Canonical Base History is the only transient edit stack.
+	const historyProject = () => ({
+		schema_version: 0, design_type: 'automations-advanced-graph',
+		root: {definition: clone(draft), name: nameField?.value || ''},
+	});
+	const refreshDirty = () => {
+		changed = JSON.stringify(draft) !== savedDefinition || (nameField?.value || '') !== savedName;
+		root.dataset.cbAdvancedDirty = changed ? 'true' : 'false';
+		if (dirtyLabel) dirtyLabel.textContent = changed ? 'Unsaved changes' : '';
+	};
 	const mark = () => {
-		changed = true;
-		root.dataset.cbAdvancedDirty = 'true';
-		if (dirtyLabel) dirtyLabel.textContent = 'Unsaved changes';
+		if (historySession) {
+			const next = historyProject();
+			historySession.execute({label:'Edit Advanced workflow', apply: () => ({project:next})});
+		}
+		refreshDirty();
 	};
 	const coords = (id, index = 0) => {
 		const p = draft.layout.nodes[id];
@@ -601,13 +616,26 @@
 	root.cbAutomationsAdvancedGraph = Object.freeze({
 		contextKey: () => 'workflow:' + String(form.querySelector('[name="workflow_id"]')?.value || ''),
 		getContentBounds: contentBounds,
+		getHistoryProject: historyProject,
+		restoreHistory(rootData) {
+			if (!rootData || !rootData.definition || typeof rootData.name !== 'string') return;
+			draft = clone(rootData.definition);
+			if (nameField) nameField.value = rootData.name;
+			current = find(current)?.id || draft.graph.nodes[0]?.id || null;
+			selectedEdge = draft.graph.edges.some(edge => edge.id === selectedEdge) ? selectedEdge : null;
+			pendingPort = null; draggingPort = null;
+			rebuild(); refreshDirty();
+		},
 		getMenuItems,
 		canInvokeMenu,
 		invokeMenu,
-		connectControllers({navigation, menu}) {
+		connectControllers({navigation, menu, history}) {
 			canvasNavigation = navigation;
 			contextMenu = menu;
+			historySession = history;
 			const viewport = root.querySelector('[data-cb-design-canvas-viewport]');
+			root.querySelector('[data-cb-advanced-undo]')?.addEventListener('click', () => historySession?.undo());
+			root.querySelector('[data-cb-advanced-redo]')?.addEventListener('click', () => historySession?.redo());
 			viewport?.addEventListener('contextmenu', event => {
 				if (event.target.closest?.('[data-cb-design-canvas-object]')) {
 					insertionPoint = null;
@@ -622,6 +650,15 @@
 		},
 	});
 	root.addEventListener('keydown', event => {
+		if ((event.ctrlKey || event.metaKey) && !event.altKey && !event.repeat
+			&& !event.target?.closest?.('input, textarea, select, [contenteditable]')
+			&& (event.key.toLowerCase() === 'z' || event.key.toLowerCase() === 'y')) {
+			if (!historySession) return;
+			event.preventDefault();
+			if (event.key.toLowerCase() === 'y' || event.shiftKey) historySession.redo();
+			else historySession.undo();
+			return;
+		}
 		if (event.key!=='Escape' || !pendingPort && !draggingPort) return;
 		event.preventDefault(); event.stopPropagation(); cancelPort();
 	},true);
