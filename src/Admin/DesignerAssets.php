@@ -57,6 +57,13 @@ final class DesignerAssets {
 					[ 'cb-automations-admin' ], is_file( $advanced_css ) ? (string) filemtime( $advanced_css ) : CB_AUTOMATIONS_VERSION );
 				wp_enqueue_script( 'cb-automations-advanced-editor', CB_AUTOMATIONS_URL . 'assets/js/admin-advanced-editor.js',
 					[], is_file( $advanced_js ) ? (string) filemtime( $advanced_js ) : CB_AUTOMATIONS_VERSION, true );
+				$advanced_shell = CB_AUTOMATIONS_DIR . 'assets/js/admin-advanced-designer-shell.js';
+				wp_enqueue_script_module(
+					'cb-automations-advanced-designer-shell',
+					CB_AUTOMATIONS_URL . 'assets/js/admin-advanced-designer-shell.js',
+					[ '@cb-core/design-editor' ],
+					is_file( $advanced_shell ) ? (string) filemtime( $advanced_shell ) : CB_AUTOMATIONS_VERSION
+				);
 				return;
 			}
 		} catch ( \Throwable ) {
