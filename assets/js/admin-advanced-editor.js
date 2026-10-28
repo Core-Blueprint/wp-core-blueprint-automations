@@ -84,6 +84,7 @@
 	let pendingPort = null;
 	let draggingPort = null;
 	let selectedEdge = null;
+	let simulatedRoute = null;
 	let suppressPortClick = false;
 	const releaseTargets = () => {
 		for (const release of releaseMenuTargets.splice(0)) release();
@@ -107,6 +108,15 @@
 		if (dirtyLabel) dirtyLabel.textContent = changed ? 'Unsaved changes' : '';
 	};
 	const mark = () => {
+		// Read-only simulation is valid only for the last saved revision and
+		// must never survive a new local graph/name mutation.
+		if (simulatedRoute) {
+			simulatedRoute = null;
+			if (previewResult) previewResult.textContent = 'Workflow changed. Save and reopen before testing again.';
+			for (const el of root.querySelectorAll('.is-simulated, .is-not-on-route')) {
+				el.classList.remove('is-simulated', 'is-not-on-route');
+			}
+		}
 		if (historySession) {
 			const next = historyProject();
 			historySession.execute({label:'Edit Advanced workflow', apply: () => ({project:next})});
@@ -235,7 +245,10 @@
 			const d = curve(start, end);
 			const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 			line.setAttribute('d', d);
-			line.setAttribute('class', 'cb-advanced-edge' + (selectedEdge === edge.id ? ' is-selected' : ''));
+			const routeActive = simulatedRoute !== null;
+			const isOnRoute = routeActive && simulatedRoute.nodes.has(edge.from) && simulatedRoute.nodes.has(edge.to);
+			line.setAttribute('class', 'cb-advanced-edge' + (selectedEdge === edge.id ? ' is-selected' : '')
+				+ (routeActive ? (isOnRoute ? ' is-simulated' : ' is-not-on-route') : ''));
 			wires.append(line);
 			const hit = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 			hit.setAttribute('d', d);
@@ -352,7 +365,8 @@
 		layer.replaceChildren();
 		draft.graph.nodes.forEach((node, index) => {
 			const point = coords(node.id, index);
-			const card = make('div', 'cb-advanced-node' + (current === node.id ? ' is-selected' : ''));
+			const card = make('div', 'cb-advanced-node' + (current === node.id ? ' is-selected' : '')
+				+ (simulatedRoute ? (simulatedRoute.nodes.has(node.id) ? ' is-simulated' : ' is-not-on-route') : ''));
 			card.style.left = point.x + 'px'; card.style.top = point.y + 'px';
 			card.dataset.nodeId = node.id;
 			card.setAttribute('role', 'group');
@@ -620,6 +634,8 @@
 		restoreHistory(rootData) {
 			if (!rootData || !rootData.definition || typeof rootData.name !== 'string') return;
 			draft = clone(rootData.definition);
+			simulatedRoute = null;
+			if (previewResult) previewResult.textContent = 'Workflow history changed. Run a new simulation.';
 			if (nameField) nameField.value = rootData.name;
 			current = find(current)?.id || draft.graph.nodes[0]?.id || null;
 			selectedEdge = draft.graph.edges.some(edge => edge.id === selectedEdge) ? selectedEdge : null;
@@ -729,7 +745,9 @@
 			if (!response.ok || json?.success !== true || !Array.isArray(json.data?.nodes)) {
 				throw new Error(json?.data?.message || 'Route simulation was not available.');
 			}
-			const title = make('strong', '', 'Simulation complete. No actions were executed.');
+			simulatedRoute = {nodes: new Set(json.data.nodes), decisions: json.data.decisions || {}};
+			draw();
+			const title = make('strong', '', 'Route simulated. No actions were executed.');
 			const list = make('ol');
 			for (const nodeId of json.data.nodes) {
 				if (typeof nodeId !== 'string') continue;
@@ -737,9 +755,11 @@
 				if (!node) continue;
 				const decision = json.data.decisions?.[nodeId];
 				const branch = typeof decision === 'boolean' ? ' (' + (decision ? 'True' : 'False') + ')' : '';
-				list.append(make('li', '', labels[node.type] + branch + ' · ' + nodeId.slice(0, 12)));
+				list.append(make('li', '', 'Simulated · ' + labels[node.type] + branch + ' · ' + nodeId.slice(0, 12)));
 			}
-			previewResult.replaceChildren(title, list);
+			const skipped = draft.graph.nodes.filter(node => !simulatedRoute.nodes.has(node.id)).length;
+			const detail = make('p', 'description', skipped + ' node(s) were not on the simulated route.');
+			previewResult.replaceChildren(title, list, detail);
 		} catch (error) {
 			previewResult.textContent = 'Simulation unavailable: ' + String(error?.message || 'unknown error').slice(0, 180);
 		} finally {

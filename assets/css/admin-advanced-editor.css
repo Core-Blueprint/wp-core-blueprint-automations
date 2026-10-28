@@ -194,3 +194,9 @@
 .cb-advanced-route-preview h2 { margin-top: 0; }
 .cb-advanced-route-preview__result { font-size: var(--cb-fs-sm); color: var(--cb-text-muted); margin-top: var(--cb-space-3); }
 .cb-advanced-route-preview__result li { margin-block: var(--cb-space-1); overflow-wrap: anywhere; }
+
+// ADV-03B simulated route is a transient visualization, never execution.
+.cb-advanced-node.is-simulated { border-color: var(--cb-accent); }
+.cb-advanced-node.is-not-on-route { opacity: .48; }
+.cb-advanced-edge.is-simulated { stroke-width: 3.5; }
+.cb-advanced-edge.is-not-on-route { opacity: .27; }

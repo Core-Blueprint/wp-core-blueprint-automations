@@ -137,3 +137,13 @@ test('ADV-03C history uses public Base domain session and no parallel undo engin
   assert.match(source, /restoreHistory\(rootData\)/);
   assert.doesNotMatch(source, /const undoStack|const redoStack|new CommandHistory/);
 });
+
+test('ADV-03B clearly labels and highlights a simulated route without persisting it', () => {
+  assert.match(source, /let simulatedRoute = null/);
+  assert.match(source, /simulatedRoute = \{nodes: new Set\(json\.data\.nodes\), decisions:/);
+  assert.match(source, /Route simulated\. No actions were executed/);
+  assert.match(source, /not on the simulated route/);
+  assert.match(source, /\bis-simulated\b/);
+  assert.match(stylesheet, /\.cb-advanced-node\.is-not-on-route/);
+  assert.doesNotMatch(source, /draft\.simulatedRoute\s*=/);
+});
