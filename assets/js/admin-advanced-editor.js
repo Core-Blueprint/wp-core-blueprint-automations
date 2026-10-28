@@ -14,6 +14,7 @@
 	const previewButton = root.querySelector('[data-cb-advanced-preview-run]');
 	const previewResult = root.querySelector('[data-cb-advanced-preview-result]');
 	const previewFixture = root.querySelector('[data-cb-advanced-preview-fixtures]');
+	const previewExamples = root.querySelector('[data-cb-advanced-preview-examples]');
 	const previewNonce = root.querySelector('[data-cb-advanced-preview-nonce]');
 	const previewAction = root.querySelector('[data-cb-advanced-preview-action]');
 	if (!(documentField instanceof HTMLInputElement) || !scene || !layer || !wires || !inspector) return;
@@ -625,6 +626,32 @@
 		event.preventDefault(); event.stopPropagation(); cancelPort();
 	},true);
 	root.dispatchEvent(new CustomEvent('cb:automations-advanced:ready'));
+	// Test fixtures never enter the saved draft and never include sensitive fields.
+	previewExamples?.addEventListener('click', () => {
+		if (!previewFixture) return;
+		const samples = Object.create(null);
+		for (const node of draft.graph.nodes) {
+			if (!['trigger', 'state', 'action'].includes(node.type)) continue;
+			const cap = configCap(node);
+			if (!cap || !cap.output_schema) continue;
+			const fields = Object.create(null);
+			for (const [name, field] of Object.entries(cap.output_schema)) {
+				if (field?.sensitive) continue;
+				let sample;
+				switch (field?.type) {
+					case 'boolean': sample = true; break;
+					case 'integer': case 'number': sample = 1; break;
+					case 'string': sample = 'sample'; break;
+					case 'array': sample = []; break;
+					default: continue;
+				}
+				fields[name] = sample;
+			}
+			if (Object.keys(fields).length) samples[node.id] = fields;
+		}
+		previewFixture.value = JSON.stringify(samples, null, 2);
+		if (previewResult) previewResult.textContent = 'Review sample outputs, then test the saved route.';
+	});
 	previewButton?.addEventListener('click', async () => {
 		if (!previewResult || !previewFixture || !previewNonce || !previewAction) return;
 		previewResult.replaceChildren();

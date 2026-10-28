@@ -92,7 +92,10 @@ if ( ! is_string( $payload ) ) {
 						</label>
 						<input type="hidden" data-cb-advanced-preview-nonce value="<?php echo esc_attr( wp_create_nonce( 'cb_automations_preview_advanced' ) ); ?>" />
 						<input type="hidden" data-cb-advanced-preview-action value="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" />
-						<button type="button" class="button" data-cb-advanced-preview-run>Test route</button>
+						<div class="cb-advanced-preview-actions">
+							<button type="button" class="button" data-cb-advanced-preview-examples>Generate samples</button>
+							<button type="button" class="button" data-cb-advanced-preview-run>Test route</button>
+						</div>
 						<div class="cb-advanced-route-preview__result" data-cb-advanced-preview-result role="status" aria-live="polite"></div>
 					</section>
 					<section class="cb-advanced-editor-validation" aria-live="polite">

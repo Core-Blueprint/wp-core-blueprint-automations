@@ -116,3 +116,10 @@ test('ADV-03B preview is read-only, revision-bound and never invokes providers',
   assert.match(source, /Save and reopen this workflow before testing/);
   assert.doesNotMatch(source, /GraphProviderExecutor|GraphRunPipeline|GraphSandboxAdmission/);
 });
+
+test('ADV-03B creates only non-sensitive schema-shaped local simulation samples', () => {
+  assert.match(advancedTemplate, /data-cb-advanced-preview-examples/);
+  assert.match(source, /previewExamples\?\.addEventListener\('click'/);
+  assert.match(source, /if \(field\?\.sensitive\) continue/);
+  assert.match(source, /previewFixture\.value = JSON\.stringify\(samples, null, 2\)/);
+});

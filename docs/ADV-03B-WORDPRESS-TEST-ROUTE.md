@@ -10,7 +10,7 @@ The Advanced Builder has a **Test Workflow** panel that asks for sample node-out
 ## Operator workflow
 1. Open a **saved** disabled Advanced workflow in the WordPress Designer.
 2. Configure the Trigger, nodes, branches and Merge; save, then reopen.
-3. In the Inspector's Test Workflow section, enter sample non-sensitive outputs using JSON, for example `{"state":{"decision":true}}` **when** the node ID is `state` and its registered non-sensitive output schema defines a Boolean `decision` field.
+3. In the Inspector's Test Workflow section, choose **Generate samples** to produce non-sensitive schema-shaped example outputs, then review and edit the JSON if necessary, or enter sample outputs using JSON, for example `{"state":{"decision":true}}` **when** the node ID is `state` and its registered non-sensitive output schema defines a Boolean `decision` field.
 4. Click **Test route**. The WordPress UI shows the simulated node sequence and IF/ELSE choices, not output values.
 5. Change the non-sensitive sample fixture and repeat to test the alternate route.
 6. A dirty draft, outdated revision, invalid graph or sensitive/unrecognized fixture must be refused. Fix and save before retesting.
