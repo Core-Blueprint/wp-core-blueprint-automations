@@ -88,3 +88,11 @@ test('ADV-03A-R3 context actions preserve keyboard focus on configure and delete
   assert.match(source, /removeNode\(target\.id\);/);
   assert.match(source, /\?\.focus\(\{preventScroll: true\}\)/);
 });
+
+test('ADV-03A-R4 visual input and output ports support pointer and keyboard connections', () => {
+  for (const piece of ['cb-advanced-node-port', 'createPorts(', 'setPointerCapture', 'canvasPoint(event)', 'inputAt(', 'renderEdges()', 'refreshPorts()', 'deleteEdge(', 'const seen = new Set(), stack = [to]']) {
+    assert.ok((source + stylesheet).includes(piece), piece);
+  }
+  assert.match(advancedTemplate, /role="group" aria-label="Workflow connections"/);
+  assert.match(source, /event\.key === 'Delete' \|\| event\.key === 'Backspace'/);
+});

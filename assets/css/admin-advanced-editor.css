@@ -93,6 +93,10 @@
 	transform-origin: 0 0; /* Base owns the actual transient transform. */
 }
 .cb-advanced-editor-scene svg { position: absolute; inset: 0; width: 1400px; height: 900px; pointer-events: none; overflow: visible; }
+.cb-advanced-edge-hit { fill: none; stroke: transparent; stroke-width: 18; pointer-events: stroke; cursor: pointer; }
+.cb-advanced-edge-hit:focus-visible { stroke: var(--cb-tint-accent); outline: none; }
+.cb-advanced-edge.is-selected { stroke-width: 4; }
+.cb-advanced-edge-preview { fill: none; stroke: var(--cb-accent); stroke-width: 2; stroke-dasharray: 6 5; pointer-events: none; }
 .cb-advanced-edge { fill: none; stroke: var(--cb-accent); stroke-width: 2.4; stroke-linecap: round; }
 .cb-advanced-edge-label { fill: var(--cb-text); font-size: var(--cb-fs-xs); text-anchor: middle; font-weight: var(--cb-fw-bold); }
 .cb-advanced-node {
@@ -109,7 +113,7 @@
 	gap: var(--cb-space-2);
 	padding: 0 0 var(--cb-space-3);
 	box-sizing: border-box;
-	overflow: hidden;
+	overflow: visible;
 	z-index: 1;
 }
 .cb-advanced-node.is-selected {
@@ -130,6 +134,21 @@
 	touch-action: none;
 }
 .cb-advanced-node-title:active { cursor: grabbing; }
+.cb-advanced-node-port {
+	position: absolute; top: calc(var(--cb-advanced-port-y) - 9px);
+	width: 18px; height: 18px; padding: 0;
+	border: 2px solid var(--cb-accent); border-radius: 50%;
+	background: var(--cb-surface-1); cursor: crosshair;
+	touch-action: none; z-index: 3;
+}
+.cb-advanced-node-port--in { left: -10px; }
+.cb-advanced-node-port--out { right: -10px; }
+.cb-advanced-node-port:is(:hover,:focus-visible,.is-available) {
+	background: var(--cb-accent); box-shadow: 0 0 0 4px var(--cb-tint-accent);
+}
+.cb-advanced-node-port.is-connected { background: var(--cb-accent); }
+.cb-advanced-node-port.is-unavailable { opacity: .45; }
+.cb-advanced-node-port:focus-visible { outline: 2px solid var(--cb-text-strong); outline-offset: 3px; }
 .cb-advanced-node-details,
 .cb-advanced-node-id { display: block; padding: 0 var(--cb-space-3); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .cb-advanced-node-details { font-size: var(--cb-fs-sm); }

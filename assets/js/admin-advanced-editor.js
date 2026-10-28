@@ -74,6 +74,10 @@
 	let contextMenu = null;
 	let releaseMenuTargets = [];
 	let insertionPoint = null;
+	let pendingPort = null;
+	let draggingPort = null;
+	let selectedEdge = null;
+	let suppressPortClick = false;
 	const releaseTargets = () => {
 		for (const release of releaseMenuTargets.splice(0)) release();
 	};
@@ -109,18 +113,43 @@
 
 	const rebuild = () => { draw(); inspect(); sync(); };
 	const sync = () => { documentField.value = JSON.stringify(draft); };
+	const portOffset = (side, port) => port === 'false' ? (side === 'out' ? 72 : 70)
+		: port === 'true' ? (side === 'out' ? 45 : 40) : (side === 'out' ? 56 : 55);
+	const anchor = (node, side, port) => {
+		const p = coords(node.id);
+		return {x: p.x + (side === 'out' ? 184 : 0), y: p.y + portOffset(side, port)};
+	};
+	const curve = (start, end) => {
+		const dx = Math.max(60, Math.abs(end.x - start.x) * .52);
+		return `M${start.x} ${start.y} C${start.x+dx} ${start.y}, ${end.x-dx} ${end.y}, ${end.x} ${end.y}`;
+	};
 	const outgoing = (type) => type === 'end' ? [] : type === 'if_else' ? ['true', 'false'] : ['next'];
 	const incoming = (type) => type === 'trigger' ? [] : type === 'exclusive_merge' ? ['true', 'false'] : ['in'];
 	const canConnect = (from, fromPort, to, toPort) => {
 		const a = find(from), b = find(to);
-		return a && b && from !== to && outgoing(a.type).includes(fromPort) && incoming(b.type).includes(toPort)
-			&& !draft.graph.edges.some(edge => edge.from === from && edge.from_port === fromPort)
-			&& !draft.graph.edges.some(edge => edge.to === to && edge.to_port === toPort);
+		if (!a || !b || from === to || !outgoing(a.type).includes(fromPort) || !incoming(b.type).includes(toPort)
+			|| draft.graph.edges.length >= 1024
+			|| draft.graph.edges.some(edge => edge.from === from && edge.from_port === fromPort)
+			|| draft.graph.edges.some(edge => edge.to === to && edge.to_port === toPort)) return false;
+		const seen = new Set(), stack = [to];
+		while (stack.length) {
+			const id = stack.pop();
+			if (id === from) return false;
+			if (seen.has(id)) continue;
+			seen.add(id);
+			for (const edge of draft.graph.edges) if (edge.from === id) stack.push(edge.to);
+		}
+		return true;
 	};
 	const connect = (from, fromPort, to, toPort) => {
 		if (!canConnect(from, fromPort, to, toPort) || draft.graph.edges.length >= 1024) return false;
 		draft.graph.edges.push({id: uid('e'), from, from_port: fromPort, to, to_port: toPort});
-		mark(); rebuild(); return true;
+		pendingPort = null; mark(); rebuild(); return true;
+	};
+	const deleteEdge = id => {
+		if (!draft.graph.edges.some(edge => edge.id === id)) return;
+		draft.graph.edges = draft.graph.edges.filter(edge => edge.id !== id);
+		selectedEdge = null; mark(); rebuild();
 	};
 	const addNode = (type, position = null) => {
 		if (!Object.hasOwn(labels, type) || draft.graph.nodes.length >= 512) return;
@@ -153,27 +182,130 @@
 		current = draft.graph.nodes[0]?.id || null;
 		mark(); rebuild();
 	};
+	const renderEdges = () => {
+		wires.replaceChildren();
+		for (const edge of draft.graph.edges) {
+			const from = find(edge.from), to = find(edge.to);
+			if (!from || !to) continue;
+			const start = anchor(from, 'out', edge.from_port), end = anchor(to, 'in', edge.to_port);
+			const d = curve(start, end);
+			const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+			line.setAttribute('d', d);
+			line.setAttribute('class', 'cb-advanced-edge' + (selectedEdge === edge.id ? ' is-selected' : ''));
+			wires.append(line);
+			const hit = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+			hit.setAttribute('d', d);
+			hit.setAttribute('class', 'cb-advanced-edge-hit');
+			hit.setAttribute('tabindex', '0');
+			hit.setAttribute('role', 'button');
+			hit.setAttribute('aria-label', 'Connection from ' + from.type + ' ' + edge.from_port + ' to ' + to.type + ' ' + edge.to_port);
+			hit.addEventListener('click', () => { selectedEdge = edge.id; current = edge.from; renderEdges(); inspect(); });
+			hit.addEventListener('keydown', event => {
+				if (event.key === 'Delete' || event.key === 'Backspace') {
+					event.preventDefault(); deleteEdge(edge.id);
+					root.querySelector('[data-cb-design-canvas-viewport]')?.focus({preventScroll: true});
+				} else if (event.key === 'Enter' || event.key === ' ') {
+					event.preventDefault(); selectedEdge = edge.id; current = edge.from;
+					line.classList.add('is-selected'); inspect();
+				}
+			});
+			wires.append(hit);
+			const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+			label.textContent = edge.from_port === 'next' ? '' : edge.from_port.toUpperCase();
+			label.setAttribute('x', String((start.x + end.x) / 2));
+			label.setAttribute('y', String((start.y + end.y) / 2 - 7));
+			label.setAttribute('class', 'cb-advanced-edge-label');
+			wires.append(label);
+		}
+		const source = draggingPort || pendingPort;
+		if (source) {
+			const node = find(source.id);
+			if (node) {
+				const start = anchor(node, 'out', source.port);
+				const preview = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+				preview.setAttribute('d', curve(start, draggingPort?.cursor || {x:start.x+64,y:start.y}));
+				preview.setAttribute('class', 'cb-advanced-edge-preview');
+				wires.append(preview);
+			}
+		}
+	};
+	const refreshPorts = () => {
+		const source = draggingPort || pendingPort;
+		for (const button of layer.querySelectorAll('[data-cb-advanced-port-side="in"]')) {
+			const valid = source && canConnect(source.id, source.port, button.dataset.cbAdvancedPortNode, button.dataset.cbAdvancedPort);
+			button.classList.toggle('is-available', !!valid);
+			button.classList.toggle('is-unavailable', !!source && !valid);
+		}
+	};
+	const cancelPort = () => { pendingPort = null; draggingPort = null; refreshPorts(); renderEdges(); };
+	const armPort = (id, port) => {
+		pendingPort = {id,port}; draggingPort = null;
+		refreshPorts(); renderEdges();
+	};
+	const inputAt = (x, y) => {
+		const input = document.elementFromPoint(x,y)?.closest?.('[data-cb-advanced-port-side="in"]');
+		return input && layer.contains(input) ? input : null;
+	};
+	const createPorts = (card, node) => {
+		for (const [side, ports] of [['in', incoming(node.type)], ['out', outgoing(node.type)]]) {
+			for (const port of ports) {
+				const control = make('button','cb-advanced-node-port cb-advanced-node-port--' + side);
+				control.type = 'button';
+				control.dataset.cbAdvancedPortSide = side;
+				control.dataset.cbAdvancedPortNode = node.id;
+				control.dataset.cbAdvancedPort = port;
+				control.dataset.cbDesignCanvasInteractive = 'port';
+				control.style.setProperty('--cb-advanced-port-y',portOffset(side,port)+'px');
+				control.setAttribute('aria-label',labels[node.type] + ' ' + (side==='in' ? 'input ' : 'output ') + port);
+				control.title = (side==='in' ? 'Input: ' : 'Output: ') + port;
+				if (draft.graph.edges.some(edge => side==='in'
+					? edge.to===node.id && edge.to_port===port : edge.from===node.id && edge.from_port===port)) control.classList.add('is-connected');
+				if (side==='in') {
+					control.addEventListener('click', () => {
+						if (pendingPort) {
+							if (!connect(pendingPort.id,pendingPort.port,node.id,port)) window.alert('Connection unavailable. Choose a compatible free port.');
+						} else { selectedEdge = null; current = node.id; inspect(); }
+					});
+				} else {
+					control.addEventListener('click', () => {
+						if (suppressPortClick) { suppressPortClick=false; return; }
+						armPort(node.id,port);
+					});
+					control.addEventListener('pointerdown', event => {
+						if (event.button!==0 || event.defaultPrevented) return;
+						event.preventDefault(); event.stopPropagation();
+						pendingPort=null;
+						draggingPort={id:node.id,port,pointerId:event.pointerId,startX:event.clientX,startY:event.clientY,moved:false,cursor:canvasPoint(event)};
+						control.setPointerCapture?.(event.pointerId);
+						refreshPorts(); renderEdges();
+					});
+					control.addEventListener('pointermove', event => {
+						if (!draggingPort || draggingPort.pointerId!==event.pointerId) return;
+						draggingPort.cursor=canvasPoint(event);
+						if (Math.hypot(event.clientX-draggingPort.startX,event.clientY-draggingPort.startY)>6) draggingPort.moved=true;
+						renderEdges();
+					});
+					control.addEventListener('pointerup', event => {
+						if (!draggingPort || draggingPort.pointerId!==event.pointerId) return;
+						const request=draggingPort,target=inputAt(event.clientX,event.clientY);
+						control.releasePointerCapture?.(event.pointerId);
+						draggingPort=null;
+						suppressPortClick=true;
+						setTimeout(()=>{suppressPortClick=false;},0);
+						if (target && canConnect(request.id,request.port,target.dataset.cbAdvancedPortNode,target.dataset.cbAdvancedPort)) {
+							connect(request.id,request.port,target.dataset.cbAdvancedPortNode,target.dataset.cbAdvancedPort);
+						} else if (!request.moved) armPort(node.id,port);
+						else cancelPort();
+					});
+					control.addEventListener('pointercancel',cancelPort);
+				}
+				card.append(control);
+			}
+		}
+	};
 	const draw = () => {
 		releaseTargets();
-		layer.replaceChildren(); wires.replaceChildren();
-		for (const edge of draft.graph.edges) {
-			const a = find(edge.from), b = find(edge.to);
-			if (!a || !b) continue;
-			const p = coords(a.id), q = coords(b.id);
-			const sx = p.x + 184, sy = p.y + (edge.from_port === 'false' ? 72 : edge.from_port === 'true' ? 45 : 56);
-			const ex = q.x, ey = q.y + (edge.to_port === 'false' ? 70 : edge.to_port === 'true' ? 40 : 55);
-			const dx = Math.max(60, Math.abs(ex - sx) * 0.52);
-			const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-			path.setAttribute('d', `M${sx} ${sy} C${sx + dx} ${sy}, ${ex - dx} ${ey}, ${ex} ${ey}`);
-			path.setAttribute('class', 'cb-advanced-edge');
-			wires.append(path);
-			const group = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-			group.textContent = edge.from_port === 'next' ? '' : edge.from_port.toUpperCase();
-			group.setAttribute('x', String((sx + ex) / 2));
-			group.setAttribute('y', String((sy + ey) / 2 - 7));
-			group.setAttribute('class', 'cb-advanced-edge-label');
-			wires.append(group);
-		}
+		layer.replaceChildren();
 		draft.graph.nodes.forEach((node, index) => {
 			const point = coords(node.id, index);
 			const card = make('div', 'cb-advanced-node' + (current === node.id ? ' is-selected' : ''));
@@ -183,10 +315,12 @@
 			card.setAttribute('aria-label', labels[node.type] + ' ' + node.id);
 			const title = make('button', 'cb-advanced-node-title', labels[node.type]);
 			title.type = 'button'; title.title = 'Drag to move · Click to inspect';
-			title.addEventListener('click', () => { current = node.id; rebuild(); });
+			title.addEventListener('click', () => { selectedEdge = null; current = node.id; rebuild(); });
 			const detail = make('span', 'cb-advanced-node-details', configCap(node)?.label || (occupied(node.config) ? 'Configured' : 'Not configured'));
 			const idlabel = make('span', 'cb-advanced-node-id', node.id.slice(0, 16));
-			card.append(title, detail, idlabel); layer.append(card);
+			card.append(title, detail, idlabel);
+			createPorts(card, node);
+			layer.append(card);
 			card.dataset.cbDesignCanvasObject = 'node';
 			if (contextMenu) releaseMenuTargets.push(contextMenu.registerTarget(card, {kind: 'node', id: node.id}));
 			title.addEventListener('pointerdown', event => {
@@ -199,7 +333,7 @@
 					const ny = Math.round(Math.max(0, Math.min(900 - 110, origin.top + now.y - origin.y)));
 					point.x = nx; point.y = ny;
 					card.style.left = nx + 'px'; card.style.top = ny + 'px';
-					for (const edge of wires.querySelectorAll('path')) edge.setAttribute('opacity', '.2');
+					renderEdges();
 				};
 				const end = e => {
 					title.releasePointerCapture?.(e.pointerId);
@@ -215,6 +349,7 @@
 				title.addEventListener('pointercancel', end);
 			});
 		});
+		renderEdges(); refreshPorts();
 	};
 
 	const parseLiteral = (raw, field) => {
@@ -294,6 +429,13 @@
 	};
 	const inspect = () => {
 		inspector.replaceChildren();
+		const edge = draft.graph.edges.find(item => item.id === selectedEdge);
+		if (edge) {
+			inspector.append(make('h3','','Connection'));
+			inspector.append(make('p','description',edge.from+':'+edge.from_port+' → '+edge.to+':'+edge.to_port));
+			inspector.append(button('Delete connection',()=>deleteEdge(edge.id),true));
+			return;
+		}
 		const node = find(current);
 		if (!node) { inspector.append(make('p', 'description', 'Select a node on the canvas.')); return; }
 		inspector.append(make('h3', '', labels[node.type]));
@@ -352,7 +494,7 @@
 		for (const edge of entries) {
 			const row = make('div', 'cb-advanced-connection');
 			row.append(make('span', '', edge.from.slice(0, 12) + ':' + edge.from_port + ' → ' + edge.to.slice(0, 12) + ':' + edge.to_port));
-			row.append(button('Remove', () => { draft.graph.edges = draft.graph.edges.filter(e => e.id !== edge.id); mark(); rebuild(); }, true));
+			row.append(button('Remove', () => deleteEdge(edge.id), true));
 			inspector.append(row);
 		}
 		if (outgoing(node.type).length) {
@@ -445,6 +587,10 @@
 			rebuild();
 		},
 	});
+	root.addEventListener('keydown', event => {
+		if (event.key!=='Escape' || !pendingPort && !draggingPort) return;
+		event.preventDefault(); event.stopPropagation(); cancelPort();
+	},true);
 	root.dispatchEvent(new CustomEvent('cb:automations-advanced:ready'));
 	root.querySelectorAll('[data-cb-advanced-add]').forEach(el => {
 		el.addEventListener('click', () => { try { addNode(el.dataset.cbAdvancedAdd); } catch (e) { window.alert(e.message); } });
