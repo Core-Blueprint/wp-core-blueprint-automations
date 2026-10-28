@@ -65,8 +65,25 @@ foreach ( $iterator as $file ) {
 	$source = file_get_contents( $file->getPathname() );
 	if ( false !== $source && str_contains( $source, 'ActionInvoker::invoke(' ) ) { $hits[] = str_replace( $root . '/', '', $file->getPathname() ); }
 }
-if ( [ 'src/Runtime/ActionPhaseRunner.php' ] !== $hits ) {
-	throw new RuntimeException( 'Mutating Action has more than one execution route: ' . implode( ', ', $hits ) );
+// Standard v1 retains its unchanged ActionPhaseRunner; Advanced C4 is an
+// isolated, lease-fenced provider path that is not admitted to the worker yet.
+// Reject extra callers rather than weakening the public Base invocation guard.
+sort( $hits, SORT_STRING );
+if ( [
+	'src/Runtime/ActionPhaseRunner.php',
+	'src/Runtime/GraphProviderExecutor.php',
+] !== $hits ) {
+	throw new RuntimeException( 'Unapproved mutating Action execution route: ' . implode( ', ', $hits ) );
+}
+$advanced = file_get_contents( $root . '/src/Runtime/GraphProviderExecutor.php' );
+if ( false === $advanced
+	|| ! str_contains( $advanced, 'GraphActionStartFence::begin(' )
+	|| ! str_contains( $advanced, 'ActionCausality::during_action(' )
+	|| ! str_contains( $advanced, 'GraphCheckpointStore::commit_completion(' )
+	|| str_contains( $advanced, 'RunStepRepository::interrupt_running_attempts(' )
+	|| str_contains( $worker, 'GraphProviderExecutor' )
+	|| str_contains( $pipeline, 'GraphProviderExecutor' ) ) {
+	throw new RuntimeException( 'Advanced Action no-replay or Standard/Advanced isolation regressed.' );
 }
 
 fwrite( STDOUT, "G2 adversarial runtime matrix: PASS\n" );
