@@ -53,13 +53,7 @@ if ( ! is_string( $payload ) ) {
 		<div class="cb-core-design-shell cb-advanced-editor-shell" data-cb-design-shell data-cb-advanced-root hidden>
 			<div class="cb-core-design-shell__toolbar cb-advanced-editor-toolbar">
 			<button type="button" class="button cb-core-button" data-cb-design-shell-fullscreen data-cb-design-shell-fullscreen-enter-label="<?php esc_attr_e( 'Open focus mode', 'core-blueprint-automations' ); ?>" data-cb-design-shell-fullscreen-exit-label="<?php esc_attr_e( 'Exit focus mode', 'core-blueprint-automations' ); ?>" aria-pressed="false"><span data-cb-design-shell-fullscreen-label><?php esc_html_e( 'Open focus mode', 'core-blueprint-automations' ); ?></span></button>
-				<label class="cb-advanced-editor-name"><?php esc_html_e( 'Automation name', 'core-blueprint-automations' ); ?>
-					<input type="text" name="name" value="<?php echo esc_attr( $record->name() ); ?>" maxlength="191" required />
-				</label>
-				<div class="cb-advanced-editor-toolbar-actions">
-					<span data-cb-advanced-dirty aria-live="polite"></span>
-					<button type="submit" class="button button-primary cb-core-button cb-core-button--primary" data-cb-design-shell-primary-action data-cb-advanced-save><?php esc_html_e( 'Save automation', 'core-blueprint-automations' ); ?></button>
-				</div>
+				<button type="submit" class="button button-primary cb-core-button cb-core-button--primary" data-cb-design-shell-primary-action data-cb-advanced-save><?php esc_html_e( 'Save automation', 'core-blueprint-automations' ); ?></button>
 			</div>
 			<div class="cb-core-design-shell__workspace cb-core-design-shell__workspace--collapsible cb-advanced-editor-workspace">
 				<aside class="cb-core-design-shell__palette cb-core-design-shell__palette--composed cb-advanced-editor-palette" aria-label="Advanced nodes">
@@ -82,6 +76,10 @@ if ( ! is_string( $payload ) ) {
 					</div>
 				</main>
 				<aside class="cb-core-design-shell__sidebar cb-core-design-shell__sidebar--composed cb-advanced-editor-inspector" aria-label="Node Inspector">
+					<label class="cb-advanced-editor-name"><?php esc_html_e( 'Automation name', 'core-blueprint-automations' ); ?>
+						<input type="text" name="name" value="<?php echo esc_attr( $record->name() ); ?>" maxlength="191" required />
+					</label>
+					<span class="cb-advanced-editor-unsaved" data-cb-advanced-dirty aria-live="polite"></span>
 					<h2><?php esc_html_e( 'Inspector', 'core-blueprint-automations' ); ?></h2>
 					<div data-cb-advanced-inspector><p class="description"><?php esc_html_e( 'Select a workflow step to inspect its context.', 'core-blueprint-automations' ); ?></p></div>
 					<section class="cb-advanced-editor-validation" aria-live="polite">
