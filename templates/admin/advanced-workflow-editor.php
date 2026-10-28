@@ -53,8 +53,8 @@ if ( ! is_string( $payload ) ) {
 		<div class="cb-core-design-shell cb-advanced-editor-shell" data-cb-design-shell data-cb-advanced-root hidden>
 			<div class="cb-core-design-shell__toolbar cb-advanced-editor-toolbar">
 			<button type="button" class="button cb-core-button" data-cb-design-shell-fullscreen data-cb-design-shell-fullscreen-enter-label="<?php esc_attr_e( 'Open focus mode', 'core-blueprint-automations' ); ?>" data-cb-design-shell-fullscreen-exit-label="<?php esc_attr_e( 'Exit focus mode', 'core-blueprint-automations' ); ?>" aria-pressed="false"><span data-cb-design-shell-fullscreen-label><?php esc_html_e( 'Open focus mode', 'core-blueprint-automations' ); ?></span></button>
-				<button type="button" class="button cb-core-button" data-cb-advanced-undo disabled>Undo</button>
-				<button type="button" class="button cb-core-button" data-cb-advanced-redo disabled>Redo</button>
+				<button type="button" class="button cb-core-button" data-cb-advanced-undo disabled><?php esc_html_e( 'Undo', 'core-blueprint-automations' ); ?></button>
+				<button type="button" class="button cb-core-button" data-cb-advanced-redo disabled><?php esc_html_e( 'Redo', 'core-blueprint-automations' ); ?></button>
 				<button type="button" class="button cb-core-button" data-cb-advanced-fit>Fit to Screen</button>
 				<button type="submit" class="button button-primary cb-core-button cb-core-button--primary" data-cb-design-shell-primary-action data-cb-advanced-save><?php esc_html_e( 'Save automation', 'core-blueprint-automations' ); ?></button>
 			</div>
