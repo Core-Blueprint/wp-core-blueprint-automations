@@ -44,3 +44,21 @@ jobs:
 
       - name: Full PHP and JavaScript regression matrix
         run: bash tools/test-regressions
+
+      - name: Build installable development ZIP
+        if: matrix.php == '8.4'
+        run: |
+          bash tools/build-release
+          unzip -tqq dist/core-blueprint-automations-1.0.0-rc2.zip
+          (cd dist && sha256sum -c core-blueprint-automations-1.0.0-rc2.zip.sha256)
+
+      - name: Upload WordPress install ZIP
+        if: matrix.php == '8.4'
+        uses: actions/upload-artifact@v4
+        with:
+          name: core-blueprint-automations-adv03a-wordpress-install
+          path: |
+            dist/core-blueprint-automations-1.0.0-rc2.zip
+            dist/core-blueprint-automations-1.0.0-rc2.zip.sha256
+          if-no-files-found: error
+          retention-days: 14
