@@ -82,6 +82,7 @@
 	max-height: none;
 	outline-offset: -3px;
 	scrollbar-color: var(--cb-scrollbar-thumb) var(--cb-scrollbar-track);
+	scrollbar-width: thin;
 }
 .cb-advanced-editor-scene {
 	width: 1400px;
