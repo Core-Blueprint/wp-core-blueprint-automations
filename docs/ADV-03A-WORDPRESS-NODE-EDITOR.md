@@ -6,7 +6,7 @@
 
 1. Install/replace the development ZIP through **WordPress → Plugins → Add New → Upload Plugin**; activate as normal. No WP-CLI, config constants, SQL or developer controls.
 2. Open **Core Blueprint → Automations → New automation**. Choose **Advanced** and enter a name.
-3. The draft opens with Trigger → End. Add State, IF/ELSE, Action or Merge in the left palette. Drag nodes to arrange the canvas; select one to inspect its capability, input bindings and graph connections in the right sidebar.
+3. The draft opens on a WordPress overview with a native Base **Design with Core Blueprint** launch button. Click it to open the fullscreen Advanced Designer. The canvas starts with Trigger → End. Add State, IF/ELSE, Action or Merge in the left palette. Drag nodes to arrange the canvas; select one to inspect its capability, input bindings and graph connections in the right sidebar.
 4. Choose typed capability options from installed Base providers, configure required inputs, connect ports, choose an IF/ELSE operator and pair an explicit Merge node where needed.
 5. Press **Save automation**, leave the page and reopen the workflow from the list. Confirm the same nodes, connections, bindings and positions remain. Review the server-side Workflow health details shown after saving.
 6. Open an existing Standard workflow and confirm it still uses the unchanged Standard Designer.
@@ -21,6 +21,16 @@
 - Advanced scripts mount only in their own root; Standard Base Domain Session, Undo/Redo, context switching and Standard Save adapters remain v1-only.
 - Connections are typed (next/in or IF true/false and Merge true/false), one connection per port. The server still validates graph cycles, merge pairing, reachability and required inputs; incomplete drafts can be saved but never activated.
 - No new database tables or authorization gates, no `wp-config.php` flags, no external provider calls, no new test REST endpoint.
+
+## ADV-03A-R2: Base Designer Foundation and admin theme correction
+
+**Field report:** The first ADV-03A ZIP opened the entire canvas inline on WordPress admin and rendered a light surface inside the dark Core Blueprint admin theme. This was a consumer integration defect, not a WordPress server configuration problem.
+
+**Correction:** The Advanced template now uses the public Base manual launch contract (`data-cb-design-launch-root`, launch context, hidden `data-cb-design-shell`, fullscreen control and primary Save action). An isolated ESM consumer adapter calls Base's exported `createDesignerShell` and registers the Base Exit Guard. Base alone owns the launcher, fullscreen state, responsive rails, and unsaved-change confirmation. Name and workflow-health content remain inside the fullscreen Inspector. The graph still uses its own typed canvas/Inspector and the unchanged nonce/CAS-protected disabled-draft WordPress POST. There is no new v2 execution admission.
+
+**Theme:** Graph-only CSS consumes Base's `--cb-surface-0..3`, `--cb-text*`, `--cb-border`, and `--cb-accent` values. No light fallback surface, no hard-coded alternate dark theme, and no consumer fullscreen overlay.
+
+**Verification:** The branch contains targeted Base launch/theme regression tests. SOURCE/CI, local WordPress build, and installed browser-field acceptance must be recorded independently. The product owner continues to pull the GitHub MCP-pushed SOURCE branch and run the usual local build. No automated ZIP distribution is part of this correction.
 
 ## Known ADV-03A limitations
 
