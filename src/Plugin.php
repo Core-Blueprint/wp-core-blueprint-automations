@@ -13,6 +13,7 @@ use CB\Automations\Admin\WorkflowActivationController;
 use CB\Automations\Admin\WorkflowDeletionController;
 use CB\Automations\Admin\SchemaSetupController;
 use CB\Automations\Admin\WorkflowController;
+use CB\Automations\Admin\AdvancedRoutePreviewController;
 use CB\Automations\Admin\WorkflowFolderController;
 use CB\Automations\Admin\WorkflowTransferController;
 use CB\Automations\Persistence\Schema;
@@ -68,6 +69,7 @@ final class Plugin {
 		RecoveryCapability::init();
 		OperatorRecoveryController::init();
 		WorkflowController::init();
+		AdvancedRoutePreviewController::init();
 		TemplateManagementController::init();
 		WorkflowFolderController::init();
 		WorkflowTransferController::init();

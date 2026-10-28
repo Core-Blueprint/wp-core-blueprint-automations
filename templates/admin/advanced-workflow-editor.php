@@ -83,6 +83,18 @@ if ( ! is_string( $payload ) ) {
 					<span class="cb-advanced-editor-unsaved" data-cb-advanced-dirty aria-live="polite"></span>
 					<h2><?php esc_html_e( 'Inspector', 'core-blueprint-automations' ); ?></h2>
 					<div data-cb-advanced-inspector tabindex="-1"><p class="description"><?php esc_html_e( 'Select a workflow step to inspect its context.', 'core-blueprint-automations' ); ?></p></div>
+					<section class="cb-advanced-route-preview">
+						<h2><?php esc_html_e( 'Test Workflow', 'core-blueprint-automations' ); ?></h2>
+						<p class="description">Simulate the route of the saved workflow. No actions or providers execute.</p>
+						<label class="cb-advanced-field">
+							<span>Sample node outputs (JSON)</span>
+							<textarea data-cb-advanced-preview-fixtures rows="3" spellcheck="false" placeholder='{}'>{}</textarea>
+						</label>
+						<input type="hidden" data-cb-advanced-preview-nonce value="<?php echo esc_attr( wp_create_nonce( 'cb_automations_preview_advanced' ) ); ?>" />
+						<input type="hidden" data-cb-advanced-preview-action value="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" />
+						<button type="button" class="button" data-cb-advanced-preview-run>Test route</button>
+						<div class="cb-advanced-route-preview__result" data-cb-advanced-preview-result role="status" aria-live="polite"></div>
+					</section>
 					<section class="cb-advanced-editor-validation" aria-live="polite">
 						<h2><?php esc_html_e( 'Workflow health', 'core-blueprint-automations' ); ?></h2>
 						<p class="description">Checks refresh after saving and reopening the draft. Activation remains disabled.</p>

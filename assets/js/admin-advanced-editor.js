@@ -11,6 +11,11 @@
 	const inspector = root.querySelector('[data-cb-advanced-inspector]');
 	const dirtyLabel = root.querySelector('[data-cb-advanced-dirty]');
 	const nameField = form.querySelector('[name="name"]');
+	const previewButton = root.querySelector('[data-cb-advanced-preview-run]');
+	const previewResult = root.querySelector('[data-cb-advanced-preview-result]');
+	const previewFixture = root.querySelector('[data-cb-advanced-preview-fixtures]');
+	const previewNonce = root.querySelector('[data-cb-advanced-preview-nonce]');
+	const previewAction = root.querySelector('[data-cb-advanced-preview-action]');
 	if (!(documentField instanceof HTMLInputElement) || !scene || !layer || !wires || !inspector) return;
 
 	let bootstrap;
@@ -592,6 +597,63 @@
 		event.preventDefault(); event.stopPropagation(); cancelPort();
 	},true);
 	root.dispatchEvent(new CustomEvent('cb:automations-advanced:ready'));
+	previewButton?.addEventListener('click', async () => {
+		if (!previewResult || !previewFixture || !previewNonce || !previewAction) return;
+		previewResult.replaceChildren();
+		if (changed) {
+			previewResult.textContent = 'Save and reopen this workflow before testing its saved version.';
+			return;
+		}
+		if (previewFixture.value.length > 8192) {
+			previewResult.textContent = 'Sample outputs exceed the permitted size.';
+			return;
+		}
+		let parsed;
+		try {
+			parsed = JSON.parse(previewFixture.value || '{}');
+			if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) throw new TypeError();
+		} catch {
+			previewResult.textContent = 'Enter a JSON object containing sample node outputs.';
+			return;
+		}
+		const workflowId = form.querySelector('[name="workflow_id"]')?.value;
+		const revision = form.querySelector('[name="revision"]')?.value;
+		const payload = new URLSearchParams({
+			action: 'cb_automations_preview_advanced',
+			_cb_automations_nonce: previewNonce.value,
+			workflow_id: workflowId || '',
+			revision: revision || '',
+			fixture_json: previewFixture.value || '{}',
+		});
+		previewButton.disabled = true;
+		previewResult.textContent = 'Simulating saved workflow route…';
+		try {
+			const response = await fetch(previewAction.value, {
+				method: 'POST', credentials: 'same-origin',
+				headers: {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'},
+				body: payload.toString(),
+			});
+			const json = await response.json();
+			if (!response.ok || json?.success !== true || !Array.isArray(json.data?.nodes)) {
+				throw new Error(json?.data?.message || 'Route simulation was not available.');
+			}
+			const title = make('strong', '', 'Simulation complete. No actions were executed.');
+			const list = make('ol');
+			for (const nodeId of json.data.nodes) {
+				if (typeof nodeId !== 'string') continue;
+				const node = find(nodeId);
+				if (!node) continue;
+				const decision = json.data.decisions?.[nodeId];
+				const branch = typeof decision === 'boolean' ? ' (' + (decision ? 'True' : 'False') + ')' : '';
+				list.append(make('li', '', labels[node.type] + branch + ' · ' + nodeId.slice(0, 12)));
+			}
+			previewResult.replaceChildren(title, list);
+		} catch (error) {
+			previewResult.textContent = 'Simulation unavailable: ' + String(error?.message || 'unknown error').slice(0, 180);
+		} finally {
+			previewButton.disabled = false;
+		}
+	});
 	root.querySelectorAll('[data-cb-advanced-add]').forEach(el => {
 		el.addEventListener('click', () => { try { addNode(el.dataset.cbAdvancedAdd); } catch (e) { window.alert(e.message); } });
 	});

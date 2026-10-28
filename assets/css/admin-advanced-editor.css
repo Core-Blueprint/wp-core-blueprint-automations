@@ -183,3 +183,13 @@
 	/* Base's drawer controller owns responsive panel visibility and movement. */
 	.cb-advanced-editor-workspace.is-responsive-drawer-mode { min-height: 0; }
 }
+
+/* ADV-03B read-only, no-provider WordPress route simulation. */
+.cb-advanced-route-preview {
+	margin-top: var(--cb-space-4);
+	padding-top: var(--cb-space-4);
+	border-top: 1px solid var(--cb-border);
+}
+.cb-advanced-route-preview h2 { margin-top: 0; }
+.cb-advanced-route-preview__result { font-size: var(--cb-fs-sm); color: var(--cb-text-muted); margin-top: var(--cb-space-3); }
+.cb-advanced-route-preview__result li { margin-block: var(--cb-space-1); overflow-wrap: anywhere; }
