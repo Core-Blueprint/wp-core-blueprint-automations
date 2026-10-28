@@ -22,3 +22,42 @@ test('ADV-03A keeps type, cap and precision fences on serialized data', () => {
   assert.match(source, /size > 262144/);
   assert.doesNotMatch(source, /RuntimeWorker|wp\.ajax|admin-ajax\.php/);
 });
+const advancedTemplate = readFileSync(new URL('../../templates/admin/advanced-workflow-editor.php', import.meta.url), 'utf8');
+const shellAdapter = readFileSync(new URL('../../assets/js/admin-advanced-designer-shell.js', import.meta.url), 'utf8');
+const stylesheet = readFileSync(new URL('../../assets/css/admin-advanced-editor.css', import.meta.url), 'utf8');
+const assets = readFileSync(new URL('../../src/Admin/DesignerAssets.php', import.meta.url), 'utf8');
+
+test('ADV-03A-R2 Base launch: no inline canvas before the native Designer launch button', () => {
+  for (const key of ['data-cb-design-launch-root', 'data-cb-design-launch-context', 'data-cb-design-shell', 'data-cb-design-shell-fullscreen', 'data-cb-design-shell-primary-action']) {
+    assert.ok(advancedTemplate.includes(key), key);
+  }
+  assert.match(advancedTemplate, /data-cb-design-shell data-cb-advanced-root hidden/);
+  assert.match(advancedTemplate, /cb-core-design-shell__workspace--collapsible/);
+  assert.match(advancedTemplate, /cb-core-design-shell__sidebar--composed/);
+  const sidebarStart = advancedTemplate.indexOf('cb-core-design-shell__sidebar--composed');
+  const sidebarName = advancedTemplate.indexOf('name="name"', sidebarStart);
+  const sidebarHealth = advancedTemplate.indexOf('cb-advanced-editor-validation', sidebarStart);
+  assert.ok(sidebarStart >= 0 && sidebarName > sidebarStart && sidebarHealth > sidebarName, 'Name and health remain in the native fullscreen sidebar');
+});
+
+test('ADV-03A-R2 Base contract: Base exclusively owns fullscreen, launch and exit guard', () => {
+  assert.match(shellAdapter, /import \{ createDesignerShell \} from '@cb-core\/design-editor'/);
+  assert.match(shellAdapter, /guard\.register\(root, \{/);
+  assert.match(shellAdapter, /createDesignerShell\(root\)/);
+  assert.match(shellAdapter, /cbAdvancedDirty/);
+  assert.doesNotMatch(shellAdapter, /requestFullscreen\(|exitFullscreen\(|\.classList\.add\('is-fullscreen'\)/);
+  assert.match(assets, /admin-advanced-designer-shell\.js/);
+  assert.match(assets, /wp_enqueue_script_module\(/);
+  assert.match(assets, /'@cb-core\/design-editor'/);
+  assert.match(source, /root\.dataset\.cbAdvancedDirty = 'true'/);
+  assert.match(source, /root\.dataset\.cbAdvancedDirty = 'false'/);
+});
+
+test('ADV-03A-R2 Base theme: canonical semantic dark/light tokens, no white custom fallback', () => {
+  for (const token of ['--cb-surface-0', '--cb-surface-1', '--cb-surface-2', '--cb-text-strong', '--cb-text-muted', '--cb-border', '--cb-accent']) {
+    assert.ok(stylesheet.includes(token), token);
+  }
+  assert.doesNotMatch(stylesheet, /#fff\b|#f6f7f7\b|var\(--cb-surface,|var\(--cb-canvas,/i);
+  assert.doesNotMatch(stylesheet, /position:\s*fixed\b/);
+  assert.match(stylesheet, /\.cb-advanced-editor-shell\[hidden\]\s*\{\s*display:\s*none/);
+});
