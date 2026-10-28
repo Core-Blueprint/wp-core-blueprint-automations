@@ -19,5 +19,34 @@ if ( ! str_contains( $architecture, 'CapabilityRegistry::executor' ) ) { throw n
 $hits = [];
 $iterator = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $root . '/src', FilesystemIterator::SKIP_DOTS ) );
 foreach ( $iterator as $file ) { if ( ! $file instanceof SplFileInfo || ! $file->isFile() || 'php' !== strtolower( $file->getExtension() ) ) { continue; } $content = file_get_contents( $file->getPathname() ); if ( false !== $content && str_contains( $content, 'ActionInvoker::invoke(' ) ) { $hits[] = str_replace( $root . '/', '', $file->getPathname() ); } }
-if ( [ 'src/Runtime/ActionPhaseRunner.php' ] !== $hits ) { throw new RuntimeException( 'ActionInvoker has more than one mutation route: ' . implode( ', ', $hits ) ); }
+// Two explicitly separated modes may invoke Base: Standard's frozen phase
+// runner and C4's isolated Advanced v2 dispatcher. No third mutation route.
+sort( $hits, SORT_STRING );
+$approved_routes = [
+    'src/Runtime/ActionPhaseRunner.php',
+    'src/Runtime/GraphProviderExecutor.php',
+];
+if ( $approved_routes !== $hits ) {
+    throw new RuntimeException( 'ActionInvoker mutation routes violate the Standard/Advanced allowlist: ' . implode( ', ', $hits ) );
+}
+// C4 is intentionally inert until C5 admission. It must reserve the Action
+// under the C3 fence before entering the public invoker, then acknowledge
+// only its returned value via the C2/C3 checkpoint store.
+$advanced = file_get_contents( $root . '/src/Runtime/GraphProviderExecutor.php' );
+$pipeline = file_get_contents( $root . '/src/Runtime/RunPipeline.php' );
+if ( false === $advanced || false === $pipeline ) {
+    throw new RuntimeException( 'Could not inspect the isolated Advanced invocation boundary.' );
+}
+$fence_pos = strpos( $advanced, 'GraphActionStartFence::begin(' );
+$invoke_pos = strpos( $advanced, 'ActionInvoker::invoke(' );
+$commit_pos = strpos( $advanced, 'GraphCheckpointStore::commit_completion(' );
+if ( false === $fence_pos || false === $invoke_pos || false === $commit_pos
+    || $fence_pos >= $invoke_pos || $invoke_pos >= $commit_pos ) {
+    throw new RuntimeException( 'Advanced Action no-replay fence or checkpoint ordering changed.' );
+}
+if ( str_contains( $advanced, 'RunStepRepository::interrupt_running_attempts(' )
+    || str_contains( $worker, 'GraphProviderExecutor' )
+    || str_contains( $pipeline, 'GraphProviderExecutor' ) ) {
+    throw new RuntimeException( 'Advanced Action replay or unauthorized worker admission detected.' );
+}
 fwrite( STDOUT, "Action execution slice: PASS\n" );
