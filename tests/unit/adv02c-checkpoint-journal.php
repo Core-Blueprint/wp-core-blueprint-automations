@@ -82,9 +82,13 @@ $false_state = $empty->record_completion(
 	[ 'decision' => false, 'label' => 'Declined' ]
 );
 $false_branch = $false_state->record_next_branch( $definition, $planner );
+$false_projection = $false_branch->replay( $definition, $planner );
 journal_expect(
-	[ 'node_id' => 'action_false', 'decision' => false ] !== $false_branch->replay( $definition, $planner )['pending_branch'],
-	'False branch was left pending after acknowledgement.'
+	null === $false_projection['pending_branch']
+	&& 'pending' === $false_projection['status']
+	&& 'action_false' === $false_projection['intent']['node_id']
+	&& false === $false_projection['decisions']['condition'],
+	'False branch was not acknowledged before the matching Action.'
 );
 journal_expect(
 	'complete' === $false_branch->record_completion(
