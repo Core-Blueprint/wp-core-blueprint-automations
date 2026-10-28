@@ -80,7 +80,8 @@ test('ADV-03A-R3 preserves scaled canvas geometry and consumer graph authority',
   assert.match(source, /window\.confirm\(/);
   assert.match(shellAdapter, /canvasNavigation\.fitToScreen\(/);
   assert.doesNotMatch(source, /createDesignerCanvasNavigation|createDesignerContextMenu|createDomainSession/);
-  assert.doesNotMatch(source, /duplicateNode\(|duplicate_node/);
+  // ADV-03C adopted node duplication on the existing public Base menu.
+  assert.match(source, /const duplicateNode = \(id\) =>/);
 });
 
 test('ADV-03A-R3 context actions preserve keyboard focus on configure and delete', () => {
@@ -104,4 +105,14 @@ test('ADV-03C duplicating nodes uses a new ID, safe branch config and no cloned 
   assert.match(source, /Edges are NOT duplicated/);
   assert.match(source, /\{id: 'duplicate', label: 'Duplicate node'/);
   assert.match(source, /duplicateNode\(target\.id\)/);
+});
+
+test('ADV-03B preview is read-only, revision-bound and never invokes providers', () => {
+  for (const marker of ['data-cb-advanced-preview-run', 'data-cb-advanced-preview-fixtures', 'data-cb-advanced-preview-nonce']) {
+    assert.ok(advancedTemplate.includes(marker), marker);
+  }
+  assert.match(source, /action: 'cb_automations_preview_advanced'/);
+  assert.match(source, /Simulating saved workflow route/);
+  assert.match(source, /Save and reopen this workflow before testing/);
+  assert.doesNotMatch(source, /GraphProviderExecutor|GraphRunPipeline|GraphSandboxAdmission/);
 });
