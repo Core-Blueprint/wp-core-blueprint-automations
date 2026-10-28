@@ -26,9 +26,9 @@ if ( ! is_string( $payload ) ) {
 	throw new \UnexpectedValueException( 'Advanced editor data could not be safely encoded.' );
 }
 ?>
-<div class="wrap cb-automations-admin cb-advanced-editor-page">
+<div class="wrap cb-automations-admin cb-advanced-editor-page" data-cb-design-launch-root data-cb-design-title="<?php echo esc_attr__( 'Automation Builder', 'core-blueprint-automations' ); ?>">
 	<p><a href="<?php echo esc_url( \CB\Automations\Admin\AutomationsPage::url() ); ?>">&larr; <?php esc_html_e( 'Back to Automations', 'core-blueprint-automations' ); ?></a></p>
-	<header class="cb-advanced-editor-header">
+	<header class="cb-advanced-editor-header" data-cb-design-launch-context>
 		<div>
 			<span class="cb-advanced-editor-eyebrow">Advanced</span>
 			<h1 class="cb-core-title"><?php echo esc_html( $record->name() ); ?></h1>
@@ -50,18 +50,19 @@ if ( ! is_string( $payload ) ) {
 		<input type="hidden" name="activation_state" value="disabled" />
 		<input type="hidden" name="definition_json" value="" data-cb-advanced-definition />
 		<?php wp_nonce_field( 'cb_automations_save_workflow', '_cb_automations_nonce' ); ?>
-		<div class="cb-core-design-shell cb-advanced-editor-shell" data-cb-advanced-root>
+		<div class="cb-core-design-shell cb-advanced-editor-shell" data-cb-design-shell data-cb-advanced-root hidden>
 			<div class="cb-core-design-shell__toolbar cb-advanced-editor-toolbar">
+			<button type="button" class="button cb-core-button" data-cb-design-shell-fullscreen data-cb-design-shell-fullscreen-enter-label="<?php esc_attr_e( 'Open focus mode', 'core-blueprint-automations' ); ?>" data-cb-design-shell-fullscreen-exit-label="<?php esc_attr_e( 'Exit focus mode', 'core-blueprint-automations' ); ?>" aria-pressed="false"><span data-cb-design-shell-fullscreen-label><?php esc_html_e( 'Open focus mode', 'core-blueprint-automations' ); ?></span></button>
 				<label class="cb-advanced-editor-name"><?php esc_html_e( 'Automation name', 'core-blueprint-automations' ); ?>
 					<input type="text" name="name" value="<?php echo esc_attr( $record->name() ); ?>" maxlength="191" required />
 				</label>
 				<div class="cb-advanced-editor-toolbar-actions">
 					<span data-cb-advanced-dirty aria-live="polite"></span>
-					<button type="submit" class="button button-primary" data-cb-advanced-save><?php esc_html_e( 'Save automation', 'core-blueprint-automations' ); ?></button>
+					<button type="submit" class="button button-primary cb-core-button cb-core-button--primary" data-cb-design-shell-primary-action data-cb-advanced-save><?php esc_html_e( 'Save automation', 'core-blueprint-automations' ); ?></button>
 				</div>
 			</div>
-			<div class="cb-core-design-shell__workspace cb-advanced-editor-workspace">
-				<aside class="cb-core-design-shell__palette cb-advanced-editor-palette" aria-label="Advanced nodes">
+			<div class="cb-core-design-shell__workspace cb-core-design-shell__workspace--collapsible cb-advanced-editor-workspace">
+				<aside class="cb-core-design-shell__palette cb-core-design-shell__palette--composed cb-advanced-editor-palette" aria-label="Advanced nodes">
 					<h2>Nodes</h2>
 					<p class="description">Select a node type to place it on the canvas.</p>
 					<button type="button" class="button" data-cb-advanced-add="trigger"><?php esc_html_e( 'Trigger', 'core-blueprint-automations' ); ?></button>
@@ -80,26 +81,27 @@ if ( ! is_string( $payload ) ) {
 						</div>
 					</div>
 				</main>
-				<aside class="cb-core-design-shell__inspector cb-advanced-editor-inspector" aria-label="Node Inspector">
+				<aside class="cb-core-design-shell__sidebar cb-core-design-shell__sidebar--composed cb-advanced-editor-inspector" aria-label="Node Inspector">
 					<h2><?php esc_html_e( 'Inspector', 'core-blueprint-automations' ); ?></h2>
 					<div data-cb-advanced-inspector><p class="description"><?php esc_html_e( 'Select a workflow step to inspect its context.', 'core-blueprint-automations' ); ?></p></div>
+					<section class="cb-advanced-editor-validation" aria-live="polite">
+						<h2><?php esc_html_e( 'Workflow health', 'core-blueprint-automations' ); ?></h2>
+						<p class="description">Checks refresh after saving and reopening the draft. Activation remains disabled.</p>
+						<?php $issues = array_filter( $validation->issues(), static fn( $issue ): bool => 'graph.execution_unavailable' !== $issue->code() ); ?>
+						<?php if ( [] === $issues ) : ?>
+							<p><?php esc_html_e( 'Valid', 'core-blueprint-automations' ); ?></p>
+						<?php else : ?>
+							<ul>
+								<?php foreach ( $issues as $issue ) : ?>
+									<li><?php echo esc_html( \CB\Automations\Admin\ValidationPresenter::message( $issue ) ); ?> <code><?php echo esc_html( $issue->code() . ' · ' . $issue->path() ); ?></code></li>
+								<?php endforeach; ?>
+							</ul>
+						<?php endif; ?>
+					</section>
 				</aside>
 			</div>
 		</div>
 	</form>
-	<section class="cb-core-panel cb-advanced-editor-validation" aria-live="polite">
-		<h2><?php esc_html_e( 'Workflow health', 'core-blueprint-automations' ); ?></h2>
-		<p class="description">Checks refresh after saving and reopening the draft. Activation remains disabled.</p>
-		<?php $issues = array_filter( $validation->issues(), static fn( $issue ): bool => 'graph.execution_unavailable' !== $issue->code() ); ?>
-		<?php if ( [] === $issues ) : ?>
-			<p><?php esc_html_e( 'Valid', 'core-blueprint-automations' ); ?></p>
-		<?php else : ?>
-			<ul>
-				<?php foreach ( $issues as $issue ) : ?>
-					<li><?php echo esc_html( \CB\Automations\Admin\ValidationPresenter::message( $issue ) ); ?> <code><?php echo esc_html( $issue->code() . ' · ' . $issue->path() ); ?></code></li>
-				<?php endforeach; ?>
-			</ul>
-		<?php endif; ?>
-	</section>
+
 	<script id="cb-advanced-editor-data" type="application/json"><?php echo $payload; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_json_encode with all JSON_HEX flags. ?></script>
 </div>
