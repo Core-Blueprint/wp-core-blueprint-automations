@@ -44,7 +44,11 @@ final class RuntimeWorker {
 						continue;
 					}
 					if ( JobSubjectType::Run === $job->subject_type() ) {
-						RunPipeline::execute( $job->subject_id(), $job );
+						if ( GraphRunPipeline::is_advanced_run( $job->subject_id() ) ) {
+							GraphRunPipeline::execute( $job->subject_id(), $job );
+						} else {
+							RunPipeline::execute( $job->subject_id(), $job );
+						}
 						JobRepository::complete( $job->id(), $job->lease_token() );
 						continue;
 					}
@@ -85,6 +89,10 @@ final class RuntimeWorker {
 
 	private static function handle_run_vault_failure( JobRecord $job ): void {
 		try {
+			if ( GraphRunPipeline::is_advanced_run( $job->subject_id() ) ) {
+				GraphRunPipeline::handle_failure( $job, true );
+				return;
+			}
 			$lease = RunExecutionLease::from_job( $job, $job->subject_id() );
 			$lease->renew();
 			$lease->transaction( static function () use ( $job ): void {
@@ -152,6 +160,10 @@ final class RuntimeWorker {
 	private static function handle_run_failure( JobRecord $job ): void {
 		$error_code = 'runtime.run_worker_failed';
 		try {
+			if ( GraphRunPipeline::is_advanced_run( $job->subject_id() ) ) {
+				GraphRunPipeline::handle_failure( $job, false );
+				return;
+			}
 			$lease = RunExecutionLease::from_job( $job, $job->subject_id() );
 			$lease->renew();
 			$run = RunRepository::find( $job->subject_id() );
