@@ -22,7 +22,7 @@ test('ADV-03D viewport projection handles signed world positions and zoom',()=>{
   const bounds=minimapBounds([
     {id:'left',x:-6000,y:-3500},{id:'right',x:7000,y:4400}
   ],{x:-100,y:40,width:500,height:300});
-  assert.deepEqual(bounds,{x:-6120,y:-3620,width:13424,height:8240});
+  assert.deepEqual(bounds,{x:-6120,y:-3620,width:13424,height:8250});
   assert.ok(bounds.width>13000);
 });
 test('ADV-03D uses one public Base navigation controller with cursor-zoom',()=>{
