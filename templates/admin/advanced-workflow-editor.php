@@ -90,7 +90,7 @@ if ( ! is_string( $payload ) ) {
 								<button type="button" class="button" data-cb-advanced-minimap-toggle aria-expanded="true" aria-controls="cb-advanced-minimap-body" title="Collapse minimap">−</button>
 							</div>
 							<div class="cb-advanced-minimap__body" data-cb-advanced-minimap-body id="cb-advanced-minimap-body">
-								<svg data-cb-advanced-minimap-svg role="img" aria-label="Workflow overview. Click to navigate; drag the viewport rectangle to pan." preserveAspectRatio="xMidYMid meet" viewBox="0 0 1 1"></svg>
+								<svg data-cb-advanced-minimap-svg tabindex="0" role="img" aria-label="Workflow overview. Click to navigate; drag the viewport rectangle to pan." preserveAspectRatio="xMidYMid meet" viewBox="0 0 1 1"></svg>
 							</div>
 						</div>
 				</main>
