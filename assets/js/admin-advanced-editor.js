@@ -303,6 +303,9 @@
 			hit.setAttribute('aria-label', 'Connection from ' + from.type + ' ' + edge.from_port + ' to ' + to.type + ' ' + edge.to_port);
 				const selectConnection = () => {
 				selectedEdge = edge.id; current = edge.from;
+				for (const card of layer.querySelectorAll('.cb-advanced-node')) {
+					card.classList.remove('is-selected');
+				}
 				for (const path of wires.querySelectorAll('.cb-advanced-edge')) {
 					path.classList.toggle('is-selected', path.dataset.cbAdvancedEdgeId === edge.id);
 				}
@@ -364,6 +367,16 @@
 		const input = document.elementFromPoint(x,y)?.closest?.('[data-cb-advanced-port-side="in"]');
 		return input && layer.contains(input) ? input : null;
 	};
+	// Selection is transient and should not rebuild focused DOM controls.
+	const selectNode = id => {
+		if (!find(id)) return;
+		current = id;
+		selectedEdge = null;
+		for (const element of layer.querySelectorAll('.cb-advanced-node')) {
+			element.classList.toggle('is-selected', element.dataset.nodeId === id);
+		}
+		renderEdges(); inspect();
+	};
 	const createPorts = (card, node) => {
 		for (const [side, ports] of [['in', incoming(node.type)], ['out', outgoing(node.type)]]) {
 			for (const port of ports) {
@@ -387,7 +400,7 @@
 							} else {
 								announceConnection('That input is occupied, incompatible, or would create a cycle. Choose another input or Escape.');
 							}
-						} else { selectedEdge = null; current = node.id; inspect(); }
+						} else selectNode(node.id);
 					});
 				} else {
 					control.addEventListener('click', event => {
@@ -441,15 +454,7 @@
 			title.type = 'button';
 			title.title = 'Drag to move · Arrow keys move 1 px · Shift+Arrow moves 10 px';
 			title.setAttribute('aria-keyshortcuts', 'ArrowUp ArrowDown ArrowLeft ArrowRight');
-			const selectCard = () => {
-				current = node.id;
-				selectedEdge = null;
-				for (const element of layer.querySelectorAll('.cb-advanced-node')) {
-					element.classList.toggle('is-selected', element.dataset.nodeId === node.id);
-				}
-				// Selection is transient; do not replace the focused title element.
-				renderEdges(); inspect();
-			};
+			const selectCard = () => selectNode(node.id);
 			title.addEventListener('click', selectCard);
 			title.addEventListener('keydown', event => {
 				if (event.altKey || event.ctrlKey || event.metaKey) return;

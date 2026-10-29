@@ -297,8 +297,19 @@ test('ADV-03C keyboard node movement shares bounded pointer layout and preserves
   assert.match(source,/title\.setAttribute\('aria-keyshortcuts'/);
   assert.match(source,/event\.shiftKey \? 10 : 1/);
   assert.match(source,/title\.addEventListener\('keydown', event =>/);
-  const selectBlock=source.split('const selectCard = () => {')[1].split('\n\t\t\t};')[0];
+  const selectBlock=source.split('const selectNode = id => {')[1].split('\n\t};')[0];
   assert.ok(selectBlock);
   assert.doesNotMatch(selectBlock,/\brebuild\(\)|layer\.replaceChildren/);
   assert.match(selectBlock,/renderEdges\(\); inspect\(\)/);
+});
+
+test('ADV-03C selected node and edge state stays accurate without replacing focus', () => {
+  assert.match(source,/const selectNode = id => \{/);
+  assert.match(source,/else selectNode\(node\.id\)/);
+  assert.match(source,/const selectCard = \(\) => selectNode\(node\.id\)/);
+  const selected=source.split('const selectNode = id => {')[1].split('\n\t};')[0];
+  assert.doesNotMatch(selected,/rebuild\(\)|layer\.replaceChildren/);
+  assert.match(selected,/element\.classList\.toggle\('is-selected'/);
+  const edgeSelect=source.split('const selectConnection = () => {')[1].split('\n\t\t\t};')[0];
+  assert.match(edgeSelect,/card\.classList\.remove\('is-selected'\)/);
 });
