@@ -826,7 +826,7 @@
 		previewEpoch++;
 		if (simulatedRoute) {
 			simulatedRoute = null;
-			draw();
+			draw(); inspect();
 		}
 		if (previewResult) previewResult.textContent = 'Sample outputs changed. Test the route again.';
 	};
@@ -955,7 +955,7 @@
 				edges: tracedEdges(json.data.nodes, decisions),
 				decisions, results, complete: json.data.complete,
 			};
-			draw();
+			draw(); inspect();
 			const title = make('strong','',json.data.complete
 				? 'Route simulated. No actions were executed.'
 				: 'Simulation incomplete. No actions were executed.');

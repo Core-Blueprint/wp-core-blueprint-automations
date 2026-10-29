@@ -323,3 +323,8 @@ test('ADV-03B-R2 status projection uses only allowlisted server metadata', () =>
   assert.match(stylesheet, /\.cb-advanced-node\.is-test-blocked/);
   assert.match(stylesheet, /\.cb-advanced-node\.is-test-failed/);
 });
+
+test('ADV-03B-R2 refreshes Inspector and canvas together after new/invalidated simulation', () => {
+  assert.match(source, /decisions, results, complete: json\.data\.complete,[\s\S]*?draw\(\); inspect\(\);/);
+  assert.match(source, /const invalidateSamplePreview = \(\) => \{[\s\S]*?simulatedRoute = null;\n\t\t\tdraw\(\); inspect\(\);/);
+});
