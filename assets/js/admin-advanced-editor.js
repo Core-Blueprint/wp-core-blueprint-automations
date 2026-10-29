@@ -165,27 +165,36 @@
 	};
 	const outgoing = (type) => type === 'end' ? [] : type === 'if_else' ? ['true', 'false'] : ['next'];
 	const incoming = (type) => type === 'trigger' ? [] : type === 'exclusive_merge' ? ['true', 'false'] : ['in'];
-	const canConnect = (from, fromPort, to, toPort) => {
+	// Rewire only a connected output to a FREE compatible input. Never
+	// silently steal an occupied target. Replacing one edge is one Base command.
+	const canConnect = (from, fromPort, to, toPort, allowRewire = false) => {
 		const a = find(from), b = find(to);
-		if (!a || !b || from === to || !outgoing(a.type).includes(fromPort) || !incoming(b.type).includes(toPort)
-			|| draft.graph.edges.length >= 1024
-			|| draft.graph.edges.some(edge => edge.from === from && edge.from_port === fromPort)
-			|| draft.graph.edges.some(edge => edge.to === to && edge.to_port === toPort)) return false;
+		if (!a || !b || from === to || !outgoing(a.type).includes(fromPort) || !incoming(b.type).includes(toPort)) return false;
+		const previous = draft.graph.edges.find(edge => edge.from === from && edge.from_port === fromPort);
+		if (previous && (!allowRewire || (previous.to === to && previous.to_port === toPort))) return false;
+		if (!previous && draft.graph.edges.length >= 1024) return false;
+		if (draft.graph.edges.some(edge => edge.to === to && edge.to_port === toPort)) return false;
 		const seen = new Set(), stack = [to];
 		while (stack.length) {
 			const id = stack.pop();
 			if (id === from) return false;
 			if (seen.has(id)) continue;
 			seen.add(id);
-			for (const edge of draft.graph.edges) if (edge.from === id) stack.push(edge.to);
+			for (const edge of draft.graph.edges) {
+				if (edge !== previous && edge.from === id) stack.push(edge.to);
+			}
 		}
 		return true;
 	};
-	const connect = (from, fromPort, to, toPort) => {
-		if (!canConnect(from, fromPort, to, toPort) || draft.graph.edges.length >= 1024) return false;
-		draft.graph.edges.push({id: uid('e'), from, from_port: fromPort, to, to_port: toPort});
+	const connect = (from, fromPort, to, toPort, allowRewire = false) => {
+		if (!canConnect(from, fromPort, to, toPort, allowRewire)) return false;
+		const index = draft.graph.edges.findIndex(edge => edge.from === from && edge.from_port === fromPort);
+		if (index >= 0) {
+			const old = draft.graph.edges[index];
+			draft.graph.edges[index] = {...old, to, to_port: toPort};
+		} else draft.graph.edges.push({id: uid('e'), from, from_port: fromPort, to, to_port: toPort});
 		pendingPort = null; mark(); rebuild();
-		announceConnection('Connection created. Undo is available.');
+		announceConnection(index >= 0 ? 'Connection redirected. Undo is available.' : 'Connection created. Undo is available.');
 		return true;
 	};
 	const deleteEdge = id => {
@@ -270,6 +279,7 @@
 			const d = curve(start, end);
 			const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 			line.setAttribute('d', d);
+			line.dataset.cbAdvancedEdgeId = edge.id;
 			const routeActive = simulatedRoute !== null;
 			const isOnRoute = routeActive && simulatedRoute.edges.has(edge.id);
 			line.setAttribute('class', 'cb-advanced-edge' + (selectedEdge === edge.id ? ' is-selected' : '')
@@ -280,15 +290,27 @@
 			hit.setAttribute('class', 'cb-advanced-edge-hit');
 			hit.setAttribute('tabindex', '0');
 			hit.setAttribute('role', 'button');
+			hit.dataset.cbAdvancedEdgeId = edge.id;
+			hit.setAttribute('aria-pressed', selectedEdge === edge.id ? 'true' : 'false');
 			hit.setAttribute('aria-label', 'Connection from ' + from.type + ' ' + edge.from_port + ' to ' + to.type + ' ' + edge.to_port);
-			hit.addEventListener('click', () => { selectedEdge = edge.id; current = edge.from; renderEdges(); inspect(); });
+				const selectConnection = () => {
+				selectedEdge = edge.id; current = edge.from;
+				for (const path of wires.querySelectorAll('.cb-advanced-edge')) {
+					path.classList.toggle('is-selected', path.dataset.cbAdvancedEdgeId === edge.id);
+				}
+				for (const target of wires.querySelectorAll('.cb-advanced-edge-hit')) {
+					target.setAttribute('aria-pressed', target.dataset.cbAdvancedEdgeId === edge.id ? 'true' : 'false');
+				}
+				// Selecting an edge must not remove the focused SVG hit target.
+				inspect();
+			};
+			hit.addEventListener('click', selectConnection);
 			hit.addEventListener('keydown', event => {
 				if (event.key === 'Delete' || event.key === 'Backspace') {
 					event.preventDefault(); deleteEdge(edge.id);
 					root.querySelector('[data-cb-design-canvas-viewport]')?.focus({preventScroll: true});
 				} else if (event.key === 'Enter' || event.key === ' ') {
-					event.preventDefault(); selectedEdge = edge.id; current = edge.from;
-					line.classList.add('is-selected'); inspect();
+					event.preventDefault(); selectConnection();
 				}
 			});
 			wires.append(hit);
@@ -314,7 +336,7 @@
 	const refreshPorts = () => {
 		const source = draggingPort || pendingPort;
 		for (const button of layer.querySelectorAll('[data-cb-advanced-port-side="in"]')) {
-			const valid = source && canConnect(source.id, source.port, button.dataset.cbAdvancedPortNode, button.dataset.cbAdvancedPort);
+			const valid = source && canConnect(source.id, source.port, button.dataset.cbAdvancedPortNode, button.dataset.cbAdvancedPort, true);
 			button.classList.toggle('is-available', !!valid);
 			button.classList.toggle('is-unavailable', !!source && !valid);
 		}
@@ -352,7 +374,7 @@
 				if (side==='in') {
 					control.addEventListener('click', () => {
 						if (pendingPort) {
-							if (connect(pendingPort.id,pendingPort.port,node.id,port)) {
+							if (connect(pendingPort.id,pendingPort.port,node.id,port,true)) {
 								root.querySelector('[data-cb-design-canvas-viewport]')?.focus({preventScroll: true});
 							} else {
 								announceConnection('That input is occupied, incompatible, or would create a cycle. Choose another input or Escape.');
@@ -385,8 +407,8 @@
 						const request=draggingPort,target=inputAt(event.clientX,event.clientY);
 						control.releasePointerCapture?.(event.pointerId);
 						draggingPort=null;
-						if (target && canConnect(request.id,request.port,target.dataset.cbAdvancedPortNode,target.dataset.cbAdvancedPort)) {
-							connect(request.id,request.port,target.dataset.cbAdvancedPortNode,target.dataset.cbAdvancedPort);
+						if (target && canConnect(request.id,request.port,target.dataset.cbAdvancedPortNode,target.dataset.cbAdvancedPort,true)) {
+							connect(request.id,request.port,target.dataset.cbAdvancedPortNode,target.dataset.cbAdvancedPort,true);
 						} else if (!request.moved) armPort(node.id,port);
 						else cancelPort('No compatible input selected. Try another port.');
 					});

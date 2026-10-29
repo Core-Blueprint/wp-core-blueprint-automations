@@ -224,7 +224,7 @@ test('ADV-03 R4 keyboard and pointer connection gestures do not race', () => {
   assert.match(source, /control\.addEventListener\('pointerup'/);
 });
 test('ADV-03 R4 typed graph connection validation refuses occupancy and cycles', () => {
-  const found = source.match(/const canConnect = \(from, fromPort, to, toPort\) => \{([\s\S]*?)\n\t\};\n\tconst connect/);
+  const found = source.match(/const canConnect = \(from, fromPort, to, toPort, allowRewire = false\) => \{([\s\S]*?)\n\t\};\n\tconst connect/);
   assert.ok(found, 'real graph connection policy found');
   const nodes = ['trigger','actionA','actionB','end'].map(id =>
     ({id,type:id==='trigger'?'trigger':id==='end'?'end':'action'}));
@@ -233,7 +233,7 @@ test('ADV-03 R4 typed graph connection validation refuses occupancy and cycles',
   const outgoing=type=>type==='end'?[]:type==='if_else'?['true','false']:['next'];
   const incoming=type=>type==='trigger'?[]:type==='exclusive_merge'?['true','false']:['in'];
   const canConnect = new Function('find','draft','outgoing','incoming',
-    'return (from,fromPort,to,toPort)=> {'+found[1]+'};')(find,draft,outgoing,incoming);
+    'return (from,fromPort,to,toPort,allowRewire=false)=> {'+found[1]+'};')(find,draft,outgoing,incoming);
   assert.ok(canConnect('trigger','next','actionA','in'));
   draft.graph.edges.push({from:'trigger',from_port:'next',to:'actionA',to_port:'in'});
   assert.ok(!canConnect('trigger','next','actionB','in'), 'occupied output');
@@ -253,4 +253,31 @@ test('ADV-03 R4 port status is accessible without browser alerts', () => {
   assert.match(source,/cancelPort\('Connection cancelled\.'/);
   const portSection=source.split('const createPorts = (card, node) => {')[1].split('const draw = () => {')[0];
   assert.doesNotMatch(portSection,/window\.alert/);
+});
+
+test('ADV-03 R4 rewires connected outputs without stealing inputs', () => {
+  const captured=source.match(/const canConnect = \(from, fromPort, to, toPort, allowRewire = false\) => \{([\s\S]*?)\n\t\};\n\tconst connect/);
+  assert.ok(captured);
+  const nodes=['trigger','a','b','end'].map(id=>({id,type:id==='trigger'?'trigger':id==='end'?'end':'action'}));
+  const find=id=>nodes.find(n=>n.id===id);
+  const draft={graph:{edges:[{id:'original',from:'trigger',from_port:'next',to:'a',to_port:'in'}]}};
+  const outgoing=type=>type==='end'?[]:['next'];
+  const incoming=type=>type==='trigger'?[]:['in'];
+  const check=new Function('find','draft','outgoing','incoming',
+    'return (from,fromPort,to,toPort,allowRewire=false)=> {'+captured[1]+'};')(find,draft,outgoing,incoming);
+  assert.ok(!check('trigger','next','b','in'));
+  assert.ok(check('trigger','next','b','in',true));
+  assert.ok(!check('trigger','next','a','in',true));
+  draft.graph.edges.push({id:'occupied',from:'a',from_port:'next',to:'end',to_port:'in'});
+  assert.ok(!check('trigger','next','end','in',true));
+  assert.match(source,/draft\.graph\.edges\[index\] = \{\.\.\.old, to, to_port: toPort\}/);
+  assert.match(source,/connect\(request\.id,request\.port,target\.dataset\.cbAdvancedPortNode,target\.dataset\.cbAdvancedPort,true\)/);
+});
+test('ADV-03 R4 link selection retains keyboard focus and pressed state', () => {
+  assert.match(source,/hit\.setAttribute\('aria-pressed', selectedEdge === edge\.id \? 'true' : 'false'\)/);
+  assert.match(source,/hit\.addEventListener\('click', selectConnection\)/);
+  const body=source.split('const selectConnection = () => {')[1].split('\n\t\t\t};')[0];
+  assert.ok(body);
+  assert.doesNotMatch(body,/renderEdges\(\)|replaceChildren/);
+  assert.match(body,/target\.setAttribute\('aria-pressed'/);
 });
