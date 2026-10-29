@@ -122,9 +122,12 @@
 		if (simulatedRoute) {
 			simulatedRoute = null;
 			if (previewResult) previewResult.textContent = 'Workflow changed. Save and reopen before testing again.';
-			for (const el of root.querySelectorAll('.is-simulated, .is-not-on-route')) {
-				el.classList.remove('is-simulated', 'is-not-on-route');
+			for (const el of root.querySelectorAll('.is-simulated, .is-not-on-route, .is-test-blocked, .is-test-failed')) {
+				el.classList.remove('is-simulated', 'is-not-on-route', 'is-test-blocked', 'is-test-failed');
+				el.removeAttribute('data-cb-advanced-test-state');
+				el.removeAttribute('aria-description');
 			}
+			for (const el of root.querySelectorAll('.cb-advanced-node-test-state, [data-cb-advanced-test-details]')) el.remove();
 		}
 		if (historySession) {
 			const next = historyProject();
@@ -266,6 +269,30 @@
 		mark(); rebuild();
 	};
 	// Only the real consecutive route transitions may be highlighted.
+	// Server emits status and fixed reason codes only, never fixture values.
+	const testStatusLabels = Object.freeze({simulated:'Simulated',skipped:'Skipped',blocked:'Blocked',failed:'Failed'});
+	const testReasons = Object.freeze({
+		route_only:'Route only. No provider or Action executed.',
+		not_on_route:'Not visited on the selected branch.',
+		sample_required:'A non-sensitive upstream sample output is required.',
+		condition_invalid:'The simulated condition could not be evaluated.',
+	});
+	const testResult = id => simulatedRoute?.results?.[id] || null;
+	const testSummary = node => {
+		const result = testResult(node.id);
+		if (!result || !Object.hasOwn(testStatusLabels,result.status)) return null;
+		const box = make('div','cb-advanced-node-test-details');
+		box.dataset.cbAdvancedTestDetails = node.id;
+		box.append(make('strong','',testStatusLabels[result.status]));
+		box.append(make('p','description',testReasons[result.reason] || 'Simulation unavailable.'));
+		if (['trigger','state','action'].includes(node.type))
+			box.append(make('p','description',result.fixture
+				? 'Non-sensitive samples supplied; values hidden.'
+				: 'No sample output supplied; no provider called.'));
+		const decision = simulatedRoute?.decisions?.[node.id];
+		if (typeof decision === 'boolean') box.append(make('p','description','Simulated branch: '+(decision?'TRUE':'FALSE')));
+		return box;
+	};
 	const tracedEdges = (nodes, decisions) => {
 		const chosen = new Set();
 		for (let i = 0; i < nodes.length - 1; i++) {
@@ -444,8 +471,16 @@
 		layer.replaceChildren();
 		draft.graph.nodes.forEach((node, index) => {
 			const point = coords(node.id, index);
-			const card = make('div', 'cb-advanced-node' + (current === node.id ? ' is-selected' : '')
-				+ (simulatedRoute ? (simulatedRoute.nodes.has(node.id) ? ' is-simulated' : ' is-not-on-route') : ''));
+			const state = testResult(node.id)?.status;
+			const card = make('div','cb-advanced-node' + (current === node.id ? ' is-selected' : '')
+				+ (state === 'simulated' ? ' is-simulated' : '')
+				+ (state === 'skipped' ? ' is-not-on-route' : '')
+				+ (state === 'blocked' ? ' is-test-blocked' : '')
+				+ (state === 'failed' ? ' is-test-failed' : ''));
+			if (state) {
+				card.dataset.cbAdvancedTestState = state;
+				card.setAttribute('aria-description', testStatusLabels[state] + '. ' + (testReasons[testResult(node.id)?.reason] || ''));
+			}
 			card.style.left = point.x + 'px'; card.style.top = point.y + 'px';
 			card.dataset.nodeId = node.id;
 			card.setAttribute('role', 'group');
@@ -474,6 +509,7 @@
 			const detail = make('span', 'cb-advanced-node-details', configCap(node)?.label || (occupied(node.config) ? 'Configured' : 'Not configured'));
 			const idlabel = make('span', 'cb-advanced-node-id', node.id.slice(0, 16));
 			card.append(title, detail, idlabel);
+			if (state) card.append(make('span','cb-advanced-node-test-state',testStatusLabels[state]));
 			createPorts(card, node);
 			layer.append(card);
 			card.dataset.cbDesignCanvasObject = 'node';
@@ -601,6 +637,8 @@
 		if (!node) { inspector.append(make('p', 'description', 'Select a node on the canvas.')); return; }
 		inspector.append(make('h3', '', labels[node.type]));
 		inspector.append(make('p', 'description', node.id));
+		const summary = testSummary(node);
+		if (summary) inspector.append(summary);
 		if (['trigger', 'state', 'action'].includes(node.type)) {
 			const options = [['', 'Choose capability'], ...typeOptions(node.type)];
 			const matched = capabilities.find(item => eqRef(item.reference, node.config?.capability));
@@ -902,25 +940,42 @@
 				throw new Error(json?.data?.message || 'Route simulation was not available.');
 			}
 			const decisions = json.data.decisions || {};
+			if (!json.data.results || typeof json.data.results !== 'object'
+				|| typeof json.data.complete !== 'boolean') throw new Error('Invalid simulation result.');
+			const results = Object.create(null);
+			for (const node of draft.graph.nodes) {
+				const result = json.data.results[node.id];
+				if (!result || !Object.hasOwn(testStatusLabels,result.status)
+					|| !Object.hasOwn(testReasons,result.reason) || typeof result.fixture !== 'boolean')
+					throw new Error('Incomplete simulation result.');
+				results[node.id] = {status:result.status,reason:result.reason,fixture:result.fixture};
+			}
 			simulatedRoute = {
 				nodes: new Set(json.data.nodes),
 				edges: tracedEdges(json.data.nodes, decisions),
-				decisions,
+				decisions, results, complete: json.data.complete,
 			};
 			draw();
-			const title = make('strong', '', 'Route simulated. No actions were executed.');
+			const title = make('strong','',json.data.complete
+				? 'Route simulated. No actions were executed.'
+				: 'Simulation incomplete. No actions were executed.');
 			const list = make('ol');
-			for (const nodeId of json.data.nodes) {
-				if (typeof nodeId !== 'string') continue;
-				const node = find(nodeId);
-				if (!node) continue;
-				const decision = json.data.decisions?.[nodeId];
-				const branch = typeof decision === 'boolean' ? ' (' + (decision ? 'True' : 'False') + ')' : '';
-				list.append(make('li', '', 'Simulated · ' + labels[node.type] + branch + ' · ' + nodeId.slice(0, 12)));
+			for (const node of draft.graph.nodes) {
+				const result = results[node.id],decision = decisions[node.id];
+				const branch = typeof decision === 'boolean' ? ' (' + (decision ? 'TRUE' : 'FALSE') + ')' : '';
+				const li = make('li','cb-advanced-test-step cb-advanced-test-step--'+result.status);
+				li.append(button(testStatusLabels[result.status]+' · '+labels[node.type]+branch,() => {
+					selectNode(node.id);
+					root.querySelector('[data-cb-advanced-inspector]')?.focus({preventScroll:true});
+				}),make('span','description',testReasons[result.reason]));
+				list.append(li);
 			}
 			const skipped = draft.graph.nodes.filter(node => !simulatedRoute.nodes.has(node.id)).length;
 			const detail = make('p', 'description', skipped + ' node(s) were not on the simulated route.');
-			previewResult.replaceChildren(title, list, detail);
+			const warning = !json.data.complete
+				? make('p','cb-advanced-test-warning','Test stopped at a blocked or failed condition; inspect its node.')
+				: null;
+			previewResult.replaceChildren(title,list,detail,...(warning?[warning]:[]));
 		} catch (error) {
 			if (requestEpoch !== previewEpoch || changed) return;
 			previewResult.textContent = 'Simulation unavailable: ' + String(error?.message || 'unknown error').slice(0, 180);
