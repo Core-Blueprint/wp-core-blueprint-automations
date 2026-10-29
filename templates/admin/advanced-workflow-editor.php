@@ -68,7 +68,8 @@ if ( ! is_string( $payload ) ) {
 					<button type="button" class="button" data-cb-advanced-add="action"><?php esc_html_e( 'Add action', 'core-blueprint-automations' ); ?></button>
 					<button type="button" class="button" data-cb-advanced-add="exclusive_merge">Merge</button>
 					<button type="button" class="button" data-cb-advanced-add="end">End</button>
-					<p class="description">Drag nodes to arrange them. Select a node to edit its capability or connect its output to another node.</p>
+					<p class="description">Drag nodes to arrange them. Connect by dragging an output port to an input, or use the keyboard: select an output, then an input. Escape cancels.</p>
+					<p class="cb-advanced-connection-status" id="cb-advanced-connection-status" data-cb-advanced-connection-status role="status" aria-live="polite" aria-atomic="true">Choose an output port to connect nodes.</p>
 				</aside>
 				<main class="cb-core-design-shell__canvas cb-advanced-editor-canvas" aria-label="Advanced workflow canvas">
 					<div class="cb-advanced-editor-canvas-scroll" data-cb-design-canvas-viewport tabindex="0" aria-label="Workflow canvas navigation">

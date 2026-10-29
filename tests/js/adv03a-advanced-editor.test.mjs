@@ -213,3 +213,44 @@ test('ADV-03B fixture input and presets invalidate pending requests without dirt
   const block = source.split('const invalidateSamplePreview = () => {')[1].split('\n\t};')[0];
   assert.doesNotMatch(block, /mark\(\)|historySession\.execute|draft\./);
 });
+
+test('ADV-03 R4 keyboard and pointer connection gestures do not race', () => {
+  assert.match(source, /const isKeyboardPortClick = event => event\.detail === 0/);
+  const keyboardClick = new Function('event', 'return event.detail === 0;');
+  assert.ok(keyboardClick({detail:0}));
+  assert.ok(!keyboardClick({detail:1}));
+  assert.doesNotMatch(source, /suppressPortClick|setTimeout\(\(\)=>\{suppressPortClick/);
+  assert.match(source, /if \(isKeyboardPortClick\(event\)\) armPort\(node\.id,port\)/);
+  assert.match(source, /control\.addEventListener\('pointerup'/);
+});
+test('ADV-03 R4 typed graph connection validation refuses occupancy and cycles', () => {
+  const found = source.match(/const canConnect = \(from, fromPort, to, toPort\) => \{([\s\S]*?)\n\t\};\n\tconst connect/);
+  assert.ok(found, 'real graph connection policy found');
+  const nodes = ['trigger','actionA','actionB','end'].map(id =>
+    ({id,type:id==='trigger'?'trigger':id==='end'?'end':'action'}));
+  const draft={graph:{edges:[]}};
+  const find=id=>nodes.find(n=>n.id===id);
+  const outgoing=type=>type==='end'?[]:type==='if_else'?['true','false']:['next'];
+  const incoming=type=>type==='trigger'?[]:type==='exclusive_merge'?['true','false']:['in'];
+  const canConnect = new Function('find','draft','outgoing','incoming',
+    'return (from,fromPort,to,toPort)=> {'+found[1]+'};')(find,draft,outgoing,incoming);
+  assert.ok(canConnect('trigger','next','actionA','in'));
+  draft.graph.edges.push({from:'trigger',from_port:'next',to:'actionA',to_port:'in'});
+  assert.ok(!canConnect('trigger','next','actionB','in'), 'occupied output');
+  assert.ok(!canConnect('actionB','next','actionA','in'), 'occupied input');
+  assert.ok(canConnect('actionA','next','actionB','in'));
+  assert.ok(!canConnect('end','next','actionA','in'));
+  assert.ok(!canConnect('actionB','next','trigger','in'));
+  draft.graph.edges=[{from:'actionA',from_port:'next',to:'actionB',to_port:'in'}];
+  assert.ok(!canConnect('actionB','next','actionA','in'), 'cycle even when input is free');
+  assert.ok(!canConnect('actionB','next','actionB','in'), 'self link');
+});
+test('ADV-03 R4 port status is accessible without browser alerts', () => {
+  assert.match(advancedTemplate,/id="cb-advanced-connection-status"/);
+  assert.match(advancedTemplate,/data-cb-advanced-connection-status role="status" aria-live="polite"/);
+  assert.match(source,/aria-describedby', 'cb-advanced-connection-status'/);
+  assert.match(source,/announceConnection\('Choose a highlighted input port/);
+  assert.match(source,/cancelPort\('Connection cancelled\.'/);
+  const portSection=source.split('const createPorts = (card, node) => {')[1].split('const draw = () => {')[0];
+  assert.doesNotMatch(portSection,/window\.alert/);
+});

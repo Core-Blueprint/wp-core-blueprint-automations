@@ -222,3 +222,12 @@
 	font-size: var(--cb-fs-sm);
 	color: var(--cb-text-strong);
 }
+
+/* Accessible, nonmodal feedback for both pointer and keyboard port gestures. */
+.cb-advanced-connection-status {
+	margin-top: var(--cb-space-2);
+	font-size: var(--cb-fs-sm);
+	line-height: 1.5;
+	color: var(--cb-text-muted);
+	overflow-wrap: anywhere;
+}
