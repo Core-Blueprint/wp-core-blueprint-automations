@@ -328,12 +328,26 @@
 	// SVG user coordinates remain identical to global graph coordinates.
 	const wireBounds = () => {
 		const b = contentBounds();
-		const cursor = draggingPort?.cursor;
-		const pad = 256; // Curve controls may extend beyond node endpoints.
-		const x = Math.floor(Math.min(b.x, cursor?.x ?? b.x) - pad);
-		const y = Math.floor(Math.min(b.y, cursor?.y ?? b.y) - pad);
-		const right = Math.ceil(Math.max(b.x + b.width, cursor?.x ?? b.x) + pad);
-		const bottom = Math.ceil(Math.max(b.y + b.height, cursor?.y ?? b.y) + pad);
+		const xs = [b.x, b.x + b.width];
+		const ys = [b.y, b.y + b.height];
+		const includeCurve = (start, end) => {
+			const dx = Math.max(60, Math.abs(end.x - start.x) * .52);
+			xs.push(start.x, start.x + dx, end.x - dx, end.x);
+			ys.push(start.y, end.y);
+		};
+		for (const edge of draft.graph.edges) {
+			const from = find(edge.from), to = find(edge.to);
+			if (from && to) includeCurve(anchor(from, 'out', edge.from_port), anchor(to, 'in', edge.to_port));
+		}
+		if (draggingPort) {
+			const from = find(draggingPort.id);
+			if (from) includeCurve(anchor(from, 'out', draggingPort.port), draggingPort.cursor);
+		}
+		const pad = 96;
+		const x = Math.floor(Math.min(...xs) - pad);
+		const y = Math.floor(Math.min(...ys) - pad);
+		const right = Math.ceil(Math.max(...xs) + pad);
+		const bottom = Math.ceil(Math.max(...ys) + pad);
 		return {x, y, width: right - x, height: bottom - y};
 	};
 	const positionWires = () => {

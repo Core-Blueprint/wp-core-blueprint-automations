@@ -360,3 +360,21 @@ test('ADV-03C world coordinates allow distant nodes without overflowing saved gr
   const bounds = new Function('draft','coords','return () => {'+boundsMatch[1]+'};')(draft,coords)();
   assert.deepEqual(bounds,{x:-4200,y:-2700,width:10584,height:7610});
 });
+
+test('ADV-03C SVG bounds include backward Bezier handles and a live drag', () => {
+  const match = source.match(/const wireBounds = \(\) => \{([\s\S]*?)\n\t\};\n\tconst positionWires/);
+  assert.ok(match, 'dynamic wire bounds are independently testable');
+  const draft = {
+    graph: {edges:[{from:'right', from_port:'next', to:'left', to_port:'in'}]},
+    layout: {nodes:{right:{x:6000,y:400}, left:{x:-6000,y:400}}},
+  };
+  const find = id => ({id, type:'action'});
+  const anchor = (node,side) => ({x:draft.layout.nodes[node.id].x + (side==='out'?184:0),y:455});
+  const contentBounds = () => ({x:-6000,y:400,width:12184,height:110});
+  const draggingPort = {id:'right',port:'next',cursor:{x:-9000,y:-600}};
+  const bounds = new Function('draft','find','anchor','contentBounds','draggingPort',
+    'return () => {'+match[1]+'};')(draft,find,anchor,contentBounds,draggingPort)();
+  assert.ok(bounds.x < -9000 && bounds.y < -600, 'preview extends beyond graph');
+  assert.ok(bounds.x + bounds.width > 10000, 'backward Bezier handle is included');
+  assert.ok(bounds.height > 1000, 'vertical drag preview is covered');
+});
