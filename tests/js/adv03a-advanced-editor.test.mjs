@@ -378,3 +378,19 @@ test('ADV-03C SVG bounds include backward Bezier handles and a live drag', () =>
   assert.ok(bounds.x + bounds.width > 10000, 'backward Bezier handle is included');
   assert.ok(bounds.height > 1000, 'vertical drag preview is covered');
 });
+
+test('ADV-03C infinite viewport routes wheel, trackpad and keyboard pan to Base only', () => {
+  assert.match(shellAdapter, /viewport\.addEventListener\('wheel', event =>/);
+  assert.match(shellAdapter, /canvasNavigation\?\.panBy\(-dx, -dy\)/);
+  assert.match(shellAdapter, /\{passive:false\}/);
+  assert.match(shellAdapter, /event\.ctrlKey \|\| event\.metaKey \|\| event\.altKey/);
+  assert.match(shellAdapter, /event\.target !== viewport/);
+  assert.match(shellAdapter, /ArrowLeft:\[step,0\], ArrowRight:\[-step,0\]/);
+  assert.doesNotMatch(shellAdapter, /scene\.style\.transform\s*=/);
+  const delta = shellAdapter.match(/const wheelDelta = event => \{([\s\S]*?)\n\t\t\t\t\};/);
+  assert.ok(delta, 'wheel normalization is independently testable');
+  const normalize = new Function('viewport', 'return event => {'+delta[1]+'};')({clientHeight:600});
+  assert.deepEqual(normalize({deltaMode:0,deltaX:50,deltaY:-70}),{dx:50,dy:-70});
+  assert.deepEqual(normalize({deltaMode:1,deltaX:2,deltaY:-3}),{dx:32,dy:-48});
+  assert.deepEqual(normalize({deltaMode:2,deltaX:1,deltaY:-1}),{dx:600,dy:-600});
+});

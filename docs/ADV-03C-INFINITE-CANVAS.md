@@ -44,3 +44,12 @@ workflow layout. Existing Standard mode and Base shells are untouched.
 **No merge, deployment, public release or production v2 activation** is
 implied by this SOURCE patch. The feature remains FIELD-HOLD until the
 combined sandbox test is accepted.
+
+## Virtual viewport input regression
+
+Because the new scene has the same physical dimensions as the viewport,
+there is no longer native overflow to scroll. The paired Base controller
+now receives wheel and trackpad deltas via its public `panBy` method.
+It also accepts arrow-key panning when **the viewport itself** is focused,
+while node-title arrow keys still move selected nodes. Modified wheel
+shortcuts are left to the browser, and Base remains the only transform owner.
