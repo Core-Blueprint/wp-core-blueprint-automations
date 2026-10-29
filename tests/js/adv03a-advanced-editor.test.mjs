@@ -281,3 +281,24 @@ test('ADV-03 R4 link selection retains keyboard focus and pressed state', () => 
   assert.doesNotMatch(body,/renderEdges\(\)|replaceChildren/);
   assert.match(body,/target\.setAttribute\('aria-pressed'/);
 });
+
+test('ADV-03C keyboard node movement shares bounded pointer layout and preserves focus', () => {
+  const snippet = source.match(/const moveNodeBy = \(point, dx, dy\) => \{([\s\S]*?)\n\t\};\n\tconst contentBounds/);
+  assert.ok(snippet, 'shared node coordinate policy exists');
+  const move = new Function('return (point,dx,dy) => {'+snippet[1]+'};')();
+  const point={x:45,y:80};
+  assert.ok(move(point,1,0));
+  assert.deepEqual(point,{x:46,y:80});
+  assert.ok(move(point,-2000,-2000));
+  assert.deepEqual(point,{x:0,y:0});
+  assert.ok(!move(point,-1,0), 'no History entry when clamped at boundary');
+  assert.ok(move(point,10000,10000));
+  assert.deepEqual(point,{x:1216,y:790});
+  assert.match(source,/title\.setAttribute\('aria-keyshortcuts'/);
+  assert.match(source,/event\.shiftKey \? 10 : 1/);
+  assert.match(source,/title\.addEventListener\('keydown', event =>/);
+  const selectBlock=source.split('const selectCard = () => {')[1].split('\n\t\t\t};')[0];
+  assert.ok(selectBlock);
+  assert.doesNotMatch(selectBlock,/\brebuild\(\)|layer\.replaceChildren/);
+  assert.match(selectBlock,/renderEdges\(\); inspect\(\)/);
+});

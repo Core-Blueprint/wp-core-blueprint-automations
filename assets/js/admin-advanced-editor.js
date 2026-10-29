@@ -139,6 +139,14 @@
 		draft.layout.nodes[id] = fresh;
 		return fresh;
 	};
+	// Both pointer and keyboard movement share the same bounded layout policy.
+	const moveNodeBy = (point, dx, dy) => {
+		const x = Math.round(Math.max(0, Math.min(1400 - 184, point.x + dx)));
+		const y = Math.round(Math.max(0, Math.min(900 - 110, point.y + dy)));
+		if (x === point.x && y === point.y) return false;
+		point.x = x; point.y = y;
+		return true;
+	};
 	const contentBounds = () => {
 		const positions = draft.graph.nodes.map((node, index) => coords(node.id, index));
 		const minX = positions.length ? Math.min(...positions.map(p => p.x)) : 0;
@@ -430,8 +438,34 @@
 			card.setAttribute('role', 'group');
 			card.setAttribute('aria-label', labels[node.type] + ' ' + node.id);
 			const title = make('button', 'cb-advanced-node-title', labels[node.type]);
-			title.type = 'button'; title.title = 'Drag to move · Click to inspect';
-			title.addEventListener('click', () => { selectedEdge = null; current = node.id; rebuild(); });
+			title.type = 'button';
+			title.title = 'Drag to move · Arrow keys move 1 px · Shift+Arrow moves 10 px';
+			title.setAttribute('aria-keyshortcuts', 'ArrowUp ArrowDown ArrowLeft ArrowRight');
+			const selectCard = () => {
+				current = node.id;
+				selectedEdge = null;
+				for (const element of layer.querySelectorAll('.cb-advanced-node')) {
+					element.classList.toggle('is-selected', element.dataset.nodeId === node.id);
+				}
+				// Selection is transient; do not replace the focused title element.
+				renderEdges(); inspect();
+			};
+			title.addEventListener('click', selectCard);
+			title.addEventListener('keydown', event => {
+				if (event.altKey || event.ctrlKey || event.metaKey) return;
+				const delta = {
+					ArrowUp: [0, -1], ArrowDown: [0, 1],
+					ArrowLeft: [-1, 0], ArrowRight: [1, 0],
+				}[event.key];
+				if (!delta) return;
+				event.preventDefault();
+				const step = event.shiftKey ? 10 : 1;
+				if (!moveNodeBy(point, delta[0] * step, delta[1] * step)) return;
+				card.style.left = point.x + 'px';
+				card.style.top = point.y + 'px';
+				selectCard();
+				mark(); sync();
+			});
 			const detail = make('span', 'cb-advanced-node-details', configCap(node)?.label || (occupied(node.config) ? 'Configured' : 'Not configured'));
 			const idlabel = make('span', 'cb-advanced-node-id', node.id.slice(0, 16));
 			card.append(title, detail, idlabel);
@@ -446,10 +480,9 @@
 				const move = e => {
 					if (e.pointerId !== event.pointerId) return;
 					const now = canvasPoint(e);
-					const nx = Math.round(Math.max(0, Math.min(1400 - 184, origin.left + now.x - origin.x)));
-					const ny = Math.round(Math.max(0, Math.min(900 - 110, origin.top + now.y - origin.y)));
-					point.x = nx; point.y = ny;
-					card.style.left = nx + 'px'; card.style.top = ny + 'px';
+					moveNodeBy(point, origin.left + now.x - origin.x - point.x,
+						origin.top + now.y - origin.y - point.y);
+					card.style.left = point.x + 'px'; card.style.top = point.y + 'px';
 					renderEdges();
 				};
 				const end = e => {
