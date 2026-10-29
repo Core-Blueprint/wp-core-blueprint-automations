@@ -703,6 +703,16 @@
 		event.preventDefault(); event.stopPropagation(); cancelPort();
 	},true);
 	root.dispatchEvent(new CustomEvent('cb:automations-advanced:ready'));
+	// Editing simulation samples does not touch the workflow document or History.
+	const invalidateSamplePreview = () => {
+		previewEpoch++;
+		if (simulatedRoute) {
+			simulatedRoute = null;
+			draw();
+		}
+		if (previewResult) previewResult.textContent = 'Sample outputs changed. Test the route again.';
+	};
+	previewFixture?.addEventListener('input', invalidateSamplePreview);
 	// Test fixtures never enter the saved draft and never include sensitive fields.
 	previewExamples?.addEventListener('click', () => {
 		if (!previewFixture) return;
@@ -727,6 +737,9 @@
 			if (Object.keys(fields).length) samples[node.id] = fields;
 		}
 		previewFixture.value = JSON.stringify(samples, null, 2);
+		invalidateSamplePreview();
+		const expert = previewFixture.closest('details');
+		if (expert) expert.open = true;
 		if (previewResult) previewResult.textContent = 'Review sample outputs, then test the saved route.';
 	});
 	// A one-click alternate branch fixture avoids requiring JSON authoring
@@ -756,6 +769,7 @@
 		}
 		if (toggled) {
 			previewFixture.value = JSON.stringify(samples, null, 2);
+			invalidateSamplePreview();
 			if (previewResult) previewResult.textContent = 'Boolean samples switched. Test the route again.';
 		} else if (previewResult) {
 			previewResult.textContent = 'No Boolean sample outputs are available to switch.';

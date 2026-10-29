@@ -204,3 +204,12 @@ test('ADV-03B discards late preview responses after graph edit or undo', () => {
   assert.match(source, /previewEpoch\+\+/);
   assert.match(source, /Workflow changed while testing/);
 });
+
+test('ADV-03B fixture input and presets invalidate pending requests without dirtying a workflow', () => {
+  assert.match(source, /const invalidateSamplePreview = \(\) => \{/);
+  assert.match(source, /previewFixture\?\.addEventListener\('input', invalidateSamplePreview\)/);
+  assert.match(source, /previewFixture\.value = JSON\.stringify\(samples, null, 2\);\n\t\tinvalidateSamplePreview\(\)/);
+  assert.match(source, /if \(expert\) expert\.open = true/);
+  const block = source.split('const invalidateSamplePreview = () => {')[1].split('\n\t};')[0];
+  assert.doesNotMatch(block, /mark\(\)|historySession\.execute|draft\./);
+});
