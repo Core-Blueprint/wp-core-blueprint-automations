@@ -89,10 +89,14 @@ final class AdvancedRoutePreviewController {
 					}
 				}
 			}
-			$trace = ( new GraphRoutePlanner( $catalog ) )->trace( $definition, $data );
+			$trace = ( new GraphRoutePlanner( $catalog ) )->inspect( $definition, $data );
 			// Return ONLY graph route identities and boolean branch decisions.
 			// Never reflect fixture values, literal bindings or provider output.
-			wp_send_json_success( [ 'nodes' => $trace['nodes'], 'decisions' => $trace['decisions'] ] );
+			wp_send_json_success( [
+				'nodes' => $trace['nodes'], 'decisions' => $trace['decisions'],
+				'results' => $trace['results'], 'complete' => $trace['complete'],
+				'blocked' => $trace['blocked'], 'reason' => $trace['reason'],
+			] );
 		} catch ( \Throwable ) {
 			self::reject( 'Route simulation could not be completed with these sample outputs.', 422 );
 		}

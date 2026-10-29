@@ -13,7 +13,7 @@ foreach ( [
 	'wp_verify_nonce(', 'AutomationsPage::CAPABILITY',
 	'ActivationState::Disabled', 'hash_equals(',
 	'new GraphValidator(', 'new GraphRoutePlanner(',
-	'->trace(', 'wp_send_json_success(',
+	'->inspect(', 'wp_send_json_success(',
 	'! empty( $spec[\'sensitive\'] )',
 ] as $required ) {
 	if ( ! str_contains( $controller, $required ) ) throw new RuntimeException( 'ADV-03B preview missing fence: ' . $required );
