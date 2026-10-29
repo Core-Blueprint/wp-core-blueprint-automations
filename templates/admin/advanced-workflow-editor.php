@@ -55,10 +55,10 @@ if ( ! is_string( $payload ) ) {
 			<button type="button" class="button cb-core-button" data-cb-design-shell-fullscreen data-cb-design-shell-fullscreen-enter-label="<?php esc_attr_e( 'Open focus mode', 'core-blueprint-automations' ); ?>" data-cb-design-shell-fullscreen-exit-label="<?php esc_attr_e( 'Exit focus mode', 'core-blueprint-automations' ); ?>" aria-pressed="false"><span data-cb-design-shell-fullscreen-label><?php esc_html_e( 'Open focus mode', 'core-blueprint-automations' ); ?></span></button>
 				<button type="button" class="button cb-core-button" data-cb-advanced-undo disabled><?php esc_html_e( 'Undo', 'core-blueprint-automations' ); ?></button>
 				<button type="button" class="button cb-core-button" data-cb-advanced-redo disabled><?php esc_html_e( 'Redo', 'core-blueprint-automations' ); ?></button>
-				<div class="cb-advanced-zoom-controls" role="group" aria-label="Canvas zoom">
-					<button type="button" class="button cb-core-button" data-cb-advanced-zoom-out aria-label="Zoom out" title="Zoom out">−</button>
-					<button type="button" class="button cb-core-button cb-advanced-zoom-reset" data-cb-advanced-zoom-reset aria-label="Reset zoom to 100 percent" title="Reset zoom to 100 percent">100%</button>
-					<button type="button" class="button cb-core-button" data-cb-advanced-zoom-in aria-label="Zoom in" title="Zoom in">+</button>
+				<div class="cb-advanced-zoom-controls" role="group" aria-label="<?php esc_attr_e( 'Canvas zoom', 'core-blueprint-automations' ); ?>">
+					<button type="button" class="button cb-core-button" data-cb-advanced-zoom-out aria-label="<?php esc_attr_e( 'Zoom out', 'core-blueprint-automations' ); ?>" title="<?php esc_attr_e( 'Zoom out', 'core-blueprint-automations' ); ?>">−</button>
+					<button type="button" class="button cb-core-button cb-advanced-zoom-reset" data-cb-advanced-zoom-reset aria-label="<?php esc_attr_e( 'Reset zoom to 100 percent', 'core-blueprint-automations' ); ?>" title="<?php esc_attr_e( 'Reset zoom to 100 percent', 'core-blueprint-automations' ); ?>">100%</button>
+					<button type="button" class="button cb-core-button" data-cb-advanced-zoom-in aria-label="<?php esc_attr_e( 'Zoom in', 'core-blueprint-automations' ); ?>" title="<?php esc_attr_e( 'Zoom in', 'core-blueprint-automations' ); ?>">+</button>
 					<button type="button" class="button cb-core-button" data-cb-advanced-fit>Fit to Screen</button>
 				</div>
 				<button type="submit" class="button button-primary cb-core-button cb-core-button--primary" data-cb-design-shell-primary-action data-cb-advanced-save><?php esc_html_e( 'Save automation', 'core-blueprint-automations' ); ?></button>
@@ -83,14 +83,14 @@ if ( ! is_string( $payload ) ) {
 							<div data-cb-advanced-nodes data-cb-design-canvas-background></div>
 						</div>
 					</div>
-						<div class="cb-advanced-minimap" data-cb-advanced-minimap aria-label="Workflow minimap">
+						<div class="cb-advanced-minimap" data-cb-advanced-minimap aria-label="<?php esc_attr_e( 'Workflow minimap', 'core-blueprint-automations' ); ?>" data-cb-minimap-expand-label="<?php esc_attr_e( 'Expand minimap', 'core-blueprint-automations' ); ?>" data-cb-minimap-collapse-label="<?php esc_attr_e( 'Collapse minimap', 'core-blueprint-automations' ); ?>">
 							<div class="cb-advanced-minimap__header">
-								<strong>Minimap</strong>
-								<button type="button" class="button" data-cb-advanced-minimap-size aria-label="Toggle minimap size" title="Toggle minimap size">⤢</button>
-								<button type="button" class="button" data-cb-advanced-minimap-toggle aria-expanded="true" aria-controls="cb-advanced-minimap-body" title="Collapse minimap">−</button>
+								<strong><?php esc_html_e( 'Minimap', 'core-blueprint-automations' ); ?></strong>
+								<button type="button" class="button" data-cb-advanced-minimap-size aria-label="<?php esc_attr_e( 'Toggle minimap size', 'core-blueprint-automations' ); ?>" title="<?php esc_attr_e( 'Toggle minimap size', 'core-blueprint-automations' ); ?>">⤢</button>
+								<button type="button" class="button" data-cb-advanced-minimap-toggle aria-expanded="true" aria-controls="cb-advanced-minimap-body" title="<?php esc_attr_e( 'Collapse minimap', 'core-blueprint-automations' ); ?>" aria-label="<?php esc_attr_e( 'Collapse minimap', 'core-blueprint-automations' ); ?>">−</button>
 							</div>
 							<div class="cb-advanced-minimap__body" data-cb-advanced-minimap-body id="cb-advanced-minimap-body">
-								<svg data-cb-advanced-minimap-svg tabindex="0" role="img" aria-label="Workflow overview. Click to navigate; drag the viewport rectangle to pan." preserveAspectRatio="xMidYMid meet" viewBox="0 0 1 1"></svg>
+								<svg data-cb-advanced-minimap-svg tabindex="0" role="img" aria-label="<?php esc_attr_e( 'Workflow overview. Click to navigate; drag the viewport rectangle to pan.', 'core-blueprint-automations' ); ?>" preserveAspectRatio="xMidYMid meet" viewBox="0 0 1 1"></svg>
 							</div>
 						</div>
 				</main>

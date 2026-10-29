@@ -60,7 +60,10 @@ export const createAutomationsGraphMinimap = ({
 		container.classList.toggle('is-large', large);
 		body.hidden = collapsed;
 		toggle.setAttribute('aria-expanded', String(!collapsed));
-		toggle.title = collapsed ? 'Expand minimap' : 'Collapse minimap';
+		toggle.title = collapsed
+			? (container.dataset.cbMinimapExpandLabel || 'Expand minimap')
+			: (container.dataset.cbMinimapCollapseLabel || 'Collapse minimap');
+		toggle.setAttribute('aria-label', toggle.title);
 		toggle.textContent = collapsed ? '+' : '−';
 		sizeButton.disabled = collapsed;
 		sizeButton.setAttribute('aria-pressed', String(large));
