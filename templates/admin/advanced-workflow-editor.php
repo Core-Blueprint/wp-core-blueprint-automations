@@ -74,7 +74,7 @@ if ( ! is_string( $payload ) ) {
 				<main class="cb-core-design-shell__canvas cb-advanced-editor-canvas" aria-label="Advanced workflow canvas">
 					<div class="cb-advanced-editor-canvas-scroll" data-cb-design-canvas-viewport tabindex="0" aria-label="Workflow canvas navigation">
 						<div class="cb-advanced-editor-scene" data-cb-advanced-scene data-cb-design-canvas-scene>
-							<svg role="group" aria-label="Workflow connections" data-cb-advanced-wires viewBox="0 0 1400 900" preserveAspectRatio="xMinYMin meet"></svg>
+							<svg role="group" aria-label="Workflow connections" data-cb-advanced-wires viewBox="0 0 1 1" preserveAspectRatio="xMinYMin meet"></svg>
 							<div data-cb-advanced-nodes data-cb-design-canvas-background></div>
 						</div>
 					</div>

@@ -167,7 +167,7 @@ test('ADV-03B preview offers simple Boolean branch switching and hides expert JS
 
 // Behavior regression: only the chosen branch's actual edge IDs may light up.
 test('ADV-03B route preview highlights exact consecutive graph transitions', () => {
-  const match = source.match(/const tracedEdges = \(nodes, decisions\) => \{([\s\S]*?)\n\t\};\n\tconst renderEdges/);
+  const match = source.match(/const tracedEdges = \(nodes, decisions\) => \{([\s\S]*?)\n\t\};\n(?:\t\/\/[^\n]*\n)*\tconst wireBounds/);
   assert.ok(match, 'Route projector source is available');
   const edges = [
     {id:'t',from:'trigger',to:'choice',from_port:'next'},
@@ -285,15 +285,16 @@ test('ADV-03 R4 link selection retains keyboard focus and pressed state', () => 
 test('ADV-03C keyboard node movement shares bounded pointer layout and preserves focus', () => {
   const snippet = source.match(/const moveNodeBy = \(point, dx, dy\) => \{([\s\S]*?)\n\t\};\n\tconst contentBounds/);
   assert.ok(snippet, 'shared node coordinate policy exists');
-  const move = new Function('return (point,dx,dy) => {'+snippet[1]+'};')();
+  const move = new Function('layoutCoordinate','return (point,dx,dy) => {'+snippet[1]+'};')(
+    value => Math.round(Math.max(-1000000, Math.min(1000000,value))));
   const point={x:45,y:80};
   assert.ok(move(point,1,0));
   assert.deepEqual(point,{x:46,y:80});
   assert.ok(move(point,-2000,-2000));
-  assert.deepEqual(point,{x:0,y:0});
-  assert.ok(!move(point,-1,0), 'no History entry when clamped at boundary');
+  assert.deepEqual(point,{x:-1954,y:-1920});
+  assert.ok(move(point,-1,0), 'negative space remains writable');
   assert.ok(move(point,10000,10000));
-  assert.deepEqual(point,{x:1216,y:790});
+  assert.deepEqual(point,{x:8045,y:8080});
   assert.match(source,/title\.setAttribute\('aria-keyshortcuts'/);
   assert.match(source,/event\.shiftKey \? 10 : 1/);
   assert.match(source,/title\.addEventListener\('keydown', event =>/);
@@ -327,4 +328,69 @@ test('ADV-03B-R2 status projection uses only allowlisted server metadata', () =>
 test('ADV-03B-R2 refreshes Inspector and canvas together after new/invalidated simulation', () => {
   assert.match(source, /decisions, results, complete: json\.data\.complete,[\s\S]*?draw\(\); inspect\(\);/);
   assert.match(source, /const invalidateSamplePreview = \(\) => \{[\s\S]*?simulatedRoute = null;\n\t\t\tdraw\(\); inspect\(\);/);
+});
+
+test('ADV-03C Infinite Canvas uses signed coordinates and a dynamic connection SVG', () => {
+  assert.match(source, /const LAYOUT_COORD_LIMIT = 1000000/);
+  assert.match(source, /const layoutCoordinate = value =>/);
+  assert.match(source, /const wireBounds = \(\) =>/);
+  assert.match(source, /wires\.setAttribute\('viewBox', b\.x \+ ' ' \+ b\.y/);
+  assert.match(source, /clientX: rect\.left \+ rect\.width \/ 2/);
+  assert.doesNotMatch(source, /1400 - 184|900 - 110|Math\.max\(0, Math\.min\(1400/);
+  assert.match(stylesheet, /\.cb-advanced-editor-scene \{\s*width: 100%;/);
+  assert.match(stylesheet, /background-size: var\(--cb-advanced-grid-step, 22px\)/);
+  assert.doesNotMatch(stylesheet, /width: 1400px|height: 900px/);
+  assert.match(shellAdapter, /onViewChange: paintGrid/);
+  assert.match(shellAdapter, /view\.x - view\.scrollLeft/);
+  assert.match(shellAdapter, /view\.y - view\.scrollTop/);
+  assert.match(advancedTemplate, /data-cb-advanced-wires viewBox="0 0 1 1"/);
+});
+
+test('ADV-03C world coordinates allow distant nodes without overflowing saved graph limits', () => {
+  const limit = 1000000, coord = value => Math.round(Math.max(-limit, Math.min(limit,value)));
+  assert.strictEqual(coord(-5000), -5000);
+  assert.strictEqual(coord(1200000), 1000000);
+  assert.strictEqual(coord(-1200000), -1000000);
+  assert.strictEqual(coord(8045.4), 8045);
+  const boundsMatch = source.match(/const contentBounds = \(\) => \{([\s\S]*?)\n\t\};\n\tconst configCap/);
+  assert.ok(boundsMatch, 'graph bounds must be derived from content, not from a fixed canvas');
+  const draft = {graph:{nodes:[{id:'left'},{id:'right'}]},
+    layout:{nodes:{left:{x:-4200,y:-2700},right:{x:6200,y:4800}}}};
+  const coords = id => draft.layout.nodes[id];
+  const bounds = new Function('draft','coords','return () => {'+boundsMatch[1]+'};')(draft,coords)();
+  assert.deepEqual(bounds,{x:-4200,y:-2700,width:10584,height:7610});
+});
+
+test('ADV-03C SVG bounds include backward Bezier handles and a live drag', () => {
+  const match = source.match(/const wireBounds = \(\) => \{([\s\S]*?)\n\t\};\n\tconst positionWires/);
+  assert.ok(match, 'dynamic wire bounds are independently testable');
+  const draft = {
+    graph: {edges:[{from:'right', from_port:'next', to:'left', to_port:'in'}]},
+    layout: {nodes:{right:{x:6000,y:400}, left:{x:-6000,y:400}}},
+  };
+  const find = id => ({id, type:'action'});
+  const anchor = (node,side) => ({x:draft.layout.nodes[node.id].x + (side==='out'?184:0),y:455});
+  const contentBounds = () => ({x:-6000,y:400,width:12184,height:110});
+  const draggingPort = {id:'right',port:'next',cursor:{x:-9000,y:-600}};
+  const bounds = new Function('draft','find','anchor','contentBounds','draggingPort',
+    'return () => {'+match[1]+'};')(draft,find,anchor,contentBounds,draggingPort)();
+  assert.ok(bounds.x < -9000 && bounds.y < -600, 'preview extends beyond graph');
+  assert.ok(bounds.x + bounds.width > 10000, 'backward Bezier handle is included');
+  assert.ok(bounds.height > 1000, 'vertical drag preview is covered');
+});
+
+test('ADV-03C infinite viewport routes wheel, trackpad and keyboard pan to Base only', () => {
+  assert.match(shellAdapter, /viewport\.addEventListener\('wheel', event =>/);
+  assert.match(shellAdapter, /canvasNavigation\?\.panBy\(-dx, -dy\)/);
+  assert.match(shellAdapter, /\{passive:false\}/);
+  assert.match(shellAdapter, /event\.ctrlKey \|\| event\.metaKey \|\| event\.altKey/);
+  assert.match(shellAdapter, /event\.target !== viewport/);
+  assert.match(shellAdapter, /ArrowLeft:\[step,0\], ArrowRight:\[-step,0\]/);
+  assert.doesNotMatch(shellAdapter, /scene\.style\.transform\s*=/);
+  const delta = shellAdapter.match(/const wheelDelta = event => \{([\s\S]*?)\n\t\t\t\t\};/);
+  assert.ok(delta, 'wheel normalization is independently testable');
+  const normalize = new Function('viewport', 'return event => {'+delta[1]+'};')({clientHeight:600});
+  assert.deepEqual(normalize({deltaMode:0,deltaX:50,deltaY:-70}),{dx:50,dy:-70});
+  assert.deepEqual(normalize({deltaMode:1,deltaX:2,deltaY:-3}),{dx:32,dy:-48});
+  assert.deepEqual(normalize({deltaMode:2,deltaX:1,deltaY:-1}),{dx:600,dy:-600});
 });

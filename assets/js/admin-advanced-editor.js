@@ -142,10 +142,14 @@
 		draft.layout.nodes[id] = fresh;
 		return fresh;
 	};
-	// Both pointer and keyboard movement share the same bounded layout policy.
+	// Infinite graph space uses signed layout coordinates. The numeric guard
+	// is purely for browser safety and is vastly larger than a visible canvas.
+	const LAYOUT_COORD_LIMIT = 1000000;
+	const layoutCoordinate = value => Math.round(Math.max(-LAYOUT_COORD_LIMIT, Math.min(LAYOUT_COORD_LIMIT, value)));
+	// Both pointer and keyboard movement use this same signed layout policy.
 	const moveNodeBy = (point, dx, dy) => {
-		const x = Math.round(Math.max(0, Math.min(1400 - 184, point.x + dx)));
-		const y = Math.round(Math.max(0, Math.min(900 - 110, point.y + dy)));
+		const x = layoutCoordinate(point.x + dx);
+		const y = layoutCoordinate(point.y + dy);
 		if (x === point.x && y === point.y) return false;
 		point.x = x; point.y = y;
 		return true;
@@ -154,8 +158,8 @@
 		const positions = draft.graph.nodes.map((node, index) => coords(node.id, index));
 		const minX = positions.length ? Math.min(...positions.map(p => p.x)) : 0;
 		const minY = positions.length ? Math.min(...positions.map(p => p.y)) : 0;
-		const maxX = positions.length ? Math.max(...positions.map(p => p.x + 184)) : 1400;
-		const maxY = positions.length ? Math.max(...positions.map(p => p.y + 110)) : 900;
+		const maxX = positions.length ? Math.max(...positions.map(p => p.x + 184)) : 184;
+		const maxY = positions.length ? Math.max(...positions.map(p => p.y + 110)) : 110;
 		return {x: minX, y: minY, width: Math.max(1, maxX - minX), height: Math.max(1, maxY - minY)};
 	};
 	const configCap = (node) => capabilities.find(item => item.available && eqRef(item.reference, node.config?.capability));
@@ -221,10 +225,25 @@
 		draft.graph.nodes.push({id, type, config: {}});
 		if (position && Number.isFinite(position.x) && Number.isFinite(position.y)) {
 			draft.layout.nodes[id] = {
-				x: Math.round(Math.max(0, Math.min(1400 - 184, position.x))),
-				y: Math.round(Math.max(0, Math.min(900 - 110, position.y))),
+				x: layoutCoordinate(position.x),
+				y: layoutCoordinate(position.y),
 			};
-		} else coords(id, draft.graph.nodes.length - 1);
+		} else {
+			// Place palette-added nodes in the currently visible region, not
+			// at a fixed global origin that may be miles away after panning.
+			const viewport = root.querySelector('[data-cb-design-canvas-viewport]');
+			const rect = viewport?.getBoundingClientRect();
+			if (canvasNavigation && rect?.width > 0 && rect?.height > 0) {
+				const center = canvasNavigation.clientToCanvas({
+					clientX: rect.left + rect.width / 2,
+					clientY: rect.top + rect.height / 2,
+				});
+				draft.layout.nodes[id] = {
+					x: layoutCoordinate(center.x - 92),
+					y: layoutCoordinate(center.y - 55),
+				};
+			} else coords(id, draft.graph.nodes.length - 1);
+		}
 		current = id;
 		mark(); rebuild();
 	};
@@ -242,8 +261,8 @@
 		draft.graph.nodes.splice(index + 1, 0, {id: newId, type: original.type, config});
 		const point = coords(id, index);
 		draft.layout.nodes[newId] = {
-			x: Math.min(1400 - 184, Math.max(0, point.x + 36)),
-			y: Math.min(900 - 110, Math.max(0, point.y + 36)),
+			x: layoutCoordinate(point.x + 36),
+			y: layoutCoordinate(point.y + 36),
 		};
 		// Edges are NOT duplicated; each typed port has exclusive occupancy.
 		selectedEdge = null;
@@ -305,7 +324,42 @@
 		}
 		return chosen;
 	};
+	// A dynamically positioned SVG covers graph nodes and the live cursor.
+	// SVG user coordinates remain identical to global graph coordinates.
+	const wireBounds = () => {
+		const b = contentBounds();
+		const xs = [b.x, b.x + b.width];
+		const ys = [b.y, b.y + b.height];
+		const includeCurve = (start, end) => {
+			const dx = Math.max(60, Math.abs(end.x - start.x) * .52);
+			xs.push(start.x, start.x + dx, end.x - dx, end.x);
+			ys.push(start.y, end.y);
+		};
+		for (const edge of draft.graph.edges) {
+			const from = find(edge.from), to = find(edge.to);
+			if (from && to) includeCurve(anchor(from, 'out', edge.from_port), anchor(to, 'in', edge.to_port));
+		}
+		if (draggingPort) {
+			const from = find(draggingPort.id);
+			if (from) includeCurve(anchor(from, 'out', draggingPort.port), draggingPort.cursor);
+		}
+		const pad = 96;
+		const x = Math.floor(Math.min(...xs) - pad);
+		const y = Math.floor(Math.min(...ys) - pad);
+		const right = Math.ceil(Math.max(...xs) + pad);
+		const bottom = Math.ceil(Math.max(...ys) + pad);
+		return {x, y, width: right - x, height: bottom - y};
+	};
+	const positionWires = () => {
+		const b = wireBounds();
+		wires.style.left = b.x + 'px';
+		wires.style.top = b.y + 'px';
+		wires.style.width = b.width + 'px';
+		wires.style.height = b.height + 'px';
+		wires.setAttribute('viewBox', b.x + ' ' + b.y + ' ' + b.width + ' ' + b.height);
+	};
 	const renderEdges = () => {
+		positionWires();
 		wires.replaceChildren();
 		for (const edge of draft.graph.edges) {
 			const from = find(edge.from), to = find(edge.to);

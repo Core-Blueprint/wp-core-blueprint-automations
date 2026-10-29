@@ -63,11 +63,49 @@ if (root instanceof HTMLElement) {
 					},
 					historyLimit: 100,
 				});
+				const paintGrid = view => {
+					// Base owns pan, scale and scroll coordinates. The grid lives
+					// on the viewport and therefore has no physical end.
+					const scale = Math.max(0.0001, view.scale);
+					viewport.style.setProperty('--cb-advanced-grid-step', (22 * scale) + 'px');
+					viewport.style.setProperty('--cb-advanced-grid-x', (view.x - view.scrollLeft) + 'px');
+					viewport.style.setProperty('--cb-advanced-grid-y', (view.y - view.scrollTop) + 'px');
+				};
 				canvasNavigation = createDesignerCanvasNavigation({
 					root, viewport, scene,
 					getContentBounds: graph.getContentBounds,
 					getContextKey: graph.contextKey,
 					isReady: () => root.isConnected && !root.hidden,
+					onViewChange: paintGrid,
+				});
+				// Keep native wheel/trackpad scrolling in sync with Base's
+				// public viewport snapshot, rather than introducing a pan engine.
+				viewport.addEventListener('scroll', () => {
+					if (canvasNavigation) paintGrid(canvasNavigation.getView());
+				}, {passive:true});
+				// Removing a finite scene removes the browser's former overflow
+				// scrollbar. Route wheel/trackpad gestures to the SAME Base pan
+				// controller, never to a second matrix or transform implementation.
+				const wheelDelta = event => {
+					const unit = event.deltaMode === 1 ? 16
+						: event.deltaMode === 2 ? Math.max(1, viewport.clientHeight) : 1;
+					return {dx: event.deltaX * unit, dy: event.deltaY * unit};
+				};
+				viewport.addEventListener('wheel', event => {
+					// Respect browser pinch-to-zoom and modified wheel shortcuts.
+					if (event.ctrlKey || event.metaKey || event.altKey || root.hidden) return;
+					const {dx,dy} = wheelDelta(event);
+					if ((dx || dy) && canvasNavigation?.panBy(-dx, -dy)) event.preventDefault();
+				}, {passive:false});
+				viewport.addEventListener('keydown', event => {
+					// Node-title arrow keys move nodes. Only the viewport itself pans.
+					if (event.target !== viewport || event.ctrlKey || event.metaKey || event.altKey) return;
+					const step = event.shiftKey ? 128 : 48;
+					const delta = {
+						ArrowLeft:[step,0], ArrowRight:[-step,0],
+						ArrowUp:[0,step], ArrowDown:[0,-step],
+					}[event.key];
+					if (delta && canvasNavigation?.panBy(...delta)) event.preventDefault();
 				});
 				contextMenu = createDesignerContextMenu({
 					root, viewport,
