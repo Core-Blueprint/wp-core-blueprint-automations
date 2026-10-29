@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ADV-03 consolidated source-to-installable-ZIP acceptance gate.
+# Never edits WordPress, never uses WP-CLI, never deploys or merges.
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
+DIST="$ROOT/dist"
+PACKAGE="$DIST/core-blueprint-automations-1.0.0-rc2.zip"
+CHECKSUM="$PACKAGE.sha256"
+
+fail() {
+  printf 'ADV-03 functional-ready gate: FAIL: %s\n' "$*" >&2
+  exit 1
+}
+
+for executable in bash git php node python3 wp msgfmt zip unzip sha256sum; do
+  command -v "$executable" >/dev/null 2>&1 || fail "required local executable missing: $executable"
+done
+
+cd "$ROOT"
+[[ -z "$(git diff --name-only -- src assets templates languages core-blueprint-automations.php)" ]] ||
+  fail "tracked source modifications exist; cannot bind ZIP to HEAD"
+[[ -z "$(git diff --cached --name-only -- src assets templates languages core-blueprint-automations.php)" ]] ||
+  fail "staged source modifications exist; cannot bind ZIP to HEAD"
+[[ -z "$(git ls-files --others --exclude-standard -- src assets templates languages)" ]] ||
+  fail "untracked packaged source exists; cannot bind ZIP to HEAD"
+
+SOURCE_HEAD="$(git rev-parse --verify HEAD)"
+[[ -n "$SOURCE_HEAD" ]] || fail 'cannot resolve git SOURCE HEAD'
+if [[ -z "${CB_AUTOMATIONS_BASE_FIXTURES_DIR:-}" ]]; then
+  export CB_AUTOMATIONS_BASE_FIXTURES_DIR="$HOME/Downloads/cb-automations-base-pins"
+fi
+
+printf '\n==> ADV-03 SOURCE %s\n' "$SOURCE_HEAD"
+printf '==> Verifying pinned immutable Base fixtures\n'
+bash "$ROOT/tools/prepare-base-fixtures" --verify
+
+printf '\n==> Full PHP + JavaScript regression matrix\n'
+bash "$ROOT/tools/test-regressions"
+
+printf '\n==> Canonical translation catalogs (six locales)\n'
+bash "$ROOT/tools/i18n/check"
+
+printf '\n==> Creating native WordPress test ZIP\n'
+bash "$ROOT/tools/build-release"
+
+[[ -s "$PACKAGE" && -s "$CHECKSUM" ]] || fail 'expected RC2 package/checksum missing'
+printf '\n==> Checking archive structure and SHA-256\n'
+unzip -tq "$PACKAGE"
+(
+  cd "$DIST"
+  sha256sum -c "$(basename "$CHECKSUM")"
+)
+
+printf '\nADV-03 FUNCTIONAL READY SOURCE/BUILD: PASS\n'
+printf 'SOURCE HEAD: %s\n' "$SOURCE_HEAD"
+printf 'PACKAGE: %s\n' "$PACKAGE"
+sha256sum "$PACKAGE"
+printf 'WORDPRESS FIELD: OPEN — not certified by the build gate\n'
+printf 'PRODUCTION ADVANCED EXECUTION / RELEASE: HOLD\n'
