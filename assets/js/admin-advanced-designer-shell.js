@@ -63,12 +63,26 @@ if (root instanceof HTMLElement) {
 					},
 					historyLimit: 100,
 				});
+				const paintGrid = view => {
+					// Base owns pan, scale and scroll coordinates. The grid lives
+					// on the viewport and therefore has no physical end.
+					const scale = Math.max(0.0001, view.scale);
+					viewport.style.setProperty('--cb-advanced-grid-step', (22 * scale) + 'px');
+					viewport.style.setProperty('--cb-advanced-grid-x', (view.x - view.scrollLeft) + 'px');
+					viewport.style.setProperty('--cb-advanced-grid-y', (view.y - view.scrollTop) + 'px');
+				};
 				canvasNavigation = createDesignerCanvasNavigation({
 					root, viewport, scene,
 					getContentBounds: graph.getContentBounds,
 					getContextKey: graph.contextKey,
 					isReady: () => root.isConnected && !root.hidden,
+					onViewChange: paintGrid,
 				});
+				// Keep native wheel/trackpad scrolling in sync with Base's
+				// public viewport snapshot, rather than introducing a pan engine.
+				viewport.addEventListener('scroll', () => {
+					if (canvasNavigation) paintGrid(canvasNavigation.getView());
+				}, {passive:true});
 				contextMenu = createDesignerContextMenu({
 					root, viewport,
 					getContextKey: graph.contextKey,
