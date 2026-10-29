@@ -86,6 +86,7 @@
 	let draggingPort = null;
 	let selectedEdge = null;
 	let simulatedRoute = null;
+	let previewEpoch = 0;
 	let suppressPortClick = false;
 	const releaseTargets = () => {
 		for (const release of releaseMenuTargets.splice(0)) release();
@@ -109,6 +110,7 @@
 		if (dirtyLabel) dirtyLabel.textContent = changed ? 'Unsaved changes' : '';
 	};
 	const mark = () => {
+		previewEpoch++;
 		// Read-only simulation is valid only for the last saved revision and
 		// must never survive a new local graph/name mutation.
 		if (simulatedRoute) {
@@ -655,6 +657,7 @@
 		restoreHistory(rootData) {
 			if (!rootData || !rootData.definition || typeof rootData.name !== 'string') return;
 			draft = clone(rootData.definition);
+			previewEpoch++;
 			simulatedRoute = null;
 			if (previewResult) previewResult.textContent = 'Workflow history changed. Run a new simulation.';
 			if (nameField) nameField.value = rootData.name;
@@ -787,6 +790,7 @@
 			fixture_json: previewFixture.value || '{}',
 		});
 		previewButton.disabled = true;
+		const requestEpoch = previewEpoch;
 		previewResult.textContent = 'Simulating saved workflow route…';
 		try {
 			const response = await fetch(previewAction.value, {
@@ -795,6 +799,11 @@
 				body: payload.toString(),
 			});
 			const json = await response.json();
+			// An in-flight request cannot repaint a workflow edited since submit.
+			if (requestEpoch !== previewEpoch || changed) {
+				previewResult.textContent = 'Workflow changed while testing. Save and reopen, then test again.';
+				return;
+			}
 			if (!response.ok || json?.success !== true || !Array.isArray(json.data?.nodes)) {
 				throw new Error(json?.data?.message || 'Route simulation was not available.');
 			}
@@ -819,6 +828,7 @@
 			const detail = make('p', 'description', skipped + ' node(s) were not on the simulated route.');
 			previewResult.replaceChildren(title, list, detail);
 		} catch (error) {
+			if (requestEpoch !== previewEpoch || changed) return;
 			previewResult.textContent = 'Simulation unavailable: ' + String(error?.message || 'unknown error').slice(0, 180);
 		} finally {
 			previewButton.disabled = false;

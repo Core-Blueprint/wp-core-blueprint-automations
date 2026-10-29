@@ -196,3 +196,11 @@ test('ADV-03A pointer cancellation rolls back instead of dirtying history', () =
 test('ADV-03C presentation CSS contains no JavaScript comments', () => {
   assert.doesNotMatch(stylesheet,/^\s*\/\/.*$/m);
 });
+
+test('ADV-03B discards late preview responses after graph edit or undo', () => {
+  assert.match(source, /let previewEpoch = 0/);
+  assert.match(source, /const requestEpoch = previewEpoch/);
+  assert.match(source, /if \(requestEpoch !== previewEpoch \|\| changed\)/);
+  assert.match(source, /previewEpoch\+\+/);
+  assert.match(source, /Workflow changed while testing/);
+});
