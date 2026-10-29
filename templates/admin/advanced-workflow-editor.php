@@ -53,6 +53,8 @@ if ( ! is_string( $payload ) ) {
 		<div class="cb-core-design-shell cb-advanced-editor-shell" data-cb-design-shell data-cb-advanced-root hidden>
 			<div class="cb-core-design-shell__toolbar cb-advanced-editor-toolbar">
 			<button type="button" class="button cb-core-button" data-cb-design-shell-fullscreen data-cb-design-shell-fullscreen-enter-label="<?php esc_attr_e( 'Open focus mode', 'core-blueprint-automations' ); ?>" data-cb-design-shell-fullscreen-exit-label="<?php esc_attr_e( 'Exit focus mode', 'core-blueprint-automations' ); ?>" aria-pressed="false"><span data-cb-design-shell-fullscreen-label><?php esc_html_e( 'Open focus mode', 'core-blueprint-automations' ); ?></span></button>
+				<button type="button" class="button cb-core-button" data-cb-advanced-undo disabled><?php esc_html_e( 'Undo', 'core-blueprint-automations' ); ?></button>
+				<button type="button" class="button cb-core-button" data-cb-advanced-redo disabled><?php esc_html_e( 'Redo', 'core-blueprint-automations' ); ?></button>
 				<button type="button" class="button cb-core-button" data-cb-advanced-fit>Fit to Screen</button>
 				<button type="submit" class="button button-primary cb-core-button cb-core-button--primary" data-cb-design-shell-primary-action data-cb-advanced-save><?php esc_html_e( 'Save automation', 'core-blueprint-automations' ); ?></button>
 			</div>
@@ -66,12 +68,13 @@ if ( ! is_string( $payload ) ) {
 					<button type="button" class="button" data-cb-advanced-add="action"><?php esc_html_e( 'Add action', 'core-blueprint-automations' ); ?></button>
 					<button type="button" class="button" data-cb-advanced-add="exclusive_merge">Merge</button>
 					<button type="button" class="button" data-cb-advanced-add="end">End</button>
-					<p class="description">Drag nodes to arrange them. Select a node to edit its capability or connect its output to another node.</p>
+					<p class="description">Drag nodes to arrange them. Connect by dragging an output port to an input, or use the keyboard: select an output, then an input. You can redirect a connected output to a free input. Escape cancels.</p>
+					<p class="cb-advanced-connection-status" id="cb-advanced-connection-status" data-cb-advanced-connection-status role="status" aria-live="polite" aria-atomic="true">Choose an output port to connect nodes.</p>
 				</aside>
 				<main class="cb-core-design-shell__canvas cb-advanced-editor-canvas" aria-label="Advanced workflow canvas">
 					<div class="cb-advanced-editor-canvas-scroll" data-cb-design-canvas-viewport tabindex="0" aria-label="Workflow canvas navigation">
 						<div class="cb-advanced-editor-scene" data-cb-advanced-scene data-cb-design-canvas-scene>
-							<svg aria-hidden="true" data-cb-advanced-wires viewBox="0 0 1400 900" preserveAspectRatio="xMinYMin meet"></svg>
+							<svg role="group" aria-label="Workflow connections" data-cb-advanced-wires viewBox="0 0 1400 900" preserveAspectRatio="xMinYMin meet"></svg>
 							<div data-cb-advanced-nodes data-cb-design-canvas-background></div>
 						</div>
 					</div>
@@ -83,6 +86,25 @@ if ( ! is_string( $payload ) ) {
 					<span class="cb-advanced-editor-unsaved" data-cb-advanced-dirty aria-live="polite"></span>
 					<h2><?php esc_html_e( 'Inspector', 'core-blueprint-automations' ); ?></h2>
 					<div data-cb-advanced-inspector tabindex="-1"><p class="description"><?php esc_html_e( 'Select a workflow step to inspect its context.', 'core-blueprint-automations' ); ?></p></div>
+					<section class="cb-advanced-route-preview">
+						<h2>Test Workflow</h2>
+						<p class="description">Simulate the route of the saved workflow. No actions or providers execute.</p>
+						<details class="cb-advanced-preview-fixtures">
+							<summary>Advanced sample outputs (JSON)</summary>
+							<label class="cb-advanced-field">
+								<span>Sample node outputs (JSON)</span>
+								<textarea data-cb-advanced-preview-fixtures rows="4" spellcheck="false" placeholder='{}'>{}</textarea>
+							</label>
+						</details>
+						<input type="hidden" data-cb-advanced-preview-nonce value="<?php echo esc_attr( wp_create_nonce( 'cb_automations_preview_advanced' ) ); ?>" />
+						<input type="hidden" data-cb-advanced-preview-action value="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" />
+						<div class="cb-advanced-preview-actions">
+							<button type="button" class="button" data-cb-advanced-preview-examples>Generate samples</button>
+							<button type="button" class="button" data-cb-advanced-preview-toggle>Flip Boolean samples</button>
+							<button type="button" class="button" data-cb-advanced-preview-run>Test route</button>
+						</div>
+						<div class="cb-advanced-route-preview__result" data-cb-advanced-preview-result role="status" aria-live="polite"></div>
+					</section>
 					<section class="cb-advanced-editor-validation" aria-live="polite">
 						<h2><?php esc_html_e( 'Workflow health', 'core-blueprint-automations' ); ?></h2>
 						<p class="description">Checks refresh after saving and reopening the draft. Activation remains disabled.</p>

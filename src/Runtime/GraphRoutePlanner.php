@@ -82,6 +82,74 @@ final class GraphRoutePlanner {
 		throw new \UnexpectedValueException( 'Advanced graph route exceeded the node bound.' );
 	}
 
+
+	/**
+	 * ADV-03B-R2: preview-only diagnostic inspection of a saved Advanced graph.
+	 * This shares transition() and GraphValidator with trace(), and NEVER
+	 * invokes providers, saves fixtures, or persists a run. Statuses describe
+	 * hypothetical visits, not executed Actions.
+	 *
+	 * @param array<string,mixed> $outputs
+	 * @return array{nodes:list<string>,decisions:array<string,bool>,results:array<string,array{status:string,reason:string,fixture:bool}>,complete:bool,blocked:?string,reason:?string}
+	 */
+	public function inspect( GraphDefinition $definition, array $outputs ): array {
+		$this->require_valid( $definition );
+		$nodes = $definition->graph()['nodes'];
+		$indexed = [];
+		$results = [];
+		$start = null;
+		foreach ( $nodes as $node ) {
+			$id = $node['id'];
+			$indexed[ $id ] = $node;
+			$results[ $id ] = [ 'status' => 'skipped', 'reason' => 'not_on_route', 'fixture' => isset( $outputs[ $id ] ) ];
+			if ( 'trigger' === $node['type'] ) $start = $id;
+		}
+		if ( null === $start ) throw new \UnexpectedValueException( 'Advanced graph has no trigger.' );
+		$path = []; $decisions = []; $seen = []; $current = $start;
+		while ( count( $path ) < count( $nodes ) ) {
+			if ( isset( $seen[ $current ] ) || ! isset( $indexed[ $current ] ) )
+				throw new \UnexpectedValueException( 'Advanced graph route revisited an invalid node.' );
+			$seen[ $current ] = true;
+			$path[] = $current;
+			$node = $indexed[ $current ];
+			$results[ $current ]['status'] = 'simulated';
+			$results[ $current ]['reason'] = 'route_only';
+			if ( 'end' === $node['type'] ) return [
+				'nodes' => $path, 'decisions' => $decisions, 'results' => $results,
+				'complete' => true, 'blocked' => null, 'reason' => null,
+			];
+			try {
+				$transition = self::transition( $definition, $current, $outputs );
+			} catch ( \UnexpectedValueException ) {
+				$missing = self::missing_condition_sample( $node, $outputs );
+				$reason = $missing ? 'sample_required' : 'condition_invalid';
+				$results[ $current ]['status'] = $missing ? 'blocked' : 'failed';
+				$results[ $current ]['reason'] = $reason;
+				return [
+					'nodes' => $path, 'decisions' => $decisions, 'results' => $results,
+					'complete' => false, 'blocked' => $current, 'reason' => $reason,
+				];
+			}
+			if ( null !== $transition['decision'] ) $decisions[ $current ] = $transition['decision'];
+			$current = $transition['to'];
+		}
+		throw new \UnexpectedValueException( 'Advanced preview route exceeded node bound.' );
+	}
+
+	/** @param array<string,mixed> $node @param array<string,mixed> $outputs */
+	private static function missing_condition_sample( array $node, array $outputs ): bool {
+		if ( 'if_else' !== $node['type'] ) return false;
+		foreach ( [ $node['config']['left'] ?? null, $node['config']['right'] ?? null ] as $binding ) {
+			if ( ! is_array( $binding ) || ( $binding['source'] ?? null ) !== 'step_output' ) continue;
+			$id = $binding['step_id'] ?? null;
+			$field = $binding['field'] ?? null;
+			if ( ! is_string( $id ) || ! is_string( $field )
+				|| ! isset( $outputs[ $id ] ) || ! is_array( $outputs[ $id ] )
+				|| ! array_key_exists( $field, $outputs[ $id ] ) ) return true;
+		}
+		return false;
+	}
+
 	/**
 	 * @param array<string,mixed> $outputs
 	 * @return array{from:string,to:string,port:string,decision:?bool}
