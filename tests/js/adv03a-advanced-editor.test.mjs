@@ -167,7 +167,7 @@ test('ADV-03B preview offers simple Boolean branch switching and hides expert JS
 
 // Behavior regression: only the chosen branch's actual edge IDs may light up.
 test('ADV-03B route preview highlights exact consecutive graph transitions', () => {
-  const match = source.match(/const tracedEdges = \(nodes, decisions\) => \{([\s\S]*?)\n\t\};\n\tconst wireBounds/);
+  const match = source.match(/const tracedEdges = \(nodes, decisions\) => \{([\s\S]*?)\n\t\};\n(?:\t\/\/[^\n]*\n)*\tconst wireBounds/);
   assert.ok(match, 'Route projector source is available');
   const edges = [
     {id:'t',from:'trigger',to:'choice',from_port:'next'},
