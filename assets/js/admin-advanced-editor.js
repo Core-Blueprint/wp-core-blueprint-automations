@@ -237,6 +237,19 @@
 		current = draft.graph.nodes[0]?.id || null;
 		mark(); rebuild();
 	};
+	// Only the real consecutive route transitions may be highlighted.
+	const tracedEdges = (nodes, decisions) => {
+		const chosen = new Set();
+		for (let i = 0; i < nodes.length - 1; i++) {
+			const from = find(nodes[i]);
+			const port = from?.type === 'if_else'
+				? (decisions[from.id] === true ? 'true' : 'false') : 'next';
+			const edge = draft.graph.edges.find(item =>
+				item.from === nodes[i] && item.to === nodes[i + 1] && item.from_port === port);
+			if (edge) chosen.add(edge.id);
+		}
+		return chosen;
+	};
 	const renderEdges = () => {
 		wires.replaceChildren();
 		for (const edge of draft.graph.edges) {
@@ -247,7 +260,7 @@
 			const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 			line.setAttribute('d', d);
 			const routeActive = simulatedRoute !== null;
-			const isOnRoute = routeActive && simulatedRoute.nodes.has(edge.from) && simulatedRoute.nodes.has(edge.to);
+			const isOnRoute = routeActive && simulatedRoute.edges.has(edge.id);
 			line.setAttribute('class', 'cb-advanced-edge' + (selectedEdge === edge.id ? ' is-selected' : '')
 				+ (routeActive ? (isOnRoute ? ' is-simulated' : ' is-not-on-route') : ''));
 			wires.append(line);
@@ -387,6 +400,7 @@
 				const start = canvasPoint(event);
 				const origin = {x: start.x, y: start.y, left: point.x, top: point.y};
 				const move = e => {
+					if (e.pointerId !== event.pointerId) return;
 					const now = canvasPoint(e);
 					const nx = Math.round(Math.max(0, Math.min(1400 - 184, origin.left + now.x - origin.x)));
 					const ny = Math.round(Math.max(0, Math.min(900 - 110, origin.top + now.y - origin.y)));
@@ -395,10 +409,16 @@
 					renderEdges();
 				};
 				const end = e => {
+					if (e.pointerId !== event.pointerId) return;
 					title.releasePointerCapture?.(e.pointerId);
 					title.removeEventListener('pointermove', move);
 					title.removeEventListener('pointerup', end);
 					title.removeEventListener('pointercancel', end);
+					if (e.type === 'pointercancel') {
+						point.x = origin.left; point.y = origin.top;
+						current = node.id; rebuild();
+						return;
+					}
 					if (origin.left !== point.x || origin.top !== point.y) mark();
 					current = node.id; rebuild();
 				};
@@ -778,7 +798,12 @@
 			if (!response.ok || json?.success !== true || !Array.isArray(json.data?.nodes)) {
 				throw new Error(json?.data?.message || 'Route simulation was not available.');
 			}
-			simulatedRoute = {nodes: new Set(json.data.nodes), decisions: json.data.decisions || {}};
+			const decisions = json.data.decisions || {};
+			simulatedRoute = {
+				nodes: new Set(json.data.nodes),
+				edges: tracedEdges(json.data.nodes, decisions),
+				decisions,
+			};
 			draw();
 			const title = make('strong', '', 'Route simulated. No actions were executed.');
 			const list = make('ol');

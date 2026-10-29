@@ -140,7 +140,8 @@ test('ADV-03C history uses public Base domain session and no parallel undo engin
 
 test('ADV-03B clearly labels and highlights a simulated route without persisting it', () => {
   assert.match(source, /let simulatedRoute = null/);
-  assert.match(source, /simulatedRoute = \{nodes: new Set\(json\.data\.nodes\), decisions:/);
+  assert.match(source, /nodes: new Set\(json\.data\.nodes\)/);
+  assert.match(source, /edges: tracedEdges\(json\.data\.nodes, decisions\)/);
   assert.match(source, /Route simulated\. No actions were executed/);
   assert.match(source, /not on the simulated route/);
   assert.match(source, /\bis-simulated\b/);
@@ -162,4 +163,36 @@ test('ADV-03B preview offers simple Boolean branch switching and hides expert JS
   assert.match(source, /field\?\.sensitive \|\| field\?\.type !== 'boolean'/);
   assert.match(source, /fields\[name\] = !fields\[name\]/);
   assert.match(stylesheet, /\.cb-advanced-preview-actions/);
+});
+
+// Behavior regression: only the chosen branch's actual edge IDs may light up.
+test('ADV-03B route preview highlights exact consecutive graph transitions', () => {
+  const match = source.match(/const tracedEdges = \(nodes, decisions\) => \{([\s\S]*?)\n\t\};\n\tconst renderEdges/);
+  assert.ok(match, 'Route projector source is available');
+  const edges = [
+    {id:'t',from:'trigger',to:'choice',from_port:'next'},
+    {id:'yes',from:'choice',to:'yesNode',from_port:'true'},
+    {id:'no',from:'choice',to:'noNode',from_port:'false'},
+    {id:'ymerge',from:'yesNode',to:'merge',from_port:'next'},
+    {id:'nmerge',from:'noNode',to:'merge',from_port:'next'},
+    {id:'end',from:'merge',to:'end',from_port:'next'},
+    {id:'shortcut',from:'trigger',to:'merge',from_port:'unused'},
+  ];
+  const nodeSet=['trigger','choice','yesNode','noNode','merge','end']
+    .map(id=>({id,type:id==='choice'?'if_else':'action'}));
+  const draft={graph:{edges}};
+  const find=id=>nodeSet.find(n=>n.id===id);
+  const trace=new Function('draft','find','nodes','decisions',match[1]);
+  const yes=trace(draft,find,['trigger','choice','yesNode','merge','end'],{choice:true});
+  const no=trace(draft,find,['trigger','choice','noNode','merge','end'],{choice:false});
+  assert.deepEqual([...yes].sort(),['t','yes','ymerge','end'].sort());
+  assert.deepEqual([...no].sort(),['t','no','nmerge','end'].sort());
+  assert.ok(!yes.has('shortcut')&&!no.has('shortcut'));
+});
+test('ADV-03A pointer cancellation rolls back instead of dirtying history', () => {
+  assert.match(source,/if \(e\.type === 'pointercancel'\) \{[\s\S]*?point\.x = origin\.left; point\.y = origin\.top;/);
+  assert.match(source,/if \(e\.pointerId !== event\.pointerId\) return;/);
+});
+test('ADV-03C presentation CSS contains no JavaScript comments', () => {
+  assert.doesNotMatch(stylesheet,/^\s*\/\/.*$/m);
 });
