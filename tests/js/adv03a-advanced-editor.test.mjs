@@ -285,15 +285,16 @@ test('ADV-03 R4 link selection retains keyboard focus and pressed state', () => 
 test('ADV-03C keyboard node movement shares bounded pointer layout and preserves focus', () => {
   const snippet = source.match(/const moveNodeBy = \(point, dx, dy\) => \{([\s\S]*?)\n\t\};\n\tconst contentBounds/);
   assert.ok(snippet, 'shared node coordinate policy exists');
-  const move = new Function('return (point,dx,dy) => {'+snippet[1]+'};')();
+  const move = new Function('layoutCoordinate','return (point,dx,dy) => {'+snippet[1]+'};')(
+    value => Math.round(Math.max(-1000000, Math.min(1000000,value))));
   const point={x:45,y:80};
   assert.ok(move(point,1,0));
   assert.deepEqual(point,{x:46,y:80});
   assert.ok(move(point,-2000,-2000));
-  assert.deepEqual(point,{x:0,y:0});
-  assert.ok(!move(point,-1,0), 'no History entry when clamped at boundary');
+  assert.deepEqual(point,{x:-1954,y:-1920});
+  assert.ok(move(point,-1,0), 'negative space remains writable');
   assert.ok(move(point,10000,10000));
-  assert.deepEqual(point,{x:1216,y:790});
+  assert.deepEqual(point,{x:8045,y:8080});
   assert.match(source,/title\.setAttribute\('aria-keyshortcuts'/);
   assert.match(source,/event\.shiftKey \? 10 : 1/);
   assert.match(source,/title\.addEventListener\('keydown', event =>/);
@@ -327,4 +328,35 @@ test('ADV-03B-R2 status projection uses only allowlisted server metadata', () =>
 test('ADV-03B-R2 refreshes Inspector and canvas together after new/invalidated simulation', () => {
   assert.match(source, /decisions, results, complete: json\.data\.complete,[\s\S]*?draw\(\); inspect\(\);/);
   assert.match(source, /const invalidateSamplePreview = \(\) => \{[\s\S]*?simulatedRoute = null;\n\t\t\tdraw\(\); inspect\(\);/);
+});
+
+test('ADV-03C Infinite Canvas uses signed coordinates and a dynamic connection SVG', () => {
+  assert.match(source, /const LAYOUT_COORD_LIMIT = 1000000/);
+  assert.match(source, /const layoutCoordinate = value =>/);
+  assert.match(source, /const wireBounds = \(\) =>/);
+  assert.match(source, /wires\.setAttribute\('viewBox', b\.x \+ ' ' \+ b\.y/);
+  assert.match(source, /clientX: rect\.left \+ rect\.width \/ 2/);
+  assert.doesNotMatch(source, /1400 - 184|900 - 110|Math\.max\(0, Math\.min\(1400/);
+  assert.match(stylesheet, /\.cb-advanced-editor-scene \{\s*width: 100%;/);
+  assert.match(stylesheet, /background-size: var\(--cb-advanced-grid-step, 22px\)/);
+  assert.doesNotMatch(stylesheet, /width: 1400px|height: 900px/);
+  assert.match(shellAdapter, /onViewChange: paintGrid/);
+  assert.match(shellAdapter, /view\.x - view\.scrollLeft/);
+  assert.match(shellAdapter, /view\.y - view\.scrollTop/);
+  assert.match(advancedTemplate, /data-cb-advanced-wires viewBox="0 0 1 1"/);
+});
+
+test('ADV-03C world coordinates allow distant nodes without overflowing saved graph limits', () => {
+  const limit = 1000000, coord = value => Math.round(Math.max(-limit, Math.min(limit,value)));
+  assert.strictEqual(coord(-5000), -5000);
+  assert.strictEqual(coord(1200000), 1000000);
+  assert.strictEqual(coord(-1200000), -1000000);
+  assert.strictEqual(coord(8045.4), 8045);
+  const boundsMatch = source.match(/const contentBounds = \(\) => \{([\s\S]*?)\n\t\};\n\tconst configCap/);
+  assert.ok(boundsMatch, 'graph bounds must be derived from content, not from a fixed canvas');
+  const draft = {graph:{nodes:[{id:'left'},{id:'right'}]},
+    layout:{nodes:{left:{x:-4200,y:-2700},right:{x:6200,y:4800}}}};
+  const coords = id => draft.layout.nodes[id];
+  const bounds = new Function('draft','coords','return () => {'+boundsMatch[1]+'};')(draft,coords)();
+  assert.deepEqual(bounds,{x:-4200,y:-2700,width:10584,height:7610});
 });
