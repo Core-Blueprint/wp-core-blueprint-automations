@@ -313,3 +313,13 @@ test('ADV-03C selected node and edge state stays accurate without replacing focu
   const edgeSelect=source.split('const selectConnection = () => {')[1].split('\n\t\t\t};')[0];
   assert.match(edgeSelect,/card\.classList\.remove\('is-selected'\)/);
 });
+
+test('ADV-03B-R2 status projection uses only allowlisted server metadata', () => {
+  assert.match(source, /const testStatusLabels = Object\.freeze/);
+  assert.match(source, /const testSummary = node =>/);
+  assert.match(source, /inspector\.append\(summary\)/);
+  assert.match(source, /results\[node\.id\] = \{status:result\.status,reason:result\.reason,fixture:result\.fixture\}/);
+  assert.match(source, /Simulation incomplete\. No actions were executed/);
+  assert.match(stylesheet, /\.cb-advanced-node\.is-test-blocked/);
+  assert.match(stylesheet, /\.cb-advanced-node\.is-test-failed/);
+});

@@ -231,3 +231,20 @@
 	color: var(--cb-text-muted);
 	overflow-wrap: anywhere;
 }
+
+/* ADV-03B-R2 diagnostic status. Simulated never means executed. */
+.cb-advanced-node.is-test-blocked { border-color:var(--cb-warning); }
+.cb-advanced-node.is-test-failed { border-color:var(--cb-error); }
+.cb-advanced-node-test-state { font-size:var(--cb-fs-xs); font-weight:var(--cb-fw-semibold);
+	padding-inline:var(--cb-space-3); color:var(--cb-text-strong); }
+.cb-advanced-node.is-test-blocked .cb-advanced-node-test-state,
+.cb-advanced-test-warning { color:var(--cb-warning); }
+.cb-advanced-node.is-test-failed .cb-advanced-node-test-state { color:var(--cb-error); }
+.cb-advanced-node-test-details { border-inline-start:3px solid var(--cb-accent);
+	padding:var(--cb-space-2) var(--cb-space-3); background:var(--cb-surface-2); margin-block:var(--cb-space-3); }
+.cb-advanced-node-test-details p { margin-block:var(--cb-space-1); }
+.cb-advanced-test-step { display:grid; gap:var(--cb-space-1); margin-block:var(--cb-space-2); }
+.cb-advanced-test-step > .button { text-align:start; overflow-wrap:anywhere; }
+.cb-advanced-test-step--blocked .button { border-color:var(--cb-warning); }
+.cb-advanced-test-step--failed .button { border-color:var(--cb-error); }
+.cb-advanced-test-step--skipped { opacity:.7; }

@@ -3,7 +3,7 @@
 Date: 28 October 2026 · Branch: `feature/automations-advanced-ux-test-batch-20261028`
 
 ## Product scope
-The Advanced Builder has a **Test Workflow** panel that asks for sample node-output JSON and sends a nonce-protected, privileged WordPress POST. It uses `GraphValidator` and the existing `GraphRoutePlanner::trace()` to show a simulated path and the IF/ELSE branch choices.
+The Advanced Builder has a **Test Workflow** panel that asks for sample node-output JSON and sends a nonce-protected, privileged WordPress POST. It uses `GraphValidator` and the existing read-only `GraphRoutePlanner` transition kernel to show route choices plus per-node diagnostic statuses.
 
 **This is a read-only route simulation, not actual workflow execution.** State/Action providers are **not** called; no side effects, jobs, run ledger records, checkpoint mutations, remote requests, activation changes, execution-principal rebinding or temporary database tables occur. The UI must clearly say so. Do not present a simulated node as an executed provider action.
 
@@ -19,8 +19,10 @@ The test fixture is POST-only and never persisted or reflected in the returned J
 
 ## Technical boundaries
 - `src/Admin/AdvancedRoutePreviewController.php` adds one **read-only** `admin_post_cb_automations_preview_advanced` handler with the same manager capability policy as editing, a dedicated nonce, workflow identity, exact server revision and disabled-v2 check.
-- The handler independently decodes JSON, runs `GraphValidator`, verifies fixture node IDs and output field schemas, then calls `GraphRoutePlanner::trace`.
-- Results consist only of a list of node IDs plus a map of branch decisions. User-supplied sample outputs are never returned.
+- The handler independently decodes JSON, runs `GraphValidator`, verifies fixture node IDs and output field schemas, then calls `GraphRoutePlanner::inspect`.
+- Results contain only graph node IDs, Boolean branch decisions, fixed status/reason codes and a Boolean fixture-present flag. **Fixture values are never returned**.
+- **Simulated** means hypothetical route traversal, not a successful provider invocation. **Skipped** means not on route. **Blocked** means a condition needs an upstream non-sensitive sample. **Failed** means simulated condition evaluation rejected its operands, not an actual Action failure.
+- Inspector and canvas show the fixed status and fixture presence only, never raw values or provider exceptions. The result list allows selecting nodes for inspection.
 - Existing Standard workflow UI, runtime admission, CLI sandbox, Action/State provider invocation, Base Designer Shell, save/CAS, graph codec, persistence, and worker remain unchanged.
 - Real controlled Advanced test execution with provider mocks, run statuses and step-level errors is **not implemented** by this read-only route-simulation slice. Never label it field-accepted ADV-03B execution until that additional safety and behavior evidence is available.
 
