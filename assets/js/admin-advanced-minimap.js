@@ -68,10 +68,12 @@ export const createAutomationsGraphMinimap = ({
 		sizeButton.disabled = collapsed;
 		sizeButton.setAttribute('aria-pressed', String(large));
 	};
-	const renderNow = (view = navigation.getView()) => {
+	const renderNow = () => {
 		queued = false;
+		// A pending frame must not access Base after pagehide/destroy.
 		if (destroyed || collapsed || !root.isConnected || root.hidden
 			|| !viewport.clientWidth || !viewport.clientHeight) return;
+		const view = navigation.getView();
 		if (!finite(view.scale) || view.scale <= 0) return;
 		const {nodes,edges} = getGraphSnapshot();
 		const visible = worldViewport(view, viewport.clientWidth, viewport.clientHeight);
@@ -102,7 +104,13 @@ export const createAutomationsGraphMinimap = ({
 	const queue = () => {
 		if (queued || destroyed) return;
 		queued = true;
-		(doc.defaultView?.requestAnimationFrame || (cb=>setTimeout(cb,16)))(() => renderNow());
+		// Preserve Window as the receiver: detached requestAnimationFrame can
+		// throw Illegal invocation and silently strand the minimap.
+		if (typeof doc.defaultView?.requestAnimationFrame === 'function') {
+			doc.defaultView.requestAnimationFrame(() => renderNow());
+		} else {
+			setTimeout(() => renderNow(), 16);
+		}
 	};
 	const point = (event, bounds) => {
 		const rect = svg.getBoundingClientRect();
