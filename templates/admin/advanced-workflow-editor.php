@@ -77,6 +77,7 @@ if ( ! is_string( $payload ) ) {
 					<p class="cb-advanced-connection-status" id="cb-advanced-connection-status" data-cb-advanced-connection-status role="status" aria-live="polite" aria-atomic="true">Choose an output port to connect nodes.</p>
 				</aside>
 				<main class="cb-core-design-shell__canvas cb-advanced-editor-canvas" aria-label="Advanced workflow canvas">
+					<div class="cb-advanced-editor-canvas-frame">
 					<div class="cb-advanced-editor-canvas-scroll" data-cb-design-canvas-viewport tabindex="0" aria-label="Workflow canvas navigation">
 						<div class="cb-advanced-editor-scene" data-cb-advanced-scene data-cb-design-canvas-scene>
 							<svg role="group" aria-label="Workflow connections" data-cb-advanced-wires viewBox="0 0 1 1" preserveAspectRatio="xMinYMin meet"></svg>
@@ -93,6 +94,7 @@ if ( ! is_string( $payload ) ) {
 								<svg data-cb-advanced-minimap-svg tabindex="0" role="img" aria-label="<?php esc_attr_e( 'Workflow overview. Click to navigate; drag the viewport rectangle to pan.', 'core-blueprint-automations' ); ?>" preserveAspectRatio="xMidYMid meet" viewBox="0 0 1 1"></svg>
 							</div>
 						</div>
+					</div>
 				</main>
 				<aside class="cb-core-design-shell__sidebar cb-core-design-shell__sidebar--composed cb-advanced-editor-inspector" aria-label="Node Inspector">
 					<label class="cb-advanced-editor-name"><?php esc_html_e( 'Automation name', 'core-blueprint-automations' ); ?>

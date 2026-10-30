@@ -46,3 +46,17 @@ After both PRs pass canonical independent and paired Level 1 checks:
 
 No production Advanced v2 execution, Base public merge, Automations merge,
 deployment or public release without separate explicit approval.
+
+## ADV-03D FIELD polish — minimap positioning (2026-10-30)
+
+Base native fullscreen explicitly resets `.cb-core-design-shell__canvas` to
+`position: static`. Previously the minimap was absolutely positioned relative
+to a more distant shell ancestor, overlapping the toolbar and Inspector.
+The consumer now wraps **only** its graph viewport and minimap within a nested
+`.cb-advanced-editor-canvas-frame` (`position: relative; isolation: isolate`).
+The minimap is a direct sibling of the viewport and cannot inherit the scene's
+pan/zoom transform. This avoids overrides of Base shared fullscreen selectors.
+All Base Canvas Navigation/ContextMenu/History APIs stay unchanged.
+
+FIELD polish check: desktop and responsive/collapsed sidebars, minimap header
+entirely inside canvas top-right, and canvas zoom/pan/pointer drag unaffected.
