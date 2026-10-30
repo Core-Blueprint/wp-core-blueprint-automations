@@ -507,7 +507,9 @@
 					// existing output-source preview and graph mutation authority;
 					// pointer movement NEVER mutates the stored edge.
 					control.addEventListener('pointerdown', event => {
-						if (event.button !== 0 || event.defaultPrevented) return;
+						// Do not steal an armed keyboard output connection or a
+						// gesture already owned by another pointer.
+						if (event.button !== 0 || event.defaultPrevented || pendingPort || draggingPort) return;
 						const edge = draft.graph.edges.find(item => item.to === node.id && item.to_port === port);
 						if (!edge) return;
 						event.preventDefault(); event.stopPropagation();

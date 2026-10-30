@@ -28,6 +28,7 @@ test('ADV-03F drag starts only for occupied inputs and retains immutable capture
   assert.match(source,/if \(side==='in'\) \{/);
   assert.match(source,/const edge = draft\.graph\.edges\.find\(item => item\.to === node\.id && item\.to_port === port\)/);
   assert.match(source,/if \(!edge\) return;/);
+  assert.match(source,/event\.defaultPrevented \|\| pendingPort \|\| draggingPort\) return;/);
   assert.match(source,/detachedEdgeId: edge\.id/);
   assert.match(source,/control\.setPointerCapture\?\.\(event\.pointerId\)/);
   assert.match(source,/request\.moved \|\|= Math\.hypot/);
