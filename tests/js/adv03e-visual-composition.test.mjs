@@ -25,6 +25,8 @@ test('ADV-03E both sidebars adopt exactly one canonical Base panel + panel body'
     const panel=html.indexOf(panelType),body=html.indexOf('cb-core-design-shell__panel-body');
     assert.ok(body>panel,'content inset inside panel');
     assert.match(html,/class="cb-core-design-shell__panel-section/);
+    assert.doesNotMatch(html,/aria-label="(?:Node types|Node connection instructions|Automation details|Node settings)"/,
+      'avoid new untranslated accessibility labels');
     assert.equal((html.match(/cb-core-design-shell__tabs/g)||[]).length,0,
       'no decorative tabs without product necessity');
   }

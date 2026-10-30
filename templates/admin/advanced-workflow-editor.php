@@ -67,7 +67,7 @@ if ( ! is_string( $payload ) ) {
 				<aside class="cb-core-design-shell__palette cb-core-design-shell__palette--composed cb-advanced-editor-palette" aria-label="Advanced nodes">
 					<div class="cb-core-design-shell__panel cb-advanced-editor-palette-panel">
 						<div class="cb-core-design-shell__panel-body">
-							<section class="cb-core-design-shell__panel-section" aria-label="Node types">
+							<section class="cb-core-design-shell__panel-section">
 							<h2 class="cb-core-design-shell__panel-section-title">Nodes</h2>
 					<p class="description">Select a node type to place it on the canvas.</p>
 					<button type="button" class="button" data-cb-advanced-add="trigger"><?php esc_html_e( 'Trigger', 'core-blueprint-automations' ); ?></button>
@@ -77,7 +77,7 @@ if ( ! is_string( $payload ) ) {
 					<button type="button" class="button" data-cb-advanced-add="exclusive_merge">Merge</button>
 					<button type="button" class="button" data-cb-advanced-add="end">End</button>
 							</section>
-							<section class="cb-core-design-shell__panel-section" aria-label="Node connection instructions">
+							<section class="cb-core-design-shell__panel-section">
 					<p class="description">Drag nodes to arrange them. Connect by dragging an output port to an input, or use the keyboard: select an output, then an input. You can redirect a connected output to a free input. Escape cancels.</p>
 					<p class="cb-advanced-connection-status" id="cb-advanced-connection-status" data-cb-advanced-connection-status role="status" aria-live="polite" aria-atomic="true">Choose an output port to connect nodes.</p>
 							</section>
@@ -107,13 +107,13 @@ if ( ! is_string( $payload ) ) {
 				<aside class="cb-core-design-shell__sidebar cb-core-design-shell__sidebar--composed cb-advanced-editor-inspector" aria-label="Node Inspector">
 					<div class="cb-core-design-shell__panel cb-core-design-shell__sidebar-panel cb-advanced-editor-inspector-panel">
 						<div class="cb-core-design-shell__panel-body">
-							<section class="cb-core-design-shell__panel-section" aria-label="Automation details">
+							<section class="cb-core-design-shell__panel-section">
 					<label class="cb-advanced-editor-name"><?php esc_html_e( 'Automation name', 'core-blueprint-automations' ); ?>
 						<input type="text" name="name" value="<?php echo esc_attr( $record->name() ); ?>" maxlength="191" required />
 					</label>
 					<span class="cb-advanced-editor-unsaved" data-cb-advanced-dirty aria-live="polite"></span>
 							</section>
-							<section class="cb-core-design-shell__panel-section" aria-label="Node settings">
+							<section class="cb-core-design-shell__panel-section">
 					<h2 class="cb-core-design-shell__panel-section-title"><?php esc_html_e( 'Inspector', 'core-blueprint-automations' ); ?></h2>
 					<div data-cb-advanced-inspector tabindex="-1"><p class="description"><?php esc_html_e( 'Select a workflow step to inspect its context.', 'core-blueprint-automations' ); ?></p></div>
 							</section>
