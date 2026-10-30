@@ -362,6 +362,9 @@
 		positionWires();
 		wires.replaceChildren();
 		for (const edge of draft.graph.edges) {
+			// While dragging a connected input, the old endpoint is replaced by
+			// a preview to the cursor. The persisted edge stays untouched.
+			if (draggingPort?.detachedEdgeId === edge.id && draggingPort.moved) continue;
 			const from = find(edge.from), to = find(edge.to);
 			if (!from || !to) continue;
 			const start = anchor(from, 'out', edge.from_port), end = anchor(to, 'in', edge.to_port);
@@ -414,7 +417,7 @@
 			wires.append(label);
 		}
 		const source = draggingPort || pendingPort;
-		if (source) {
+		if (source && (!draggingPort?.detachedEdgeId || draggingPort.moved)) {
 			const node = find(source.id);
 			if (node) {
 				const start = anchor(node, 'out', source.port);
@@ -448,6 +451,22 @@
 	const inputAt = (x, y) => {
 		const input = document.elementFromPoint(x,y)?.closest?.('[data-cb-advanced-port-side="in"]');
 		return input && layer.contains(input) ? input : null;
+	};
+	// Disconnect only when released onto genuine blank canvas. Never treat a
+	// sidebar, toolbar, node body, another port or SVG edge as empty space.
+	const blankCanvasAt = (x, y) => {
+		const target = document.elementFromPoint(x,y);
+		const viewport = root.querySelector('[data-cb-design-canvas-viewport]');
+		return !!(target && viewport?.contains(target)
+			&& !target.closest?.('[data-cb-design-canvas-object], [data-cb-advanced-edge-id], [data-cb-advanced-port-side]'));
+	};
+	// Pure commit decision: pointer movement only previews; data mutation is
+	// deferred until release, leaving click, Escape and invalid drops inert.
+	const inputDragOutcome = (request, target, blankCanvas) => {
+		if (!request.moved) return 'cancel';
+		if (target) return target.node === request.inputNode && target.port === request.inputPort
+			? 'cancel' : 'rewire';
+		return blankCanvas ? 'disconnect' : 'cancel';
 	};
 	// Selection is transient and should not rebuild focused DOM controls.
 	const selectNode = id => {
@@ -484,6 +503,74 @@
 							}
 						} else selectNode(node.id);
 					});
+					// ADV-03F: an occupied input is a detachable endpoint. Use the
+					// existing output-source preview and graph mutation authority;
+					// pointer movement NEVER mutates the stored edge.
+					control.addEventListener('pointerdown', event => {
+						// Do not steal an armed keyboard output connection or a
+						// gesture already owned by another pointer.
+						if (event.button !== 0 || event.defaultPrevented || pendingPort || draggingPort) return;
+						const edge = draft.graph.edges.find(item => item.to === node.id && item.to_port === port);
+						if (!edge) return;
+						event.preventDefault(); event.stopPropagation();
+						pendingPort = null;
+						draggingPort = {
+							id: edge.from, port: edge.from_port, detachedEdgeId: edge.id,
+							inputNode: node.id, inputPort: port,
+							pointerId: event.pointerId, startX: event.clientX, startY: event.clientY,
+							moved: false, cursor: canvasPoint(event),
+						};
+						control.setPointerCapture?.(event.pointerId);
+						announceConnection('Drag to a free input to redirect, or release on empty canvas to disconnect. Escape cancels.');
+						refreshPorts(); renderEdges();
+					});
+					control.addEventListener('pointermove', event => {
+						if (!draggingPort?.detachedEdgeId || draggingPort.pointerId !== event.pointerId) return;
+						draggingPort.cursor = canvasPoint(event);
+						if (Math.hypot(event.clientX - draggingPort.startX, event.clientY - draggingPort.startY) > 6) {
+							draggingPort.moved = true;
+						}
+						renderEdges();
+					});
+					control.addEventListener('pointerup', event => {
+						if (!draggingPort?.detachedEdgeId || draggingPort.pointerId !== event.pointerId) return;
+						const request = draggingPort;
+						// Fast gestures can end before the final pointermove is delivered.
+						request.moved ||= Math.hypot(event.clientX - request.startX, event.clientY - request.startY) > 6;
+						const target = inputAt(event.clientX, event.clientY);
+						const targetPort = target && {
+							node: target.dataset.cbAdvancedPortNode, port: target.dataset.cbAdvancedPort,
+						};
+						const outcome = inputDragOutcome(request, targetPort, !target && blankCanvasAt(event.clientX, event.clientY));
+						draggingPort = null;
+						control.releasePointerCapture?.(event.pointerId);
+						// Explicit identity fence: never change an edge that was replaced
+						// or removed during this gesture (e.g. by Undo/Redo).
+						const stillBound = draft.graph.edges.some(edge =>
+							edge.id === request.detachedEdgeId && edge.from === request.id
+							&& edge.from_port === request.port && edge.to === request.inputNode
+							&& edge.to_port === request.inputPort);
+						if (!stillBound) { cancelPort('Connection changed during drag.'); return; }
+						if (outcome === 'rewire' && canConnect(request.id, request.port, targetPort.node, targetPort.port, true)) {
+							connect(request.id, request.port, targetPort.node, targetPort.port, true);
+						} else if (outcome === 'disconnect') {
+							deleteEdge(request.detachedEdgeId);
+						} else if (outcome === 'rewire') {
+							cancelPort('That input is occupied, incompatible, or would create a cycle. Connection kept.');
+						} else {
+							cancelPort('Connection kept.');
+							// Some browsers suppress click after pointer capture; a
+							// simple input press still selects its node, without editing.
+							if (!request.moved) selectNode(node.id);
+						}
+					});
+					const cancelInputDrag = event => {
+						if (draggingPort?.detachedEdgeId && draggingPort.pointerId === event.pointerId) {
+							cancelPort('Connection cancelled.');
+						}
+					};
+					control.addEventListener('pointercancel', cancelInputDrag);
+					control.addEventListener('lostpointercapture', cancelInputDrag);
 				} else {
 					control.addEventListener('click', event => {
 						// Pointerup already handles primary mouse and touch clicks;
