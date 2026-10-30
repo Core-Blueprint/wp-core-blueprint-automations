@@ -7,9 +7,11 @@ const styles=readFileSync(new URL('../../assets/css/admin-advanced-editor.css',i
 
 // Extract the pure endpoint decision from the real shipping classic-script
 // renderer, to exercise actual release behavior without duplicating a planner.
-const match=source.match(/const inputDragOutcome = ([\\s\\S]*?);\\n\\t\\/\\/ Selection is transient/);
-assert.ok(match,'input drag decision is present in shipping renderer');
-const inputDragOutcome=Function('return ('+match[1]+')')();
+const decisionStart=source.indexOf('const inputDragOutcome = ');
+const decisionEnd=source.indexOf('\n\t// Selection is transient',decisionStart);
+assert.ok(decisionStart>=0 && decisionEnd>decisionStart,'input drag decision exists');
+const decisionBody=source.slice(decisionStart+'const inputDragOutcome = '.length,decisionEnd).trim().replace(/;$/,'');
+const inputDragOutcome=Function('return ('+decisionBody+')')();
 
 test('ADV-03F endpoint release classifier never mutates on a click, invalid drop or original input',()=>{
   const source={moved:false,inputNode:'b',inputPort:'in'};
@@ -38,7 +40,7 @@ test('ADV-03F drag starts only for occupied inputs and retains immutable capture
 test('ADV-03F transient preview hides only dragged edge, never mutates document in pointermove',()=>{
   assert.match(source,/if \(draggingPort\?\.detachedEdgeId === edge\.id && draggingPort\.moved\) continue/);
   assert.match(source,/source && \(!draggingPort\?\.detachedEdgeId \|\| draggingPort\.moved\)/);
-  const inputMove=source.match(/control\.addEventListener\('pointermove', event => \{\n\t{6}if \(!draggingPort\?\.detachedEdgeId[\\s\\S]*?\n\t{5}\}\);/);
+  const inputMove=source.match(/control\.addEventListener\('pointermove', event => \{\n\t{6}if \(!draggingPort\?\.detachedEdgeId[\s\S]*?\n\t{5}\}\);/);
   assert.ok(inputMove,'connected-input move handler exists');
   assert.doesNotMatch(inputMove[0],/deleteEdge\(|connect\(|mark\(|rebuild\(/);
   assert.match(source,/canvasNavigation\.clientToCanvas\(/);
@@ -54,4 +56,26 @@ test('ADV-03F only blank viewport can delete; occupied or incompatible targets n
   assert.match(source,/draft\.graph\.edges\[index\] = \{\.\.\.old, to, to_port: toPort\}/);
   assert.match(source,/const deleteEdge = id =>/);
   assert.match(source,/mark\(\); rebuild\(\)/);
+});
+
+test('ADV-03F uses one authoritative Base History mutation for rewire and disconnect',()=>{
+  const start=source.indexOf('const connect = ');
+  const end=source.indexOf('const addNode = ',start);
+  assert.ok(start>=0 && end>start);
+  const realOperations=source.slice(start,end);
+  const draft={graph:{edges:[{id:'edge-1',from:'a',from_port:'next',to:'b',to_port:'in'}]}};
+  let steps=0,rebuilds=0;
+  const operations=Function('draft','canConnect','uid','mark','rebuild','announceConnection',
+    'let pendingPort=null;let selectedEdge=null;\n'+realOperations+'\nreturn {connect,deleteEdge};'
+  )(draft,()=>true,()=>{throw Error('Unnecessary new edge identity')},
+    ()=>{steps++;},()=>{rebuilds++;},()=>{});
+  assert.equal(operations.connect('a','next','c','in',true),true);
+  assert.deepEqual(draft.graph.edges,[{id:'edge-1',from:'a',from_port:'next',to:'c',to_port:'in'}]);
+  assert.equal(steps,1,'rewire is exactly one History step');
+  assert.equal(rebuilds,1);
+  operations.deleteEdge('edge-1');
+  assert.deepEqual(draft.graph.edges,[]);
+  assert.equal(steps,2,'disconnect is exactly one further History step');
+  operations.deleteEdge('edge-1');
+  assert.equal(steps,2,'absent edge is never recorded');
 });
