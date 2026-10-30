@@ -36,36 +36,17 @@
 .cb-advanced-editor-name { display: flex; flex-direction: column; gap: var(--cb-space-2); font-size: var(--cb-fs-sm); font-weight: var(--cb-fw-semibold); }
 .cb-advanced-editor-name input { width: 100%; min-width: 0; }
 .cb-advanced-editor-unsaved { display: block; min-height: 1.2em; color: var(--cb-warning); font-size: var(--cb-fs-xs); }
-.cb-advanced-editor-workspace {
-	display: grid;
-	grid-template-columns:
-		var(--cb-design-left-track, minmax(200px, 240px))
-		minmax(0, 1fr)
-		var(--cb-design-right-track, minmax(250px, 300px));
-	gap: var(--cb-space-3);
-	flex: 1;
-	min-height: 0;
-}
-.cb-advanced-editor-palette,
-.cb-advanced-editor-inspector {
+/* ADV-03E: Base Designer Mode owns the grid, rails, borders, header rhythm,
+ * panel insets and scrolling. Only consumer content is styled below. */
+.cb-advanced-editor-palette .button { text-align: start; justify-content: flex-start; }
+.cb-advanced-editor-palette-panel,
+.cb-advanced-editor-inspector-panel {
+	flex: 1 1 auto;
 	min-width: 0;
 	min-height: 0;
-	padding: var(--cb-space-3);
-	border: 1px solid var(--cb-border);
-	border-radius: var(--cb-radius-md);
-	background: var(--cb-surface-1);
-	color: var(--cb-text);
+	overflow-x: hidden;
+	overflow-y: auto;
 }
-.cb-advanced-editor-palette {
-	display: flex;
-	flex-direction: column;
-	gap: var(--cb-space-2);
-	align-items: stretch;
-}
-.cb-advanced-editor-palette h2,
-.cb-advanced-editor-inspector h2 { font-size: var(--cb-fs-lg); margin: 0 0 var(--cb-space-2); }
-.cb-advanced-editor-palette .button { text-align: start; justify-content: flex-start; }
-.cb-advanced-editor-inspector { overflow: auto; }
 .cb-advanced-editor-inspector h3 { font-size: var(--cb-fs-lg); margin: var(--cb-space-3) 0 var(--cb-space-2); }
 .cb-advanced-editor-inspector h4 { font-size: var(--cb-fs-md); margin: var(--cb-space-5) 0 var(--cb-space-3); }
 .cb-advanced-editor-inspector .description { overflow-wrap: anywhere; }
@@ -187,9 +168,7 @@
 .cb-advanced-error { color: var(--cb-error); }
 .cb-advanced-editor-inspector [data-cb-advanced-inspector] > .button { margin: var(--cb-space-2); margin-inline-start: 0; }
 .cb-advanced-editor-validation {
-	margin-top: var(--cb-space-4);
-	padding-top: var(--cb-space-4);
-	border-top: 1px solid var(--cb-border);
+	min-width: 0;
 }
 .cb-advanced-editor-validation h2 { margin-top: 0; }
 .cb-advanced-editor-validation li { margin: var(--cb-space-2) 0; overflow-wrap: anywhere; }
@@ -203,9 +182,7 @@
 
 /* ADV-03B read-only, no-provider WordPress route simulation. */
 .cb-advanced-route-preview {
-	margin-top: var(--cb-space-4);
-	padding-top: var(--cb-space-4);
-	border-top: 1px solid var(--cb-border);
+	min-width: 0;
 }
 .cb-advanced-route-preview h2 { margin-top: 0; }
 .cb-advanced-route-preview__result { font-size: var(--cb-fs-sm); color: var(--cb-text-muted); margin-top: var(--cb-space-3); }

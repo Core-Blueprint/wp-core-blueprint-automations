@@ -65,7 +65,10 @@ if ( ! is_string( $payload ) ) {
 			</div>
 			<div class="cb-core-design-shell__workspace cb-core-design-shell__workspace--collapsible cb-advanced-editor-workspace">
 				<aside class="cb-core-design-shell__palette cb-core-design-shell__palette--composed cb-advanced-editor-palette" aria-label="Advanced nodes">
-					<h2>Nodes</h2>
+					<div class="cb-core-design-shell__panel cb-advanced-editor-palette-panel">
+						<div class="cb-core-design-shell__panel-body">
+							<section class="cb-core-design-shell__panel-section" aria-label="Node types">
+							<h2 class="cb-core-design-shell__panel-section-title">Nodes</h2>
 					<p class="description">Select a node type to place it on the canvas.</p>
 					<button type="button" class="button" data-cb-advanced-add="trigger"><?php esc_html_e( 'Trigger', 'core-blueprint-automations' ); ?></button>
 					<button type="button" class="button" data-cb-advanced-add="state"><?php esc_html_e( 'Add data lookup', 'core-blueprint-automations' ); ?></button>
@@ -73,8 +76,13 @@ if ( ! is_string( $payload ) ) {
 					<button type="button" class="button" data-cb-advanced-add="action"><?php esc_html_e( 'Add action', 'core-blueprint-automations' ); ?></button>
 					<button type="button" class="button" data-cb-advanced-add="exclusive_merge">Merge</button>
 					<button type="button" class="button" data-cb-advanced-add="end">End</button>
+							</section>
+							<section class="cb-core-design-shell__panel-section" aria-label="Node connection instructions">
 					<p class="description">Drag nodes to arrange them. Connect by dragging an output port to an input, or use the keyboard: select an output, then an input. You can redirect a connected output to a free input. Escape cancels.</p>
 					<p class="cb-advanced-connection-status" id="cb-advanced-connection-status" data-cb-advanced-connection-status role="status" aria-live="polite" aria-atomic="true">Choose an output port to connect nodes.</p>
+							</section>
+						</div>
+					</div>
 				</aside>
 				<main class="cb-core-design-shell__canvas cb-advanced-editor-canvas" aria-label="Advanced workflow canvas">
 					<div class="cb-advanced-editor-canvas-frame">
@@ -97,13 +105,19 @@ if ( ! is_string( $payload ) ) {
 					</div>
 				</main>
 				<aside class="cb-core-design-shell__sidebar cb-core-design-shell__sidebar--composed cb-advanced-editor-inspector" aria-label="Node Inspector">
+					<div class="cb-core-design-shell__panel cb-core-design-shell__sidebar-panel cb-advanced-editor-inspector-panel">
+						<div class="cb-core-design-shell__panel-body">
+							<section class="cb-core-design-shell__panel-section" aria-label="Automation details">
 					<label class="cb-advanced-editor-name"><?php esc_html_e( 'Automation name', 'core-blueprint-automations' ); ?>
 						<input type="text" name="name" value="<?php echo esc_attr( $record->name() ); ?>" maxlength="191" required />
 					</label>
 					<span class="cb-advanced-editor-unsaved" data-cb-advanced-dirty aria-live="polite"></span>
-					<h2><?php esc_html_e( 'Inspector', 'core-blueprint-automations' ); ?></h2>
+							</section>
+							<section class="cb-core-design-shell__panel-section" aria-label="Node settings">
+					<h2 class="cb-core-design-shell__panel-section-title"><?php esc_html_e( 'Inspector', 'core-blueprint-automations' ); ?></h2>
 					<div data-cb-advanced-inspector tabindex="-1"><p class="description"><?php esc_html_e( 'Select a workflow step to inspect its context.', 'core-blueprint-automations' ); ?></p></div>
-					<section class="cb-advanced-route-preview">
+							</section>
+					<section class="cb-core-design-shell__panel-section cb-advanced-route-preview">
 						<h2>Test Workflow</h2>
 						<p class="description">Simulate the route of the saved workflow. No actions or providers execute.</p>
 						<details class="cb-advanced-preview-fixtures">
@@ -122,7 +136,7 @@ if ( ! is_string( $payload ) ) {
 						</div>
 						<div class="cb-advanced-route-preview__result" data-cb-advanced-preview-result role="status" aria-live="polite"></div>
 					</section>
-					<section class="cb-advanced-editor-validation" aria-live="polite">
+					<section class="cb-core-design-shell__panel-section cb-advanced-editor-validation" aria-live="polite">
 						<h2><?php esc_html_e( 'Workflow health', 'core-blueprint-automations' ); ?></h2>
 						<p class="description">Checks refresh after saving and reopening the draft. Activation remains disabled.</p>
 						<?php $issues = array_filter( $validation->issues(), static fn( $issue ): bool => 'graph.execution_unavailable' !== $issue->code() ); ?>
@@ -136,6 +150,8 @@ if ( ! is_string( $payload ) ) {
 							</ul>
 						<?php endif; ?>
 					</section>
+						</div>
+					</div>
 				</aside>
 			</div>
 		</div>
