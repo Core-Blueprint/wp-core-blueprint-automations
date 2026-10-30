@@ -55,12 +55,20 @@ if ( ! is_string( $payload ) ) {
 			<button type="button" class="button cb-core-button" data-cb-design-shell-fullscreen data-cb-design-shell-fullscreen-enter-label="<?php esc_attr_e( 'Open focus mode', 'core-blueprint-automations' ); ?>" data-cb-design-shell-fullscreen-exit-label="<?php esc_attr_e( 'Exit focus mode', 'core-blueprint-automations' ); ?>" aria-pressed="false"><span data-cb-design-shell-fullscreen-label><?php esc_html_e( 'Open focus mode', 'core-blueprint-automations' ); ?></span></button>
 				<button type="button" class="button cb-core-button" data-cb-advanced-undo disabled><?php esc_html_e( 'Undo', 'core-blueprint-automations' ); ?></button>
 				<button type="button" class="button cb-core-button" data-cb-advanced-redo disabled><?php esc_html_e( 'Redo', 'core-blueprint-automations' ); ?></button>
-				<button type="button" class="button cb-core-button" data-cb-advanced-fit>Fit to Screen</button>
+				<div class="cb-advanced-zoom-controls" role="group" aria-label="<?php esc_attr_e( 'Canvas zoom', 'core-blueprint-automations' ); ?>">
+					<button type="button" class="button cb-core-button" data-cb-advanced-zoom-out aria-label="<?php esc_attr_e( 'Zoom out', 'core-blueprint-automations' ); ?>" title="<?php esc_attr_e( 'Zoom out', 'core-blueprint-automations' ); ?>">−</button>
+					<button type="button" class="button cb-core-button cb-advanced-zoom-reset" data-cb-advanced-zoom-reset aria-label="<?php esc_attr_e( 'Reset zoom to 100 percent', 'core-blueprint-automations' ); ?>" title="<?php esc_attr_e( 'Reset zoom to 100 percent', 'core-blueprint-automations' ); ?>">100%</button>
+					<button type="button" class="button cb-core-button" data-cb-advanced-zoom-in aria-label="<?php esc_attr_e( 'Zoom in', 'core-blueprint-automations' ); ?>" title="<?php esc_attr_e( 'Zoom in', 'core-blueprint-automations' ); ?>">+</button>
+					<button type="button" class="button cb-core-button" data-cb-advanced-fit>Fit to Screen</button>
+				</div>
 				<button type="submit" class="button button-primary cb-core-button cb-core-button--primary" data-cb-design-shell-primary-action data-cb-advanced-save><?php esc_html_e( 'Save automation', 'core-blueprint-automations' ); ?></button>
 			</div>
 			<div class="cb-core-design-shell__workspace cb-core-design-shell__workspace--collapsible cb-advanced-editor-workspace">
 				<aside class="cb-core-design-shell__palette cb-core-design-shell__palette--composed cb-advanced-editor-palette" aria-label="Advanced nodes">
-					<h2>Nodes</h2>
+					<div class="cb-core-design-shell__panel cb-advanced-editor-palette-panel">
+						<div class="cb-core-design-shell__panel-body">
+							<section class="cb-core-design-shell__panel-section">
+							<h2 class="cb-core-design-shell__panel-section-title">Nodes</h2>
 					<p class="description">Select a node type to place it on the canvas.</p>
 					<button type="button" class="button" data-cb-advanced-add="trigger"><?php esc_html_e( 'Trigger', 'core-blueprint-automations' ); ?></button>
 					<button type="button" class="button" data-cb-advanced-add="state"><?php esc_html_e( 'Add data lookup', 'core-blueprint-automations' ); ?></button>
@@ -68,25 +76,48 @@ if ( ! is_string( $payload ) ) {
 					<button type="button" class="button" data-cb-advanced-add="action"><?php esc_html_e( 'Add action', 'core-blueprint-automations' ); ?></button>
 					<button type="button" class="button" data-cb-advanced-add="exclusive_merge">Merge</button>
 					<button type="button" class="button" data-cb-advanced-add="end">End</button>
+							</section>
+							<section class="cb-core-design-shell__panel-section">
 					<p class="description">Drag nodes to arrange them. Connect by dragging an output port to an input, or use the keyboard: select an output, then an input. You can redirect a connected output to a free input. Escape cancels.</p>
 					<p class="cb-advanced-connection-status" id="cb-advanced-connection-status" data-cb-advanced-connection-status role="status" aria-live="polite" aria-atomic="true">Choose an output port to connect nodes.</p>
+							</section>
+						</div>
+					</div>
 				</aside>
 				<main class="cb-core-design-shell__canvas cb-advanced-editor-canvas" aria-label="Advanced workflow canvas">
+					<div class="cb-advanced-editor-canvas-frame">
 					<div class="cb-advanced-editor-canvas-scroll" data-cb-design-canvas-viewport tabindex="0" aria-label="Workflow canvas navigation">
 						<div class="cb-advanced-editor-scene" data-cb-advanced-scene data-cb-design-canvas-scene>
 							<svg role="group" aria-label="Workflow connections" data-cb-advanced-wires viewBox="0 0 1 1" preserveAspectRatio="xMinYMin meet"></svg>
 							<div data-cb-advanced-nodes data-cb-design-canvas-background></div>
 						</div>
 					</div>
+						<div class="cb-advanced-minimap" data-cb-advanced-minimap aria-label="<?php esc_attr_e( 'Workflow minimap', 'core-blueprint-automations' ); ?>" data-cb-minimap-expand-label="<?php esc_attr_e( 'Expand minimap', 'core-blueprint-automations' ); ?>" data-cb-minimap-collapse-label="<?php esc_attr_e( 'Collapse minimap', 'core-blueprint-automations' ); ?>">
+							<div class="cb-advanced-minimap__header">
+								<strong><?php esc_html_e( 'Minimap', 'core-blueprint-automations' ); ?></strong>
+								<button type="button" class="button" data-cb-advanced-minimap-size aria-label="<?php esc_attr_e( 'Toggle minimap size', 'core-blueprint-automations' ); ?>" title="<?php esc_attr_e( 'Toggle minimap size', 'core-blueprint-automations' ); ?>">⤢</button>
+								<button type="button" class="button" data-cb-advanced-minimap-toggle aria-expanded="true" aria-controls="cb-advanced-minimap-body" title="<?php esc_attr_e( 'Collapse minimap', 'core-blueprint-automations' ); ?>" aria-label="<?php esc_attr_e( 'Collapse minimap', 'core-blueprint-automations' ); ?>">−</button>
+							</div>
+							<div class="cb-advanced-minimap__body" data-cb-advanced-minimap-body id="cb-advanced-minimap-body">
+								<svg data-cb-advanced-minimap-svg tabindex="0" role="img" aria-label="<?php esc_attr_e( 'Workflow overview. Click to navigate; drag the viewport rectangle to pan.', 'core-blueprint-automations' ); ?>" preserveAspectRatio="xMidYMid meet" viewBox="0 0 1 1"></svg>
+							</div>
+						</div>
+					</div>
 				</main>
 				<aside class="cb-core-design-shell__sidebar cb-core-design-shell__sidebar--composed cb-advanced-editor-inspector" aria-label="Node Inspector">
+					<div class="cb-core-design-shell__panel cb-core-design-shell__sidebar-panel cb-advanced-editor-inspector-panel">
+						<div class="cb-core-design-shell__panel-body">
+							<section class="cb-core-design-shell__panel-section">
 					<label class="cb-advanced-editor-name"><?php esc_html_e( 'Automation name', 'core-blueprint-automations' ); ?>
 						<input type="text" name="name" value="<?php echo esc_attr( $record->name() ); ?>" maxlength="191" required />
 					</label>
 					<span class="cb-advanced-editor-unsaved" data-cb-advanced-dirty aria-live="polite"></span>
-					<h2><?php esc_html_e( 'Inspector', 'core-blueprint-automations' ); ?></h2>
+							</section>
+							<section class="cb-core-design-shell__panel-section">
+					<h2 class="cb-core-design-shell__panel-section-title"><?php esc_html_e( 'Inspector', 'core-blueprint-automations' ); ?></h2>
 					<div data-cb-advanced-inspector tabindex="-1"><p class="description"><?php esc_html_e( 'Select a workflow step to inspect its context.', 'core-blueprint-automations' ); ?></p></div>
-					<section class="cb-advanced-route-preview">
+							</section>
+					<section class="cb-core-design-shell__panel-section cb-advanced-route-preview">
 						<h2>Test Workflow</h2>
 						<p class="description">Simulate the route of the saved workflow. No actions or providers execute.</p>
 						<details class="cb-advanced-preview-fixtures">
@@ -105,7 +136,7 @@ if ( ! is_string( $payload ) ) {
 						</div>
 						<div class="cb-advanced-route-preview__result" data-cb-advanced-preview-result role="status" aria-live="polite"></div>
 					</section>
-					<section class="cb-advanced-editor-validation" aria-live="polite">
+					<section class="cb-core-design-shell__panel-section cb-advanced-editor-validation" aria-live="polite">
 						<h2><?php esc_html_e( 'Workflow health', 'core-blueprint-automations' ); ?></h2>
 						<p class="description">Checks refresh after saving and reopening the draft. Activation remains disabled.</p>
 						<?php $issues = array_filter( $validation->issues(), static fn( $issue ): bool => 'graph.execution_unavailable' !== $issue->code() ); ?>
@@ -119,6 +150,8 @@ if ( ! is_string( $payload ) ) {
 							</ul>
 						<?php endif; ?>
 					</section>
+						</div>
+					</div>
 				</aside>
 			</div>
 		</div>

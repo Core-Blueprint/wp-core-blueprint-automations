@@ -2620,3 +2620,43 @@ msgstr "Seuls les workflows désactivés peuvent être supprimés."
 #: templates/admin/automations.php
 msgid "Delete"
 msgstr "Supprimer"
+
+#: templates/admin/advanced-workflow-editor.php
+msgid "Canvas zoom"
+msgstr "Zoom du canevas"
+
+#: templates/admin/advanced-workflow-editor.php
+msgid "Zoom out"
+msgstr "Dézoomer"
+
+#: templates/admin/advanced-workflow-editor.php
+msgid "Reset zoom to 100 percent"
+msgstr "Réinitialiser le zoom à 100 pour cent"
+
+#: templates/admin/advanced-workflow-editor.php
+msgid "Zoom in"
+msgstr "Zoomer"
+
+#: templates/admin/advanced-workflow-editor.php
+msgid "Workflow minimap"
+msgstr "Mini-carte du flux de travail"
+
+#: templates/admin/advanced-workflow-editor.php
+msgid "Minimap"
+msgstr "Mini-carte"
+
+#: templates/admin/advanced-workflow-editor.php
+msgid "Toggle minimap size"
+msgstr "Changer la taille de la mini-carte"
+
+#: templates/admin/advanced-workflow-editor.php
+msgid "Collapse minimap"
+msgstr "Réduire la mini-carte"
+
+#: templates/admin/advanced-workflow-editor.php
+msgid "Expand minimap"
+msgstr "Déployer la mini-carte"
+
+#: templates/admin/advanced-workflow-editor.php
+msgid "Workflow overview. Click to navigate; drag the viewport rectangle to pan."
+msgstr "Vue d'ensemble du flux de travail. Cliquez pour naviguer et faites glisser le cadre visible pour vous déplacer."

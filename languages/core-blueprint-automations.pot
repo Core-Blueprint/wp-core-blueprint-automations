@@ -2406,3 +2406,43 @@ msgstr ""
 #: templates/admin/automations.php
 msgid "Delete"
 msgstr ""
+
+#: templates/admin/advanced-workflow-editor.php
+msgid "Canvas zoom"
+msgstr ""
+
+#: templates/admin/advanced-workflow-editor.php
+msgid "Zoom out"
+msgstr ""
+
+#: templates/admin/advanced-workflow-editor.php
+msgid "Reset zoom to 100 percent"
+msgstr ""
+
+#: templates/admin/advanced-workflow-editor.php
+msgid "Zoom in"
+msgstr ""
+
+#: templates/admin/advanced-workflow-editor.php
+msgid "Workflow minimap"
+msgstr ""
+
+#: templates/admin/advanced-workflow-editor.php
+msgid "Minimap"
+msgstr ""
+
+#: templates/admin/advanced-workflow-editor.php
+msgid "Toggle minimap size"
+msgstr ""
+
+#: templates/admin/advanced-workflow-editor.php
+msgid "Collapse minimap"
+msgstr ""
+
+#: templates/admin/advanced-workflow-editor.php
+msgid "Expand minimap"
+msgstr ""
+
+#: templates/admin/advanced-workflow-editor.php
+msgid "Workflow overview. Click to navigate; drag the viewport rectangle to pan."
+msgstr ""

@@ -2599,3 +2599,43 @@ msgstr "Alleen uitgeschakelde workflows kunnen worden verwijderd."
 #: templates/admin/automations.php
 msgid "Delete"
 msgstr "Verwijderen"
+
+#: templates/admin/advanced-workflow-editor.php
+msgid "Canvas zoom"
+msgstr "Canvaszoom"
+
+#: templates/admin/advanced-workflow-editor.php
+msgid "Zoom out"
+msgstr "Uitzoomen"
+
+#: templates/admin/advanced-workflow-editor.php
+msgid "Reset zoom to 100 percent"
+msgstr "Zoom herstellen naar 100 procent"
+
+#: templates/admin/advanced-workflow-editor.php
+msgid "Zoom in"
+msgstr "Inzoomen"
+
+#: templates/admin/advanced-workflow-editor.php
+msgid "Workflow minimap"
+msgstr "Minikaart van workflow"
+
+#: templates/admin/advanced-workflow-editor.php
+msgid "Minimap"
+msgstr "Minikaart"
+
+#: templates/admin/advanced-workflow-editor.php
+msgid "Toggle minimap size"
+msgstr "Grootte van minikaart wijzigen"
+
+#: templates/admin/advanced-workflow-editor.php
+msgid "Collapse minimap"
+msgstr "Minikaart inklappen"
+
+#: templates/admin/advanced-workflow-editor.php
+msgid "Expand minimap"
+msgstr "Minikaart uitklappen"
+
+#: templates/admin/advanced-workflow-editor.php
+msgid "Workflow overview. Click to navigate; drag the viewport rectangle to pan."
+msgstr "Workflowoverzicht. Klik om te navigeren en versleep het vensterkader om te pannen."

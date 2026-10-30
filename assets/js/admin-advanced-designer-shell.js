@@ -7,6 +7,7 @@
  */
 import { createDesignerShell } from '@cb-core/design-editor';
 import { createDesignerCanvasNavigation, createDesignerContextMenu, createDomainSession } from '@cb-core/design-editor';
+import { createAutomationsGraphMinimap } from './admin-advanced-minimap.js';
 
 const root = document.querySelector('[data-cb-advanced-root][data-cb-design-shell]');
 
@@ -40,6 +41,7 @@ if (root instanceof HTMLElement) {
 		let canvasNavigation = null;
 		let contextMenu = null;
 		let historySession = null;
+		let minimap = null;
 		const mountGraph = () => {
 			const graph = root.cbAutomationsAdvancedGraph;
 			if (mounted || !graph || typeof graph.connectControllers !== 'function') return;
@@ -63,6 +65,9 @@ if (root instanceof HTMLElement) {
 					},
 					historyLimit: 100,
 				});
+				const resetZoomButton = root.querySelector('[data-cb-advanced-zoom-reset]');
+				const zoomOutButton = root.querySelector('[data-cb-advanced-zoom-out]');
+				const zoomInButton = root.querySelector('[data-cb-advanced-zoom-in]');
 				const paintGrid = view => {
 					// Base owns pan, scale and scroll coordinates. The grid lives
 					// on the viewport and therefore has no physical end.
@@ -70,6 +75,10 @@ if (root instanceof HTMLElement) {
 					viewport.style.setProperty('--cb-advanced-grid-step', (22 * scale) + 'px');
 					viewport.style.setProperty('--cb-advanced-grid-x', (view.x - view.scrollLeft) + 'px');
 					viewport.style.setProperty('--cb-advanced-grid-y', (view.y - view.scrollTop) + 'px');
+					if (resetZoomButton) resetZoomButton.textContent = Math.round(view.scale * 100) + '%';
+					if (zoomOutButton) zoomOutButton.disabled = view.scale <= .1 + 1e-9;
+					if (zoomInButton) zoomInButton.disabled = view.scale >= 4 - 1e-9;
+					minimap?.render();
 				};
 				canvasNavigation = createDesignerCanvasNavigation({
 					root, viewport, scene,
@@ -78,6 +87,18 @@ if (root instanceof HTMLElement) {
 					isReady: () => root.isConnected && !root.hidden,
 					onViewChange: paintGrid,
 				});
+				if (typeof canvasNavigation.zoomAt !== 'function' || typeof canvasNavigation.zoomBy !== 'function'
+					|| typeof graph.getMinimapGraph !== 'function') {
+					throw new TypeError('Advanced Canvas requires the paired Base CN-2 module.');
+				}
+				minimap = createAutomationsGraphMinimap({
+					root, viewport, navigation: canvasNavigation,
+					getGraphSnapshot: graph.getMinimapGraph,
+				});
+				const zoomBy = factor => canvasNavigation?.zoomBy({factor});
+				zoomOutButton?.addEventListener('click', () => zoomBy(1 / 1.2));
+				zoomInButton?.addEventListener('click', () => zoomBy(1.2));
+				resetZoomButton?.addEventListener('click', () => canvasNavigation?.zoomAt({scale:1}));
 				// Keep native wheel/trackpad scrolling in sync with Base's
 				// public viewport snapshot, rather than introducing a pan engine.
 				viewport.addEventListener('scroll', () => {
@@ -92,9 +113,18 @@ if (root instanceof HTMLElement) {
 					return {dx: event.deltaX * unit, dy: event.deltaY * unit};
 				};
 				viewport.addEventListener('wheel', event => {
-					// Respect browser pinch-to-zoom and modified wheel shortcuts.
-					if (event.ctrlKey || event.metaKey || event.altKey || root.hidden) return;
+					if (root.hidden || event.altKey) return;
 					const {dx,dy} = wheelDelta(event);
+					// Only the canvas catches Ctrl/Cmd+wheel or trackpad pinch.
+					// Outside this viewport the browser keeps its native zoom.
+					if (event.ctrlKey || event.metaKey) {
+						event.preventDefault();
+						if (dy) canvasNavigation?.zoomBy({
+							factor: Math.exp(-dy * 0.002),
+							clientX: event.clientX, clientY: event.clientY,
+						});
+						return;
+					}
 					if ((dx || dy) && canvasNavigation?.panBy(-dx, -dy)) event.preventDefault();
 				}, {passive:false});
 				viewport.addEventListener('keydown', event => {
@@ -133,17 +163,19 @@ if (root instanceof HTMLElement) {
 				root.addEventListener('cb:design-shell:fullscreenchange', () => {
 					if (root.hidden) return;
 					requestAnimationFrame(() => {
-						if (!root.hidden && root.isConnected) canvasNavigation?.fitToScreen();
+						if (!root.hidden && root.isConnected) { canvasNavigation?.fitToScreen(); minimap?.render(); }
 					});
 				});
 				window.addEventListener('pagehide', () => {
 					contextMenu?.destroy();
+					minimap?.destroy();
 					canvasNavigation?.destroy();
 					historySession?.dispose();
 				}, {once: true});
 				mounted = true;
 			} catch (_) {
 				contextMenu?.destroy();
+				minimap?.destroy();
 				canvasNavigation?.destroy();
 				historySession?.dispose();
 				root.dispatchEvent(new CustomEvent('cb:design-shell:failure', {

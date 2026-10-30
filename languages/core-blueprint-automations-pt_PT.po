@@ -2618,3 +2618,43 @@ msgstr "Só é possível eliminar fluxos de trabalho desativados."
 #: templates/admin/automations.php
 msgid "Delete"
 msgstr "Eliminar"
+
+#: templates/admin/advanced-workflow-editor.php
+msgid "Canvas zoom"
+msgstr "Zoom da área de trabalho"
+
+#: templates/admin/advanced-workflow-editor.php
+msgid "Zoom out"
+msgstr "Reduzir zoom"
+
+#: templates/admin/advanced-workflow-editor.php
+msgid "Reset zoom to 100 percent"
+msgstr "Repor o zoom para 100 por cento"
+
+#: templates/admin/advanced-workflow-editor.php
+msgid "Zoom in"
+msgstr "Ampliar zoom"
+
+#: templates/admin/advanced-workflow-editor.php
+msgid "Workflow minimap"
+msgstr "Minimapa do fluxo de trabalho"
+
+#: templates/admin/advanced-workflow-editor.php
+msgid "Minimap"
+msgstr "Minimapa"
+
+#: templates/admin/advanced-workflow-editor.php
+msgid "Toggle minimap size"
+msgstr "Alterar tamanho do minimapa"
+
+#: templates/admin/advanced-workflow-editor.php
+msgid "Collapse minimap"
+msgstr "Recolher minimapa"
+
+#: templates/admin/advanced-workflow-editor.php
+msgid "Expand minimap"
+msgstr "Expandir minimapa"
+
+#: templates/admin/advanced-workflow-editor.php
+msgid "Workflow overview. Click to navigate; drag the viewport rectangle to pan."
+msgstr "Visão geral do fluxo de trabalho. Clique para navegar e arraste a moldura visível para deslocar a vista."

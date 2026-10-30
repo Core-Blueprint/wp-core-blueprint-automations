@@ -424,6 +424,7 @@
 				wires.append(preview);
 			}
 		}
+		root.dispatchEvent(new CustomEvent('cb:automations-advanced:graphchange'));
 	};
 	const refreshPorts = () => {
 		const source = draggingPort || pendingPort;
@@ -825,6 +826,15 @@
 	root.cbAutomationsAdvancedGraph = Object.freeze({
 		contextKey: () => 'workflow:' + String(form.querySelector('[name="workflow_id"]')?.value || ''),
 		getContentBounds: contentBounds,
+		getMinimapGraph() {
+			return {
+				nodes: draft.graph.nodes.map((node,index) => {
+					const point = coords(node.id,index);
+					return {id:node.id,type:node.type,x:point.x,y:point.y};
+				}),
+				edges: draft.graph.edges.map(edge => ({from:edge.from,to:edge.to})),
+			};
+		},
 		getHistoryProject: historyProject,
 		restoreHistory(rootData) {
 			if (!rootData || !rootData.definition || typeof rootData.name !== 'string') return;
