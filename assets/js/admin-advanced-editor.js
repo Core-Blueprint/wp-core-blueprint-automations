@@ -555,7 +555,12 @@
 							deleteEdge(request.detachedEdgeId);
 						} else if (outcome === 'rewire') {
 							cancelPort('That input is occupied, incompatible, or would create a cycle. Connection kept.');
-						} else cancelPort('Connection kept.');
+						} else {
+							cancelPort('Connection kept.');
+							// Some browsers suppress click after pointer capture; a
+							// simple input press still selects its node, without editing.
+							if (!request.moved) selectNode(node.id);
+						}
 					});
 					const cancelInputDrag = event => {
 						if (draggingPort?.detachedEdgeId && draggingPort.pointerId === event.pointerId) {

@@ -32,6 +32,7 @@ test('ADV-03F drag starts only for occupied inputs and retains immutable capture
   assert.match(source,/control\.setPointerCapture\?\.\(event\.pointerId\)/);
   assert.match(source,/request\.moved \|\|= Math\.hypot/);
   assert.match(source,/const stillBound = draft\.graph\.edges\.some/);
+  assert.match(source,/if \(!request\.moved\) selectNode\(node\.id\)/);
   assert.match(source,/edge\.id === request\.detachedEdgeId/);
   assert.match(source,/control\.addEventListener\('pointercancel', cancelInputDrag\)/);
   assert.match(source,/control\.addEventListener\('lostpointercapture', cancelInputDrag\)/);
@@ -50,7 +51,7 @@ test('ADV-03F only blank viewport can delete; occupied or incompatible targets n
   assert.match(source,/viewport\?\.contains\(target\)/);
   assert.match(source,/!target\.closest\?\.\('\[data-cb-design-canvas-object\], \[data-cb-advanced-edge-id\], \[data-cb-advanced-port-side\]'\)/);
   assert.match(source,/outcome === 'rewire' && canConnect\(/);
-  assert.match(source,/outcome === 'disconnect'\) \{\n\t{6}deleteEdge\(request\.detachedEdgeId\)/);
+  assert.match(source,/outcome === 'disconnect'\) \{\s*deleteEdge\(request\.detachedEdgeId\)/);
   assert.match(source,/connect\(request\.id, request\.port, targetPort\.node, targetPort\.port, true\)/);
   assert.match(source,/const old = draft\.graph\.edges\[index\]/);
   assert.match(source,/draft\.graph\.edges\[index\] = \{\.\.\.old, to, to_port: toPort\}/);
