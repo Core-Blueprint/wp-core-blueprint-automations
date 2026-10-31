@@ -47,7 +47,13 @@ if ( ! $healthy instanceof WorkflowRecord || 1 !== $healthy->id() ) {
 }
 
 $cases = [
-	'ROW_METADATA_INVALID' => static fn( array $row ): array => array_replace( $row, [ 'revision' => 0 ] ),
+	'ROW_ID_INVALID' => static fn( array $row ): array => array_replace( $row, [ 'id' => 0 ] ),
+	'ROW_REVISION_INVALID' => static fn( array $row ): array => array_replace( $row, [ 'revision' => 0 ] ),
+	'ROW_PRINCIPAL_INVALID' => static fn( array $row ): array => array_replace( $row, [ 'execution_principal_user_id' => -1 ] ),
+	// Simulate MariaDB PAD_CHAR_TO_FULL_LENGTH returning a padded empty CHAR(64).
+	'ROW_TRIGGER_KEY_INVALID' => static fn( array $row ): array => array_replace( $row, [ 'trigger_key' => str_repeat( ' ', 64 ) ] ),
+	'ROW_ACTIVATION_INVALID' => static fn( array $row ): array => array_replace( $row, [ 'activation_state' => 'draft' ] ),
+	'ROW_DEFINITION_VERSION_INVALID' => static fn( array $row ): array => array_replace( $row, [ 'definition_version' => 2 ] ),
 	'ENCODED_LIMIT_EXCEEDED' => static fn( array $row ): array => array_replace( $row, [
 		'definition_json' => str_repeat( 'x', PersistencePolicy::MAX_DEFINITION_BYTES + 1 ),
 	] ),
@@ -71,8 +77,12 @@ $generic = PersistenceFailure::definition();
 if ( ! $generic->is_definition_failure() || '' !== $generic->definition_reason() ) {
 	throw new \RuntimeException( 'Generic definition diagnostic compatibility changed.' );
 }
+$legacy = PersistenceFailure::definition( 'ROW_METADATA_INVALID' );
+if ( ! $legacy->is_definition_failure() || 'ROW_METADATA_INVALID' !== $legacy->definition_reason() ) {
+	throw new \RuntimeException( 'Metadata diagnostic compatibility changed.' );
+}
 $schema = PersistenceFailure::schema();
 if ( $schema->is_definition_failure() || '' !== $schema->definition_reason() ) {
 	throw new \RuntimeException( 'Non-definition persistence failure misclassified.' );
 }
-echo "Automations hydration diagnostic contract: PASS (valid draft + 5 exact fail-closed classifications)\n";
+echo "Automations hydration diagnostic contract: PASS (valid draft + 10 exact fail-closed classifications)\n";
