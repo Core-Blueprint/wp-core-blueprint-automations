@@ -439,25 +439,32 @@ final class WorkflowRepository {
 			|| null === $state
 			|| Definition::VERSION !== (int) ( $row['definition_version'] ?? 0 )
 		) {
-			throw PersistenceFailure::definition();
+			throw PersistenceFailure::definition( 'ROW_METADATA_INVALID' );
 		}
 
 		try {
 			$encoded = (string) ( $row['definition_json'] ?? '' );
 			if ( ! PersistencePolicy::allows_encoded_definition( $encoded ) ) {
-				throw new JsonException( 'Stored workflow definition exceeds the supported size.' );
+				throw PersistenceFailure::definition( 'ENCODED_LIMIT_EXCEEDED' );
 			}
 			$decoded = json_decode( $encoded, true, 64, JSON_THROW_ON_ERROR );
 			if ( ! is_array( $decoded ) ) {
 				throw new JsonException( 'Workflow definition root must be an object.' );
 			}
+		} catch ( PersistenceFailure $error ) {
+			throw $error;
+		} catch ( \Throwable ) {
+			throw PersistenceFailure::definition( 'JSON_MALFORMED' );
+		}
+
+		try {
 			$definition = DefinitionCodec::decode( $decoded );
 		} catch ( \Throwable ) {
-			throw PersistenceFailure::definition();
+			throw PersistenceFailure::definition( 'CODEC_REJECTED' );
 		}
 
 		if ( TriggerKey::for_definition( $definition ) !== $trigger_key ) {
-			throw PersistenceFailure::definition();
+			throw PersistenceFailure::definition( 'TRIGGER_KEY_MISMATCH' );
 		}
 
 		$name = self::normalize_name( (string) ( $row['name'] ?? '' ) );
