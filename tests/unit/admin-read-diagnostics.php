@@ -96,6 +96,9 @@ namespace {
 		'WORKFLOW_INDEX_FAILED' => static function(): void {
 			\CB\Automations\Admin\WorkflowAdminReadService::$failure = 'index';
 		},
+		'WORKFLOW_COUNT_FAILED' => static function(): void {
+			\CB\Automations\Persistence\WorkflowRepository::$fail_count = true;
+		},
 		'WORKFLOW_HYDRATION_FAILED' => static function(): void {
 			\CB\Automations\Admin\WorkflowAdminReadService::$failure = 'definition';
 		},
@@ -128,7 +131,11 @@ namespace {
 			ob_start();
 			(new \CB\Automations\Admin\AutomationsPage())->render();
 			$html = (string)ob_get_clean();
-			$actual = 'FOLDER_ASSIGNMENTS_FAILED' === $expected ? 'FOLDER_READ_FAILED' : $expected;
+			$actual = match ($expected) {
+				'FOLDER_ASSIGNMENTS_FAILED' => 'FOLDER_READ_FAILED',
+				'WORKFLOW_COUNT_FAILED' => 'WORKFLOW_INDEX_FAILED',
+				default => $expected,
+			};
 			$marker = '<code data-cb-automations-diagnostic-code>' . $actual . '</code>';
 			$log_content = (string)file_get_contents($log);
 			if (!str_contains($html, $marker) || !str_contains($log_content, 'Admin page diagnostic: ' . $actual)) {
@@ -145,5 +152,5 @@ namespace {
 		ini_set('error_log', (string)$original_log);
 		unlink($log);
 	}
-	echo "Automations P1 diagnostic routes: PASS (7 simulated admin failure paths, private exception content excluded)\n";
+	echo "Automations P1 diagnostic routes: PASS (8 simulated admin failure paths, private exception content excluded)\n";
 }
