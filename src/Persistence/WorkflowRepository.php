@@ -431,15 +431,25 @@ final class WorkflowRepository {
 		$trigger_key = (string) ( $row['trigger_key'] ?? '' );
 		$state    = ActivationState::tryFrom( (string) ( $row['activation_state'] ?? '' ) );
 
-		if (
-			$id < 1
-			|| $revision < 1
-			|| $principal < 0
-			|| ! TriggerKey::is_valid( $trigger_key )
-			|| null === $state
-			|| Definition::VERSION !== (int) ( $row['definition_version'] ?? 0 )
-		) {
-			throw PersistenceFailure::definition( 'ROW_METADATA_INVALID' );
+		// Preserve every fail-closed invariant; identify only which field failed.
+		// Never include row values, IDs, names or definitions in diagnostics.
+		if ( $id < 1 ) {
+			throw PersistenceFailure::definition( 'ROW_ID_INVALID' );
+		}
+		if ( $revision < 1 ) {
+			throw PersistenceFailure::definition( 'ROW_REVISION_INVALID' );
+		}
+		if ( $principal < 0 ) {
+			throw PersistenceFailure::definition( 'ROW_PRINCIPAL_INVALID' );
+		}
+		if ( ! TriggerKey::is_valid( $trigger_key ) ) {
+			throw PersistenceFailure::definition( 'ROW_TRIGGER_KEY_INVALID' );
+		}
+		if ( null === $state ) {
+			throw PersistenceFailure::definition( 'ROW_ACTIVATION_INVALID' );
+		}
+		if ( Definition::VERSION !== (int) ( $row['definition_version'] ?? 0 ) ) {
+			throw PersistenceFailure::definition( 'ROW_DEFINITION_VERSION_INVALID' );
 		}
 
 		try {
