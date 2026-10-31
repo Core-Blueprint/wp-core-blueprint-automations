@@ -173,6 +173,12 @@ final class AutomationsPage implements Page {
 				&& $error instanceof PersistenceFailure
 				&& $error->is_definition_failure()
 					? 'WORKFLOW_HYDRATION_FAILED' : $stage;
+			if ( 'WORKFLOW_HYDRATION_FAILED' === $diagnostic && $error instanceof PersistenceFailure ) {
+				$reason = $error->definition_reason();
+				if ( '' !== $reason ) {
+					$diagnostic .= '_' . $reason;
+				}
+			}
 			$this->render_unavailable( $diagnostic );
 		}
 	}
