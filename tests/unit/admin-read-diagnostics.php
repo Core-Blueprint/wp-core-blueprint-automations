@@ -58,6 +58,9 @@ namespace CB\Automations\Admin {
 		public function index(int $page = 1, int $per_page = 25, string $search = '', string $status = 'all', string $sort = 'updated_desc', ?int $folder_id = null): array {
 			if ('index' === self::$failure) { throw new \RuntimeException('PRIVATE_WORKFLOW_QUERY_MESSAGE'); }
 			if ('definition' === self::$failure) { throw \CB\Automations\Persistence\PersistenceFailure::definition(); }
+			if (str_starts_with(self::$failure, 'definition:')) {
+				throw \CB\Automations\Persistence\PersistenceFailure::definition(substr(self::$failure, strlen('definition:')));
+			}
 			return [ 'items' => [], 'total' => 0, 'page' => 1, 'per_page' => 25, 'pages' => 1 ];
 		}
 		public function detail(int $id): ?array { throw new \RuntimeException('PRIVATE_WORKFLOW_DETAIL_MESSAGE'); }
@@ -101,6 +104,21 @@ namespace {
 		},
 		'WORKFLOW_HYDRATION_FAILED' => static function(): void {
 			\CB\Automations\Admin\WorkflowAdminReadService::$failure = 'definition';
+		},
+		'WORKFLOW_HYDRATION_FAILED_ROW_METADATA_INVALID' => static function(): void {
+			\CB\Automations\Admin\WorkflowAdminReadService::$failure = 'definition:ROW_METADATA_INVALID';
+		},
+		'WORKFLOW_HYDRATION_FAILED_ENCODED_LIMIT_EXCEEDED' => static function(): void {
+			\CB\Automations\Admin\WorkflowAdminReadService::$failure = 'definition:ENCODED_LIMIT_EXCEEDED';
+		},
+		'WORKFLOW_HYDRATION_FAILED_JSON_MALFORMED' => static function(): void {
+			\CB\Automations\Admin\WorkflowAdminReadService::$failure = 'definition:JSON_MALFORMED';
+		},
+		'WORKFLOW_HYDRATION_FAILED_CODEC_REJECTED' => static function(): void {
+			\CB\Automations\Admin\WorkflowAdminReadService::$failure = 'definition:CODEC_REJECTED';
+		},
+		'WORKFLOW_HYDRATION_FAILED_TRIGGER_KEY_MISMATCH' => static function(): void {
+			\CB\Automations\Admin\WorkflowAdminReadService::$failure = 'definition:TRIGGER_KEY_MISMATCH';
 		},
 		'FOLDER_READ_FAILED' => static function(): void {
 			\CB\Automations\Organisation\FolderRepository::$ready = true;
@@ -152,5 +170,5 @@ namespace {
 		ini_set('error_log', (string)$original_log);
 		unlink($log);
 	}
-	echo "Automations P1 diagnostic routes: PASS (8 simulated admin failure paths, private exception content excluded)\n";
+	echo "Automations P1 diagnostic routes: PASS (13 simulated admin failure paths, private exception content excluded)\n";
 }
