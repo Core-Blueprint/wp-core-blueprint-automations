@@ -142,7 +142,7 @@ if ( ! is_string( $definition_json ) ) {
 
 		<div class="cb-core-design-shell cb-automations-design-shell" data-cb-design-shell data-cb-automations-designer-shell>
 			<div class="cb-core-design-shell__toolbar">
-				<label class="cb-core-field" data-cb-design-shell-context hidden aria-hidden="true">
+				<div class="cb-core-field" data-cb-design-shell-context hidden aria-hidden="true">
 					<span class="cb-core-field__label"><?php esc_html_e( 'Workflow', 'core-blueprint-automations' ); ?></span>
 					<select data-cb-automations-workflow-switcher aria-label="<?php esc_attr_e( 'Workflow', 'core-blueprint-automations' ); ?>">
 						<?php foreach ( $workflow_contexts as $workflow_context ) : ?>
@@ -152,7 +152,7 @@ if ( ! is_string( $definition_json ) ) {
 							><?php echo esc_html( $workflow_context['name'] ); ?></option>
 						<?php endforeach; ?>
 					</select>
-				</label>
+				</div>
 				<div class="cb-core-design-shell__toolbar-group cb-automations-builder-history-controls">
 					<span data-cb-design-shell-group-label><?php esc_html_e( 'History', 'core-blueprint-automations' ); ?></span>
 					<button type="button" class="button cb-core-button" data-cb-design-shell-undo disabled><?php esc_html_e( 'Undo', 'core-blueprint-automations' ); ?></button>
