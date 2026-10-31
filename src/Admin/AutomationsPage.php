@@ -6,6 +6,7 @@ namespace CB\Automations\Admin;
 use CB\Automations\Runtime\RunStatus;
 use CB\Automations\Organisation\FolderRepository;
 use CB\Automations\Persistence\Schema;
+use CB\Automations\Persistence\PersistenceFailure;
 use CB\Automations\Persistence\WorkflowRepository;
 use CB\Automations\Runtime\StepStatus;
 use CB\Automations\Template\WorkflowTemplateRegistry;
@@ -50,10 +51,12 @@ final class AutomationsPage implements Page {
 		}
 
 		if ( ! Schema::authoring_ready() ) {
-			$this->render_unavailable();
+			$this->render_unavailable( 'SCHEMA_NOT_READY' );
 			return;
 		}
 
+		// The stage is an internal allowlisted diagnostic, never derived from workflow data.
+		$stage = 'ADMIN_RENDER_FAILED';
 		try {
 			// Metadata/manage views recheck the current actor; template definitions
 			// are never sent to the Base Template Browser.
@@ -67,6 +70,7 @@ final class AutomationsPage implements Page {
 			$workflow_id = self::requested_workflow_id();
 			$reader = new WorkflowAdminReadService();
 			if ( $workflow_id > 0 ) {
+				$stage = 'WORKFLOW_DETAIL_FAILED';
 				$detail = $reader->detail( $workflow_id );
 				if ( null === $detail ) {
 					$this->render_not_found();
@@ -81,10 +85,11 @@ final class AutomationsPage implements Page {
 				// Never serialize 64-bit PHP integers into a JavaScript Number.
 				// This read-only recovery route leaves the stored definition intact.
 				if ( ! \CB\Automations\Workflow\EditorIntegerSafety::is_browser_safe( $detail['record']->definition() ) ) {
-					$this->render_unavailable();
+					$this->render_unavailable( 'EDITOR_PRECISION_UNSAFE' );
 					return;
 				}
 
+				$stage = 'ADMIN_RENDER_FAILED';
 				$this->template(
 					'workflow-editor.php',
 					[
@@ -117,6 +122,7 @@ final class AutomationsPage implements Page {
 			$folders = [];
 			$folder_filter = null;
 			$assignments = [];
+			$stage = 'FOLDER_READ_FAILED';
 			$folders_ready = FolderRepository::is_ready();
 			if ( 'workflows' === $view && $folders_ready ) {
 				$folders = FolderRepository::all();
@@ -129,16 +135,19 @@ final class AutomationsPage implements Page {
 				}
 			}
 			$sort = in_array( $sort, [ 'updated_desc', 'updated_asc', 'name_asc', 'name_desc' ], true ) ? $sort : 'updated_desc';
+			$stage = 'WORKFLOW_INDEX_FAILED';
 			$listing = 'workflows' === $view ? $reader->index( $page, 25, $search, $status, $sort, $folder_filter ) : null;
 			$status_counts = null === $listing ? [] : [
 				'enabled' => WorkflowRepository::count_index( $search, 'enabled', $folder_filter ),
 				'disabled' => WorkflowRepository::count_index( $search, 'disabled', $folder_filter ),
 			];
 			if ( null !== $listing && $folders_ready ) {
+				$stage = 'FOLDER_READ_FAILED';
 				$assignments = FolderRepository::assignments(
 					array_map( static fn( array $item ): int => $item['record']->id(), $listing['items'] )
 				);
 			}
+			$stage = 'ADMIN_RENDER_FAILED';
 			$this->template(
 				'automations.php',
 				[
@@ -159,8 +168,12 @@ final class AutomationsPage implements Page {
 				]
 			);
 		} catch ( \Throwable $error ) {
-			error_log( '[Core Blueprint Automations] Admin page read failed.' );
-			$this->render_unavailable();
+			// Only the stable internal persistence failure classifies malformed stored definitions.
+			$diagnostic = 'WORKFLOW_INDEX_FAILED' === $stage
+				&& $error instanceof PersistenceFailure
+				&& $error->is_definition_failure()
+					? 'WORKFLOW_HYDRATION_FAILED' : $stage;
+			$this->render_unavailable( $diagnostic );
 		}
 	}
 
@@ -277,7 +290,7 @@ final class AutomationsPage implements Page {
 	private function template( string $name, array $vars ): void {
 		$path = CB_AUTOMATIONS_DIR . 'templates/admin/' . $name;
 		if ( ! is_file( $path ) ) {
-			$this->render_unavailable();
+			$this->render_unavailable( 'TEMPLATE_UNAVAILABLE' );
 			return;
 		}
 		extract( $vars, EXTR_SKIP ); // phpcs:ignore WordPress.PHP.DontExtract.extract_extract -- bounded internal presentation data.
@@ -288,7 +301,9 @@ final class AutomationsPage implements Page {
 		echo '<div class="wrap cb-core-wrap"><h1 class="cb-core-title">' . esc_html__( 'Automation not found', 'core-blueprint-automations' ) . '</h1><p><a href="' . esc_url( self::url() ) . '">' . esc_html__( 'Back to Automations', 'core-blueprint-automations' ) . '</a></p></div>';
 	}
 
-	private function render_unavailable(): void {
-		echo '<div class="wrap cb-core-wrap"><h1 class="cb-core-title">' . esc_html__( 'Automations', 'core-blueprint-automations' ) . '</h1><div class="notice notice-error"><p>' . esc_html__( 'Automation information is temporarily unavailable. No workflow data was changed.', 'core-blueprint-automations' ) . '</p></div></div>';
+	private function render_unavailable( string $code = 'ADMIN_RENDER_FAILED' ): void {
+		// Static diagnostic identifiers only: no exception messages, SQL or workflow content.
+		error_log( '[Core Blueprint Automations] Admin page diagnostic: ' . $code ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- fixed code only.
+		echo '<div class="wrap cb-core-wrap"><h1 class="cb-core-title">' . esc_html__( 'Automations', 'core-blueprint-automations' ) . '</h1><div class="notice notice-error"><p>' . esc_html__( 'Automation information is temporarily unavailable. No workflow data was changed.', 'core-blueprint-automations' ) . '</p><p><code data-cb-automations-diagnostic-code>' . esc_html( $code ) . '</code></p></div></div>';
 	}
 }
