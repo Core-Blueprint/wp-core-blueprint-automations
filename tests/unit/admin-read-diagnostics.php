@@ -108,6 +108,24 @@ namespace {
 		'WORKFLOW_HYDRATION_FAILED_ROW_METADATA_INVALID' => static function(): void {
 			\CB\Automations\Admin\WorkflowAdminReadService::$failure = 'definition:ROW_METADATA_INVALID';
 		},
+		'WORKFLOW_HYDRATION_FAILED_ROW_ID_INVALID' => static function(): void {
+			\CB\Automations\Admin\WorkflowAdminReadService::$failure = 'definition:ROW_ID_INVALID';
+		},
+		'WORKFLOW_HYDRATION_FAILED_ROW_REVISION_INVALID' => static function(): void {
+			\CB\Automations\Admin\WorkflowAdminReadService::$failure = 'definition:ROW_REVISION_INVALID';
+		},
+		'WORKFLOW_HYDRATION_FAILED_ROW_PRINCIPAL_INVALID' => static function(): void {
+			\CB\Automations\Admin\WorkflowAdminReadService::$failure = 'definition:ROW_PRINCIPAL_INVALID';
+		},
+		'WORKFLOW_HYDRATION_FAILED_ROW_TRIGGER_KEY_INVALID' => static function(): void {
+			\CB\Automations\Admin\WorkflowAdminReadService::$failure = 'definition:ROW_TRIGGER_KEY_INVALID';
+		},
+		'WORKFLOW_HYDRATION_FAILED_ROW_ACTIVATION_INVALID' => static function(): void {
+			\CB\Automations\Admin\WorkflowAdminReadService::$failure = 'definition:ROW_ACTIVATION_INVALID';
+		},
+		'WORKFLOW_HYDRATION_FAILED_ROW_DEFINITION_VERSION_INVALID' => static function(): void {
+			\CB\Automations\Admin\WorkflowAdminReadService::$failure = 'definition:ROW_DEFINITION_VERSION_INVALID';
+		},
 		'WORKFLOW_HYDRATION_FAILED_ENCODED_LIMIT_EXCEEDED' => static function(): void {
 			\CB\Automations\Admin\WorkflowAdminReadService::$failure = 'definition:ENCODED_LIMIT_EXCEEDED';
 		},
@@ -170,5 +188,5 @@ namespace {
 		ini_set('error_log', (string)$original_log);
 		unlink($log);
 	}
-	echo "Automations P1 diagnostic routes: PASS (13 simulated admin failure paths, private exception content excluded)\n";
+	echo "Automations P1 diagnostic routes: PASS (19 simulated admin failure paths, private exception content excluded)\n";
 }
