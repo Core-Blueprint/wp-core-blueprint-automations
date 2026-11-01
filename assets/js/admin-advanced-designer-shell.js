@@ -22,18 +22,56 @@ if (root instanceof HTMLElement) {
 			}),
 		}));
 	} else {
+		// Advanced retains its existing native WordPress POST. There is no
+		// client-visible, verified CAS receipt, so Save & Close is NOT offered.
 		guard.register(root, {
 			isDirty: () => root.dataset.cbAdvancedDirty === 'true',
-			save: async () => {
-				// A native POST cannot return the authoritative save receipt to
-				// this page. Trigger the existing guarded WordPress form but DO
-				// NOT claim Save/close success before server readback.
+			isUncertain: () => root.dataset.cbDesignShellSaveOutcomeUnknown === 'true'
+				|| root.dataset.cbDesignShellSaveState === 'unknown'
+				|| root.dataset.cbDesignShellSaveState === 'saving',
+			discard: () => {
+				// Base owns Discard, History and typed Selection; this adapter
+				// verifies that its graph renderer received source='discard'.
+				const graph = root.cbAutomationsAdvancedGraph;
 				const form = root.closest('[data-cb-advanced-form]');
-				const button = root.querySelector('[data-cb-advanced-save]');
-				if (form instanceof HTMLFormElement && button instanceof HTMLButtonElement) {
-					form.requestSubmit(button);
+				const revision = form?.querySelector('[name="revision"]');
+				const status = root.dataset.cbDesignShellSaveState;
+				if (!mounted || !historySession?.discardToBaseline
+					|| !historySession?.baselineSnapshot || !historySession?.snapshot
+					|| !graph?.getHistoryProject || !graph?.isDiscardRestored
+					|| !(revision instanceof HTMLInputElement)
+					|| status === 'saving' || status === 'unknown'
+					|| root.dataset.cbDesignShellSaveOutcomeUnknown === 'true') return false;
+				const serverRevision = revision.value;
+				try {
+					const baseline = historySession.baselineSnapshot();
+					if (JSON.stringify(historySession.snapshot()) !== JSON.stringify(graph.getHistoryProject())) return false;
+					if (historySession.discardToBaseline() !== true) throw new Error('Base graph Discard refused.');
+					const history = historySession.historyStatus();
+					const selection = historySession.selection();
+					if (revision.value !== serverRevision
+						|| JSON.stringify(historySession.snapshot()) !== JSON.stringify(baseline)
+						|| !graph.isDiscardRestored(baseline)
+						|| history.canUndo || history.canRedo || history.size !== 0
+						|| selection.primary !== null || !Array.isArray(selection.refs)
+						|| selection.refs.length !== 0) {
+						throw new Error('Graph Discard restoration could not be verified.');
+					}
+					return true;
+				} catch {
+					// The Base transaction might already have committed; never
+					// authorize exit or another Save on unverifiable UI state.
+					root.dataset.cbDesignShellSaveOutcomeUnknown = 'true';
+					root.dataset.cbDesignShellSaveState = 'unknown';
+					root.dispatchEvent(new CustomEvent('cb:design-shell:failure', {
+						bubbles: true,
+						detail: Object.freeze({
+							phase: 'discard-integrity',
+							message: 'Workflow Discard could not be verified. Reload before saving.',
+						}),
+					}));
+					return false;
 				}
-				return false;
 			},
 		});
 		createDesignerShell(root);
@@ -61,7 +99,9 @@ if (root instanceof HTMLElement) {
 							throw new TypeError('Invalid Advanced history project.');
 					},
 					onChange(project, event) {
-						if (event?.source === 'history') graph.restoreHistory(project.root);
+						if (event?.source === 'history' || event?.source === 'discard') {
+							graph.restoreHistory(project.root, { discard: event.source === 'discard' });
+						}
 					},
 					historyLimit: 100,
 				});
