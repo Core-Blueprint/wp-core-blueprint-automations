@@ -214,8 +214,8 @@ final class DesignerAssets {
 			// Never fall back to legacy local Layers/Inspector selection.
 			&& defined( DesignEditorAssets::class . '::DOMAIN_SESSION_API' )
 			&& constant( DesignEditorAssets::class . '::DOMAIN_SESSION_API' ) >= 3
-			// Base B1 owns context authorization. Older Exit Guard contracts fail closed.
+			// DCMP-03A: Base Exit Guard v3 requires synchronous verified Discard.
 			&& defined( DesignEditorAssets::class . '::DESIGNER_EXIT_GUARD_API' )
-			&& constant( DesignEditorAssets::class . '::DESIGNER_EXIT_GUARD_API' ) >= 2;
+			&& constant( DesignEditorAssets::class . '::DESIGNER_EXIT_GUARD_API' ) >= 3;
 	}
 }
