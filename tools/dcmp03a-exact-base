@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Separate exact-frozen-Base admission. Never modifies the historical B1/B2/F02
+# fixture matrix. This is a SOURCE/ESM gate, NOT installed WordPress FIELD.
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
+export CB_BASE_DESIGNER_EXACT_REPO="${CB_BASE_DESIGNER_EXACT_REPO:-$HOME/Downloads/wp-core-blueprint}"
+EXPECTED="1c23b41b8e893f25e854f101e5ee0be44e707492"
+
+fail() { printf 'DCMP-03A exact Base gate: FAIL: %s\n' "$*" >&2; exit 1; }
+for command in git node; do
+  command -v "$command" >/dev/null 2>&1 || fail "Missing executable: $command"
+done
+[[ -d "$CB_BASE_DESIGNER_EXACT_REPO/.git" ]] || fail "Base checkout not found: $CB_BASE_DESIGNER_EXACT_REPO"
+ACTUAL="$(git -C "$CB_BASE_DESIGNER_EXACT_REPO" rev-parse HEAD)"
+[[ "$ACTUAL" == "$EXPECTED" ]] || fail "Frozen Base mismatch: got $ACTUAL, expected $EXPECTED"
+[[ -z "$(git -C "$CB_BASE_DESIGNER_EXACT_REPO" status --porcelain -- src/Design/Editor/Assets.php assets/js/design assets/js/features/designer-exit-guard.js assets/js/features/designer-launch.js)" ]] ||
+  fail "Frozen Base relevant source files are modified"
+cd "$ROOT"
+node --test tests/exact-base/dcmp03a-base.test.mjs
+printf 'DCMP-03A exact Base SOURCE/ESM: PASS (%s)\n' "$ACTUAL"
+printf 'Installed WordPress FIELD: PENDING\n'
