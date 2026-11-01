@@ -317,6 +317,34 @@ if (api?.snapshot && api?.replace && api?.root && shell
     return result;
   };
 
+  // DCMP-03A: Base alone commits the Discard transaction. All three
+  // consumer projections must reflect its FINAL History/Selection epoch.
+  const discardToBaseline = () => {
+    if (!selectionApi.ready() || shell.dataset.cbDesignShellSaveOutcomeUnknown === 'true'
+      || shell.dataset.cbDesignShellSaveState === 'unknown'
+      || shell.dataset.cbDesignShellSaveState === 'saving') return false;
+    try {
+      const baseline = fromProject(session.baselineSnapshot());
+      if (session.discardToBaseline() !== true) throw new Error('Base Discard refused.');
+      const history = session.historyStatus();
+      const selection = session.selection();
+      const restored = same(fromProject(session.snapshot()), baseline)
+        && same(api.snapshot(), baseline)
+        && !history.canUndo && !history.canRedo && history.size === 0
+        && selection.primary === null && Array.isArray(selection.refs)
+        && selection.refs.length === 0 && selectionApi.ready()
+        && ['layers', 'inspector', 'canvas'].every(view => selectionApi.verified(view));
+      if (!restored) throw new Error('Designer Discard could not be verified.');
+      syncButtons();
+      return true;
+    } catch {
+      // The Base transaction may already have committed. Never authorize exit
+      // or allow another Save until a fresh server/editor read establishes truth.
+      fenceView();
+      return false;
+    }
+  };
+
   const prepareContext = (definition) => fromProject(toProject(definition));
 
   // The public Base Domain Session is the only History authority. A witness
@@ -397,6 +425,7 @@ if (api?.snapshot && api?.replace && api?.root && shell
     resetForContext,
     captureSave,
     acknowledgeSave,
+    discardToBaseline,
     undo: () => run('undo'),
     redo: () => run('redo'),
   });
