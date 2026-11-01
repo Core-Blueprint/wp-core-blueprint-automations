@@ -134,7 +134,7 @@ test('ADV-03C history uses public Base domain session and no parallel undo engin
   assert.match(source, /historySession\.execute\(\{/);
   assert.match(source, /historySession\.undo\(\)/);
   assert.match(source, /historySession\.redo\(\)/);
-  assert.match(source, /restoreHistory\(rootData\)/);
+  assert.match(source, /restoreHistory\(rootData, \{ discard = false \} = \{\}\)/);
   assert.doesNotMatch(source, /const undoStack|const redoStack|new CommandHistory/);
 });
 
