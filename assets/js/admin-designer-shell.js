@@ -310,6 +310,44 @@ if (root) {
 				reject(error);
 			}
 		});
+		// DCMP-03A: restore the accepted workflow baseline synchronously.
+		// Base performs the sole History/Selection Discard; Automations restores
+		// only its form projection and verifies the unchanged server CAS cursor.
+		const discardWorkflow = () => {
+			if (saveIsUncertainOrBusy()) return false;
+			const history = window.cbAutomationsBuilderHistory;
+			const revision = form?.querySelector('[name="revision"]');
+			if (!history?.discardToBaseline || !history?.baseline || !history?.snapshot
+				|| !(revision instanceof HTMLInputElement)
+				|| !(definition instanceof HTMLInputElement)
+				|| !(name instanceof HTMLInputElement)
+				|| !(activation instanceof HTMLSelectElement)) return false;
+			const serverRevision = revision.value;
+			try {
+				// If session and confirmed form baselines disagree, never discard one
+				// and silently claim the other was restored.
+				if (normalized(JSON.stringify(history.baseline())) !== baseline.definition) return false;
+				if (history.discardToBaseline() !== true) return false;
+				name.value = baseline.name;
+				activation.value = baseline.activation;
+				if (authority) authority.checked = baseline.rebind;
+				const heading = document.querySelector('.cb-automations-editor-heading .cb-core-title');
+				if (heading) heading.textContent = baseline.name;
+				const restored = revision.value === serverRevision
+					&& normalized(definition.value) === baseline.definition
+					&& normalized(JSON.stringify(history.snapshot())) === baseline.definition
+					&& name.value === baseline.name
+					&& activation.value === baseline.activation
+					&& Boolean(authority?.checked) === baseline.rebind
+					&& (!heading || heading.textContent === baseline.name)
+					&& !isDirty();
+				if (!restored) throw new Error('Workflow Discard restoration unverified.');
+				return true;
+			} catch {
+				fenceUncertainContext();
+				return false;
+			}
+		};
 		// Base owns the one Exit Guard, confirmation Modal, Escape handling and
 		// beforeunload safety. Register only authoritative Automations adapters.
 		const exitGuard = window.cbCore?.designerExitGuard;
@@ -325,6 +363,7 @@ if (root) {
 			const labels = window.cbAutomationsInspectorStrings || {};
 			exitGuard.register(root, {
 				isDirty,
+				discard: discardWorkflow,
 				isUncertain: () => root.dataset.cbDesignShellSaveOutcomeUnknown === 'true'
 					|| root.dataset.cbDesignShellSaveState === 'unknown',
 				save: async () => {
